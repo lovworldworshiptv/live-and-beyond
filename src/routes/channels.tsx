@@ -158,70 +158,36 @@ function ChannelsPage() {
         )}
       </section>
 
-      {/* LIVE GUIDE */}
+      {/* ADS BANNER */}
       <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-16">
-        <div className="flex items-end justify-between mb-5">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-              <Signal className="size-5 text-primary" /> Live Guide
-            </h2>
-            <p className="text-sm text-[color:var(--muted-foreground)] mt-1">Today's schedule across every channel.</p>
-          </div>
-          <div className="hidden sm:flex items-center gap-2 text-xs text-[color:var(--muted-foreground)]">
-            <Radio className="size-3.5" /> Times shown in your local timezone
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-border overflow-hidden bg-elevated/40">
-          <div className="grid grid-cols-[220px_repeat(8,1fr)] border-b border-border bg-surface/60 sticky top-16 z-10">
-            <div className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[color:var(--muted-foreground)]">
-              Channel
-            </div>
-            {hours.map((h) => (
-              <div key={h} className="px-3 py-3 text-xs font-medium text-[color:var(--muted-foreground)] border-l border-border">
-                {h}
+        <Link
+          to="/guide"
+          className="group relative block overflow-hidden rounded-2xl border border-border"
+        >
+          <div
+            className="absolute inset-0 opacity-90"
+            style={{ background: "var(--gradient-hero)" }}
+          />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(30,94,255,0.25),transparent_60%),radial-gradient(circle_at_80%_50%,rgba(156,21,51,0.35),transparent_60%)]" />
+          <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6 px-8 py-10 lg:px-12 lg:py-14">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-[11px] font-semibold uppercase tracking-wider">
+                <Sparkles className="size-3.5 text-accent" /> Sponsored · Lettflix Premium
               </div>
-            ))}
+              <h3 className="mt-4 text-2xl lg:text-3xl font-extrabold tracking-tight">
+                Never miss a broadcast. See what's on across every channel.
+              </h3>
+              <p className="mt-2 text-sm lg:text-base text-[color:var(--secondary-foreground)]">
+                Open the full Electronic Program Guide — 7 days of scheduling across live TV, radio and events.
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-2 h-11 px-5 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-[var(--shadow-glow)] group-hover:translate-x-0.5 transition">
+              Open the Guide <ArrowRight className="size-4" />
+            </div>
           </div>
-
-          <div className="overflow-x-auto">
-            {channels.map((c) => (
-              <Link
-                key={c.id}
-                to="/channels/$channelId"
-                params={{ channelId: c.id }}
-                className="grid grid-cols-[220px_repeat(8,1fr)] items-center border-b border-border last:border-b-0 hover:bg-elevated/60 transition min-w-[900px]"
-              >
-                <div className="px-4 py-3 flex items-center gap-3">
-                  <div className="size-10 rounded-md overflow-hidden shrink-0">
-                    <img src={c.logoImg} alt="" className="size-full object-cover" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold truncate">{c.name}</div>
-                    <div className="text-[11px] text-[color:var(--muted-foreground)] truncate">{c.category}</div>
-                  </div>
-                </div>
-                {c.schedule.slice(0, 8).map((s, i) => (
-                  <div
-                    key={i}
-                    className={`px-3 py-3 border-l border-border h-full text-xs ${
-                      s.live
-                        ? "bg-primary/15 text-foreground"
-                        : "text-[color:var(--secondary-foreground)]"
-                    }`}
-                  >
-                    <div className="font-medium truncate flex items-center gap-1.5">
-                      {s.live && <span className="size-1.5 rounded-full bg-primary animate-pulse" />}
-                      {s.title}
-                    </div>
-                    <div className="text-[10px] text-[color:var(--muted-foreground)] mt-0.5 truncate">{s.kind}</div>
-                  </div>
-                ))}
-              </Link>
-            ))}
-          </div>
-        </div>
+        </Link>
       </section>
+
 
       <SiteFooter />
     </div>
