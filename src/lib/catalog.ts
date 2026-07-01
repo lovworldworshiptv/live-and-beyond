@@ -12,13 +12,22 @@ export type Channel = {
   id: string;
   name: string;
   tagline: string;
+  description?: string;
   category: string;
   language: string;
+  country: string;
   region: string;
   viewers: string;
+  popularity: number; // 0-100
+  trending?: boolean;
+  addedAt: string; // ISO date
+  streamKind: "video" | "radio";
   isLive: boolean;
   logoImg: string;
   banner: string;
+  videoLibrary?: string[]; // title ids
+  podcastLibrary?: string[]; // title ids
+  featuredContent?: string[]; // title ids
   nowPlaying: { title: string; startsAt: string; endsAt: string; description: string };
   schedule: { time: string; title: string; kind: string; live?: boolean }[];
 };
