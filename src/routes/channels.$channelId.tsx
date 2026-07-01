@@ -177,7 +177,7 @@ function ChannelPage() {
               <Radio className="size-4 text-primary" /> Today's Schedule
             </h2>
             <div className="mt-4 rounded-xl border border-border overflow-hidden divide-y divide-border">
-              {channel.schedule.map((s, i) => (
+              {channel.schedule.map((s: typeof channel.schedule[number], i: number) => (
                 <div
                   key={i}
                   className={`px-4 py-3 flex items-center gap-4 ${

@@ -9,38 +9,106 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OnDemandRouteImport } from './routes/on-demand'
+import { Route as ChannelsRouteImport } from './routes/channels'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnDemandTitleIdRouteImport } from './routes/on-demand.$titleId'
+import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
 
+const OnDemandRoute = OnDemandRouteImport.update({
+  id: '/on-demand',
+  path: '/on-demand',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChannelsRoute = ChannelsRouteImport.update({
+  id: '/channels',
+  path: '/channels',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnDemandTitleIdRoute = OnDemandTitleIdRouteImport.update({
+  id: '/$titleId',
+  path: '/$titleId',
+  getParentRoute: () => OnDemandRoute,
+} as any)
+const ChannelsChannelIdRoute = ChannelsChannelIdRouteImport.update({
+  id: '/$channelId',
+  path: '/$channelId',
+  getParentRoute: () => ChannelsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/channels': typeof ChannelsRouteWithChildren
+  '/on-demand': typeof OnDemandRouteWithChildren
+  '/channels/$channelId': typeof ChannelsChannelIdRoute
+  '/on-demand/$titleId': typeof OnDemandTitleIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/channels': typeof ChannelsRouteWithChildren
+  '/on-demand': typeof OnDemandRouteWithChildren
+  '/channels/$channelId': typeof ChannelsChannelIdRoute
+  '/on-demand/$titleId': typeof OnDemandTitleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/channels': typeof ChannelsRouteWithChildren
+  '/on-demand': typeof OnDemandRouteWithChildren
+  '/channels/$channelId': typeof ChannelsChannelIdRoute
+  '/on-demand/$titleId': typeof OnDemandTitleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/channels'
+    | '/on-demand'
+    | '/channels/$channelId'
+    | '/on-demand/$titleId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/channels'
+    | '/on-demand'
+    | '/channels/$channelId'
+    | '/on-demand/$titleId'
+  id:
+    | '__root__'
+    | '/'
+    | '/channels'
+    | '/on-demand'
+    | '/channels/$channelId'
+    | '/on-demand/$titleId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChannelsRoute: typeof ChannelsRouteWithChildren
+  OnDemandRoute: typeof OnDemandRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/on-demand': {
+      id: '/on-demand'
+      path: '/on-demand'
+      fullPath: '/on-demand'
+      preLoaderRoute: typeof OnDemandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/channels': {
+      id: '/channels'
+      path: '/channels'
+      fullPath: '/channels'
+      preLoaderRoute: typeof ChannelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +116,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/on-demand/$titleId': {
+      id: '/on-demand/$titleId'
+      path: '/$titleId'
+      fullPath: '/on-demand/$titleId'
+      preLoaderRoute: typeof OnDemandTitleIdRouteImport
+      parentRoute: typeof OnDemandRoute
+    }
+    '/channels/$channelId': {
+      id: '/channels/$channelId'
+      path: '/$channelId'
+      fullPath: '/channels/$channelId'
+      preLoaderRoute: typeof ChannelsChannelIdRouteImport
+      parentRoute: typeof ChannelsRoute
+    }
   }
 }
 
+interface ChannelsRouteChildren {
+  ChannelsChannelIdRoute: typeof ChannelsChannelIdRoute
+}
+
+const ChannelsRouteChildren: ChannelsRouteChildren = {
+  ChannelsChannelIdRoute: ChannelsChannelIdRoute,
+}
+
+const ChannelsRouteWithChildren = ChannelsRoute._addFileChildren(
+  ChannelsRouteChildren,
+)
+
+interface OnDemandRouteChildren {
+  OnDemandTitleIdRoute: typeof OnDemandTitleIdRoute
+}
+
+const OnDemandRouteChildren: OnDemandRouteChildren = {
+  OnDemandTitleIdRoute: OnDemandTitleIdRoute,
+}
+
+const OnDemandRouteWithChildren = OnDemandRoute._addFileChildren(
+  OnDemandRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChannelsRoute: ChannelsRouteWithChildren,
+  OnDemandRoute: OnDemandRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
