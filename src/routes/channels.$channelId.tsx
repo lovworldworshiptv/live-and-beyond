@@ -60,7 +60,15 @@ function ChannelError({ error, reset }: { error: Error; reset: () => void }) {
 
 function ChannelPage() {
   const { channel } = Route.useLoaderData();
-  const related = channels.filter((c) => c.id !== channel.id).slice(0, 4);
+  const related = channels
+    .filter((c) => c.id !== channel.id && c.category === channel.category)
+    .concat(channels.filter((c) => c.id !== channel.id && c.category !== channel.category))
+    .slice(0, 4);
+  const recommendations = channels.filter((c) => c.id !== channel.id).sort((a, b) => b.popularity - a.popularity).slice(0, 6);
+  const videoLib = (channel.videoLibrary ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
+  const podcastLib = (channel.podcastLibrary ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
+  const featured = (channel.featuredContent ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
+  const isRadio = channel.streamKind === "radio";
 
   return (
     <div className="min-h-screen bg-background text-foreground">
