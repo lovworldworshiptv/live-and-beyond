@@ -1,19 +1,18 @@
-import { Link, Github, Twitter, Youtube } from "lucide-react";
+import { Twitter, Youtube, Github, Link as LinkIcon } from "lucide-react";
+import logo from "@/assets/lettflix-logo.png.asset.json";
 
 export function SiteFooter() {
   return (
     <footer className="mt-24 border-t border-border bg-surface/40">
       <div className="mx-auto max-w-[1480px] px-6 lg:px-10 py-14 grid gap-10 md:grid-cols-5">
         <div className="md:col-span-2">
-          <div className="font-display font-extrabold text-xl">
-            LETT<span className="text-primary">FLIX</span>
-          </div>
-          <p className="mt-3 text-sm text-[color:var(--muted-foreground)] max-w-sm">
+          <img src={logo.url} alt="Lettflix — LoveWorld Entertainment Flix" width={180} height={140} className="h-24 w-auto object-contain" />
+          <p className="mt-4 text-sm text-[color:var(--muted-foreground)] max-w-sm">
             The future of digital broadcasting. Live channels, radio, podcasts and on-demand
             entertainment — one subscription, one ecosystem.
           </p>
           <div className="flex gap-2 mt-5">
-            {[Twitter, Youtube, Github, Link].map((Icon, i) => (
+            {[Twitter, Youtube, Github, LinkIcon].map((Icon, i) => (
               <button key={i} className="size-9 grid place-items-center rounded-md bg-elevated hover:bg-elevated/70 transition">
                 <Icon className="size-4" />
               </button>
