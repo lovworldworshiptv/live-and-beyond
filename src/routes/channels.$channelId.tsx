@@ -74,104 +74,122 @@ function ChannelPage() {
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
 
-      {/* PLAYER */}
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-6">
-          <div className="text-xs text-[color:var(--muted-foreground)] flex items-center gap-1.5">
+      {/* BRANDING BANNER */}
+      <section className="relative border-b border-border">
+        <div className="relative h-[280px] lg:h-[360px] overflow-hidden">
+          <img src={channel.banner} alt="" className="absolute inset-0 size-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-background/30 to-transparent" />
+        </div>
+        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 -mt-24 relative">
+          <div className="text-xs text-[color:var(--muted-foreground)] flex items-center gap-1.5 mb-4">
             <Link to="/channels" className="hover:text-foreground">Channels</Link>
             <ChevronRight className="size-3" />
             <span className="text-foreground">{channel.name}</span>
           </div>
-
-          <div className="mt-4 relative rounded-2xl overflow-hidden border border-border bg-black aspect-video">
-            <img src={channel.banner} alt="" className="absolute inset-0 size-full object-cover opacity-60" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-
-            {/* LIVE badge + viewer count */}
-            <div className="absolute top-4 left-4 flex items-center gap-2">
-              {channel.isLive && (
-                <span className="inline-flex items-center px-2.5 py-1 rounded text-[11px] font-bold bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
-                  LIVE
-                </span>
-              )}
-              <span className="text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur inline-flex items-center gap-1">
-                <Users className="size-3" /> {channel.viewers} watching
-              </span>
+          <div className="flex items-end gap-5 flex-wrap">
+            <div className="size-24 lg:size-28 rounded-2xl overflow-hidden border border-border shadow-[var(--shadow-card)] shrink-0 bg-elevated">
+              <img src={channel.logoImg} alt="" className="size-full object-cover" />
             </div>
-
-            {/* Center play */}
-            <button className="absolute inset-0 grid place-items-center group">
-              <div className="size-20 rounded-full bg-white/95 grid place-items-center shadow-[var(--shadow-card)] group-hover:scale-105 transition">
-                <Play className="size-7 text-background fill-current ml-1" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-accent">
+                {isRadio ? <Mic className="size-3.5" /> : <Tv className="size-3.5" />}
+                {channel.category} · {channel.country}
               </div>
-            </button>
-
-            {/* Player chrome */}
-            <div className="absolute bottom-0 inset-x-0 p-4 lg:p-6">
-              <div className="flex items-center justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="text-xs text-white/70 uppercase tracking-wider">Now Playing</div>
-                  <div className="font-semibold text-lg truncate">{channel.nowPlaying.title}</div>
-                </div>
-                <div className="flex items-center gap-1">
-                  {[Volume2, Cast, Maximize2].map((Icon, i) => (
-                    <button key={i} className="size-9 grid place-items-center rounded-md hover:bg-white/10 transition" aria-label="Control">
-                      <Icon className="size-4" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Fake progress bar (live) */}
-              <div className="mt-3 h-1 rounded-full bg-white/15 overflow-hidden">
-                <div className="h-full w-1/3 bg-primary" />
-              </div>
-              <div className="mt-1.5 flex items-center justify-between text-[11px] text-white/60">
-                <span>{channel.nowPlaying.startsAt}</span>
-                <span>{channel.nowPlaying.endsAt}</span>
-              </div>
+              <h1 className="mt-1.5 text-3xl lg:text-5xl font-extrabold tracking-tight">{channel.name}</h1>
+              <p className="mt-2 text-[color:var(--secondary-foreground)] max-w-2xl">{channel.tagline}</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* META */}
-      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-8 grid gap-10 lg:grid-cols-[1fr_360px]">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="size-14 rounded-lg overflow-hidden border border-border">
-              <img src={channel.logoImg} alt="" className="size-full object-cover" />
-            </div>
-            <div>
-              <div className="text-xs text-accent font-semibold uppercase tracking-wider">{channel.category}</div>
-              <h1 className="text-3xl font-bold tracking-tight leading-tight">{channel.name}</h1>
-            </div>
+      {/* PLAYER — Live Stream / Radio Stream */}
+      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-8">
+        <div className={`relative rounded-2xl overflow-hidden border border-border bg-black ${isRadio ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}`}>
+          <img src={channel.banner} alt="" className={`absolute inset-0 size-full object-cover ${isRadio ? "opacity-40 blur-sm scale-110" : "opacity-60"}`} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+
+          <div className="absolute top-4 left-4 flex items-center gap-2">
+            {channel.isLive && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-bold bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
+                {isRadio ? "ON AIR" : "LIVE"}
+              </span>
+            )}
+            <span className="text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur inline-flex items-center gap-1">
+              <Users className="size-3" /> {channel.viewers} {isRadio ? "listening" : "watching"}
+            </span>
+            <span className="text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur inline-flex items-center gap-1 text-white/80">
+              <Signal className="size-3" /> {isRadio ? "Audio · 320kbps" : "1080p · HDR"}
+            </span>
           </div>
 
-          <p className="mt-4 text-[color:var(--secondary-foreground)] max-w-2xl">
-            {channel.tagline}
-          </p>
+          <button className="absolute inset-0 grid place-items-center group">
+            <div className="size-20 rounded-full bg-white/95 grid place-items-center shadow-[var(--shadow-card)] group-hover:scale-105 transition">
+              {isRadio ? <Mic className="size-7 text-background" /> : <Play className="size-7 text-background fill-current ml-1" />}
+            </div>
+          </button>
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="absolute bottom-0 inset-x-0 p-4 lg:p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <div className="text-xs text-white/70 uppercase tracking-wider">
+                  {isRadio ? "On Air Now" : "Now Playing"}
+                </div>
+                <div className="font-semibold text-lg truncate text-white">{channel.nowPlaying.title}</div>
+              </div>
+              <div className="flex items-center gap-1 text-white">
+                {[Volume2, Cast, Maximize2].map((Icon, i) => (
+                  <button key={i} className="size-9 grid place-items-center rounded-md hover:bg-white/10 transition" aria-label="Control">
+                    <Icon className="size-4" />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="mt-3 h-1 rounded-full bg-white/15 overflow-hidden">
+              <div className="h-full w-1/3 bg-primary" />
+            </div>
+            <div className="mt-1.5 flex items-center justify-between text-[11px] text-white/60">
+              <span>{channel.nowPlaying.startsAt}</span>
+              <span>{channel.nowPlaying.endsAt}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* META + ACTIONS */}
+      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-8 grid gap-10 lg:grid-cols-[1fr_360px]">
+        <div>
+          <div className="flex flex-wrap gap-3">
             <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold shadow-[var(--shadow-glow)] hover:opacity-95 transition">
-              <Play className="size-4 fill-current" /> Watch Live
+              <Play className="size-4 fill-current" /> {isRadio ? "Listen Live" : "Watch Live"}
             </button>
             <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
-              <Plus className="size-4" /> My Channels
+              <Plus className="size-4" /> Follow Channel
             </button>
             <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
-              <Bell className="size-4" /> Notify
+              <Bell className="size-4" /> Notify Me
             </button>
             <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
               <Share2 className="size-4" /> Share
             </button>
           </div>
 
-          <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl">
+          {/* DESCRIPTION */}
+          {channel.description && (
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold tracking-tight">About {channel.name}</h2>
+              <p className="mt-3 text-[color:var(--secondary-foreground)] max-w-3xl leading-relaxed">
+                {channel.description}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl">
             {[
               { k: "Language", v: channel.language },
-              { k: "Region", v: channel.region },
-              { k: "Format", v: "1080p HDR" },
-              { k: "Audio", v: "Stereo · 320kbps" },
+              { k: "Country", v: channel.country },
+              { k: "Format", v: isRadio ? "Audio · 320kbps" : "1080p HDR" },
+              { k: "Popularity", v: `${channel.popularity}/100` },
             ].map((m) => (
               <div key={m.k} className="rounded-lg border border-border bg-elevated/40 p-3">
                 <div className="text-[11px] text-[color:var(--muted-foreground)] uppercase tracking-wider">{m.k}</div>
@@ -180,10 +198,10 @@ function ChannelPage() {
             ))}
           </div>
 
-          {/* SCHEDULE */}
+          {/* PROGRAM SCHEDULE */}
           <div className="mt-10">
             <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
-              <Radio className="size-4 text-primary" /> Today's Schedule
+              <Radio className="size-4 text-primary" /> Program Schedule
             </h2>
             <div className="mt-4 rounded-xl border border-border overflow-hidden divide-y divide-border">
               {(channel.schedule as Channel["schedule"]).map((s, i) => (
@@ -216,12 +234,80 @@ function ChannelPage() {
               ))}
             </div>
           </div>
+
+          {/* FEATURED CONTENT */}
+          {featured.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
+                <Sparkles className="size-4 text-accent" /> Featured Content
+              </h2>
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {featured.map((t) => t && <TitleCard key={t.id} t={t} portrait={false} />)}
+              </div>
+            </div>
+          )}
+
+          {/* VIDEO LIBRARY */}
+          {videoLib.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
+                <Tv className="size-4 text-accent" /> Video Library
+              </h2>
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {videoLib.map((t) => t && <TitleCard key={t.id} t={t} />)}
+              </div>
+            </div>
+          )}
+
+          {/* PODCAST LIBRARY */}
+          {podcastLib.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
+                <Mic className="size-4 text-accent" /> Podcast Library
+              </h2>
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {podcastLib.map((t) => t && <TitleCard key={t.id} t={t} portrait={false} />)}
+              </div>
+            </div>
+          )}
+
+          {/* RECOMMENDATIONS */}
+          <div className="mt-12">
+            <h2 className="text-xl font-semibold tracking-tight">Recommended for you</h2>
+            <p className="text-sm text-[color:var(--muted-foreground)] mt-1">
+              Channels popular with viewers of {channel.name}.
+            </p>
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+              {recommendations.map((r) => (
+                <Link
+                  key={r.id}
+                  to="/channels/$channelId"
+                  params={{ channelId: r.id }}
+                  className="group flex gap-3 p-3 rounded-xl border border-border bg-elevated/40 hover:border-accent/40 transition"
+                >
+                  <div className="relative size-16 shrink-0 rounded-md overflow-hidden">
+                    <img src={r.banner} alt="" className="size-full object-cover" />
+                    {r.isLive && (
+                      <span className="absolute top-1 left-1 text-[9px] font-bold px-1 py-0.5 rounded bg-primary text-primary-foreground">LIVE</span>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] text-accent font-semibold uppercase tracking-wider">{r.category}</div>
+                    <div className="text-sm font-semibold leading-tight line-clamp-1">{r.name}</div>
+                    <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5 line-clamp-1">
+                      Now: {r.nowPlaying.title}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* SIDEBAR — related channels */}
         <aside className="space-y-3">
           <div className="text-xs font-semibold uppercase tracking-wider text-[color:var(--muted-foreground)]">
-            More channels
+            Related channels
           </div>
           {related.map((r) => (
             <Link
