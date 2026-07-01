@@ -25,10 +25,6 @@ export const Route = createFileRoute("/channels")({
   component: ChannelsPage,
 });
 
-const hours = Array.from({ length: 8 }, (_, i) => {
-  const h = 9 + i;
-  return `${String(h).padStart(2, "0")}:00`;
-});
 
 function ChannelsPage() {
   const [genre, setGenre] = useState("All");
