@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Radio, Filter, Signal, Search, TrendingUp, Clock, Flame } from "lucide-react";
+import { Filter, Search, TrendingUp, Clock, Flame, Sparkles, ArrowRight } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ChannelCard } from "@/components/channel-card";
