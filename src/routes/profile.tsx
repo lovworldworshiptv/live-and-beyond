@@ -83,7 +83,7 @@ function ProfilePage() {
         action={
           progressTitles.length > 0 && (
             <button
-              onClick={clearProgress}
+              onClick={() => progressTitles.forEach(({ t }) => clearProgress(t.id))}
               className="text-xs text-[color:var(--muted-foreground)] hover:text-primary transition inline-flex items-center gap-1"
             >
               <Trash2 className="size-3" /> Clear
