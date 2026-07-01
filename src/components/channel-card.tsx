@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Play, Users, Calendar, ArrowRight } from "lucide-react";
-import { useRef, useState } from "react";
+import { Play, Users, Calendar, ArrowRight, Volume2, VolumeX } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -11,40 +11,74 @@ import { ShareMenu } from "./share-menu";
 import { useFollowing } from "@/lib/personal";
 import type { Channel } from "@/lib/catalog";
 
+const PREVIEW_VIDEO =
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+
 export function ChannelCard({ c }: { c: Channel }) {
-  const [open, setOpen] = useState(false);
-  const timer = useRef<number | null>(null);
+  const [hovering, setHovering] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const [epgOpen, setEpgOpen] = useState(false);
+  const hoverTimer = useRef<number | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { has, toggle } = useFollowing();
   const following = has(c.id);
+  const canPreview = c.streamKind === "video" && c.isLive;
 
-  const openSoon = () => {
-    if (timer.current) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setOpen(true), 300);
+  const onEnter = () => {
+    if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
+    hoverTimer.current = window.setTimeout(() => setHovering(true), 350);
   };
-  const closeNow = () => {
-    if (timer.current) window.clearTimeout(timer.current);
-    setOpen(false);
+  const onLeave = () => {
+    if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
+    setHovering(false);
+    setMuted(true);
   };
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (hovering && canPreview) {
+      v.muted = muted;
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+      v.currentTime = 0;
+    }
+  }, [hovering, muted, canPreview]);
 
   return (
     <div
       className="group relative"
-      onMouseEnter={openSoon}
-      onMouseLeave={closeNow}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
     >
       <Link
         to="/channels/$channelId"
         params={{ channelId: c.id }}
         className="block rounded-2xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/50 transition"
       >
-        <div className="relative aspect-[16/9]">
+        <div className="relative aspect-[16/9] overflow-hidden">
           <img
             src={c.banner}
             alt={c.name}
             loading="lazy"
-            className="size-full object-cover group-hover:scale-105 transition duration-700"
+            className={`size-full object-cover transition duration-700 ${
+              hovering && canPreview ? "opacity-0" : "group-hover:scale-105"
+            }`}
           />
-          <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
+          {canPreview && (
+            <video
+              ref={videoRef}
+              src={PREVIEW_VIDEO}
+              loop
+              playsInline
+              muted
+              className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${
+                hovering ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          )}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "var(--gradient-card)" }} />
           {c.isLive && (
             <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded text-[11px] font-bold bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
               LIVE
@@ -54,12 +88,29 @@ export function ChannelCard({ c }: { c: Channel }) {
             <Users className="size-3" /> {c.viewers}
           </span>
 
-          {/* Hover play + actions */}
-          <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
-            <div className="size-14 rounded-full bg-white/95 grid place-items-center shadow-[var(--shadow-card)]">
-              <Play className="size-5 text-background fill-current ml-0.5" />
+          {/* Hover play indicator (only when not previewing) */}
+          {!(hovering && canPreview) && (
+            <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
+              <div className="size-14 rounded-full bg-white/95 grid place-items-center shadow-[var(--shadow-card)]">
+                <Play className="size-5 text-background fill-current ml-0.5" />
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Unmute button while preview is playing */}
+          {hovering && canPreview && (
+            <button
+              aria-label={muted ? "Unmute preview" : "Mute preview"}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setMuted((m) => !m);
+              }}
+              className="absolute bottom-3 left-3 size-9 grid place-items-center rounded-full bg-black/70 backdrop-blur border border-white/10 hover:bg-black/90 transition"
+            >
+              {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+            </button>
+          )}
 
           {/* Bottom-right hover action bar */}
           <div className="absolute bottom-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition">
@@ -68,14 +119,14 @@ export function ChannelCard({ c }: { c: Channel }) {
               time={c.nowPlaying.startsAt}
               title={c.nowPlaying.title}
             />
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover open={epgOpen} onOpenChange={setEpgOpen}>
               <PopoverTrigger asChild>
                 <button
                   aria-label="Show schedule"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    setOpen((o) => !o);
+                    setEpgOpen((o) => !o);
                   }}
                   className="size-8 grid place-items-center rounded-full bg-black/60 backdrop-blur border border-white/10 hover:bg-black/80 transition"
                 >
