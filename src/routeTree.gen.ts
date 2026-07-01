@@ -9,15 +9,34 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PortalRouteImport } from './routes/portal'
 import { Route as OnDemandRouteImport } from './routes/on-demand'
+import { Route as GuideRouteImport } from './routes/guide'
 import { Route as ChannelsRouteImport } from './routes/channels'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OnDemandTitleIdRouteImport } from './routes/on-demand.$titleId'
+import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
 import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
 
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalRoute = PortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnDemandRoute = OnDemandRouteImport.update({
   id: '/on-demand',
   path: '/on-demand',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuideRoute = GuideRouteImport.update({
+  id: '/guide',
+  path: '/guide',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChannelsRoute = ChannelsRouteImport.update({
@@ -35,6 +54,11 @@ const OnDemandTitleIdRoute = OnDemandTitleIdRouteImport.update({
   path: '/$titleId',
   getParentRoute: () => OnDemandRoute,
 } as any)
+const CollectionsCollectionIdRoute = CollectionsCollectionIdRouteImport.update({
+  id: '/collections/$collectionId',
+  path: '/collections/$collectionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChannelsChannelIdRoute = ChannelsChannelIdRouteImport.update({
   id: '/$channelId',
   path: '/$channelId',
@@ -44,23 +68,35 @@ const ChannelsChannelIdRoute = ChannelsChannelIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/channels': typeof ChannelsRouteWithChildren
+  '/guide': typeof GuideRoute
   '/on-demand': typeof OnDemandRouteWithChildren
+  '/portal': typeof PortalRoute
+  '/profile': typeof ProfileRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
+  '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/on-demand/$titleId': typeof OnDemandTitleIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/channels': typeof ChannelsRouteWithChildren
+  '/guide': typeof GuideRoute
   '/on-demand': typeof OnDemandRouteWithChildren
+  '/portal': typeof PortalRoute
+  '/profile': typeof ProfileRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
+  '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/on-demand/$titleId': typeof OnDemandTitleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/channels': typeof ChannelsRouteWithChildren
+  '/guide': typeof GuideRoute
   '/on-demand': typeof OnDemandRouteWithChildren
+  '/portal': typeof PortalRoute
+  '/profile': typeof ProfileRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
+  '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/on-demand/$titleId': typeof OnDemandTitleIdRoute
 }
 export interface FileRouteTypes {
@@ -68,38 +104,75 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/channels'
+    | '/guide'
     | '/on-demand'
+    | '/portal'
+    | '/profile'
     | '/channels/$channelId'
+    | '/collections/$collectionId'
     | '/on-demand/$titleId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/channels'
+    | '/guide'
     | '/on-demand'
+    | '/portal'
+    | '/profile'
     | '/channels/$channelId'
+    | '/collections/$collectionId'
     | '/on-demand/$titleId'
   id:
     | '__root__'
     | '/'
     | '/channels'
+    | '/guide'
     | '/on-demand'
+    | '/portal'
+    | '/profile'
     | '/channels/$channelId'
+    | '/collections/$collectionId'
     | '/on-demand/$titleId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChannelsRoute: typeof ChannelsRouteWithChildren
+  GuideRoute: typeof GuideRoute
   OnDemandRoute: typeof OnDemandRouteWithChildren
+  PortalRoute: typeof PortalRoute
+  ProfileRoute: typeof ProfileRoute
+  CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal': {
+      id: '/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof PortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/on-demand': {
       id: '/on-demand'
       path: '/on-demand'
       fullPath: '/on-demand'
       preLoaderRoute: typeof OnDemandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guide': {
+      id: '/guide'
+      path: '/guide'
+      fullPath: '/guide'
+      preLoaderRoute: typeof GuideRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/channels': {
@@ -122,6 +195,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/on-demand/$titleId'
       preLoaderRoute: typeof OnDemandTitleIdRouteImport
       parentRoute: typeof OnDemandRoute
+    }
+    '/collections/$collectionId': {
+      id: '/collections/$collectionId'
+      path: '/collections/$collectionId'
+      fullPath: '/collections/$collectionId'
+      preLoaderRoute: typeof CollectionsCollectionIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/channels/$channelId': {
       id: '/channels/$channelId'
@@ -160,18 +240,12 @@ const OnDemandRouteWithChildren = OnDemandRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChannelsRoute: ChannelsRouteWithChildren,
+  GuideRoute: GuideRoute,
   OnDemandRoute: OnDemandRouteWithChildren,
+  PortalRoute: PortalRoute,
+  ProfileRoute: ProfileRoute,
+  CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

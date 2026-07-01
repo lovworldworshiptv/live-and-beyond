@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Play, Radio, Filter, Signal, Search, ArrowRight, Users } from "lucide-react";
+import { Radio, Filter, Signal, Search } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ChannelCard } from "@/components/channel-card";
 import { channels, genres } from "@/lib/catalog";
 
 export const Route = createFileRoute("/channels")({
@@ -98,44 +99,7 @@ function ChannelsPage() {
       <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-10">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((c) => (
-            <Link
-              key={c.id}
-              to="/channels/$channelId"
-              params={{ channelId: c.id }}
-              className="group relative rounded-2xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/50 transition"
-            >
-              <div className="relative aspect-[16/9]">
-                <img src={c.banner} alt={c.name} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-700" />
-                <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
-                {c.isLive && (
-                  <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded text-[11px] font-bold bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
-                    LIVE
-                  </span>
-                )}
-                <span className="absolute top-3 right-3 text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur inline-flex items-center gap-1">
-                  <Users className="size-3" /> {c.viewers}
-                </span>
-                <button className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
-                  <div className="size-14 rounded-full bg-white/95 grid place-items-center shadow-[var(--shadow-card)]">
-                    <Play className="size-5 text-background fill-current ml-0.5" />
-                  </div>
-                </button>
-              </div>
-              <div className="p-5">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-xs text-accent font-semibold uppercase tracking-wider">{c.category}</div>
-                  <div className="text-[11px] text-[color:var(--muted-foreground)]">{c.region}</div>
-                </div>
-                <div className="mt-1.5 font-semibold text-lg leading-tight">{c.name}</div>
-                <div className="text-sm text-[color:var(--muted-foreground)] mt-1 line-clamp-1">{c.tagline}</div>
-                <div className="mt-4 flex items-center justify-between text-sm">
-                  <div className="text-[color:var(--secondary-foreground)] line-clamp-1">
-                    <span className="text-foreground font-medium">Now:</span> {c.nowPlaying.title}
-                  </div>
-                  <ArrowRight className="size-4 text-[color:var(--muted-foreground)] group-hover:text-foreground group-hover:translate-x-0.5 transition" />
-                </div>
-              </div>
-            </Link>
+            <ChannelCard key={c.id} c={c} />
           ))}
         </div>
 
