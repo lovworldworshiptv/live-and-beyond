@@ -1,44 +1,29 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Play, Search, Filter, Sparkles, Info, ArrowRight, Clock } from "lucide-react";
+import { Play, Search, Filter, Sparkles, Clock, Info, ArrowRight } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Row } from "@/components/row";
-import { TitleCard } from "@/components/title-card";
-import { Pagination } from "@/components/pagination";
-import { titles, genres, getTitle } from "@/lib/catalog";
-import { collections } from "@/lib/collections";
-import { useProgress } from "@/lib/personal";
+import { titles, genres } from "@/lib/catalog";
 
 export const Route = createFileRoute("/on-demand")({
   head: () => ({
     meta: [
       { title: "On Demand — Lettflix" },
-      {
-        name: "description",
-        content:
-          "Watch premium on-demand series, films, concerts, documentaries and podcasts on Lettflix. 12,000+ titles, one subscription.",
-      },
+      { name: "description", content: "Watch premium on-demand series, films, concerts, documentaries and podcasts on Lettflix. 12,000+ titles, one subscription." },
       { property: "og:title", content: "On Demand — Lettflix" },
-      {
-        property: "og:description",
-        content:
-          "Series, films, concerts and documentaries. Premium on-demand entertainment from Lettflix.",
-      },
+      { property: "og:description", content: "Series, films, concerts and documentaries. Premium on-demand entertainment from Lettflix." },
     ],
   }),
   component: OnDemand,
 });
 
 const kinds = ["All", "Series", "Film", "Documentary", "Concert", "Event", "Podcast"] as const;
-const PAGE_SIZE = 12;
 
 function OnDemand() {
   const [genre, setGenre] = useState("All");
   const [kind, setKind] = useState<(typeof kinds)[number]>("All");
   const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const { items: progress } = useProgress();
 
   const featured = titles.find((t) => t.featured) ?? titles[0];
 
@@ -53,23 +38,8 @@ function OnDemand() {
     [genre, kind, query]
   );
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-  const pageItems = filtered.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
-
-  const trending = titles.slice(0, 8);
-  const newReleases = [...titles].reverse().slice(0, 8);
-  const continueWatching = progress
-    .map((p) => ({ p, t: getTitle(p.titleId) }))
-    .filter((x): x is { p: (typeof progress)[number]; t: NonNullable<ReturnType<typeof getTitle>> } => !!x.t);
-
-  const resetPage = <T,>(fn: (v: T) => void) => (v: T) => {
-    fn(v);
-    setPage(1);
-  };
+  const trending = titles.slice(0, 6);
+  const newReleases = [...titles].reverse().slice(0, 6);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -121,93 +91,33 @@ function OnDemand() {
         </div>
       </section>
 
-      {/* CONTINUE WATCHING */}
-      {continueWatching.length > 0 && (
-        <Row title="Continue Watching" subtitle="Pick up where you left off.">
-          {continueWatching.map(({ t }) => (
-            <TitleCard key={t.id} t={t} portrait={false} />
-          ))}
-        </Row>
-      )}
-
       {/* ROWS */}
       <Row title="Trending On Demand" subtitle="What Lettflix is watching this week.">
         {trending.map((t, i) => (
-          <TitleCard key={t.id} t={t} rank={i + 1} portrait={false} />
+          <TitleCard key={t.id} t={t} rank={i + 1} />
         ))}
       </Row>
-
-      {/* FEATURED COLLECTIONS */}
-      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-16">
-        <div className="flex items-end justify-between mb-5">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Featured Collections</h2>
-            <p className="text-sm text-[color:var(--muted-foreground)] mt-1">
-              Hand-curated bundles from the Lettflix editors.
-            </p>
-          </div>
-          <Link
-            to="/on-demand"
-            className="hidden sm:inline-flex items-center gap-1 text-sm text-accent hover:underline"
-          >
-            View all <ArrowRight className="size-3.5" />
-          </Link>
-        </div>
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
-          {collections.slice(0, 6).map((c) => (
-            <Link
-              key={c.id}
-              to="/collections/$collectionId"
-              params={{ collectionId: c.id }}
-              className="group relative rounded-2xl overflow-hidden border border-border aspect-[16/10] hover:border-white/30 transition"
-              style={{ background: c.gradient }}
-            >
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition" />
-              <div className="absolute inset-0 p-6 flex flex-col justify-between">
-                <div>
-                  <div className="text-[11px] uppercase tracking-widest text-white/80 font-semibold">
-                    Collection
-                  </div>
-                  <h3 className="mt-2 text-2xl lg:text-3xl font-extrabold tracking-tight text-white max-w-[80%]">
-                    {c.name}
-                  </h3>
-                </div>
-                <div className="flex items-end justify-between">
-                  <p className="text-sm text-white/85 max-w-[70%]">{c.tagline}</p>
-                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-white group-hover:translate-x-1 transition">
-                    Open <ArrowRight className="size-4" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
 
       <Row title="New Releases" subtitle="Fresh drops across every genre.">
         {newReleases.map((t) => (
-          <TitleCard key={t.id} t={t} portrait={false} />
+          <TitleCard key={t.id} t={t} />
         ))}
       </Row>
 
-      {/* FULL LIBRARY WITH PAGINATION */}
-      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-16 mb-16">
+      {/* FULL LIBRARY */}
+      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-16">
         <div className="flex items-end justify-between mb-5 flex-wrap gap-4">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight">Browse the Library</h2>
             <p className="text-sm text-[color:var(--muted-foreground)] mt-1">
               {filtered.length} of {titles.length} titles
-              {totalPages > 1 && ` · Page ${currentPage} of ${totalPages}`}
             </p>
           </div>
           <div className="relative">
             <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)]" />
             <input
               value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => setQuery(e.target.value)}
               placeholder="Search titles…"
               className="h-10 pl-9 pr-4 rounded-md bg-surface border border-border w-64 text-sm outline-none focus:border-accent transition"
             />
@@ -220,7 +130,7 @@ function OnDemand() {
             {genres.map((g) => (
               <button
                 key={g}
-                onClick={() => resetPage(setGenre)(g)}
+                onClick={() => setGenre(g)}
                 className={`shrink-0 px-3 h-8 rounded-full text-sm border transition ${
                   genre === g
                     ? "bg-primary text-primary-foreground border-primary"
@@ -235,7 +145,7 @@ function OnDemand() {
             {kinds.map((k) => (
               <button
                 key={k}
-                onClick={() => resetPage(setKind)(k)}
+                onClick={() => setKind(k)}
                 className={`shrink-0 px-3 h-8 rounded-full text-sm border transition ${
                   kind === k
                     ? "bg-accent text-accent-foreground border-accent"
@@ -249,8 +159,8 @@ function OnDemand() {
         </div>
 
         <div className="mt-6 grid gap-5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-          {pageItems.map((t) => (
-            <TitleCard key={t.id} t={t} />
+          {filtered.map((t) => (
+            <TitleCard key={t.id} t={t} portrait />
           ))}
         </div>
 
@@ -259,8 +169,6 @@ function OnDemand() {
             Nothing matches those filters yet.
           </div>
         )}
-
-        <Pagination page={currentPage} totalPages={totalPages} onPage={setPage} />
       </section>
 
       <SiteFooter />
@@ -268,5 +176,48 @@ function OnDemand() {
   );
 }
 
-// Silence unused Clock import when trending renderer changes
-void Clock;
+function TitleCard({
+  t,
+  rank,
+  portrait,
+}: {
+  t: (typeof titles)[number];
+  rank?: number;
+  portrait?: boolean;
+}) {
+  return (
+    <Link
+      to="/on-demand/$titleId"
+      params={{ titleId: t.id }}
+      className={`group shrink-0 snap-start ${portrait ? "" : "w-[260px]"}`}
+    >
+      <div className={`relative rounded-xl overflow-hidden border border-border bg-elevated/50 ${portrait ? "aspect-[2/3]" : "aspect-video"}`}>
+        <img src={t.cover} alt={t.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
+        <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
+        {rank && (
+          <span className="absolute top-3 left-3 text-[11px] font-bold px-2 py-1 rounded bg-black/60 backdrop-blur">#{rank}</span>
+        )}
+        <span className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-black/60 backdrop-blur text-white/90">
+          {t.kind}
+        </span>
+        <div className="absolute inset-x-0 bottom-0 p-3">
+          <div className="text-sm font-semibold leading-tight line-clamp-2">{t.title}</div>
+          <div className="text-[11px] text-white/70 mt-1 flex items-center gap-1.5">
+            <Clock className="size-3" /> {t.duration}
+          </div>
+        </div>
+        <button className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
+          <div className="size-12 rounded-full bg-white/95 grid place-items-center shadow-[var(--shadow-card)]">
+            <Play className="size-4 text-background fill-current ml-0.5" />
+          </div>
+        </button>
+      </div>
+      {!portrait && (
+        <div className="mt-2 text-xs text-[color:var(--muted-foreground)] flex items-center justify-between">
+          <span>{t.category}</span>
+          <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition" />
+        </div>
+      )}
+    </Link>
+  );
+}
