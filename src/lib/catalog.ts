@@ -572,10 +572,30 @@ export function getTitle(id: string) {
 
 export const genres = [
   "All",
-  "Christian Living",
-  "Music",
   "Sports",
   "News",
-  "Podcasts",
-  "Documentary",
+  "Entertainment",
+  "Christian Living",
+  "Music",
+  "LoveWorld",
+  "Radio",
+  "Education",
+  "Lifestyle",
+  "Kids & Family",
 ];
+
+export const channelLanguages = ["All", "English", "French", "Spanish", "Portuguese"];
+export const channelCountries = [
+  "All",
+  "Nigeria",
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "South Africa",
+];
+export const channelSorts = [
+  { id: "popularity", label: "Popularity" },
+  { id: "trending", label: "Trending" },
+  { id: "recent", label: "Recently Added" },
+] as const;
+export type ChannelSortId = (typeof channelSorts)[number]["id"];
