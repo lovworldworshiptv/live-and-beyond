@@ -47,17 +47,17 @@ function ProfilePage() {
       <section className="border-b border-border">
         <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-12 pb-8 flex items-center gap-6 flex-wrap">
           <div className="size-24 rounded-full bg-[image:var(--gradient-accent)] grid place-items-center text-4xl font-bold shadow-[var(--shadow-glow)]">
-            {profile.name.charAt(0)}
+            {profile.displayName.charAt(0)}
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">
-              Member since {profile.since}
+              {profile.handle} · {profile.location}
             </div>
             <h1 className="mt-1 text-3xl lg:text-4xl font-extrabold tracking-tight">
-              {profile.name}
+              {profile.displayName}
             </h1>
-            <div className="mt-1 text-sm text-[color:var(--muted-foreground)]">
-              {profile.email} · {profile.plan} plan
+            <div className="mt-1 text-sm text-[color:var(--muted-foreground)] max-w-xl">
+              {profile.bio}
             </div>
           </div>
           <div className="flex items-center gap-6">
