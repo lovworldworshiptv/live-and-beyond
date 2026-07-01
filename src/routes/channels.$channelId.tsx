@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-rout
 import { Play, Volume2, Maximize2, Users, Radio, Bell, Share2, Plus, ChevronRight, Cast } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { channels, getChannel } from "@/lib/catalog";
+import { channels, getChannel, type Channel } from "@/lib/catalog";
 
 export const Route = createFileRoute("/channels/$channelId")({
   loader: ({ params }) => {
@@ -177,7 +177,7 @@ function ChannelPage() {
               <Radio className="size-4 text-primary" /> Today's Schedule
             </h2>
             <div className="mt-4 rounded-xl border border-border overflow-hidden divide-y divide-border">
-              {channel.schedule.map((s: typeof channel.schedule[number], i: number) => (
+              {(channel.schedule as Channel["schedule"]).map((s, i) => (
                 <div
                   key={i}
                   className={`px-4 py-3 flex items-center gap-4 ${
