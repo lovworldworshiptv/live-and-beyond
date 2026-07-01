@@ -13,6 +13,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as OnDemandRouteImport } from './routes/on-demand'
 import { Route as GuideRouteImport } from './routes/guide'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChannelsRouteImport } from './routes/channels'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
@@ -38,6 +39,11 @@ const OnDemandRoute = OnDemandRouteImport.update({
 const GuideRoute = GuideRouteImport.update({
   id: '/guide',
   path: '/guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChannelsRoute = ChannelsRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/channels': typeof ChannelsRouteWithChildren
+  '/community': typeof CommunityRoute
   '/guide': typeof GuideRoute
   '/on-demand': typeof OnDemandRouteWithChildren
   '/portal': typeof PortalRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/channels': typeof ChannelsRouteWithChildren
+  '/community': typeof CommunityRoute
   '/guide': typeof GuideRoute
   '/on-demand': typeof OnDemandRouteWithChildren
   '/portal': typeof PortalRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/channels': typeof ChannelsRouteWithChildren
+  '/community': typeof CommunityRoute
   '/guide': typeof GuideRoute
   '/on-demand': typeof OnDemandRouteWithChildren
   '/portal': typeof PortalRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/channels'
+    | '/community'
     | '/guide'
     | '/on-demand'
     | '/portal'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/channels'
+    | '/community'
     | '/guide'
     | '/on-demand'
     | '/portal'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/channels'
+    | '/community'
     | '/guide'
     | '/on-demand'
     | '/portal'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   ChannelsRoute: typeof ChannelsRouteWithChildren
+  CommunityRoute: typeof CommunityRoute
   GuideRoute: typeof GuideRoute
   OnDemandRoute: typeof OnDemandRouteWithChildren
   PortalRoute: typeof PortalRoute
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       path: '/guide'
       fullPath: '/guide'
       preLoaderRoute: typeof GuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/channels': {
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   ChannelsRoute: ChannelsRouteWithChildren,
+  CommunityRoute: CommunityRoute,
   GuideRoute: GuideRoute,
   OnDemandRoute: OnDemandRouteWithChildren,
   PortalRoute: PortalRoute,
