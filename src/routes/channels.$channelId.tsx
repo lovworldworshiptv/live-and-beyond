@@ -1,8 +1,9 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import { Play, Volume2, Maximize2, Users, Radio, Bell, Share2, Plus, ChevronRight, Cast } from "lucide-react";
+import { Play, Volume2, Maximize2, Users, Radio, Bell, Share2, Plus, ChevronRight, Cast, Signal, Sparkles, Tv, Mic } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { channels, getChannel, type Channel } from "@/lib/catalog";
+import { TitleCard } from "@/components/title-card";
+import { channels, getChannel, getTitle, type Channel } from "@/lib/catalog";
 
 export const Route = createFileRoute("/channels/$channelId")({
   loader: ({ params }) => {
