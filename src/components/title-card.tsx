@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { Play, Plus, Check, Info } from "lucide-react";
-import { useState, useRef } from "react";
+import { Play, Plus, Check, Info, Volume2, VolumeX } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useMyList, useProgress } from "@/lib/personal";
 import { ShareMenu } from "./share-menu";
 import type { Title } from "@/lib/catalog";
 
-/**
- * Netflix-style hover-preview card for on-demand titles.
- * Portrait poster; on hover, expands into a wider preview with metadata
- * and quick actions (Play / My List / Info / Share).
- */
+const PREVIEW_VIDEO =
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+
+type Align = "left" | "center" | "right";
+
 export function TitleCard({
   t,
   rank,
@@ -22,20 +22,61 @@ export function TitleCard({
   size?: "sm" | "md" | "lg";
 }) {
   const [open, setOpen] = useState(false);
-  const timer = useRef<number | null>(null);
+  const [muted, setMuted] = useState(true);
+  const [align, setAlign] = useState<Align>("center");
+  const openTimer = useRef<number | null>(null);
+  const closeTimer = useRef<number | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { has, toggle } = useMyList();
   const { items } = useProgress();
   const progress = items.find((i) => i.titleId === t.id);
   const inList = has(t.id);
 
+  const clearTimers = () => {
+    if (openTimer.current) window.clearTimeout(openTimer.current);
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+  };
+
   const openSoon = () => {
-    if (timer.current) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setOpen(true), 350);
+    clearTimers();
+    openTimer.current = window.setTimeout(() => setOpen(true), 350);
   };
-  const closeNow = () => {
-    if (timer.current) window.clearTimeout(timer.current);
-    setOpen(false);
+  const closeSoon = () => {
+    clearTimers();
+    closeTimer.current = window.setTimeout(() => {
+      setOpen(false);
+      setMuted(true);
+    }, 120);
   };
+  const cancelClose = () => {
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+  };
+
+  // Edge-aware alignment
+  useLayoutEffect(() => {
+    if (!open || !cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const previewWidth = 340;
+    const vw = window.innerWidth;
+    const cardCenter = rect.left + rect.width / 2;
+    if (cardCenter - previewWidth / 2 < 16) setAlign("left");
+    else if (cardCenter + previewWidth / 2 > vw - 16) setAlign("right");
+    else setAlign("center");
+  }, [open]);
+
+  // Video playback
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (open) {
+      v.muted = muted;
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+      v.currentTime = 0;
+    }
+  }, [open, muted]);
 
   const widthClass =
     !portrait
@@ -44,11 +85,19 @@ export function TitleCard({
         : "w-[260px]"
       : "";
 
+  const previewPositionClass =
+    align === "left"
+      ? "left-0"
+      : align === "right"
+        ? "right-0"
+        : "left-1/2 -translate-x-1/2";
+
   return (
     <div
+      ref={cardRef}
       className={`group relative shrink-0 snap-start ${widthClass}`}
       onMouseEnter={openSoon}
-      onMouseLeave={closeNow}
+      onMouseLeave={closeSoon}
     >
       <Link
         to="/on-demand/$titleId"
@@ -99,21 +148,43 @@ export function TitleCard({
       {/* Hover preview */}
       {open && (
         <div
-          className="pointer-events-none absolute z-30 top-0 left-1/2 -translate-x-1/2 w-[340px]"
-          style={{ transform: "translate(-50%, -6%)" }}
+          className={`absolute z-30 top-0 w-[340px] ${previewPositionClass}`}
+          style={{ transform: `translateY(-6%) ${align === "center" ? "translateX(-50%)" : ""}`.trim() }}
+          onMouseEnter={cancelClose}
+          onMouseLeave={closeSoon}
         >
+          {/* offset trick for center */}
           <div
-            className="pointer-events-auto rounded-xl overflow-hidden border border-border bg-elevated shadow-[var(--shadow-card)] animate-in fade-in zoom-in-95 duration-150"
+            className="rounded-xl overflow-hidden border border-border bg-elevated shadow-[var(--shadow-card)] animate-in fade-in zoom-in-95 duration-150"
           >
             <div className="relative aspect-video">
               <img src={t.hero} alt="" className="size-full object-cover" />
+              <video
+                ref={videoRef}
+                src={PREVIEW_VIDEO}
+                loop
+                playsInline
+                muted
+                className="absolute inset-0 size-full object-cover"
+              />
               <div
-                className="absolute inset-0"
+                className="absolute inset-0 pointer-events-none"
                 style={{
                   background:
                     "linear-gradient(180deg, transparent 20%, oklch(0 0 0 / 0.85) 100%)",
                 }}
               />
+              <button
+                aria-label={muted ? "Unmute preview" : "Mute preview"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setMuted((m) => !m);
+                }}
+                className="absolute top-3 right-3 size-8 grid place-items-center rounded-full bg-black/70 backdrop-blur border border-white/10 hover:bg-black/90 transition"
+              >
+                {muted ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
+              </button>
               <div className="absolute inset-x-3 bottom-3 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <Link

@@ -74,9 +74,9 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <button className="hidden md:flex items-center gap-2 px-3 h-9 rounded-md bg-surface border border-border text-sm text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated transition w-64">
-            <Search className="size-4" />
-            <span>Search channels, shows, podcasts…</span>
+          <button className="hidden md:flex items-center gap-2 px-3 h-9 rounded-md bg-surface border border-border text-sm text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated transition w-64 overflow-hidden">
+            <Search className="size-4 shrink-0" />
+            <span className="truncate whitespace-nowrap">Search titles, channels, podcasts…</span>
           </button>
           <button className="size-9 grid place-items-center rounded-md hover:bg-elevated transition" aria-label="Notifications">
             <Bell className="size-4" />
