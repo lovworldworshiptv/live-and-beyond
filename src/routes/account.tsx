@@ -155,6 +155,15 @@ function AccountPage() {
                 onChange={(v) => update("emailNotifications", v)}
               />
               <Toggle
+                label="Push notifications"
+                description="Real-time pings on your mobile and desktop devices."
+                value={pushEnabled}
+                onChange={(v) => {
+                  setPushEnabled(v);
+                  toast.success(v ? "Push notifications enabled" : "Push notifications disabled");
+                }}
+              />
+              <Toggle
                 label="Live channel alerts"
                 description="Ping me when a followed channel goes live."
                 value={settings.liveAlerts}
@@ -172,12 +181,21 @@ function AccountPage() {
           {active === "playback" && (
             <Card title="Playback" subtitle="Tune quality and previews.">
               <Toggle
-                label="Autoplay previews on hover"
-                description="Netflix-style hover previews across the app."
+                label="Autoplay next episode"
+                description="Automatically continue to the next episode in a series."
+                value={autoAdvance}
+                onChange={(v) => {
+                  setAutoAdvance(v);
+                  toast.success("Autoplay preference saved");
+                }}
+              />
+              <Toggle
+                label="Auto preview on hover"
+                description="Netflix-style muted previews when hovering titles and channels."
                 value={settings.autoplayPreviews}
                 onChange={(v) => update("autoplayPreviews", v)}
               />
-              <Field label="Playback quality">
+              <Field label="Preferred quality">
                 <div className="flex gap-2">
                   {(["auto", "hd", "4k"] as const).map((q) => (
                     <button
@@ -196,6 +214,7 @@ function AccountPage() {
               </Field>
             </Card>
           )}
+
 
           {active === "language" && (
             <Card title="Language & Region" subtitle="Interface and captions.">
