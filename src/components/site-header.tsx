@@ -1,5 +1,5 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Search, Bell, ChevronDown } from "lucide-react";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Search, Bell, ChevronDown, LogOut, ShieldCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import logoIcon from "@/assets/lettflix-icon.png.asset.json";
 import { useProfile } from "@/lib/personal";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 const navItems = [
   { label: "Home", to: "/" as const },
@@ -22,6 +24,18 @@ const navItems = [
 export function SiteHeader() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { profile } = useProfile();
+  const { user, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const displayName = user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? profile.displayName;
+  const handle = user?.email ?? profile.handle;
+  const initial = (displayName as string).charAt(0).toUpperCase();
+
+  async function onSignOut() {
+    await signOut();
+    toast("Signed out");
+    navigate({ to: "/" });
+  }
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border">
@@ -70,6 +84,11 @@ export function SiteHeader() {
               <DropdownMenuItem asChild>
                 <Link to="/enterprise">Enterprise</Link>
               </DropdownMenuItem>
+              {isAdmin && (
+                <DropdownMenuItem asChild>
+                  <Link to="/admin">CMS Admin</Link>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </nav>
@@ -82,38 +101,58 @@ export function SiteHeader() {
           <button className="size-9 grid place-items-center rounded-md hover:bg-elevated transition" aria-label="Notifications">
             <Bell className="size-4" />
           </button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="size-9 rounded-md bg-[image:var(--gradient-live)] grid place-items-center text-primary-foreground text-sm font-bold"
-                aria-label="Profile"
-              >
-                {profile.displayName.charAt(0)}
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="font-semibold">{profile.displayName}</div>
-                <div className="text-xs text-[color:var(--muted-foreground)] font-normal">
-                  {profile.handle}
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/profile">My Profile</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/account">Account & Settings</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/portal">Creator Portal</Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/enterprise">For Enterprise</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+
+          {!user ? (
+            <Link
+              to="/auth"
+              className="h-9 px-4 inline-flex items-center rounded-md bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition"
+            >
+              Sign in
+            </Link>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="size-9 rounded-md bg-[image:var(--gradient-live)] grid place-items-center text-primary-foreground text-sm font-bold"
+                  aria-label="Profile"
+                >
+                  {initial}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="font-semibold">{displayName}</div>
+                  <div className="text-xs text-[color:var(--muted-foreground)] font-normal truncate">
+                    {handle}
+                  </div>
+                  {isAdmin && (
+                    <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary">
+                      <ShieldCheck className="size-3" /> Admin
+                    </div>
+                  )}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/profile">My Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/account">Account & Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/portal">Creator Portal</Link>
+                </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin">CMS Admin</Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={onSignOut} className="text-destructive">
+                  <LogOut className="size-4" /> Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
     </header>
