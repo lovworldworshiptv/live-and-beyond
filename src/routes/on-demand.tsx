@@ -137,54 +137,8 @@ function OnDemand() {
         ))}
       </Row>
 
-      {/* FEATURED COLLECTIONS */}
-      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-16">
-        <div className="flex items-end justify-between mb-5">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Featured Collections</h2>
-            <p className="text-sm text-[color:var(--muted-foreground)] mt-1">
-              Hand-curated bundles from the Lettflix editors.
-            </p>
-          </div>
-          <Link
-            to="/on-demand"
-            className="hidden sm:inline-flex items-center gap-1 text-sm text-accent hover:underline"
-          >
-            View all <ArrowRight className="size-3.5" />
-          </Link>
-        </div>
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
-          {collections.slice(0, 6).map((c) => (
-            <Link
-              key={c.id}
-              to="/collections/$collectionId"
-              params={{ collectionId: c.id }}
-              className="group relative rounded-2xl overflow-hidden border border-border aspect-[16/10] hover:border-white/30 transition"
-              style={{ background: c.gradient }}
-            >
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition" />
-              <div className="absolute inset-0 p-6 flex flex-col justify-between">
-                <div>
-                  <div className="text-[11px] uppercase tracking-widest text-white/80 font-semibold">
-                    Collection
-                  </div>
-                  <h3 className="mt-2 text-2xl lg:text-3xl font-extrabold tracking-tight text-white max-w-[80%]">
-                    {c.name}
-                  </h3>
-                </div>
-                <div className="flex items-end justify-between">
-                  <p className="text-sm text-white/85 max-w-[70%]">{c.tagline}</p>
-                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-white group-hover:translate-x-1 transition">
-                    Open <ArrowRight className="size-4" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
       <Row title="New Releases" subtitle="Fresh drops across every genre.">
+
         {newReleases.map((t) => (
           <TitleCard key={t.id} t={t} portrait={false} />
         ))}
