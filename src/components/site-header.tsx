@@ -16,6 +16,7 @@ const navItems = [
   { label: "Channels", to: "/channels" as const },
   { label: "Guide", to: "/guide" as const },
   { label: "On Demand", to: "/on-demand" as const },
+  { label: "Pricing", to: "/pricing" as const },
 ];
 
 export function SiteHeader() {
