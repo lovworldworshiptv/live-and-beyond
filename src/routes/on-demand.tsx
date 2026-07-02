@@ -119,14 +119,22 @@ function OnDemand() {
         </div>
       </section>
 
-      {/* CONTINUE WATCHING */}
-      {continueWatching.length > 0 && (
-        <Row title="Continue Watching" subtitle="Pick up where you left off.">
-          {continueWatching.map(({ t }) => (
-            <TitleCard key={t.id} t={t} portrait={false} />
-          ))}
-        </Row>
-      )}
+      {/* CONTINUE WATCHING — always shown, falls back to popular picks */}
+      <Row
+        title="Continue Watching"
+        subtitle={
+          continueWatching.length > 0
+            ? "Pick up where you left off."
+            : "Start a title to build your history — here are some popular picks."
+        }
+      >
+        {(continueWatching.length > 0
+          ? continueWatching.map(({ t }) => t)
+          : titles.slice(0, 6)
+        ).map((t) => (
+          <TitleCard key={t.id} t={t} portrait={false} />
+        ))}
+      </Row>
 
       {/* ROWS */}
       <Row title="Trending On Demand" subtitle="What Lettflix is watching this week.">
