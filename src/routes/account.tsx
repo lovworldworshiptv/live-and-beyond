@@ -306,14 +306,58 @@ function AccountPage() {
             </Card>
           )}
 
-          {active === "privacy" && (
-            <Card title="Privacy & Security" subtitle="Keep your account safe.">
+          {active === "security" && (
+            <Card title="Security" subtitle="Passwords and authentication.">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Field label="Current password">
+                  <input
+                    type="password"
+                    className={inputClass}
+                    value={pw.current}
+                    onChange={(e) => setPw({ ...pw, current: e.target.value })}
+                  />
+                </Field>
+                <Field label="New password">
+                  <input
+                    type="password"
+                    className={inputClass}
+                    value={pw.next}
+                    onChange={(e) => setPw({ ...pw, next: e.target.value })}
+                  />
+                </Field>
+                <Field label="Confirm new password">
+                  <input
+                    type="password"
+                    className={inputClass}
+                    value={pw.confirm}
+                    onChange={(e) => setPw({ ...pw, confirm: e.target.value })}
+                  />
+                </Field>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => {
+                    if (!pw.current || !pw.next) return toast.error("Fill both fields");
+                    if (pw.next !== pw.confirm) return toast.error("Passwords do not match");
+                    setPw({ current: "", next: "", confirm: "" });
+                    toast.success("Password updated");
+                  }}
+                  className="h-10 px-5 rounded-md bg-accent text-accent-foreground font-semibold hover:bg-accent/90 transition"
+                >
+                  Update password
+                </button>
+              </div>
               <Toggle
                 label="Two-factor authentication"
                 description="Extra security with an authenticator app."
                 value={true}
                 onChange={() => toast("2FA settings opened")}
               />
+            </Card>
+          )}
+
+          {active === "privacy" && (
+            <Card title="Privacy" subtitle="Control your data and account.">
               <Toggle
                 label="Personalised recommendations"
                 description="Use viewing history to power your rows."
@@ -324,9 +368,32 @@ function AccountPage() {
                 <button className="h-10 px-4 rounded-md bg-surface border border-border text-sm hover:bg-elevated transition">
                   Download my data
                 </button>
-                <button className="h-10 px-4 rounded-md bg-primary/10 border border-primary/40 text-primary text-sm hover:bg-primary/20 transition">
-                  Delete account
-                </button>
+              </div>
+              <div className="mt-6 rounded-xl border border-primary/40 bg-primary/5 p-5">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="size-5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="font-semibold">Delete account</div>
+                    <p className="text-sm text-[color:var(--secondary-foreground)] mt-1">
+                      Permanent, after a 30-day grace period. To confirm, type <span className="font-mono text-primary">DELETE</span> below.
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <input
+                        className={inputClass + " max-w-[220px]"}
+                        placeholder="Type DELETE to confirm"
+                        value={deleteConfirm}
+                        onChange={(e) => setDeleteConfirm(e.target.value)}
+                      />
+                      <button
+                        disabled={deleteConfirm !== "DELETE"}
+                        onClick={() => toast.success("Deletion scheduled — you have 30 days to cancel.")}
+                        className="h-10 px-4 rounded-md bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/90 transition"
+                      >
+                        Delete my account
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </Card>
           )}
