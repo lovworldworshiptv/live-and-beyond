@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as OnDemandRouteImport } from './routes/on-demand'
 import { Route as GuideRouteImport } from './routes/guide'
@@ -25,6 +26,11 @@ import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channe
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PortalRoute = PortalRouteImport.update({
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/guide': typeof GuideRoute
   '/on-demand': typeof OnDemandRouteWithChildren
   '/portal': typeof PortalRoute
+  '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/guide': typeof GuideRoute
   '/on-demand': typeof OnDemandRouteWithChildren
   '/portal': typeof PortalRoute
+  '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/guide': typeof GuideRoute
   '/on-demand': typeof OnDemandRouteWithChildren
   '/portal': typeof PortalRoute
+  '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/guide'
     | '/on-demand'
     | '/portal'
+    | '/pricing'
     | '/profile'
     | '/channels/$channelId'
     | '/collections/$collectionId'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/guide'
     | '/on-demand'
     | '/portal'
+    | '/pricing'
     | '/profile'
     | '/channels/$channelId'
     | '/collections/$collectionId'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/guide'
     | '/on-demand'
     | '/portal'
+    | '/pricing'
     | '/profile'
     | '/channels/$channelId'
     | '/collections/$collectionId'
@@ -180,6 +192,7 @@ export interface RootRouteChildren {
   GuideRoute: typeof GuideRoute
   OnDemandRoute: typeof OnDemandRouteWithChildren
   PortalRoute: typeof PortalRoute
+  PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
 }
@@ -191,6 +204,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/portal': {
@@ -306,6 +326,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuideRoute: GuideRoute,
   OnDemandRoute: OnDemandRouteWithChildren,
   PortalRoute: PortalRoute,
+  PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
 }
