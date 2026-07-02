@@ -30,12 +30,10 @@ export const Route = createFileRoute("/on-demand")({
   component: OnDemand,
 });
 
-const kinds = ["All", "Series", "Film", "Documentary", "Concert", "Event", "Podcast"] as const;
 const PAGE_SIZE = 12;
 
 function OnDemand() {
   const [genre, setGenre] = useState("All");
-  const [kind, setKind] = useState<(typeof kinds)[number]>("All");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const { items: progress } = useProgress();
@@ -47,7 +45,7 @@ function OnDemand() {
       titles.filter(
         (t) =>
           (genre === "All" || t.category === genre) &&
-          (kind === "All" || t.kind === kind) &&
+
           (query === "" || t.title.toLowerCase().includes(query.toLowerCase()))
       ),
     [genre, kind, query]
