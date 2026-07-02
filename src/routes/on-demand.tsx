@@ -48,7 +48,7 @@ function OnDemand() {
 
           (query === "" || t.title.toLowerCase().includes(query.toLowerCase()))
       ),
-    [genre, kind, query]
+    [genre, query]
   );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
