@@ -1,14 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Play, Search, Filter, Sparkles, Info, ArrowRight, Clock } from "lucide-react";
+import { Play, Search, Filter, Sparkles, Info } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Row } from "@/components/row";
 import { TitleCard } from "@/components/title-card";
 import { Pagination } from "@/components/pagination";
 import { titles, genres, getTitle } from "@/lib/catalog";
-import { collections } from "@/lib/collections";
 import { useProgress } from "@/lib/personal";
+
 
 export const Route = createFileRoute("/on-demand")({
   head: () => ({
