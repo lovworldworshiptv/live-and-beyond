@@ -204,6 +204,3 @@ function OnDemand() {
     </div>
   );
 }
-
-// Silence unused Clock import when trending renderer changes
-void Clock;
