@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   Check,
   Sparkles,
@@ -391,8 +391,8 @@ function PricingPage() {
             </thead>
             <tbody>
               {comparisonRows.map((group) => (
-                <>
-                  <tr key={group.section} className="bg-elevated/20">
+                <Fragment key={group.section}>
+                  <tr className="bg-elevated/20">
                     <td
                       colSpan={5}
                       className="px-4 py-2 text-[10px] uppercase tracking-widest font-bold text-[color:var(--muted-foreground)]"
@@ -401,10 +401,7 @@ function PricingPage() {
                     </td>
                   </tr>
                   {group.rows.map((row) => (
-                    <tr
-                      key={row.label}
-                      className="border-t border-border"
-                    >
+                    <tr key={row.label} className="border-t border-border">
                       <td className="p-4 text-[color:var(--secondary-foreground)]">
                         {row.label}
                       </td>
@@ -425,7 +422,7 @@ function PricingPage() {
                       ))}
                     </tr>
                   ))}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
