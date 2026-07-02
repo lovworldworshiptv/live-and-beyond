@@ -185,21 +185,6 @@ function OnDemand() {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
-            {kinds.map((k) => (
-              <button
-                key={k}
-                onClick={() => resetPage(setKind)(k)}
-                className={`shrink-0 px-3 h-8 rounded-full text-sm border transition ${
-                  kind === k
-                    ? "bg-accent text-accent-foreground border-accent"
-                    : "bg-elevated/50 border-border text-[color:var(--secondary-foreground)] hover:text-foreground"
-                }`}
-              >
-                {k}
-              </button>
-            ))}
-          </div>
         </div>
 
         <div className="mt-6 grid gap-5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
