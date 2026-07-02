@@ -1,14 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  User,
-  Bell,
-  CreditCard,
-  Shield,
-  Monitor,
-  Globe,
-  LogOut,
-  Check,
+  User, Bell, CreditCard, Shield, Monitor, Globe, LogOut, Check, KeyRound, AlertTriangle,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -19,34 +12,36 @@ export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
       { title: "Account Settings — Lettflix" },
-      {
-        name: "description",
-        content:
-          "Manage your Lettflix profile, notifications, playback quality, billing plan and privacy.",
-      },
+      { name: "description", content: "Manage your Lettflix profile, notifications, playback quality, security and billing." },
     ],
   }),
   component: AccountPage,
 });
 
 const sections = [
-  { id: "profile", label: "Profile", icon: User },
+  { id: "profile", label: "Personal", icon: User },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "playback", label: "Playback", icon: Monitor },
   { id: "language", label: "Language & Region", icon: Globe },
-  { id: "billing", label: "Billing", icon: CreditCard },
-  { id: "privacy", label: "Privacy & Security", icon: Shield },
+  { id: "billing", label: "Subscription", icon: CreditCard },
+  { id: "security", label: "Security", icon: KeyRound },
+  { id: "privacy", label: "Privacy", icon: Shield },
 ] as const;
 
 function AccountPage() {
   const { profile, setProfile } = useProfile();
   const { settings, setSettings } = useSettings();
   const [active, setActive] = useState<(typeof sections)[number]["id"]>("profile");
+  const [pushEnabled, setPushEnabled] = useState(true);
+  const [autoAdvance, setAutoAdvance] = useState(true);
+  const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
+  const [deleteConfirm, setDeleteConfirm] = useState("");
 
   const update = <K extends keyof SettingsData>(k: K, v: SettingsData[K]) => {
     setSettings({ ...settings, [k]: v });
     toast.success("Settings saved");
   };
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -160,6 +155,15 @@ function AccountPage() {
                 onChange={(v) => update("emailNotifications", v)}
               />
               <Toggle
+                label="Push notifications"
+                description="Real-time pings on your mobile and desktop devices."
+                value={pushEnabled}
+                onChange={(v) => {
+                  setPushEnabled(v);
+                  toast.success(v ? "Push notifications enabled" : "Push notifications disabled");
+                }}
+              />
+              <Toggle
                 label="Live channel alerts"
                 description="Ping me when a followed channel goes live."
                 value={settings.liveAlerts}
@@ -177,12 +181,21 @@ function AccountPage() {
           {active === "playback" && (
             <Card title="Playback" subtitle="Tune quality and previews.">
               <Toggle
-                label="Autoplay previews on hover"
-                description="Netflix-style hover previews across the app."
+                label="Autoplay next episode"
+                description="Automatically continue to the next episode in a series."
+                value={autoAdvance}
+                onChange={(v) => {
+                  setAutoAdvance(v);
+                  toast.success("Autoplay preference saved");
+                }}
+              />
+              <Toggle
+                label="Auto preview on hover"
+                description="Netflix-style muted previews when hovering titles and channels."
                 value={settings.autoplayPreviews}
                 onChange={(v) => update("autoplayPreviews", v)}
               />
-              <Field label="Playback quality">
+              <Field label="Preferred quality">
                 <div className="flex gap-2">
                   {(["auto", "hd", "4k"] as const).map((q) => (
                     <button
@@ -201,6 +214,7 @@ function AccountPage() {
               </Field>
             </Card>
           )}
+
 
           {active === "language" && (
             <Card title="Language & Region" subtitle="Interface and captions.">
@@ -292,14 +306,58 @@ function AccountPage() {
             </Card>
           )}
 
-          {active === "privacy" && (
-            <Card title="Privacy & Security" subtitle="Keep your account safe.">
+          {active === "security" && (
+            <Card title="Security" subtitle="Passwords and authentication.">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Field label="Current password">
+                  <input
+                    type="password"
+                    className={inputClass}
+                    value={pw.current}
+                    onChange={(e) => setPw({ ...pw, current: e.target.value })}
+                  />
+                </Field>
+                <Field label="New password">
+                  <input
+                    type="password"
+                    className={inputClass}
+                    value={pw.next}
+                    onChange={(e) => setPw({ ...pw, next: e.target.value })}
+                  />
+                </Field>
+                <Field label="Confirm new password">
+                  <input
+                    type="password"
+                    className={inputClass}
+                    value={pw.confirm}
+                    onChange={(e) => setPw({ ...pw, confirm: e.target.value })}
+                  />
+                </Field>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => {
+                    if (!pw.current || !pw.next) return toast.error("Fill both fields");
+                    if (pw.next !== pw.confirm) return toast.error("Passwords do not match");
+                    setPw({ current: "", next: "", confirm: "" });
+                    toast.success("Password updated");
+                  }}
+                  className="h-10 px-5 rounded-md bg-accent text-accent-foreground font-semibold hover:bg-accent/90 transition"
+                >
+                  Update password
+                </button>
+              </div>
               <Toggle
                 label="Two-factor authentication"
                 description="Extra security with an authenticator app."
                 value={true}
                 onChange={() => toast("2FA settings opened")}
               />
+            </Card>
+          )}
+
+          {active === "privacy" && (
+            <Card title="Privacy" subtitle="Control your data and account.">
               <Toggle
                 label="Personalised recommendations"
                 description="Use viewing history to power your rows."
@@ -310,9 +368,32 @@ function AccountPage() {
                 <button className="h-10 px-4 rounded-md bg-surface border border-border text-sm hover:bg-elevated transition">
                   Download my data
                 </button>
-                <button className="h-10 px-4 rounded-md bg-primary/10 border border-primary/40 text-primary text-sm hover:bg-primary/20 transition">
-                  Delete account
-                </button>
+              </div>
+              <div className="mt-6 rounded-xl border border-primary/40 bg-primary/5 p-5">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="size-5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="font-semibold">Delete account</div>
+                    <p className="text-sm text-[color:var(--secondary-foreground)] mt-1">
+                      Permanent, after a 30-day grace period. To confirm, type <span className="font-mono text-primary">DELETE</span> below.
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <input
+                        className={inputClass + " max-w-[220px]"}
+                        placeholder="Type DELETE to confirm"
+                        value={deleteConfirm}
+                        onChange={(e) => setDeleteConfirm(e.target.value)}
+                      />
+                      <button
+                        disabled={deleteConfirm !== "DELETE"}
+                        onClick={() => toast.success("Deletion scheduled — you have 30 days to cancel.")}
+                        className="h-10 px-4 rounded-md bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/90 transition"
+                      >
+                        Delete my account
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </Card>
           )}
