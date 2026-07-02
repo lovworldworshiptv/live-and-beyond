@@ -1,14 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  User,
-  Bell,
-  CreditCard,
-  Shield,
-  Monitor,
-  Globe,
-  LogOut,
-  Check,
+  User, Bell, CreditCard, Shield, Monitor, Globe, LogOut, Check, KeyRound, AlertTriangle,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -19,34 +12,36 @@ export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
       { title: "Account Settings — Lettflix" },
-      {
-        name: "description",
-        content:
-          "Manage your Lettflix profile, notifications, playback quality, billing plan and privacy.",
-      },
+      { name: "description", content: "Manage your Lettflix profile, notifications, playback quality, security and billing." },
     ],
   }),
   component: AccountPage,
 });
 
 const sections = [
-  { id: "profile", label: "Profile", icon: User },
+  { id: "profile", label: "Personal", icon: User },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "playback", label: "Playback", icon: Monitor },
   { id: "language", label: "Language & Region", icon: Globe },
-  { id: "billing", label: "Billing", icon: CreditCard },
-  { id: "privacy", label: "Privacy & Security", icon: Shield },
+  { id: "billing", label: "Subscription", icon: CreditCard },
+  { id: "security", label: "Security", icon: KeyRound },
+  { id: "privacy", label: "Privacy", icon: Shield },
 ] as const;
 
 function AccountPage() {
   const { profile, setProfile } = useProfile();
   const { settings, setSettings } = useSettings();
   const [active, setActive] = useState<(typeof sections)[number]["id"]>("profile");
+  const [pushEnabled, setPushEnabled] = useState(true);
+  const [autoAdvance, setAutoAdvance] = useState(true);
+  const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
+  const [deleteConfirm, setDeleteConfirm] = useState("");
 
   const update = <K extends keyof SettingsData>(k: K, v: SettingsData[K]) => {
     setSettings({ ...settings, [k]: v });
     toast.success("Settings saved");
   };
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
