@@ -40,17 +40,12 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border">
       <div className="mx-auto max-w-[1480px] px-6 lg:px-10 h-16 flex items-center gap-8">
-        <Link to="/" className="flex items-center gap-2.5 group">
+        <Link to="/" className="flex items-center group">
           <img
-            src={logoIcon.url}
+            src={logoHorizontal.url}
             alt="Lettflix"
-            width={36}
-            height={36}
-            className="size-9 object-contain drop-shadow-[0_4px_16px_rgba(156,21,51,0.45)]"
+            className="h-9 w-auto object-contain"
           />
-          <span className="font-display font-extrabold tracking-tight text-lg hidden sm:inline">
-            LETT<span className="text-primary">FLIX</span>
-          </span>
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1 text-sm">
