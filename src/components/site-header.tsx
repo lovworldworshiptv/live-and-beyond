@@ -132,9 +132,11 @@ export function SiteHeader() {
                 <DropdownMenuItem asChild>
                   <Link to="/account">Account & Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/portal">Creator Portal</Link>
-                </DropdownMenuItem>
+                {isCreator && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/portal">Creator Portal</Link>
+                  </DropdownMenuItem>
+                )}
                 {isAdmin && (
                   <DropdownMenuItem asChild>
                     <Link to="/admin">CMS Admin</Link>
