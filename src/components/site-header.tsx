@@ -39,12 +39,12 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border">
-      <div className="mx-auto max-w-[1480px] px-6 lg:px-10 h-16 flex items-center gap-8">
+      <div className="mx-auto max-w-[1480px] px-6 lg:px-10 h-24 flex items-center gap-8">
         <Link to="/" className="flex items-center group">
           <img
             src={logoHorizontal.url}
             alt="Lettflix"
-            className="h-11 w-auto object-contain"
+            className="h-[88px] w-auto object-contain"
           />
         </Link>
 
