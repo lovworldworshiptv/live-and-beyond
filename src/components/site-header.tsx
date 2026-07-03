@@ -24,7 +24,7 @@ const navItems = [
 export function SiteHeader() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { profile } = useProfile();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, isCreator, signOut } = useAuth();
   const navigate = useNavigate();
 
   const displayName = user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? profile.displayName;
@@ -73,12 +73,11 @@ export function SiteHeader() {
               More <ChevronDown className="size-3.5" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem asChild>
-                <Link to="/portal">Creator Portal</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/enterprise">Enterprise</Link>
-              </DropdownMenuItem>
+              {isCreator && (
+                <DropdownMenuItem asChild>
+                  <Link to="/portal">Creator Portal</Link>
+                </DropdownMenuItem>
+              )}
               {isAdmin && (
                 <DropdownMenuItem asChild>
                   <Link to="/admin">CMS Admin</Link>
@@ -133,9 +132,11 @@ export function SiteHeader() {
                 <DropdownMenuItem asChild>
                   <Link to="/account">Account & Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/portal">Creator Portal</Link>
-                </DropdownMenuItem>
+                {isCreator && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/portal">Creator Portal</Link>
+                  </DropdownMenuItem>
+                )}
                 {isAdmin && (
                   <DropdownMenuItem asChild>
                     <Link to="/admin">CMS Admin</Link>
