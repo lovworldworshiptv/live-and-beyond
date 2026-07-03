@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import logoIcon from "@/assets/lettflix-icon.png.asset.json";
+import logoHorizontal from "@/assets/lettflix-horizontal.png.asset.json";
 import { useProfile } from "@/lib/personal";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
