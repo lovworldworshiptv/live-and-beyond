@@ -44,7 +44,7 @@ export function SiteHeader() {
           <img
             src={logoHorizontal.url}
             alt="Lettflix"
-            className="h-9 w-auto object-contain"
+            className="h-11 w-auto object-contain"
           />
         </Link>
 
