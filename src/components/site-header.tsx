@@ -73,12 +73,11 @@ export function SiteHeader() {
               More <ChevronDown className="size-3.5" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem asChild>
-                <Link to="/portal">Creator Portal</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/enterprise">Enterprise</Link>
-              </DropdownMenuItem>
+              {isCreator && (
+                <DropdownMenuItem asChild>
+                  <Link to="/portal">Creator Portal</Link>
+                </DropdownMenuItem>
+              )}
               {isAdmin && (
                 <DropdownMenuItem asChild>
                   <Link to="/admin">CMS Admin</Link>
