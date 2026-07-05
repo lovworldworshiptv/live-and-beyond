@@ -28,12 +28,38 @@ const PREVIEW_VIDEO =
 export function ChannelCard({ c }: { c: Channel }) {
   const [hovering, setHovering] = useState(false);
   const [muted, setMuted] = useState(true);
-  const [epgOpen, setEpgOpen] = useState(false);
+  const [reminderOpen, setReminderOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const hoverTimer = useRef<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { has, toggle } = useFollowing();
   const following = has(c.id);
+  const reminders = useReminders();
+  const reminderId = `${c.id}::${c.nowPlaying.startsAt}::${c.nowPlaying.title}`;
+  const reminderActive = reminders.has(reminderId);
   const canPreview = c.streamKind === "video" && c.isLive;
+
+  const stop = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const confirmReminder = () => {
+    reminders.toggle({
+      id: reminderId,
+      channelId: c.id,
+      time: c.nowPlaying.startsAt,
+      title: c.nowPlaying.title,
+    });
+    if (!reminderActive) {
+      toast.success("Reminder set", {
+        description: `${c.nowPlaying.title} · ${c.nowPlaying.startsAt}`,
+      });
+    } else {
+      toast("Reminder removed", { description: c.nowPlaying.title });
+    }
+    setReminderOpen(false);
+  };
 
   const onEnter = () => {
     if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
