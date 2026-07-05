@@ -1,14 +1,25 @@
 import { Link } from "@tanstack/react-router";
-import { Play, Users, Calendar, ArrowRight, Volume2, VolumeX } from "lucide-react";
+import { Play, Users, Calendar, Volume2, VolumeX, Bell, BellRing, CalendarClock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { RemindButton } from "./remind-button";
 import { ShareMenu } from "./share-menu";
-import { useFollowing } from "@/lib/personal";
+import { useFollowing, useReminders } from "@/lib/personal";
+import { toast } from "sonner";
 import type { Channel } from "@/lib/catalog";
 
 const PREVIEW_VIDEO =
