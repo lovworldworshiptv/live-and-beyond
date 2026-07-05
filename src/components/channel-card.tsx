@@ -1,14 +1,25 @@
 import { Link } from "@tanstack/react-router";
-import { Play, Users, Calendar, ArrowRight, Volume2, VolumeX } from "lucide-react";
+import { Play, Users, Calendar, Volume2, VolumeX, Bell, BellRing, CalendarClock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { RemindButton } from "./remind-button";
 import { ShareMenu } from "./share-menu";
-import { useFollowing } from "@/lib/personal";
+import { useFollowing, useReminders } from "@/lib/personal";
+import { toast } from "sonner";
 import type { Channel } from "@/lib/catalog";
 
 const PREVIEW_VIDEO =
@@ -17,12 +28,38 @@ const PREVIEW_VIDEO =
 export function ChannelCard({ c }: { c: Channel }) {
   const [hovering, setHovering] = useState(false);
   const [muted, setMuted] = useState(true);
-  const [epgOpen, setEpgOpen] = useState(false);
+  const [reminderOpen, setReminderOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const hoverTimer = useRef<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { has, toggle } = useFollowing();
   const following = has(c.id);
+  const reminders = useReminders();
+  const reminderId = `${c.id}::${c.nowPlaying.startsAt}::${c.nowPlaying.title}`;
+  const reminderActive = reminders.has(reminderId);
   const canPreview = c.streamKind === "video" && c.isLive;
+
+  const stop = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const confirmReminder = () => {
+    reminders.toggle({
+      id: reminderId,
+      channelId: c.id,
+      time: c.nowPlaying.startsAt,
+      title: c.nowPlaying.title,
+    });
+    if (!reminderActive) {
+      toast.success("Reminder set", {
+        description: `${c.nowPlaying.title} · ${c.nowPlaying.startsAt}`,
+      });
+    } else {
+      toast("Reminder removed", { description: c.nowPlaying.title });
+    }
+    setReminderOpen(false);
+  };
 
   const onEnter = () => {
     if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
@@ -112,37 +149,6 @@ export function ChannelCard({ c }: { c: Channel }) {
             </button>
           )}
 
-          {/* Bottom-right hover action bar */}
-          <div className="absolute bottom-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition">
-            <RemindButton
-              channelId={c.id}
-              time={c.nowPlaying.startsAt}
-              title={c.nowPlaying.title}
-            />
-            <Popover open={epgOpen} onOpenChange={setEpgOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  aria-label="Show schedule"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setEpgOpen((o) => !o);
-                  }}
-                  className="size-8 grid place-items-center rounded-full bg-black/60 backdrop-blur border border-white/10 hover:bg-black/80 transition"
-                >
-                  <Calendar className="size-3.5" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                align="end"
-                onClick={(e) => e.stopPropagation()}
-                className="w-80 p-0"
-              >
-                <MiniEpg channel={c} />
-              </PopoverContent>
-            </Popover>
-            <ShareMenu title={c.name} path={`/channels/${c.id}`} />
-          </div>
         </div>
 
         <div className="p-5">
@@ -175,61 +181,148 @@ export function ChannelCard({ c }: { c: Channel }) {
               {following ? "Following" : "Follow"}
             </button>
           </div>
-          <div className="mt-3 flex items-center justify-end text-[color:var(--muted-foreground)]">
-            <ArrowRight className="size-4 group-hover:text-foreground group-hover:translate-x-0.5 transition" />
-          </div>
         </div>
       </Link>
-    </div>
-  );
-}
 
-function MiniEpg({ channel }: { channel: Channel }) {
-  return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <div className="text-xs uppercase tracking-wider text-[color:var(--muted-foreground)]">
-            On {channel.name}
-          </div>
-          <div className="font-semibold text-sm mt-0.5">Today's schedule</div>
-        </div>
-        <Link
-          to="/channels/$channelId"
-          params={{ channelId: channel.id }}
-          className="text-[11px] text-accent hover:underline"
+      {/* Watch Now CTA stripe */}
+      <Link
+        to="/channels/$channelId"
+        params={{ channelId: c.id }}
+        className="mt-2 flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-[var(--shadow-card)] hover:brightness-110 transition"
+      >
+        <Play className="size-4 fill-current" /> Watch Now
+      </Link>
+
+      {/* Action row: Reminder · Schedule · Share */}
+      <div className="mt-2 grid grid-cols-3 gap-2">
+        <button
+          onClick={(e) => {
+            stop(e);
+            setReminderOpen(true);
+          }}
+          className={`inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border text-xs font-medium transition ${
+            reminderActive
+              ? "bg-primary/15 border-primary/40 text-primary"
+              : "bg-elevated border-border hover:bg-elevated/80"
+          }`}
         >
-          Open channel
-        </Link>
+          {reminderActive ? <BellRing className="size-3.5" /> : <Bell className="size-3.5" />}
+          Reminder
+        </button>
+        <button
+          onClick={(e) => {
+            stop(e);
+            setScheduleOpen(true);
+          }}
+          className="inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border bg-elevated hover:bg-elevated/80 text-xs font-medium transition"
+        >
+          <CalendarClock className="size-3.5" />
+          Schedule
+        </button>
+        <div onClick={stop} className="[&>div]:w-full">
+          <ShareMenu title={c.name} path={`/channels/${c.id}`} variant="chip" />
+        </div>
       </div>
-      <ul className="space-y-1">
-        {channel.schedule.slice(0, 6).map((s, i) => (
-          <li
-            key={i}
-            className={`flex items-center justify-between gap-3 rounded-md px-2 py-2 text-sm ${
-              s.live ? "bg-primary/15" : "hover:bg-elevated/60"
-            }`}
-          >
-            <div className="min-w-0 flex-1">
-              <div className="text-[11px] text-[color:var(--muted-foreground)]">
-                {s.time} · {s.kind}
-              </div>
-              <div className="text-sm font-medium truncate flex items-center gap-1.5">
-                {s.live && <span className="size-1.5 rounded-full bg-primary animate-pulse" />}
-                {s.title}
-              </div>
+
+      {/* Reminder dialog — opens in the middle */}
+      <Dialog open={reminderOpen} onOpenChange={setReminderOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="size-4 text-primary" /> Set a reminder
+            </DialogTitle>
+            <DialogDescription>
+              We'll notify you when this programme is about to start on {c.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg border border-border bg-elevated/60 p-4">
+            <div className="text-[11px] uppercase tracking-wider text-[color:var(--muted-foreground)]">
+              Now / Next on {c.name}
             </div>
-            {!s.live && (
-              <RemindButton
-                channelId={channel.id}
-                time={s.time}
-                title={s.title}
-                variant="icon"
-              />
+            <div className="mt-1 font-semibold">{c.nowPlaying.title}</div>
+            <div className="text-sm text-[color:var(--muted-foreground)] mt-0.5">
+              {c.nowPlaying.startsAt} – {c.nowPlaying.endsAt}
+            </div>
+            {c.nowPlaying.description && (
+              <p className="text-sm text-[color:var(--secondary-foreground)] mt-3 line-clamp-3">
+                {c.nowPlaying.description}
+              </p>
             )}
-          </li>
-        ))}
-      </ul>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <button
+              onClick={() => setReminderOpen(false)}
+              className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-border bg-elevated hover:bg-elevated/80 text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmReminder}
+              className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:brightness-110"
+            >
+              {reminderActive ? <BellRing className="size-4" /> : <Bell className="size-4" />}
+              {reminderActive ? "Remove reminder" : "Set reminder"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule sheet — slides in from the right */}
+      <Sheet open={scheduleOpen} onOpenChange={setScheduleOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+          <SheetHeader className="p-6 pb-4 border-b border-border">
+            <div className="text-xs uppercase tracking-wider text-accent font-semibold">
+              {c.category}
+            </div>
+            <SheetTitle className="flex items-center gap-2">
+              <Calendar className="size-4" /> {c.name} · Schedule
+            </SheetTitle>
+            <SheetDescription>Today's programming on {c.name}.</SheetDescription>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto p-4">
+            <ul className="space-y-1">
+              {c.schedule.map((s, i) => (
+                <li
+                  key={i}
+                  className={`flex items-center justify-between gap-3 rounded-lg px-3 py-3 ${
+                    s.live ? "bg-primary/15 border border-primary/30" : "hover:bg-elevated/60"
+                  }`}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[11px] text-[color:var(--muted-foreground)] uppercase tracking-wider">
+                      {s.time} · {s.kind}
+                    </div>
+                    <div className="text-sm font-medium truncate flex items-center gap-1.5 mt-0.5">
+                      {s.live && (
+                        <span className="size-1.5 rounded-full bg-primary animate-pulse" />
+                      )}
+                      {s.title}
+                    </div>
+                  </div>
+                  {!s.live && (
+                    <RemindButton
+                      channelId={c.id}
+                      time={s.time}
+                      title={s.title}
+                      variant="icon"
+                    />
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="p-4 border-t border-border">
+            <Link
+              to="/channels/$channelId"
+              params={{ channelId: c.id }}
+              onClick={() => setScheduleOpen(false)}
+              className="flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:brightness-110 transition"
+            >
+              <Play className="size-4 fill-current" /> Watch {c.name}
+            </Link>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
