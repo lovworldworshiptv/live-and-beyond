@@ -200,26 +200,28 @@ export function ChannelCard({ c }: { c: Channel }) {
             stop(e);
             setReminderOpen(true);
           }}
-          className={`inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border text-xs font-medium transition shadow-sm ${
+          className={`inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border text-xs font-medium whitespace-nowrap transition shadow-sm ${
             reminderActive
               ? "bg-primary text-primary-foreground border-primary hover:brightness-110"
               : "bg-elevated border-border hover:bg-elevated/80 hover:border-primary/30"
           }`}
         >
-          {reminderActive ? <BellRing className="size-3.5" /> : <Bell className="size-3.5" />}
-          Notify Me
+          {reminderActive ? <BellRing className="size-3.5 shrink-0" /> : <Bell className="size-3.5 shrink-0" />}
+          <span className="hidden sm:inline">Notify Me</span>
+          <span className="sm:hidden">Notify</span>
         </button>
         <button
           onClick={(e) => {
             stop(e);
             setScheduleOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border bg-elevated hover:bg-elevated/80 hover:border-primary/30 text-xs font-medium transition shadow-sm"
+          className="inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border bg-elevated hover:bg-elevated/80 hover:border-primary/30 text-xs font-medium whitespace-nowrap transition shadow-sm"
         >
-          <CalendarClock className="size-3.5" />
-          Add to Calendar
+          <CalendarClock className="size-3.5 shrink-0" />
+          <span className="hidden sm:inline">Add to Calendar</span>
+          <span className="sm:hidden">Calendar</span>
         </button>
-        <div onClick={stop} className="[&>div]:w-full [&>div>button]:w-full">
+        <div onClick={stop} className="[&>div]:w-full [&>div>button]:w-full [&>div>button]:whitespace-nowrap">
           <ShareMenu title={c.name} path={`/channels/${c.id}`} variant="chip" />
         </div>
       </div>
