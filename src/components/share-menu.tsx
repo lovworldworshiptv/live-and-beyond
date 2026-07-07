@@ -39,7 +39,7 @@ export function ShareMenu({
           className={
             variant === "icon"
               ? "size-8 grid place-items-center rounded-full bg-black/60 backdrop-blur border border-white/10 hover:bg-black/80 transition"
-              : "inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-black/60 backdrop-blur border border-white/10 hover:bg-black/80 transition text-xs font-medium"
+              : "inline-flex items-center justify-center gap-1.5 h-10 w-full rounded-lg bg-elevated border border-border hover:bg-elevated/80 transition text-xs font-medium"
           }
         >
           <Share2 className="size-3.5" />
