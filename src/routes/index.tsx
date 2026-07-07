@@ -178,15 +178,15 @@ function Index() {
                 </div>
               </button>
             </div>
-            <div className="p-4" style={{ background: "linear-gradient(180deg, oklch(0.43 0.165 14 / 0.75), oklch(0.43 0.165 14 / 0.95))" }}>
+            <div className="p-4" style={{ background: "linear-gradient(180deg, oklch(0.32 0.20 25 / 0.85), oklch(0.26 0.18 25 / 0.98))" }}>
               <div className="flex items-center justify-between gap-2">
-                <div className="text-xs font-semibold uppercase tracking-wider text-white/90">{c.category}</div>
-                <button className="text-white/70 hover:text-white" aria-label="Set reminder">
+                <div className="text-xs font-semibold uppercase tracking-wider text-accent">{c.category}</div>
+                <button className="text-accent/70 hover:text-accent" aria-label="Set reminder">
                   <Bell className="size-3.5" />
                 </button>
               </div>
-              <div className="mt-1.5 font-semibold leading-tight line-clamp-1 text-white">{c.program}</div>
-              <div className="text-sm text-white/70 mt-0.5">{c.channel}</div>
+              <div className="mt-1.5 font-semibold leading-tight line-clamp-1 text-accent">{c.program}</div>
+              <div className="text-sm text-accent/70 mt-0.5">{c.channel}</div>
             </div>
           </article>
         ))}
