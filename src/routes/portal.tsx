@@ -176,7 +176,7 @@ function PortalPage() {
                     fontSize: 12,
                   }}
                 />
-                <Bar dataKey="ad" stackId="a" fill="#9C1533" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="ad" stackId="a" fill="#650606" radius={[0, 0, 0, 0]} />
                 <Bar dataKey="sub" stackId="a" fill="#1E5EFF" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
