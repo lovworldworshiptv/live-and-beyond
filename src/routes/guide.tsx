@@ -70,16 +70,16 @@ function GuidePage() {
                 Every channel. Every slot. Set a reminder and we'll ping you when it starts.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter channels…"
-                className="h-10 px-4 rounded-md bg-surface border border-border w-56 text-sm outline-none focus:border-accent transition"
+                className="h-10 px-4 rounded-md bg-surface border border-border flex-1 sm:w-56 min-w-0 text-sm outline-none focus:border-accent transition"
               />
               <button
                 onClick={() => setLiveOnly((v) => !v)}
-                className={`h-10 px-4 rounded-md text-sm font-medium border transition inline-flex items-center gap-2 ${
+                className={`h-10 px-4 rounded-md text-sm font-medium border transition inline-flex items-center gap-2 shrink-0 whitespace-nowrap ${
                   liveOnly
                     ? "bg-primary border-primary text-primary-foreground"
                     : "bg-surface border-border text-[color:var(--secondary-foreground)] hover:text-foreground"
