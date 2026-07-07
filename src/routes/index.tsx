@@ -165,7 +165,7 @@ function Index() {
           >
             <div className="relative aspect-video overflow-hidden">
               <img src={c.img} alt={c.program} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 50%, oklch(0.43 0.165 14 / 0.45) 100%)" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 50%, oklch(0.32 0.20 25 / 0.55) 100%)" }} />
               <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded text-[11px] font-bold tracking-wide bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
                 LIVE
               </span>
@@ -178,15 +178,15 @@ function Index() {
                 </div>
               </button>
             </div>
-            <div className="p-4" style={{ background: "linear-gradient(180deg, oklch(0.43 0.165 14 / 0.75), oklch(0.43 0.165 14 / 0.95))" }}>
+            <div className="p-4" style={{ background: "linear-gradient(180deg, oklch(0.32 0.20 25 / 0.85), oklch(0.26 0.18 25 / 0.98))" }}>
               <div className="flex items-center justify-between gap-2">
-                <div className="text-xs font-semibold uppercase tracking-wider text-white/90">{c.category}</div>
-                <button className="text-white/70 hover:text-white" aria-label="Set reminder">
+                <div className="text-xs font-semibold uppercase tracking-wider text-accent">{c.category}</div>
+                <button className="text-accent/70 hover:text-accent" aria-label="Set reminder">
                   <Bell className="size-3.5" />
                 </button>
               </div>
-              <div className="mt-1.5 font-semibold leading-tight line-clamp-1 text-white">{c.program}</div>
-              <div className="text-sm text-white/70 mt-0.5">{c.channel}</div>
+              <div className="mt-1.5 font-semibold leading-tight line-clamp-1 text-accent">{c.program}</div>
+              <div className="text-sm text-accent/70 mt-0.5">{c.channel}</div>
             </div>
           </article>
         ))}
