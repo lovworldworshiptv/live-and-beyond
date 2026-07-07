@@ -193,33 +193,33 @@ export function ChannelCard({ c }: { c: Channel }) {
         <Play className="size-4 fill-current" /> Watch Now
       </Link>
 
-      {/* Action row: Reminder · Schedule · Share */}
+      {/* Action row: Notify Me · Schedule · Share */}
       <div className="mt-2 grid grid-cols-3 gap-2">
         <button
           onClick={(e) => {
             stop(e);
             setReminderOpen(true);
           }}
-          className={`inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border text-xs font-medium transition ${
+          className={`inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border text-xs font-medium transition shadow-sm ${
             reminderActive
-              ? "bg-primary/15 border-primary/40 text-primary"
-              : "bg-elevated border-border hover:bg-elevated/80"
+              ? "bg-primary text-primary-foreground border-primary hover:brightness-110"
+              : "bg-elevated border-border hover:bg-elevated/80 hover:border-primary/30"
           }`}
         >
           {reminderActive ? <BellRing className="size-3.5" /> : <Bell className="size-3.5" />}
-          Reminder
+          Notify Me
         </button>
         <button
           onClick={(e) => {
             stop(e);
             setScheduleOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border bg-elevated hover:bg-elevated/80 text-xs font-medium transition"
+          className="inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border bg-elevated hover:bg-elevated/80 hover:border-primary/30 text-xs font-medium transition shadow-sm"
         >
           <CalendarClock className="size-3.5" />
-          Schedule
+          Add to Calendar
         </button>
-        <div onClick={stop} className="[&>div]:w-full">
+        <div onClick={stop} className="[&>div]:w-full [&>div>button]:w-full">
           <ShareMenu title={c.name} path={`/channels/${c.id}`} variant="chip" />
         </div>
       </div>
