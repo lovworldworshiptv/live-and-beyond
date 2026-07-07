@@ -15,8 +15,8 @@ export const collections: Collection[] = [
     id: "faith-and-family",
     name: "Faith & Family",
     tagline: "The programming that brings the whole household together.",
-    gradient: "linear-gradient(135deg, oklch(0.43 0.165 14), oklch(0.55 0.18 350))",
-    accent: "#9C1533",
+    gradient: "linear-gradient(135deg, oklch(0.24 0.59 359.4), oklch(0.36 0.59 359.4))",
+    accent: "#650606",
     filter: (t) => t.category === "Christian Living" || t.kind === "Series",
   },
   {
