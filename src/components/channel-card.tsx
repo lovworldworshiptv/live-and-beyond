@@ -217,7 +217,7 @@ export function ChannelCard({ c }: { c: Channel }) {
           className="inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border bg-elevated hover:bg-elevated/80 hover:border-primary/30 text-xs font-medium transition shadow-sm"
         >
           <CalendarClock className="size-3.5" />
-          Schedule
+          Add to Calendar
         </button>
         <div onClick={stop} className="[&>div]:w-full [&>div>button]:w-full">
           <ShareMenu title={c.name} path={`/channels/${c.id}`} variant="chip" />
