@@ -165,7 +165,7 @@ function Index() {
           >
             <div className="relative aspect-video overflow-hidden">
               <img src={c.img} alt={c.program} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 50%, oklch(0.43 0.165 14 / 0.45) 100%)" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 50%, oklch(0.32 0.20 25 / 0.55) 100%)" }} />
               <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded text-[11px] font-bold tracking-wide bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
                 LIVE
               </span>
