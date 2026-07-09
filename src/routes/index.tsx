@@ -99,8 +99,9 @@ function Index() {
       {/* HERO */}
       <section className="relative">
         <div className="absolute inset-0 -z-10">
-          <img src={heroImg} alt="" width={1920} height={1088} className="size-full object-cover opacity-60" />
-          <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
+          <img src={heroImg} alt="" width={1920} height={1088} className="size-full object-cover object-right" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-transparent md:via-background/80 lg:via-background/60" />
+          <div className="absolute inset-y-0 left-0 w-1/2 bg-background/70 md:bg-background/40 lg:bg-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-b from-transparent to-background" />
         </div>
 
