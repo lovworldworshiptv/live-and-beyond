@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          metadata: Json
+          resource_id: string | null
+          resource_type: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       cms_channels: {
         Row: {
           banner_url: string | null
@@ -21,6 +60,8 @@ export type Database = {
           country: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           id: string
           is_live: boolean
@@ -32,6 +73,7 @@ export type Database = {
           slug: string
           tagline: string | null
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           banner_url?: string | null
@@ -39,6 +81,8 @@ export type Database = {
           country?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           id?: string
           is_live?: boolean
@@ -50,6 +94,7 @@ export type Database = {
           slug: string
           tagline?: string | null
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           banner_url?: string | null
@@ -57,6 +102,8 @@ export type Database = {
           country?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           id?: string
           is_live?: boolean
@@ -68,6 +115,7 @@ export type Database = {
           slug?: string
           tagline?: string | null
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -76,6 +124,8 @@ export type Database = {
           cover_url: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           id: string
           is_featured: boolean
@@ -83,11 +133,14 @@ export type Database = {
           name: string
           slug: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           id?: string
           is_featured?: boolean
@@ -95,11 +148,14 @@ export type Database = {
           name: string
           slug: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           id?: string
           is_featured?: boolean
@@ -107,6 +163,7 @@ export type Database = {
           name?: string
           slug?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -117,6 +174,8 @@ export type Database = {
           cover_url: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           ends_at: string | null
           id: string
@@ -125,6 +184,7 @@ export type Database = {
           slug: string
           starts_at: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           category?: string | null
@@ -132,6 +192,8 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           ends_at?: string | null
           id?: string
@@ -140,6 +202,7 @@ export type Database = {
           slug: string
           starts_at: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           category?: string | null
@@ -147,6 +210,8 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           ends_at?: string | null
           id?: string
@@ -155,6 +220,7 @@ export type Database = {
           slug?: string
           starts_at?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -172,36 +238,48 @@ export type Database = {
           channel_id: string
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           ends_at: string
           id: string
+          is_published: boolean
           program_title: string
           starts_at: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           category?: string | null
           channel_id: string
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           ends_at: string
           id?: string
+          is_published?: boolean
           program_title: string
           starts_at: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           category?: string | null
           channel_id?: string
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           ends_at?: string
           id?: string
+          is_published?: boolean
           program_title?: string
           starts_at?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -238,6 +316,8 @@ export type Database = {
           created_by: string | null
           cta_label: string | null
           cta_url: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           ends_at: string | null
           event_ids: string[]
@@ -252,6 +332,7 @@ export type Database = {
           priority: number
           starts_at: string | null
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           channel_ids?: string[]
@@ -259,6 +340,8 @@ export type Database = {
           created_by?: string | null
           cta_label?: string | null
           cta_url?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           ends_at?: string | null
           event_ids?: string[]
@@ -273,6 +356,7 @@ export type Database = {
           priority?: number
           starts_at?: string | null
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           channel_ids?: string[]
@@ -280,6 +364,8 @@ export type Database = {
           created_by?: string | null
           cta_label?: string | null
           cta_url?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           ends_at?: string | null
           event_ids?: string[]
@@ -294,6 +380,7 @@ export type Database = {
           priority?: number
           starts_at?: string | null
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -302,6 +389,8 @@ export type Database = {
           backdrop_url: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           duration_minutes: number | null
           genre: string | null
           id: string
@@ -312,12 +401,15 @@ export type Database = {
           synopsis: string | null
           title: string
           updated_at: string
+          updated_by: string | null
           year: number | null
         }
         Insert: {
           backdrop_url?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           duration_minutes?: number | null
           genre?: string | null
           id?: string
@@ -328,12 +420,15 @@ export type Database = {
           synopsis?: string | null
           title: string
           updated_at?: string
+          updated_by?: string | null
           year?: number | null
         }
         Update: {
           backdrop_url?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           duration_minutes?: number | null
           genre?: string | null
           id?: string
@@ -344,6 +439,7 @@ export type Database = {
           synopsis?: string | null
           title?: string
           updated_at?: string
+          updated_by?: string | null
           year?: number | null
         }
         Relationships: []
@@ -384,6 +480,39 @@ export type Database = {
         }
         Relationships: []
       }
+      login_history: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          ip_address: string | null
+          provider: string | null
+          success: boolean
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          ip_address?: string | null
+          provider?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          ip_address?: string | null
+          provider?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -391,6 +520,8 @@ export type Database = {
           display_name: string | null
           handle: string | null
           id: string
+          last_sign_in_at: string | null
+          mfa_enrolled: boolean
           updated_at: string
         }
         Insert: {
@@ -399,6 +530,8 @@ export type Database = {
           display_name?: string | null
           handle?: string | null
           id: string
+          last_sign_in_at?: string | null
+          mfa_enrolled?: boolean
           updated_at?: string
         }
         Update: {
@@ -407,6 +540,8 @@ export type Database = {
           display_name?: string | null
           handle?: string | null
           id?: string
+          last_sign_in_at?: string | null
+          mfa_enrolled?: boolean
           updated_at?: string
         }
         Relationships: []
