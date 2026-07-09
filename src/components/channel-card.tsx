@@ -128,8 +128,13 @@ export function ChannelCard({ c }: { c: Channel }) {
           {/* Hover play indicator (only when not previewing) */}
           {!(hovering && canPreview) && (
             <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
-              <div className="size-14 rounded-full bg-white/95 grid place-items-center shadow-[var(--shadow-card)]">
-                <Play className="size-5 text-background fill-current ml-0.5" />
+              <div
+                className="size-16 rounded-full bg-white/95 grid place-items-center"
+                style={{
+                  boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 24px oklch(0.24 0.59 359.4 / 0.45), 0 0 50px oklch(0.24 0.59 359.4 / 0.2)",
+                }}
+              >
+                <Play className="size-6 text-background fill-current ml-0.5" />
               </div>
             </div>
           )}
@@ -188,9 +193,12 @@ export function ChannelCard({ c }: { c: Channel }) {
       <Link
         to="/channels/$channelId"
         params={{ channelId: c.id }}
-        className="mt-2 flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-[var(--shadow-card)] hover:brightness-110 transition"
+        className="mt-2 flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm transition hover:brightness-110"
+        style={{
+          boxShadow: "0 0 0 2px oklch(0.24 0.59 359.4 / 0.35), 0 0 18px oklch(0.24 0.59 359.4 / 0.35), 0 0 40px oklch(0.24 0.59 359.4 / 0.15)",
+        }}
       >
-        <Play className="size-4 fill-current" /> Watch Now
+        <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch Now
       </Link>
 
       {/* Action row: Notify Me · Schedule · Share */}
