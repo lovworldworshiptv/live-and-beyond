@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import {
   BarChart3,
   DollarSign,
@@ -10,6 +11,8 @@ import {
   Calendar,
   Settings,
   Sparkles,
+  Loader2,
+  ShieldOff,
 } from "lucide-react";
 import {
   AreaChart,
@@ -24,6 +27,7 @@ import {
 } from "recharts";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/portal")({
   head: () => ({
@@ -54,9 +58,47 @@ const revenueData = [
 ];
 
 function PortalPage() {
+  const { user, isAdmin, isCreator, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) navigate({ to: "/auth", search: { redirect: "/portal" }, replace: true });
+  }, [user, loading, navigate]);
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen grid place-items-center">
+        <Loader2 className="size-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isCreator && !isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <SiteHeader />
+        <main className="flex-1 grid place-items-center px-6">
+          <div className="max-w-md text-center py-24">
+            <ShieldOff className="size-12 text-primary mx-auto mb-4" />
+            <h1 className="text-2xl font-bold">Creator access required</h1>
+            <p className="text-sm text-[color:var(--muted-foreground)] mt-2">
+              The Creator Portal is available to approved creators and administrators. Contact an admin to request access.
+            </p>
+            <Link to="/" className="mt-6 inline-flex h-10 px-5 items-center rounded-md bg-primary text-primary-foreground font-semibold text-sm">
+              Back to Home
+            </Link>
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
+
 
       <section className="border-b border-border">
         <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-12 pb-8">

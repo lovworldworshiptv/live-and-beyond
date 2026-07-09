@@ -5,13 +5,13 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ChannelCard } from "@/components/channel-card";
 import {
-  channels,
   genres,
   channelLanguages,
   channelCountries,
   channelSorts,
   type ChannelSortId,
 } from "@/lib/catalog";
+import { useCmsChannels } from "@/lib/cms-catalog";
 
 export const Route = createFileRoute("/channels")({
   head: () => ({
@@ -27,6 +27,7 @@ export const Route = createFileRoute("/channels")({
 
 
 function ChannelsPage() {
+  const { channels } = useCmsChannels();
   const [genre, setGenre] = useState("All");
   const [language, setLanguage] = useState("All");
   const [country, setCountry] = useState("All");
@@ -47,7 +48,7 @@ function ChannelsPage() {
         (a, b) => Number(b.trending ?? false) - Number(a.trending ?? false) || b.popularity - a.popularity
       );
     return [...list].sort((a, b) => (a.addedAt < b.addedAt ? 1 : -1));
-  }, [genre, language, country, sort, query]);
+  }, [channels, genre, language, country, sort, query]);
 
   const sortIcon = (id: ChannelSortId) =>
     id === "popularity" ? Flame : id === "trending" ? TrendingUp : Clock;

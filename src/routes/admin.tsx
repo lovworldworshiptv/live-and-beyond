@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { MediaPicker } from "@/components/media-picker";
 import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
@@ -189,19 +190,29 @@ type Channel = {
   category: string | null;
   language: string | null;
   country: string | null;
+  region: string | null;
+  viewers: string | null;
+  popularity: number | null;
+  is_trending: boolean | null;
+  stream_url: string | null;
   logo_url: string | null;
   banner_url: string | null;
   kind: string;
   is_live: boolean;
   is_published: boolean;
+  now_playing: { title?: string; startsAt?: string; endsAt?: string; description?: string } | null;
+  video_library: string[] | null;
+  podcast_library: string[] | null;
+  featured_content: string[] | null;
 };
+
 
 function ChannelsCms() {
   const { rows, loading, save, remove } = useCrud<Channel>("cms_channels");
   const [editing, setEditing] = useState<Partial<Channel> | null>(null);
 
   function openNew() {
-    setEditing({ kind: "video", is_published: true, is_live: false });
+    setEditing({ kind: "tv", is_published: true, is_live: false, popularity: 0, is_trending: false });
   }
 
   if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
@@ -285,6 +296,11 @@ function ChannelsCms() {
 function ChannelEditor({ value, onClose, onSave }: { value: Partial<Channel>; onClose: () => void; onSave: (v: Partial<Channel>) => void | Promise<void> }) {
   const [form, setForm] = useState<Partial<Channel>>(value);
   const set = <K extends keyof Channel>(k: K, v: Channel[K]) => setForm((f) => ({ ...f, [k]: v }));
+  const np = form.now_playing ?? {};
+  const setNp = (patch: Partial<NonNullable<Channel["now_playing"]>>) =>
+    setForm((f) => ({ ...f, now_playing: { ...(f.now_playing ?? {}), ...patch } }));
+  const listToStr = (a?: string[] | null) => (a ?? []).join(", ");
+  const strToList = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
 
   return (
     <ModalShell title={form.id ? "Edit channel" : "New channel"} onClose={onClose} onSave={() => onSave(form)}>
@@ -298,27 +314,64 @@ function ChannelEditor({ value, onClose, onSave }: { value: Partial<Channel>; on
           </select>
         </Field>
         <Field label="Kind">
-          <select className={inputClass} value={form.kind ?? "video"} onChange={(e) => set("kind", e.target.value)}>
-            <option value="video">Video</option>
+          <select className={inputClass} value={form.kind ?? "tv"} onChange={(e) => set("kind", e.target.value)}>
+            <option value="tv">TV / Video</option>
             <option value="radio">Radio</option>
           </select>
         </Field>
         <Field label="Language"><input className={inputClass} value={form.language ?? ""} onChange={(e) => set("language", e.target.value)} /></Field>
         <Field label="Country"><input className={inputClass} value={form.country ?? ""} onChange={(e) => set("country", e.target.value)} /></Field>
-        <Field label="Logo URL"><input className={inputClass} value={form.logo_url ?? ""} onChange={(e) => set("logo_url", e.target.value)} /></Field>
-        <Field label="Banner URL"><input className={inputClass} value={form.banner_url ?? ""} onChange={(e) => set("banner_url", e.target.value)} /></Field>
+        <Field label="Region"><input className={inputClass} value={form.region ?? ""} onChange={(e) => set("region", e.target.value)} placeholder="Global" /></Field>
+        <Field label="Viewers (display)"><input className={inputClass} value={form.viewers ?? ""} onChange={(e) => set("viewers", e.target.value)} placeholder="12.4K" /></Field>
+        <Field label="Popularity (0-100)"><input type="number" min={0} max={100} className={inputClass} value={form.popularity ?? 0} onChange={(e) => set("popularity", Number(e.target.value))} /></Field>
+        <Field label="Stream URL (HLS / MP4 / radio)"><input className={inputClass} value={form.stream_url ?? ""} onChange={(e) => set("stream_url", e.target.value)} placeholder="https://…/index.m3u8" /></Field>
       </div>
+
+      <div className="grid gap-4 mt-4 md:grid-cols-2">
+        <Field label="Logo">
+          <MediaPicker value={form.logo_url} onChange={(url) => set("logo_url", url)} folder="channels/logos" />
+        </Field>
+        <Field label="Banner">
+          <MediaPicker value={form.banner_url} onChange={(url) => set("banner_url", url)} folder="channels/banners" />
+        </Field>
+      </div>
+
       <div className="grid gap-4 mt-4">
         <Field label="Tagline"><input className={inputClass} value={form.tagline ?? ""} onChange={(e) => set("tagline", e.target.value)} /></Field>
         <Field label="Description"><textarea className={textareaClass} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} /></Field>
       </div>
-      <div className="flex gap-6 mt-4">
+
+      <div className="mt-6">
+        <h4 className="text-sm font-semibold mb-2">Now Playing</h4>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Program title"><input className={inputClass} value={np.title ?? ""} onChange={(e) => setNp({ title: e.target.value })} /></Field>
+          <Field label="Description"><input className={inputClass} value={np.description ?? ""} onChange={(e) => setNp({ description: e.target.value })} /></Field>
+          <Field label="Starts at (label)"><input className={inputClass} value={np.startsAt ?? ""} onChange={(e) => setNp({ startsAt: e.target.value })} placeholder="10:00" /></Field>
+          <Field label="Ends at (label)"><input className={inputClass} value={np.endsAt ?? ""} onChange={(e) => setNp({ endsAt: e.target.value })} placeholder="12:00" /></Field>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-4">
+        <Field label="Video library (title slugs, comma-separated)">
+          <input className={inputClass} value={listToStr(form.video_library)} onChange={(e) => set("video_library", strToList(e.target.value))} />
+        </Field>
+        <Field label="Podcast library (title slugs, comma-separated)">
+          <input className={inputClass} value={listToStr(form.podcast_library)} onChange={(e) => set("podcast_library", strToList(e.target.value))} />
+        </Field>
+        <Field label="Featured content (title slugs, comma-separated)">
+          <input className={inputClass} value={listToStr(form.featured_content)} onChange={(e) => set("featured_content", strToList(e.target.value))} />
+        </Field>
+      </div>
+
+      <div className="flex gap-6 mt-6 flex-wrap">
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_published ?? true} onChange={(e) => set("is_published", e.target.checked)} /> Published</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_live ?? false} onChange={(e) => set("is_live", e.target.checked)} /> Live now</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_trending ?? false} onChange={(e) => set("is_trending", e.target.checked)} /> Trending</label>
       </div>
     </ModalShell>
   );
 }
+
 
 // ---------- Titles CMS ----------
 type Title = {
@@ -329,7 +382,15 @@ type Title = {
   kind: string;
   genre: string | null;
   year: number | null;
+  rating: string | null;
   duration_minutes: number | null;
+  duration_label: string | null;
+  seasons: number | null;
+  episodes: number | null;
+  cast_list: string[] | null;
+  is_featured: boolean | null;
+  stream_url: string | null;
+  trailer_url: string | null;
   poster_url: string | null;
   backdrop_url: string | null;
   is_published: boolean;
@@ -420,18 +481,51 @@ function TitleEditor({ value, onClose, onSave }: { value: Partial<Title>; onClos
             <option value="movie">Movie</option>
             <option value="series">Series</option>
             <option value="podcast">Podcast</option>
+            <option value="documentary">Documentary</option>
+            <option value="concert">Concert</option>
+            <option value="event">Event</option>
           </select>
         </Field>
         <Field label="Genre"><input className={inputClass} value={form.genre ?? ""} onChange={(e) => set("genre", e.target.value)} /></Field>
         <Field label="Year"><input type="number" className={inputClass} value={form.year ?? ""} onChange={(e) => set("year", e.target.value ? Number(e.target.value) : null)} /></Field>
+        <Field label="Rating"><input className={inputClass} value={form.rating ?? ""} onChange={(e) => set("rating", e.target.value)} placeholder="TV-PG" /></Field>
+        <Field label="Duration label"><input className={inputClass} value={form.duration_label ?? ""} onChange={(e) => set("duration_label", e.target.value)} placeholder="2h 14m" /></Field>
         <Field label="Duration (minutes)"><input type="number" className={inputClass} value={form.duration_minutes ?? ""} onChange={(e) => set("duration_minutes", e.target.value ? Number(e.target.value) : null)} /></Field>
-        <Field label="Poster URL"><input className={inputClass} value={form.poster_url ?? ""} onChange={(e) => set("poster_url", e.target.value)} /></Field>
-        <Field label="Backdrop URL"><input className={inputClass} value={form.backdrop_url ?? ""} onChange={(e) => set("backdrop_url", e.target.value)} /></Field>
+        <Field label="Seasons"><input type="number" className={inputClass} value={form.seasons ?? ""} onChange={(e) => set("seasons", e.target.value ? Number(e.target.value) : null)} /></Field>
+        <Field label="Episodes"><input type="number" className={inputClass} value={form.episodes ?? ""} onChange={(e) => set("episodes", e.target.value ? Number(e.target.value) : null)} /></Field>
       </div>
+
+      <div className="grid gap-4 mt-4 md:grid-cols-2">
+        <Field label="Poster">
+          <MediaPicker value={form.poster_url} onChange={(url) => set("poster_url", url)} folder="titles/posters" />
+        </Field>
+        <Field label="Backdrop">
+          <MediaPicker value={form.backdrop_url} onChange={(url) => set("backdrop_url", url)} folder="titles/backdrops" />
+        </Field>
+      </div>
+
+      <div className="grid gap-4 mt-4 md:grid-cols-2">
+        <Field label="Video / stream file">
+          <MediaPicker value={form.stream_url} onChange={(url) => set("stream_url", url)} folder="titles/video" kind="video" />
+        </Field>
+        <Field label="Trailer">
+          <MediaPicker value={form.trailer_url} onChange={(url) => set("trailer_url", url)} folder="titles/trailers" kind="video" />
+        </Field>
+      </div>
+
+      <div className="mt-4">
+        <Field label="Cast (comma-separated)">
+          <input className={inputClass} value={(form.cast_list ?? []).join(", ")} onChange={(e) => set("cast_list", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} />
+        </Field>
+      </div>
+
       <div className="mt-4">
         <Field label="Synopsis"><textarea className={textareaClass} value={form.synopsis ?? ""} onChange={(e) => set("synopsis", e.target.value)} /></Field>
       </div>
-      <label className="flex items-center gap-2 text-sm mt-4"><input type="checkbox" checked={form.is_published ?? true} onChange={(e) => set("is_published", e.target.checked)} /> Published</label>
+      <div className="flex gap-6 mt-4">
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_published ?? true} onChange={(e) => set("is_published", e.target.checked)} /> Published</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_featured ?? false} onChange={(e) => set("is_featured", e.target.checked)} /> Featured</label>
+      </div>
     </ModalShell>
   );
 }

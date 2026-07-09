@@ -6,7 +6,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { Row } from "@/components/row";
 import { TitleCard } from "@/components/title-card";
 import { Pagination } from "@/components/pagination";
-import { titles, genres, getTitle } from "@/lib/catalog";
+import { genres } from "@/lib/catalog";
+import { useCmsTitles } from "@/lib/cms-catalog";
 import { useProgress } from "@/lib/personal";
 
 
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/on-demand")({
 const PAGE_SIZE = 12;
 
 function OnDemand() {
+  const { titles } = useCmsTitles();
   const [genre, setGenre] = useState("All");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -45,10 +47,9 @@ function OnDemand() {
       titles.filter(
         (t) =>
           (genre === "All" || t.category === genre) &&
-
           (query === "" || t.title.toLowerCase().includes(query.toLowerCase()))
       ),
-    [genre, query]
+    [titles, genre, query]
   );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -60,9 +61,12 @@ function OnDemand() {
 
   const trending = titles.slice(0, 8);
   const newReleases = [...titles].reverse().slice(0, 8);
+  const titleById = new Map(titles.map((t) => [t.id, t] as const));
   const continueWatching = progress
-    .map((p) => ({ p, t: getTitle(p.titleId) }))
-    .filter((x): x is { p: (typeof progress)[number]; t: NonNullable<ReturnType<typeof getTitle>> } => !!x.t);
+    .map((p) => ({ p, t: titleById.get(p.titleId) }))
+    .filter((x): x is { p: (typeof progress)[number]; t: NonNullable<ReturnType<typeof titleById.get>> } => !!x.t);
+
+  if (!featured) return null;
 
   const resetPage = <T,>(fn: (v: T) => void) => (v: T) => {
     fn(v);
