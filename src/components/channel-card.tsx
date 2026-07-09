@@ -327,8 +327,11 @@ export function ChannelCard({ c }: { c: Channel }) {
               params={{ channelId: c.id }}
               onClick={() => setScheduleOpen(false)}
               className="flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:brightness-110 transition"
+              style={{
+                boxShadow: "0 0 0 2px oklch(0.24 0.59 359.4 / 0.35), 0 0 18px oklch(0.24 0.59 359.4 / 0.35), 0 0 40px oklch(0.24 0.59 359.4 / 0.15)",
+              }}
             >
-              <Play className="size-4 fill-current" /> Watch {c.name}
+              <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch {c.name}
             </Link>
           </div>
         </SheetContent>

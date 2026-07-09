@@ -127,8 +127,13 @@ function Index() {
               One ecosystem.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <button className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold shadow-[var(--shadow-glow)] hover:opacity-95 transition">
-                <Play className="size-4 fill-current" /> Watch Live
+              <button
+                className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
+                style={{
+                  boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 24px oklch(0.24 0.59 359.4 / 0.45), 0 0 50px oklch(0.24 0.59 359.4 / 0.2)",
+                }}
+              >
+                <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch Live
               </button>
               <button className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-elevated/80 border border-border backdrop-blur hover:bg-elevated transition font-medium">
                 <Tv className="size-4" /> Browse Channels
