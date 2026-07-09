@@ -382,7 +382,15 @@ type Title = {
   kind: string;
   genre: string | null;
   year: number | null;
+  rating: string | null;
   duration_minutes: number | null;
+  duration_label: string | null;
+  seasons: number | null;
+  episodes: number | null;
+  cast_list: string[] | null;
+  is_featured: boolean | null;
+  stream_url: string | null;
+  trailer_url: string | null;
   poster_url: string | null;
   backdrop_url: string | null;
   is_published: boolean;
