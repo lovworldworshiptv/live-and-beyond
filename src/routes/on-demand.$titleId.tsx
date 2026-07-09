@@ -91,7 +91,7 @@ function TitleDetail() {
               <div
                 className="size-[110px] rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
                 style={{
-                  boxShadow: "0 0 0 4px oklch(0.24 0.59 359.4 / 0.35), 0 0 30px oklch(0.24 0.59 359.4 / 0.55), 0 0 70px oklch(0.24 0.59 359.4 / 0.25)",
+                  boxShadow: "0 0 0 4px oklch(0.55 0.22 25 / 0.35), 0 0 30px oklch(0.55 0.22 25 / 0.55), 0 0 70px oklch(0.55 0.22 25 / 0.25)",
                 }}
               >
                 <Play className="size-10 text-background fill-current ml-1" />

@@ -186,7 +186,7 @@ export function TitleCard({
                       onClick={() => setProgress(t.id, Math.max(progress?.positionPct ?? 0, 12))}
                       className="size-11 grid place-items-center rounded-full bg-white text-background hover:bg-white/90 transition"
                       style={{
-                        boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 20px oklch(0.24 0.59 359.4 / 0.4), 0 0 45px oklch(0.24 0.59 359.4 / 0.18)",
+                        boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.3), 0 0 20px oklch(0.55 0.22 25 / 0.4), 0 0 45px oklch(0.55 0.22 25 / 0.18)",
                       }}
                       aria-label="Play"
                     >
