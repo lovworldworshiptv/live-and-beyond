@@ -296,6 +296,11 @@ function ChannelsCms() {
 function ChannelEditor({ value, onClose, onSave }: { value: Partial<Channel>; onClose: () => void; onSave: (v: Partial<Channel>) => void | Promise<void> }) {
   const [form, setForm] = useState<Partial<Channel>>(value);
   const set = <K extends keyof Channel>(k: K, v: Channel[K]) => setForm((f) => ({ ...f, [k]: v }));
+  const np = form.now_playing ?? {};
+  const setNp = (patch: Partial<NonNullable<Channel["now_playing"]>>) =>
+    setForm((f) => ({ ...f, now_playing: { ...(f.now_playing ?? {}), ...patch } }));
+  const listToStr = (a?: string[] | null) => (a ?? []).join(", ");
+  const strToList = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
 
   return (
     <ModalShell title={form.id ? "Edit channel" : "New channel"} onClose={onClose} onSave={() => onSave(form)}>
@@ -309,27 +314,64 @@ function ChannelEditor({ value, onClose, onSave }: { value: Partial<Channel>; on
           </select>
         </Field>
         <Field label="Kind">
-          <select className={inputClass} value={form.kind ?? "video"} onChange={(e) => set("kind", e.target.value)}>
-            <option value="video">Video</option>
+          <select className={inputClass} value={form.kind ?? "tv"} onChange={(e) => set("kind", e.target.value)}>
+            <option value="tv">TV / Video</option>
             <option value="radio">Radio</option>
           </select>
         </Field>
         <Field label="Language"><input className={inputClass} value={form.language ?? ""} onChange={(e) => set("language", e.target.value)} /></Field>
         <Field label="Country"><input className={inputClass} value={form.country ?? ""} onChange={(e) => set("country", e.target.value)} /></Field>
-        <Field label="Logo URL"><input className={inputClass} value={form.logo_url ?? ""} onChange={(e) => set("logo_url", e.target.value)} /></Field>
-        <Field label="Banner URL"><input className={inputClass} value={form.banner_url ?? ""} onChange={(e) => set("banner_url", e.target.value)} /></Field>
+        <Field label="Region"><input className={inputClass} value={form.region ?? ""} onChange={(e) => set("region", e.target.value)} placeholder="Global" /></Field>
+        <Field label="Viewers (display)"><input className={inputClass} value={form.viewers ?? ""} onChange={(e) => set("viewers", e.target.value)} placeholder="12.4K" /></Field>
+        <Field label="Popularity (0-100)"><input type="number" min={0} max={100} className={inputClass} value={form.popularity ?? 0} onChange={(e) => set("popularity", Number(e.target.value))} /></Field>
+        <Field label="Stream URL (HLS / MP4 / radio)"><input className={inputClass} value={form.stream_url ?? ""} onChange={(e) => set("stream_url", e.target.value)} placeholder="https://…/index.m3u8" /></Field>
       </div>
+
+      <div className="grid gap-4 mt-4 md:grid-cols-2">
+        <Field label="Logo">
+          <MediaPicker value={form.logo_url} onChange={(url) => set("logo_url", url)} folder="channels/logos" />
+        </Field>
+        <Field label="Banner">
+          <MediaPicker value={form.banner_url} onChange={(url) => set("banner_url", url)} folder="channels/banners" />
+        </Field>
+      </div>
+
       <div className="grid gap-4 mt-4">
         <Field label="Tagline"><input className={inputClass} value={form.tagline ?? ""} onChange={(e) => set("tagline", e.target.value)} /></Field>
         <Field label="Description"><textarea className={textareaClass} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} /></Field>
       </div>
-      <div className="flex gap-6 mt-4">
+
+      <div className="mt-6">
+        <h4 className="text-sm font-semibold mb-2">Now Playing</h4>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Program title"><input className={inputClass} value={np.title ?? ""} onChange={(e) => setNp({ title: e.target.value })} /></Field>
+          <Field label="Description"><input className={inputClass} value={np.description ?? ""} onChange={(e) => setNp({ description: e.target.value })} /></Field>
+          <Field label="Starts at (label)"><input className={inputClass} value={np.startsAt ?? ""} onChange={(e) => setNp({ startsAt: e.target.value })} placeholder="10:00" /></Field>
+          <Field label="Ends at (label)"><input className={inputClass} value={np.endsAt ?? ""} onChange={(e) => setNp({ endsAt: e.target.value })} placeholder="12:00" /></Field>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-4">
+        <Field label="Video library (title slugs, comma-separated)">
+          <input className={inputClass} value={listToStr(form.video_library)} onChange={(e) => set("video_library", strToList(e.target.value))} />
+        </Field>
+        <Field label="Podcast library (title slugs, comma-separated)">
+          <input className={inputClass} value={listToStr(form.podcast_library)} onChange={(e) => set("podcast_library", strToList(e.target.value))} />
+        </Field>
+        <Field label="Featured content (title slugs, comma-separated)">
+          <input className={inputClass} value={listToStr(form.featured_content)} onChange={(e) => set("featured_content", strToList(e.target.value))} />
+        </Field>
+      </div>
+
+      <div className="flex gap-6 mt-6 flex-wrap">
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_published ?? true} onChange={(e) => set("is_published", e.target.checked)} /> Published</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_live ?? false} onChange={(e) => set("is_live", e.target.checked)} /> Live now</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_trending ?? false} onChange={(e) => set("is_trending", e.target.checked)} /> Trending</label>
       </div>
     </ModalShell>
   );
 }
+
 
 // ---------- Titles CMS ----------
 type Title = {
