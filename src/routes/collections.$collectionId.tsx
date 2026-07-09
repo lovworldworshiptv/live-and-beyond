@@ -71,7 +71,7 @@ function CollectionPage() {
                 params={{ titleId: titles[0].id }}
                 className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition"
               >
-                <Play className="size-4 fill-current" /> Play Feature
+                <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Play Feature
               </Link>
             )}
             <div className="text-sm text-white/70">{titles.length} titles</div>

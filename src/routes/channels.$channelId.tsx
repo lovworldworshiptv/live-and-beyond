@@ -124,8 +124,13 @@ function ChannelPage() {
           </div>
 
           <button className="absolute inset-0 grid place-items-center group">
-            <div className="size-20 rounded-full bg-white/95 grid place-items-center shadow-[var(--shadow-card)] group-hover:scale-105 transition">
-              {isRadio ? <Mic className="size-7 text-background" /> : <Play className="size-7 text-background fill-current ml-1" />}
+            <div
+              className="size-[92px] rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
+              style={{
+                boxShadow: "0 0 0 4px oklch(0.24 0.59 359.4 / 0.35), 0 0 30px oklch(0.24 0.59 359.4 / 0.55), 0 0 70px oklch(0.24 0.59 359.4 / 0.25)",
+              }}
+            >
+              {isRadio ? <Mic className="size-8 text-background" /> : <Play className="size-8 text-background fill-current ml-1" />}
             </div>
           </button>
 
@@ -160,8 +165,13 @@ function ChannelPage() {
       <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-8 grid gap-10 lg:grid-cols-[1fr_360px]">
         <div>
           <div className="flex flex-wrap gap-3">
-            <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold shadow-[var(--shadow-glow)] hover:opacity-95 transition">
-              <Play className="size-4 fill-current" /> {isRadio ? "Listen Live" : "Watch Live"}
+            <button
+              className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
+              style={{
+                boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 24px oklch(0.24 0.59 359.4 / 0.45), 0 0 50px oklch(0.24 0.59 359.4 / 0.2)",
+              }}
+            >
+              <Play className="size-[19px] fill-current" strokeWidth={2.5} /> {isRadio ? "Listen Live" : "Watch Live"}
             </button>
             <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
               <Plus className="size-4" /> Follow Channel
