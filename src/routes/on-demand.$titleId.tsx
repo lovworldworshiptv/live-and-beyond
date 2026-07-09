@@ -88,8 +88,13 @@ function TitleDetail() {
             <img src={title.hero} alt="" className="absolute inset-0 size-full object-cover opacity-70" />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
             <button className="absolute inset-0 grid place-items-center group" aria-label="Play">
-              <div className="size-24 rounded-full bg-white/95 grid place-items-center shadow-[var(--shadow-card)] group-hover:scale-105 transition">
-                <Play className="size-8 text-background fill-current ml-1" />
+              <div
+                className="size-[110px] rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
+                style={{
+                  boxShadow: "0 0 0 4px oklch(0.24 0.59 359.4 / 0.35), 0 0 30px oklch(0.24 0.59 359.4 / 0.55), 0 0 70px oklch(0.24 0.59 359.4 / 0.25)",
+                }}
+              >
+                <Play className="size-10 text-background fill-current ml-1" />
               </div>
             </button>
             <div className="absolute bottom-0 inset-x-0 p-4 lg:p-6">
@@ -131,7 +136,7 @@ function TitleDetail() {
 
           <div className="mt-7 flex flex-wrap gap-3">
             <button className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition">
-              <Play className="size-4 fill-current" /> Play
+              <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Play
             </button>
             <button className="inline-flex items-center gap-2 px-5 h-12 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
               <Plus className="size-4" /> My List
