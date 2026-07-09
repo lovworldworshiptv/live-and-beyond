@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { MediaPicker } from "@/components/media-picker";
 import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
@@ -189,12 +190,22 @@ type Channel = {
   category: string | null;
   language: string | null;
   country: string | null;
+  region: string | null;
+  viewers: string | null;
+  popularity: number | null;
+  is_trending: boolean | null;
+  stream_url: string | null;
   logo_url: string | null;
   banner_url: string | null;
   kind: string;
   is_live: boolean;
   is_published: boolean;
+  now_playing: { title?: string; startsAt?: string; endsAt?: string; description?: string } | null;
+  video_library: string[] | null;
+  podcast_library: string[] | null;
+  featured_content: string[] | null;
 };
+
 
 function ChannelsCms() {
   const { rows, loading, save, remove } = useCrud<Channel>("cms_channels");
