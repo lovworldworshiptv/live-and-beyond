@@ -40,12 +40,32 @@ function AuthPage() {
     }
   }, [user, loading, redirect, navigate]);
 
+  async function recordLogin(userId: string, success: boolean, reason?: string) {
+    try {
+      await supabase.from("login_history").insert({
+        user_id: userId,
+        success,
+        failure_reason: reason ?? null,
+        user_agent: navigator.userAgent,
+      });
+      if (success) {
+        await supabase.from("profiles").update({ last_sign_in_at: new Date().toISOString() }).eq("id", userId);
+      }
+    } catch {
+      /* non-blocking */
+    }
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (mode === "signup" && password.length < 12) {
+      toast.error("Password must be at least 12 characters");
+      return;
+    }
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -57,10 +77,15 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Account created", { description: "Welcome to Lettflix." });
+        if (data.user) await recordLogin(data.user.id, true);
+        toast.success("Account created", { description: "Check your email to verify your address." });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          // Attempt to log failed attempt if we can resolve user id (best-effort skip)
+          throw error;
+        }
+        if (data.user) await recordLogin(data.user.id, true);
         toast.success("Signed in");
       }
     } catch (err) {
@@ -70,6 +95,7 @@ function AuthPage() {
       setBusy(false);
     }
   }
+
 
   async function onGoogle() {
     setBusy(true);
