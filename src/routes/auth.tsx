@@ -45,7 +45,8 @@ function AuthPage() {
       await supabase.from("login_history").insert({
         user_id: userId,
         success,
-        failure_reason: reason ?? null,
+        event: success ? "sign_in" : (reason ?? "failed_sign_in"),
+        provider: "password",
         user_agent: navigator.userAgent,
       });
       if (success) {
@@ -55,6 +56,7 @@ function AuthPage() {
       /* non-blocking */
     }
   }
+
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -178,12 +180,13 @@ function AuthPage() {
             <input
               type="password"
               required
-              minLength={8}
-              placeholder="Password (min 8 characters)"
+              minLength={mode === "signup" ? 12 : 8}
+              placeholder={mode === "signup" ? "Password (min 12 characters)" : "Password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
+
             <button
               type="submit"
               disabled={busy}
