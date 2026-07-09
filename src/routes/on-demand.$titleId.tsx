@@ -167,7 +167,7 @@ function TitleDetail() {
                     <div className="relative w-40 shrink-0 rounded-md overflow-hidden aspect-video">
                       <img src={title.cover} alt="" className="size-full object-cover" />
                       <div className="absolute inset-0 bg-black/30 grid place-items-center opacity-0 hover:opacity-100 transition">
-                        <Play className="size-6 fill-current" />
+                        <Play className="size-[22px] fill-current" strokeWidth={2.5} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">

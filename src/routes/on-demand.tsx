@@ -105,7 +105,7 @@ function OnDemand() {
                 params={{ titleId: featured.id }}
                 className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition"
               >
-                <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Play Now Now
+                <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Play Now
               </Link>
               <Link
                 to="/on-demand/$titleId"
