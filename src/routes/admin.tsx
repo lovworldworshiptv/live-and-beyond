@@ -481,18 +481,51 @@ function TitleEditor({ value, onClose, onSave }: { value: Partial<Title>; onClos
             <option value="movie">Movie</option>
             <option value="series">Series</option>
             <option value="podcast">Podcast</option>
+            <option value="documentary">Documentary</option>
+            <option value="concert">Concert</option>
+            <option value="event">Event</option>
           </select>
         </Field>
         <Field label="Genre"><input className={inputClass} value={form.genre ?? ""} onChange={(e) => set("genre", e.target.value)} /></Field>
         <Field label="Year"><input type="number" className={inputClass} value={form.year ?? ""} onChange={(e) => set("year", e.target.value ? Number(e.target.value) : null)} /></Field>
+        <Field label="Rating"><input className={inputClass} value={form.rating ?? ""} onChange={(e) => set("rating", e.target.value)} placeholder="TV-PG" /></Field>
+        <Field label="Duration label"><input className={inputClass} value={form.duration_label ?? ""} onChange={(e) => set("duration_label", e.target.value)} placeholder="2h 14m" /></Field>
         <Field label="Duration (minutes)"><input type="number" className={inputClass} value={form.duration_minutes ?? ""} onChange={(e) => set("duration_minutes", e.target.value ? Number(e.target.value) : null)} /></Field>
-        <Field label="Poster URL"><input className={inputClass} value={form.poster_url ?? ""} onChange={(e) => set("poster_url", e.target.value)} /></Field>
-        <Field label="Backdrop URL"><input className={inputClass} value={form.backdrop_url ?? ""} onChange={(e) => set("backdrop_url", e.target.value)} /></Field>
+        <Field label="Seasons"><input type="number" className={inputClass} value={form.seasons ?? ""} onChange={(e) => set("seasons", e.target.value ? Number(e.target.value) : null)} /></Field>
+        <Field label="Episodes"><input type="number" className={inputClass} value={form.episodes ?? ""} onChange={(e) => set("episodes", e.target.value ? Number(e.target.value) : null)} /></Field>
       </div>
+
+      <div className="grid gap-4 mt-4 md:grid-cols-2">
+        <Field label="Poster">
+          <MediaPicker value={form.poster_url} onChange={(url) => set("poster_url", url)} folder="titles/posters" />
+        </Field>
+        <Field label="Backdrop">
+          <MediaPicker value={form.backdrop_url} onChange={(url) => set("backdrop_url", url)} folder="titles/backdrops" />
+        </Field>
+      </div>
+
+      <div className="grid gap-4 mt-4 md:grid-cols-2">
+        <Field label="Video / stream file">
+          <MediaPicker value={form.stream_url} onChange={(url) => set("stream_url", url)} folder="titles/video" kind="video" />
+        </Field>
+        <Field label="Trailer">
+          <MediaPicker value={form.trailer_url} onChange={(url) => set("trailer_url", url)} folder="titles/trailers" kind="video" />
+        </Field>
+      </div>
+
+      <div className="mt-4">
+        <Field label="Cast (comma-separated)">
+          <input className={inputClass} value={(form.cast_list ?? []).join(", ")} onChange={(e) => set("cast_list", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} />
+        </Field>
+      </div>
+
       <div className="mt-4">
         <Field label="Synopsis"><textarea className={textareaClass} value={form.synopsis ?? ""} onChange={(e) => set("synopsis", e.target.value)} /></Field>
       </div>
-      <label className="flex items-center gap-2 text-sm mt-4"><input type="checkbox" checked={form.is_published ?? true} onChange={(e) => set("is_published", e.target.checked)} /> Published</label>
+      <div className="flex gap-6 mt-4">
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_published ?? true} onChange={(e) => set("is_published", e.target.checked)} /> Published</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_featured ?? false} onChange={(e) => set("is_featured", e.target.checked)} /> Featured</label>
+      </div>
     </ModalShell>
   );
 }
