@@ -97,11 +97,20 @@ function Index() {
       <SiteHeader />
 
       {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-b from-transparent to-background -z-10 pointer-events-none" />
+      <section className="relative isolate overflow-hidden min-h-[680px] md:min-h-[720px] lg:min-h-[760px]">
+        <div className="absolute inset-0 bg-background" />
+        <img
+          src={heroImg}
+          alt="Lettflix broadcast showcase"
+          width={1920}
+          height={1088}
+          className="absolute inset-y-0 right-0 h-full w-full object-cover object-[72%_center] pointer-events-none"
+          style={{ maskImage: "linear-gradient(90deg, transparent 0%, transparent 38%, black 56%, black 100%)", WebkitMaskImage: "linear-gradient(90deg, transparent 0%, transparent 38%, black 56%, black 100%)" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/20 pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent to-background pointer-events-none" />
 
-        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-16 lg:pt-24 pb-20 lg:pb-32 grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
-          {/* LEFT — plain text side */}
+        <div className="relative mx-auto max-w-[1480px] px-6 lg:px-10 pt-16 lg:pt-24 pb-20 lg:pb-32 flex min-h-[680px] md:min-h-[720px] lg:min-h-[760px] items-center">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-xs font-medium">
               <span className="live-pulse text-primary">LIVE NOW</span>
@@ -141,21 +150,6 @@ function Index() {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* RIGHT — poster */}
-          <div className="relative">
-            <div className="relative rounded-3xl overflow-hidden border border-border shadow-[var(--shadow-glow)] aspect-[4/5] lg:aspect-[5/6]">
-              <img
-                src={heroImg}
-                alt="Lettflix broadcast showcase"
-                width={1920}
-                height={1088}
-                className="size-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-tr from-background/40 via-transparent to-transparent pointer-events-none" />
-            </div>
-            <div className="absolute -inset-6 -z-10 blur-3xl opacity-40" style={{ background: "var(--gradient-live)" }} />
           </div>
         </div>
       </section>
