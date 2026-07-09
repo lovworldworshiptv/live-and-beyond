@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -76,16 +76,26 @@ function AdminPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="channels" className="w-full">
-          <TabsList className="mb-6">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="mb-6 flex flex-wrap h-auto">
+            <TabsTrigger value="overview"><LayoutDashboard className="size-4" /> Overview</TabsTrigger>
             <TabsTrigger value="channels"><Radio className="size-4" /> Channels</TabsTrigger>
             <TabsTrigger value="titles"><Video className="size-4" /> Titles</TabsTrigger>
+            <TabsTrigger value="schedule"><CalendarClock className="size-4" /> Schedule</TabsTrigger>
+            <TabsTrigger value="events"><Sparkles className="size-4" /> Events</TabsTrigger>
             <TabsTrigger value="collections"><Layers className="size-4" /> Collections</TabsTrigger>
+            <TabsTrigger value="sponsors"><Megaphone className="size-4" /> Sponsors</TabsTrigger>
+            <TabsTrigger value="leads"><Building2 className="size-4" /> Leads</TabsTrigger>
             <TabsTrigger value="users"><UsersIcon className="size-4" /> Users</TabsTrigger>
           </TabsList>
+          <TabsContent value="overview"><OverviewCms /></TabsContent>
           <TabsContent value="channels"><ChannelsCms /></TabsContent>
           <TabsContent value="titles"><TitlesCms /></TabsContent>
+          <TabsContent value="schedule"><ScheduleCms /></TabsContent>
+          <TabsContent value="events"><EventsCms /></TabsContent>
           <TabsContent value="collections"><CollectionsCms /></TabsContent>
+          <TabsContent value="sponsors"><SponsorsCms /></TabsContent>
+          <TabsContent value="leads"><LeadsCms /></TabsContent>
           <TabsContent value="users"><UsersCms /></TabsContent>
         </Tabs>
       </main>
