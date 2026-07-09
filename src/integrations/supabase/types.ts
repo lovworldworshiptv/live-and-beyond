@@ -63,17 +63,26 @@ export type Database = {
           deleted_at: string | null
           deleted_by: string | null
           description: string | null
+          featured_content: string[]
           id: string
           is_live: boolean
           is_published: boolean
+          is_trending: boolean
           kind: string
           language: string | null
           logo_url: string | null
           name: string
+          now_playing: Json | null
+          podcast_library: string[]
+          popularity: number
+          region: string | null
           slug: string
+          stream_url: string | null
           tagline: string | null
           updated_at: string
           updated_by: string | null
+          video_library: string[]
+          viewers: string | null
         }
         Insert: {
           banner_url?: string | null
@@ -84,17 +93,26 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           description?: string | null
+          featured_content?: string[]
           id?: string
           is_live?: boolean
           is_published?: boolean
+          is_trending?: boolean
           kind?: string
           language?: string | null
           logo_url?: string | null
           name: string
+          now_playing?: Json | null
+          podcast_library?: string[]
+          popularity?: number
+          region?: string | null
           slug: string
+          stream_url?: string | null
           tagline?: string | null
           updated_at?: string
           updated_by?: string | null
+          video_library?: string[]
+          viewers?: string | null
         }
         Update: {
           banner_url?: string | null
@@ -105,17 +123,26 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           description?: string | null
+          featured_content?: string[]
           id?: string
           is_live?: boolean
           is_published?: boolean
+          is_trending?: boolean
           kind?: string
           language?: string | null
           logo_url?: string | null
           name?: string
+          now_playing?: Json | null
+          podcast_library?: string[]
+          popularity?: number
+          region?: string | null
           slug?: string
+          stream_url?: string | null
           tagline?: string | null
           updated_at?: string
           updated_by?: string | null
+          video_library?: string[]
+          viewers?: string | null
         }
         Relationships: []
       }
@@ -387,57 +414,81 @@ export type Database = {
       cms_titles: {
         Row: {
           backdrop_url: string | null
+          cast_list: string[]
           created_at: string
           created_by: string | null
           deleted_at: string | null
           deleted_by: string | null
+          duration_label: string | null
           duration_minutes: number | null
+          episodes: number | null
           genre: string | null
           id: string
+          is_featured: boolean
           is_published: boolean
           kind: string
           poster_url: string | null
+          rating: string | null
+          seasons: number | null
           slug: string
+          stream_url: string | null
           synopsis: string | null
           title: string
+          trailer_url: string | null
           updated_at: string
           updated_by: string | null
           year: number | null
         }
         Insert: {
           backdrop_url?: string | null
+          cast_list?: string[]
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          duration_label?: string | null
           duration_minutes?: number | null
+          episodes?: number | null
           genre?: string | null
           id?: string
+          is_featured?: boolean
           is_published?: boolean
           kind?: string
           poster_url?: string | null
+          rating?: string | null
+          seasons?: number | null
           slug: string
+          stream_url?: string | null
           synopsis?: string | null
           title: string
+          trailer_url?: string | null
           updated_at?: string
           updated_by?: string | null
           year?: number | null
         }
         Update: {
           backdrop_url?: string | null
+          cast_list?: string[]
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          duration_label?: string | null
           duration_minutes?: number | null
+          episodes?: number | null
           genre?: string | null
           id?: string
+          is_featured?: boolean
           is_published?: boolean
           kind?: string
           poster_url?: string | null
+          rating?: string | null
+          seasons?: number | null
           slug?: string
+          stream_url?: string | null
           synopsis?: string | null
           title?: string
+          trailer_url?: string | null
           updated_at?: string
           updated_by?: string | null
           year?: number | null
