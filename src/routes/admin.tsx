@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -76,16 +76,26 @@ function AdminPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="channels" className="w-full">
-          <TabsList className="mb-6">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="mb-6 flex flex-wrap h-auto">
+            <TabsTrigger value="overview"><LayoutDashboard className="size-4" /> Overview</TabsTrigger>
             <TabsTrigger value="channels"><Radio className="size-4" /> Channels</TabsTrigger>
             <TabsTrigger value="titles"><Video className="size-4" /> Titles</TabsTrigger>
+            <TabsTrigger value="schedule"><CalendarClock className="size-4" /> Schedule</TabsTrigger>
+            <TabsTrigger value="events"><Sparkles className="size-4" /> Events</TabsTrigger>
             <TabsTrigger value="collections"><Layers className="size-4" /> Collections</TabsTrigger>
+            <TabsTrigger value="sponsors"><Megaphone className="size-4" /> Sponsors</TabsTrigger>
+            <TabsTrigger value="leads"><Building2 className="size-4" /> Leads</TabsTrigger>
             <TabsTrigger value="users"><UsersIcon className="size-4" /> Users</TabsTrigger>
           </TabsList>
+          <TabsContent value="overview"><OverviewCms /></TabsContent>
           <TabsContent value="channels"><ChannelsCms /></TabsContent>
           <TabsContent value="titles"><TitlesCms /></TabsContent>
+          <TabsContent value="schedule"><ScheduleCms /></TabsContent>
+          <TabsContent value="events"><EventsCms /></TabsContent>
           <TabsContent value="collections"><CollectionsCms /></TabsContent>
+          <TabsContent value="sponsors"><SponsorsCms /></TabsContent>
+          <TabsContent value="leads"><LeadsCms /></TabsContent>
           <TabsContent value="users"><UsersCms /></TabsContent>
         </Tabs>
       </main>
@@ -624,6 +634,500 @@ function ModalShell({ title, onClose, onSave, children }: { title: string; onClo
         </div>
         <div className="p-6">{children}</div>
       </div>
+    </div>
+  );
+}
+
+// ---------- Overview ----------
+function OverviewCms() {
+  const [stats, setStats] = useState<{ label: string; value: number; icon: React.ComponentType<{ className?: string }> }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const tables: { key: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+        { key: "cms_channels", label: "Channels", icon: Radio },
+        { key: "cms_titles", label: "Titles", icon: Video },
+        { key: "cms_schedule", label: "Scheduled programs", icon: CalendarClock },
+        { key: "cms_events", label: "Events", icon: Sparkles },
+        { key: "cms_collections", label: "Collections", icon: Layers },
+        { key: "cms_sponsors", label: "Sponsors", icon: Megaphone },
+        { key: "enterprise_leads", label: "Enterprise leads", icon: Building2 },
+        { key: "profiles", label: "Users", icon: UsersIcon },
+      ];
+      const results = await Promise.all(
+        tables.map((t) => supabase.from(t.key as never).select("*", { count: "exact", head: true }))
+      );
+      setStats(tables.map((t, i) => ({ label: t.label, icon: t.icon, value: (results[i] as { count: number | null }).count ?? 0 })));
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold">Platform overview</h2>
+        <p className="text-xs text-[color:var(--muted-foreground)]">Live counts across the Lettflix catalog.</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map((s) => {
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className="rounded-xl border border-border bg-surface/60 p-5">
+              <div className="flex items-center justify-between">
+                <div className="text-xs uppercase tracking-wide text-[color:var(--muted-foreground)]">{s.label}</div>
+                <Icon className="size-4 text-primary" />
+              </div>
+              <div className="mt-2 text-3xl font-bold">{s.value.toLocaleString()}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Schedule (EPG) CMS ----------
+type ScheduleRow = {
+  id: string;
+  channel_id: string;
+  program_title: string;
+  description: string | null;
+  category: string | null;
+  starts_at: string;
+  ends_at: string;
+};
+
+function ScheduleCms() {
+  const { rows, loading, save, remove } = useCrud<ScheduleRow>("cms_schedule", "starts_at");
+  const [channels, setChannels] = useState<{ id: string; name: string }[]>([]);
+  const [editing, setEditing] = useState<Partial<ScheduleRow> | null>(null);
+  const [channelFilter, setChannelFilter] = useState("");
+
+  useEffect(() => {
+    supabase.from("cms_channels").select("id, name").order("name").then(({ data }) => setChannels(data ?? []));
+  }, []);
+
+  const openNew = () => setEditing({ starts_at: new Date().toISOString().slice(0, 16), ends_at: "" });
+  const channelName = (id: string) => channels.find((c) => c.id === id)?.name ?? "—";
+
+  const filtered = useMemo(
+    () => (channelFilter ? rows.filter((r) => r.channel_id === channelFilter) : rows),
+    [rows, channelFilter]
+  );
+
+  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-lg font-semibold">Program Schedule</h2>
+          <p className="text-xs text-[color:var(--muted-foreground)]">EPG entries powering the Live Guide.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <select value={channelFilter} onChange={(e) => setChannelFilter(e.target.value)} className={`${inputClass} max-w-xs`}>
+            <option value="">All channels</option>
+            {channels.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          <button onClick={openNew} className="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-primary text-primary-foreground font-semibold text-sm">
+            <Plus className="size-4" /> New Program
+          </button>
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <EmptyState label="programs" onNew={openNew} />
+      ) : (
+        <Panel>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs text-[color:var(--muted-foreground)] uppercase tracking-wide">
+                <tr className="border-b border-border">
+                  <th className="pb-3 pr-4">Program</th>
+                  <th className="pb-3 pr-4">Channel</th>
+                  <th className="pb-3 pr-4">Starts</th>
+                  <th className="pb-3 pr-4">Ends</th>
+                  <th className="pb-3 pr-4 w-24"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((r) => (
+                  <tr key={r.id} className="border-b border-border/60 last:border-0">
+                    <td className="py-3 pr-4">
+                      <div className="font-medium">{r.program_title}</div>
+                      {r.category && <div className="text-xs text-[color:var(--muted-foreground)]">{r.category}</div>}
+                    </td>
+                    <td className="py-3 pr-4">{channelName(r.channel_id)}</td>
+                    <td className="py-3 pr-4 text-[color:var(--muted-foreground)]">{new Date(r.starts_at).toLocaleString()}</td>
+                    <td className="py-3 pr-4 text-[color:var(--muted-foreground)]">{new Date(r.ends_at).toLocaleString()}</td>
+                    <td className="py-3 pr-4">
+                      <div className="flex justify-end gap-1">
+                        <button onClick={() => setEditing(r)} className="size-8 grid place-items-center rounded-md hover:bg-elevated"><Pencil className="size-4" /></button>
+                        <button onClick={() => remove(r.id)} className="size-8 grid place-items-center rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+      )}
+
+      {editing && (
+        <ModalShell
+          title={editing.id ? "Edit program" : "New program"}
+          onClose={() => setEditing(null)}
+          onSave={async () => {
+            const payload = {
+              ...editing,
+              starts_at: editing.starts_at ? new Date(editing.starts_at).toISOString() : "",
+              ends_at: editing.ends_at ? new Date(editing.ends_at).toISOString() : "",
+            };
+            await save(payload as Partial<ScheduleRow>);
+            setEditing(null);
+          }}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Channel">
+              <select className={inputClass} value={editing.channel_id ?? ""} onChange={(e) => setEditing({ ...editing, channel_id: e.target.value })}>
+                <option value="">Select channel…</option>
+                {channels.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </Field>
+            <Field label="Program title"><input className={inputClass} value={editing.program_title ?? ""} onChange={(e) => setEditing({ ...editing, program_title: e.target.value })} /></Field>
+            <Field label="Starts at"><input type="datetime-local" className={inputClass} value={toLocal(editing.starts_at)} onChange={(e) => setEditing({ ...editing, starts_at: e.target.value })} /></Field>
+            <Field label="Ends at"><input type="datetime-local" className={inputClass} value={toLocal(editing.ends_at)} onChange={(e) => setEditing({ ...editing, ends_at: e.target.value })} /></Field>
+            <Field label="Category"><input className={inputClass} value={editing.category ?? ""} onChange={(e) => setEditing({ ...editing, category: e.target.value })} /></Field>
+          </div>
+          <div className="mt-4">
+            <Field label="Description"><textarea className={textareaClass} value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
+          </div>
+        </ModalShell>
+      )}
+    </div>
+  );
+}
+
+function toLocal(iso: string | null | undefined) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso.slice(0, 16);
+  const off = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - off).toISOString().slice(0, 16);
+}
+
+// ---------- Events CMS ----------
+type EventRow = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  starts_at: string;
+  ends_at: string | null;
+  cover_url: string | null;
+  channel_id: string | null;
+  is_published: boolean;
+};
+
+function EventsCms() {
+  const { rows, loading, save, remove } = useCrud<EventRow>("cms_events", "starts_at");
+  const [editing, setEditing] = useState<Partial<EventRow> | null>(null);
+  const [channels, setChannels] = useState<{ id: string; name: string }[]>([]);
+  useEffect(() => { supabase.from("cms_channels").select("id, name").order("name").then(({ data }) => setChannels(data ?? [])); }, []);
+
+  const openNew = () => setEditing({ is_published: true });
+
+  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Upcoming Events</h2>
+          <p className="text-xs text-[color:var(--muted-foreground)]">Conferences, concerts, sports and broadcast specials.</p>
+        </div>
+        <button onClick={openNew} className="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-primary text-primary-foreground font-semibold text-sm">
+          <Plus className="size-4" /> New Event
+        </button>
+      </div>
+
+      {rows.length === 0 ? (
+        <EmptyState label="events" onNew={openNew} />
+      ) : (
+        <Panel>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {rows.map((r) => (
+              <div key={r.id} className="rounded-lg border border-border bg-elevated/40 overflow-hidden">
+                {r.cover_url && <img src={r.cover_url} alt="" className="w-full h-32 object-cover" />}
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-semibold truncate">{r.name}</div>
+                      <div className="text-xs text-[color:var(--muted-foreground)]">{new Date(r.starts_at).toLocaleString()}</div>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <button onClick={() => setEditing(r)} className="size-8 grid place-items-center rounded-md hover:bg-elevated"><Pencil className="size-4" /></button>
+                      <button onClick={() => remove(r.id)} className="size-8 grid place-items-center rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-3 flex-wrap">
+                    {r.category && <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">{r.category}</span>}
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${r.is_published ? "bg-emerald-500/15 text-emerald-400" : "bg-elevated text-[color:var(--muted-foreground)]"}`}>
+                      {r.is_published ? "Published" : "Draft"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      )}
+
+      {editing && (
+        <ModalShell
+          title={editing.id ? "Edit event" : "New event"}
+          onClose={() => setEditing(null)}
+          onSave={async () => {
+            const payload = {
+              ...editing,
+              starts_at: editing.starts_at ? new Date(editing.starts_at).toISOString() : "",
+              ends_at: editing.ends_at ? new Date(editing.ends_at).toISOString() : null,
+              channel_id: editing.channel_id || null,
+            };
+            await save(payload as Partial<EventRow>);
+            setEditing(null);
+          }}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Name"><input className={inputClass} value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></Field>
+            <Field label="Slug"><input className={inputClass} value={editing.slug ?? ""} onChange={(e) => setEditing({ ...editing, slug: e.target.value })} /></Field>
+            <Field label="Starts at"><input type="datetime-local" className={inputClass} value={toLocal(editing.starts_at)} onChange={(e) => setEditing({ ...editing, starts_at: e.target.value })} /></Field>
+            <Field label="Ends at"><input type="datetime-local" className={inputClass} value={toLocal(editing.ends_at)} onChange={(e) => setEditing({ ...editing, ends_at: e.target.value })} /></Field>
+            <Field label="Category"><input className={inputClass} value={editing.category ?? ""} onChange={(e) => setEditing({ ...editing, category: e.target.value })} /></Field>
+            <Field label="Channel (optional)">
+              <select className={inputClass} value={editing.channel_id ?? ""} onChange={(e) => setEditing({ ...editing, channel_id: e.target.value || null })}>
+                <option value="">None</option>
+                {channels.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </Field>
+            <Field label="Cover URL"><input className={inputClass} value={editing.cover_url ?? ""} onChange={(e) => setEditing({ ...editing, cover_url: e.target.value })} /></Field>
+          </div>
+          <div className="mt-4">
+            <Field label="Description"><textarea className={textareaClass} value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
+          </div>
+          <label className="flex items-center gap-2 text-sm mt-4"><input type="checkbox" checked={editing.is_published ?? true} onChange={(e) => setEditing({ ...editing, is_published: e.target.checked })} /> Published</label>
+        </ModalShell>
+      )}
+    </div>
+  );
+}
+
+// ---------- Sponsors CMS ----------
+type SponsorRow = {
+  id: string;
+  name: string;
+  headline: string | null;
+  description: string | null;
+  cta_label: string | null;
+  cta_url: string | null;
+  image_url: string | null;
+  placement: string;
+  priority: number;
+  is_active: boolean;
+};
+
+function SponsorsCms() {
+  const { rows, loading, save, remove } = useCrud<SponsorRow>("cms_sponsors", "priority");
+  const [editing, setEditing] = useState<Partial<SponsorRow> | null>(null);
+  const openNew = () => setEditing({ placement: "home", priority: 0, is_active: true });
+
+  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Sponsors & Ads</h2>
+          <p className="text-xs text-[color:var(--muted-foreground)]">Promotional banners for the home and browse pages.</p>
+        </div>
+        <button onClick={openNew} className="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-primary text-primary-foreground font-semibold text-sm">
+          <Plus className="size-4" /> New Sponsor
+        </button>
+      </div>
+
+      {rows.length === 0 ? (
+        <EmptyState label="sponsors" onNew={openNew} />
+      ) : (
+        <Panel>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs text-[color:var(--muted-foreground)] uppercase tracking-wide">
+                <tr className="border-b border-border">
+                  <th className="pb-3 pr-4">Sponsor</th>
+                  <th className="pb-3 pr-4">Placement</th>
+                  <th className="pb-3 pr-4">Priority</th>
+                  <th className="pb-3 pr-4">Status</th>
+                  <th className="pb-3 pr-4 w-24"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.id} className="border-b border-border/60 last:border-0">
+                    <td className="py-3 pr-4">
+                      <div className="font-medium">{r.name}</div>
+                      {r.headline && <div className="text-xs text-[color:var(--muted-foreground)] line-clamp-1">{r.headline}</div>}
+                    </td>
+                    <td className="py-3 pr-4 capitalize">{r.placement}</td>
+                    <td className="py-3 pr-4">{r.priority}</td>
+                    <td className="py-3 pr-4">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${r.is_active ? "bg-emerald-500/15 text-emerald-400" : "bg-elevated text-[color:var(--muted-foreground)]"}`}>
+                        {r.is_active ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <div className="flex justify-end gap-1">
+                        <button onClick={() => setEditing(r)} className="size-8 grid place-items-center rounded-md hover:bg-elevated"><Pencil className="size-4" /></button>
+                        <button onClick={() => remove(r.id)} className="size-8 grid place-items-center rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+      )}
+
+      {editing && (
+        <ModalShell
+          title={editing.id ? "Edit sponsor" : "New sponsor"}
+          onClose={() => setEditing(null)}
+          onSave={async () => { await save(editing as Partial<SponsorRow>); setEditing(null); }}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Sponsor name"><input className={inputClass} value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></Field>
+            <Field label="Placement">
+              <select className={inputClass} value={editing.placement ?? "home"} onChange={(e) => setEditing({ ...editing, placement: e.target.value })}>
+                <option value="home">Home</option>
+                <option value="channels">Channels</option>
+                <option value="on-demand">On Demand</option>
+                <option value="guide">Guide</option>
+              </select>
+            </Field>
+            <Field label="Headline"><input className={inputClass} value={editing.headline ?? ""} onChange={(e) => setEditing({ ...editing, headline: e.target.value })} /></Field>
+            <Field label="Priority"><input type="number" className={inputClass} value={editing.priority ?? 0} onChange={(e) => setEditing({ ...editing, priority: Number(e.target.value) })} /></Field>
+            <Field label="CTA label"><input className={inputClass} value={editing.cta_label ?? ""} onChange={(e) => setEditing({ ...editing, cta_label: e.target.value })} /></Field>
+            <Field label="CTA URL"><input className={inputClass} value={editing.cta_url ?? ""} onChange={(e) => setEditing({ ...editing, cta_url: e.target.value })} /></Field>
+            <Field label="Image URL"><input className={inputClass} value={editing.image_url ?? ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
+          </div>
+          <div className="mt-4">
+            <Field label="Description"><textarea className={textareaClass} value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
+          </div>
+          <label className="flex items-center gap-2 text-sm mt-4"><input type="checkbox" checked={editing.is_active ?? true} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} /> Active</label>
+        </ModalShell>
+      )}
+    </div>
+  );
+}
+
+// ---------- Enterprise Leads CMS ----------
+type LeadRow = {
+  id: string;
+  name: string;
+  org: string | null;
+  email: string;
+  plan: string | null;
+  message: string | null;
+  status: string;
+  created_at: string;
+};
+
+function LeadsCms() {
+  const [rows, setRows] = useState<LeadRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function refresh() {
+    setLoading(true);
+    const { data, error } = await supabase.from("enterprise_leads").select("*").order("created_at", { ascending: false });
+    if (error) toast.error(error.message);
+    setRows((data ?? []) as LeadRow[]);
+    setLoading(false);
+  }
+  useEffect(() => { refresh(); }, []);
+
+  async function setStatus(id: string, status: string) {
+    const { error } = await supabase.from("enterprise_leads").update({ status }).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Updated");
+    refresh();
+  }
+  async function remove(id: string) {
+    if (!confirm("Delete this lead?")) return;
+    const { error } = await supabase.from("enterprise_leads").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    refresh();
+  }
+
+  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold">Enterprise Leads</h2>
+        <p className="text-xs text-[color:var(--muted-foreground)]">Contact-sales submissions from the Enterprise page.</p>
+      </div>
+      {rows.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border py-16 text-center text-sm text-[color:var(--muted-foreground)]">
+          No leads yet. Submissions from the Enterprise page will appear here.
+        </div>
+      ) : (
+        <Panel>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs text-[color:var(--muted-foreground)] uppercase tracking-wide">
+                <tr className="border-b border-border">
+                  <th className="pb-3 pr-4">Contact</th>
+                  <th className="pb-3 pr-4">Organization</th>
+                  <th className="pb-3 pr-4">Plan</th>
+                  <th className="pb-3 pr-4">Received</th>
+                  <th className="pb-3 pr-4">Status</th>
+                  <th className="pb-3 pr-4 w-16"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.id} className="border-b border-border/60 last:border-0 align-top">
+                    <td className="py-3 pr-4">
+                      <div className="font-medium">{r.name}</div>
+                      <a href={`mailto:${r.email}`} className="text-xs text-accent hover:underline">{r.email}</a>
+                      {r.message && <div className="text-xs text-[color:var(--muted-foreground)] mt-1 line-clamp-2 max-w-sm">{r.message}</div>}
+                    </td>
+                    <td className="py-3 pr-4">{r.org ?? "—"}</td>
+                    <td className="py-3 pr-4">{r.plan ?? "—"}</td>
+                    <td className="py-3 pr-4 text-[color:var(--muted-foreground)]">{new Date(r.created_at).toLocaleDateString()}</td>
+                    <td className="py-3 pr-4">
+                      <select value={r.status} onChange={(e) => setStatus(r.id, e.target.value)} className="h-8 rounded-md bg-elevated border border-border text-xs px-2">
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="qualified">Qualified</option>
+                        <option value="won">Won</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <button onClick={() => remove(r.id)} className="size-8 grid place-items-center rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+      )}
     </div>
   );
 }
