@@ -1286,3 +1286,78 @@ function LeadsCms() {
     </div>
   );
 }
+
+type LoginRow = { id: string; user_id: string; event: string; success: boolean; provider: string | null; ip_address: string | null; user_agent: string | null; created_at: string };
+type AuditRow = { id: string; actor_id: string | null; action: string; resource_type: string; resource_id: string | null; metadata: unknown; created_at: string };
+
+function SecurityCms() {
+  const [logins, setLogins] = useState<LoginRow[]>([]);
+  const [audits, setAudits] = useState<AuditRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const [l, a] = await Promise.all([
+        supabase.from("login_history").select("*").order("created_at", { ascending: false }).limit(50),
+        supabase.from("audit_log").select("*").order("created_at", { ascending: false }).limit(50),
+      ]);
+      setLogins((l.data ?? []) as LoginRow[]);
+      setAudits((a.data ?? []) as AuditRow[]);
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) return <div className="py-12 text-center"><Loader2 className="size-5 animate-spin inline text-primary" /></div>;
+
+  return (
+    <div className="space-y-8">
+      <section>
+        <h2 className="text-lg font-semibold mb-3">Recent sign-ins</h2>
+        <div className="rounded-xl border border-border overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-elevated text-xs uppercase tracking-wide text-[color:var(--muted-foreground)]">
+              <tr><th className="text-left px-3 py-2">When</th><th className="text-left px-3 py-2">User</th><th className="text-left px-3 py-2">Event</th><th className="text-left px-3 py-2">Provider</th><th className="text-left px-3 py-2">IP</th><th className="text-left px-3 py-2">Agent</th></tr>
+            </thead>
+            <tbody>
+              {logins.length === 0 && <tr><td colSpan={6} className="px-3 py-6 text-center text-[color:var(--muted-foreground)]">No sign-ins recorded.</td></tr>}
+              {logins.map((r) => (
+                <tr key={r.id} className="border-t border-border">
+                  <td className="px-3 py-2 whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</td>
+                  <td className="px-3 py-2 font-mono text-xs">{r.user_id.slice(0, 8)}…</td>
+                  <td className="px-3 py-2"><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs ${r.success ? "bg-emerald-500/10 text-emerald-500" : "bg-primary/15 text-primary"}`}>{r.event}</span></td>
+                  <td className="px-3 py-2 text-xs">{r.provider ?? "—"}</td>
+                  <td className="px-3 py-2 text-xs">{r.ip_address ?? "—"}</td>
+                  <td className="px-3 py-2 text-xs text-[color:var(--muted-foreground)] truncate max-w-[240px]" title={r.user_agent ?? ""}>{r.user_agent?.slice(0, 60) ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold mb-3">Audit log</h2>
+        <div className="rounded-xl border border-border overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-elevated text-xs uppercase tracking-wide text-[color:var(--muted-foreground)]">
+              <tr><th className="text-left px-3 py-2">When</th><th className="text-left px-3 py-2">Actor</th><th className="text-left px-3 py-2">Action</th><th className="text-left px-3 py-2">Resource</th><th className="text-left px-3 py-2">Metadata</th></tr>
+            </thead>
+            <tbody>
+              {audits.length === 0 && <tr><td colSpan={5} className="px-3 py-6 text-center text-[color:var(--muted-foreground)]">No audit events yet.</td></tr>}
+              {audits.map((r) => (
+                <tr key={r.id} className="border-t border-border">
+                  <td className="px-3 py-2 whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</td>
+                  <td className="px-3 py-2 font-mono text-xs">{r.actor_id?.slice(0, 8) ?? "system"}…</td>
+                  <td className="px-3 py-2 text-xs">{r.action}</td>
+                  <td className="px-3 py-2 text-xs">{r.resource_type}{r.resource_id ? ` · ${r.resource_id.slice(0, 8)}…` : ""}</td>
+                  <td className="px-3 py-2 text-xs font-mono text-[color:var(--muted-foreground)] truncate max-w-[280px]">{r.metadata ? JSON.stringify(r.metadata).slice(0, 80) : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+}
+
