@@ -486,3 +486,131 @@ function Toggle({
     </div>
   );
 }
+
+function MfaPanel() {
+  const [factors, setFactors] = useState<Array<{ id: string; status: string; factor_type: string }>>([]);
+  const [enrolling, setEnrolling] = useState<{ id: string; qr: string; secret: string } | null>(null);
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function refresh() {
+    const { data } = await supabase.auth.mfa.listFactors();
+    setFactors((data?.all ?? []).map((f) => ({ id: f.id, status: f.status, factor_type: f.factor_type })));
+  }
+  useEffect(() => { refresh(); }, []);
+
+  async function startEnroll() {
+    setBusy(true);
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
+    setBusy(false);
+    if (error || !data) { toast.error(error?.message ?? "Could not start MFA"); return; }
+    setEnrolling({ id: data.id, qr: data.totp.qr_code, secret: data.totp.secret });
+  }
+
+  async function verify() {
+    if (!enrolling) return;
+    setBusy(true);
+    const { data: ch, error: cErr } = await supabase.auth.mfa.challenge({ factorId: enrolling.id });
+    if (cErr || !ch) { setBusy(false); toast.error(cErr?.message ?? "Challenge failed"); return; }
+    const { error } = await supabase.auth.mfa.verify({ factorId: enrolling.id, challengeId: ch.id, code });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Two-factor enabled");
+    setEnrolling(null); setCode("");
+    refresh();
+  }
+
+  async function unenroll(id: string) {
+    const { error } = await supabase.auth.mfa.unenroll({ factorId: id });
+    if (error) return toast.error(error.message);
+    toast.success("Factor removed");
+    refresh();
+  }
+
+  const verified = factors.filter((f) => f.status === "verified");
+
+  return (
+    <div className="rounded-xl border border-border bg-surface/60 p-5 space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-sm font-semibold">Two-factor authentication (TOTP)</div>
+          <div className="text-xs text-[color:var(--muted-foreground)]">
+            {verified.length > 0 ? "Enabled with authenticator app." : "Add an authenticator app for stronger sign-in security."}
+          </div>
+        </div>
+        {verified.length === 0 && !enrolling && (
+          <button onClick={startEnroll} disabled={busy} className="h-9 px-4 rounded-md bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50">
+            Enable
+          </button>
+        )}
+      </div>
+      {enrolling && (
+        <div className="rounded-lg border border-border bg-elevated p-4 space-y-3">
+          <div className="text-xs text-[color:var(--muted-foreground)]">Scan the QR in your authenticator app, then enter the 6-digit code.</div>
+          <img src={enrolling.qr} alt="TOTP QR" className="size-40 bg-white rounded-md p-2" />
+          <div className="text-[11px] font-mono break-all opacity-70">Secret: {enrolling.secret}</div>
+          <div className="flex gap-2">
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="123456"
+              className="h-10 px-3 rounded-md bg-background border border-border text-sm w-32 tracking-widest text-center"
+            />
+            <button onClick={verify} disabled={busy || code.length < 6} className="h-10 px-4 rounded-md bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-50">Verify</button>
+            <button onClick={() => { setEnrolling(null); setCode(""); }} className="h-10 px-3 rounded-md border border-border text-sm">Cancel</button>
+          </div>
+        </div>
+      )}
+      {verified.length > 0 && (
+        <ul className="text-sm space-y-1">
+          {verified.map((f) => (
+            <li key={f.id} className="flex items-center justify-between rounded-md bg-elevated px-3 py-2">
+              <span>Authenticator app · <span className="text-[color:var(--muted-foreground)] text-xs">{f.id.slice(0, 8)}…</span></span>
+              <button onClick={() => unenroll(f.id)} className="text-xs text-primary hover:underline">Remove</button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function LoginHistoryPanel() {
+  const { user } = useAuth();
+  const [rows, setRows] = useState<Array<{ id: string; event: string; success: boolean; provider: string | null; user_agent: string | null; ip_address: string | null; created_at: string }>>([]);
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("login_history")
+      .select("id,event,success,provider,user_agent,ip_address,created_at")
+      .order("created_at", { ascending: false })
+      .limit(10)
+      .then(({ data }) => setRows((data ?? []) as typeof rows));
+  }, [user]);
+  if (!user) return null;
+  return (
+    <div className="rounded-xl border border-border bg-surface/60 p-5 space-y-3">
+      <div className="text-sm font-semibold">Recent sign-in activity</div>
+      {rows.length === 0 ? (
+        <div className="text-xs text-[color:var(--muted-foreground)]">No sign-in activity recorded yet.</div>
+      ) : (
+        <ul className="text-xs divide-y divide-border">
+          {rows.map((r) => (
+            <li key={r.id} className="py-2 flex items-center justify-between gap-3">
+              <span className="flex items-center gap-2">
+                <span className={`inline-block size-2 rounded-full ${r.success ? "bg-emerald-500" : "bg-primary"}`} />
+                <span className="font-medium">{r.event}</span>
+                <span className="text-[color:var(--muted-foreground)]">{r.provider ?? "—"}</span>
+              </span>
+              <span className="text-[color:var(--muted-foreground)] truncate max-w-[45%]" title={r.user_agent ?? ""}>
+                {r.ip_address ?? ""} {r.user_agent?.split(")")[0]?.slice(0, 40) ?? ""}
+              </span>
+              <span className="text-[color:var(--muted-foreground)] shrink-0">{new Date(r.created_at).toLocaleString()}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
