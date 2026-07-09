@@ -936,14 +936,84 @@ type SponsorRow = {
   cta_url: string | null;
   image_url: string | null;
   placement: string;
+  placements: string[];
+  home_sections: string[];
+  channel_ids: string[];
+  event_ids: string[];
+  starts_at: string | null;
+  ends_at: string | null;
   priority: number;
   is_active: boolean;
 };
 
+const PLACEMENT_OPTIONS: { value: string; label: string }[] = [
+  { value: "home", label: "Home page" },
+  { value: "channels", label: "Channels index" },
+  { value: "channel_page", label: "Channel pages" },
+  { value: "on-demand", label: "On-Demand" },
+  { value: "guide", label: "Guide (EPG)" },
+  { value: "event_banner", label: "Event banners" },
+];
+
+const HOME_SECTION_OPTIONS: { value: string; label: string }[] = [
+  { value: "hero", label: "Hero showcase" },
+  { value: "live_now", label: "Live Right Now" },
+  { value: "featured_channels", label: "Featured Channels" },
+  { value: "trending", label: "Trending" },
+  { value: "continue_watching", label: "Continue Watching" },
+  { value: "upcoming_events", label: "Upcoming Events" },
+  { value: "collections", label: "Collections" },
+];
+
+function isSponsorLive(s: SponsorRow, now = new Date()) {
+  if (!s.is_active) return false;
+  if (s.starts_at && new Date(s.starts_at) > now) return false;
+  if (s.ends_at && new Date(s.ends_at) < now) return false;
+  return true;
+}
+
+function CheckGrid({ options, value, onChange }: { options: { value: string; label: string }[]; value: string[]; onChange: (next: string[]) => void }) {
+  const set = new Set(value ?? []);
+  return (
+    <div className="grid gap-2 sm:grid-cols-2 rounded-md border border-border bg-elevated/40 p-3">
+      {options.map((o) => (
+        <label key={o.value} className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="size-4 accent-primary"
+            checked={set.has(o.value)}
+            onChange={(e) => {
+              const next = new Set(set);
+              if (e.target.checked) next.add(o.value); else next.delete(o.value);
+              onChange(Array.from(next));
+            }}
+          />
+          {o.label}
+        </label>
+      ))}
+    </div>
+  );
+}
+
 function SponsorsCms() {
   const { rows, loading, save, remove } = useCrud<SponsorRow>("cms_sponsors", "priority");
   const [editing, setEditing] = useState<Partial<SponsorRow> | null>(null);
-  const openNew = () => setEditing({ placement: "home", priority: 0, is_active: true });
+  const [channels, setChannels] = useState<{ id: string; name: string }[]>([]);
+  const [events, setEvents] = useState<{ id: string; name: string }[]>([]);
+  useEffect(() => {
+    supabase.from("cms_channels").select("id, name").order("name").then(({ data }) => setChannels(data ?? []));
+    supabase.from("cms_events").select("id, name").order("starts_at", { ascending: false }).then(({ data }) => setEvents(data ?? []));
+  }, []);
+
+  const openNew = () => setEditing({
+    placement: "home",
+    placements: ["home"],
+    home_sections: [],
+    channel_ids: [],
+    event_ids: [],
+    priority: 0,
+    is_active: true,
+  });
 
   if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
 
@@ -952,7 +1022,7 @@ function SponsorsCms() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Sponsors & Ads</h2>
-          <p className="text-xs text-[color:var(--muted-foreground)]">Promotional banners for the home and browse pages.</p>
+          <p className="text-xs text-[color:var(--muted-foreground)]">Target placements across the app and set publish windows.</p>
         </div>
         <button onClick={openNew} className="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-primary text-primary-foreground font-semibold text-sm">
           <Plus className="size-4" /> New Sponsor
@@ -968,34 +1038,52 @@ function SponsorsCms() {
               <thead className="text-left text-xs text-[color:var(--muted-foreground)] uppercase tracking-wide">
                 <tr className="border-b border-border">
                   <th className="pb-3 pr-4">Sponsor</th>
-                  <th className="pb-3 pr-4">Placement</th>
+                  <th className="pb-3 pr-4">Placements</th>
+                  <th className="pb-3 pr-4">Window</th>
                   <th className="pb-3 pr-4">Priority</th>
                   <th className="pb-3 pr-4">Status</th>
                   <th className="pb-3 pr-4 w-24"></th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id} className="border-b border-border/60 last:border-0">
-                    <td className="py-3 pr-4">
-                      <div className="font-medium">{r.name}</div>
-                      {r.headline && <div className="text-xs text-[color:var(--muted-foreground)] line-clamp-1">{r.headline}</div>}
-                    </td>
-                    <td className="py-3 pr-4 capitalize">{r.placement}</td>
-                    <td className="py-3 pr-4">{r.priority}</td>
-                    <td className="py-3 pr-4">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${r.is_active ? "bg-emerald-500/15 text-emerald-400" : "bg-elevated text-[color:var(--muted-foreground)]"}`}>
-                        {r.is_active ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td className="py-3 pr-4">
-                      <div className="flex justify-end gap-1">
-                        <button onClick={() => setEditing(r)} className="size-8 grid place-items-center rounded-md hover:bg-elevated"><Pencil className="size-4" /></button>
-                        <button onClick={() => remove(r.id)} className="size-8 grid place-items-center rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {rows.map((r) => {
+                  const live = isSponsorLive(r);
+                  const labels = (r.placements?.length ? r.placements : [r.placement]).map(
+                    (p) => PLACEMENT_OPTIONS.find((o) => o.value === p)?.label ?? p
+                  );
+                  return (
+                    <tr key={r.id} className="border-b border-border/60 last:border-0 align-top">
+                      <td className="py-3 pr-4">
+                        <div className="font-medium">{r.name}</div>
+                        {r.headline && <div className="text-xs text-[color:var(--muted-foreground)] line-clamp-1">{r.headline}</div>}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {labels.map((l) => (
+                            <span key={l} className="text-[10px] px-1.5 py-0.5 rounded-full bg-elevated border border-border">{l}</span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4 text-xs text-[color:var(--muted-foreground)]">
+                        {r.starts_at ? new Date(r.starts_at).toLocaleDateString() : "Any"}
+                        {" → "}
+                        {r.ends_at ? new Date(r.ends_at).toLocaleDateString() : "Any"}
+                      </td>
+                      <td className="py-3 pr-4">{r.priority}</td>
+                      <td className="py-3 pr-4">
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${live ? "bg-emerald-500/15 text-emerald-400" : r.is_active ? "bg-amber-500/15 text-amber-400" : "bg-elevated text-[color:var(--muted-foreground)]"}`}>
+                          {live ? "Live" : r.is_active ? "Scheduled" : "Inactive"}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <div className="flex justify-end gap-1">
+                          <button onClick={() => setEditing(r)} className="size-8 grid place-items-center rounded-md hover:bg-elevated"><Pencil className="size-4" /></button>
+                          <button onClick={() => remove(r.id)} className="size-8 grid place-items-center rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -1006,28 +1094,92 @@ function SponsorsCms() {
         <ModalShell
           title={editing.id ? "Edit sponsor" : "New sponsor"}
           onClose={() => setEditing(null)}
-          onSave={async () => { await save(editing as Partial<SponsorRow>); setEditing(null); }}
+          onSave={async () => {
+            const placements = editing.placements?.length ? editing.placements : [editing.placement ?? "home"];
+            const payload: Partial<SponsorRow> = {
+              ...editing,
+              placements,
+              placement: placements[0],
+              home_sections: placements.includes("home") ? (editing.home_sections ?? []) : [],
+              channel_ids: placements.includes("channel_page") ? (editing.channel_ids ?? []) : [],
+              event_ids: placements.includes("event_banner") ? (editing.event_ids ?? []) : [],
+              starts_at: editing.starts_at ? new Date(editing.starts_at).toISOString() : null,
+              ends_at: editing.ends_at ? new Date(editing.ends_at).toISOString() : null,
+            };
+            await save(payload);
+            setEditing(null);
+          }}
         >
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Sponsor name"><input className={inputClass} value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></Field>
-            <Field label="Placement">
-              <select className={inputClass} value={editing.placement ?? "home"} onChange={(e) => setEditing({ ...editing, placement: e.target.value })}>
-                <option value="home">Home</option>
-                <option value="channels">Channels</option>
-                <option value="on-demand">On Demand</option>
-                <option value="guide">Guide</option>
-              </select>
-            </Field>
+            <Field label="Priority (higher shows first)"><input type="number" className={inputClass} value={editing.priority ?? 0} onChange={(e) => setEditing({ ...editing, priority: Number(e.target.value) })} /></Field>
             <Field label="Headline"><input className={inputClass} value={editing.headline ?? ""} onChange={(e) => setEditing({ ...editing, headline: e.target.value })} /></Field>
-            <Field label="Priority"><input type="number" className={inputClass} value={editing.priority ?? 0} onChange={(e) => setEditing({ ...editing, priority: Number(e.target.value) })} /></Field>
+            <Field label="Image URL"><input className={inputClass} value={editing.image_url ?? ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
             <Field label="CTA label"><input className={inputClass} value={editing.cta_label ?? ""} onChange={(e) => setEditing({ ...editing, cta_label: e.target.value })} /></Field>
             <Field label="CTA URL"><input className={inputClass} value={editing.cta_url ?? ""} onChange={(e) => setEditing({ ...editing, cta_url: e.target.value })} /></Field>
-            <Field label="Image URL"><input className={inputClass} value={editing.image_url ?? ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
           </div>
           <div className="mt-4">
             <Field label="Description"><textarea className={textareaClass} value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
           </div>
-          <label className="flex items-center gap-2 text-sm mt-4"><input type="checkbox" checked={editing.is_active ?? true} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} /> Active</label>
+
+          <div className="mt-6">
+            <Field label="Placements — pick every surface where this ad should appear">
+              <CheckGrid
+                options={PLACEMENT_OPTIONS}
+                value={editing.placements ?? (editing.placement ? [editing.placement] : [])}
+                onChange={(next) => setEditing({ ...editing, placements: next })}
+              />
+            </Field>
+          </div>
+
+          {(editing.placements ?? []).includes("home") && (
+            <div className="mt-4">
+              <Field label="Home sections">
+                <CheckGrid
+                  options={HOME_SECTION_OPTIONS}
+                  value={editing.home_sections ?? []}
+                  onChange={(next) => setEditing({ ...editing, home_sections: next })}
+                />
+              </Field>
+            </div>
+          )}
+
+          {(editing.placements ?? []).includes("channel_page") && (
+            <div className="mt-4">
+              <Field label="Target specific channels (leave empty for all)">
+                <CheckGrid
+                  options={channels.map((c) => ({ value: c.id, label: c.name }))}
+                  value={editing.channel_ids ?? []}
+                  onChange={(next) => setEditing({ ...editing, channel_ids: next })}
+                />
+              </Field>
+            </div>
+          )}
+
+          {(editing.placements ?? []).includes("event_banner") && (
+            <div className="mt-4">
+              <Field label="Target specific events (leave empty for all)">
+                <CheckGrid
+                  options={events.map((e) => ({ value: e.id, label: e.name }))}
+                  value={editing.event_ids ?? []}
+                  onChange={(next) => setEditing({ ...editing, event_ids: next })}
+                />
+              </Field>
+            </div>
+          )}
+
+          <div className="grid gap-4 md:grid-cols-2 mt-6">
+            <Field label="Publish from (optional)">
+              <input type="datetime-local" className={inputClass} value={toLocal(editing.starts_at)} onChange={(e) => setEditing({ ...editing, starts_at: e.target.value || null })} />
+            </Field>
+            <Field label="Publish until (optional)">
+              <input type="datetime-local" className={inputClass} value={toLocal(editing.ends_at)} onChange={(e) => setEditing({ ...editing, ends_at: e.target.value || null })} />
+            </Field>
+          </div>
+
+          <label className="flex items-center gap-2 text-sm mt-4">
+            <input type="checkbox" checked={editing.is_active ?? true} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} /> Active (turn off to unpublish immediately)
+          </label>
         </ModalShell>
       )}
     </div>

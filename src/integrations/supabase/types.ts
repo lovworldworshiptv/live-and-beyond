@@ -233,48 +233,66 @@ export type Database = {
       }
       cms_sponsors: {
         Row: {
+          channel_ids: string[]
           created_at: string
           created_by: string | null
           cta_label: string | null
           cta_url: string | null
           description: string | null
+          ends_at: string | null
+          event_ids: string[]
           headline: string | null
+          home_sections: string[]
           id: string
           image_url: string | null
           is_active: boolean
           name: string
           placement: string
+          placements: string[]
           priority: number
+          starts_at: string | null
           updated_at: string
         }
         Insert: {
+          channel_ids?: string[]
           created_at?: string
           created_by?: string | null
           cta_label?: string | null
           cta_url?: string | null
           description?: string | null
+          ends_at?: string | null
+          event_ids?: string[]
           headline?: string | null
+          home_sections?: string[]
           id?: string
           image_url?: string | null
           is_active?: boolean
           name: string
           placement?: string
+          placements?: string[]
           priority?: number
+          starts_at?: string | null
           updated_at?: string
         }
         Update: {
+          channel_ids?: string[]
           created_at?: string
           created_by?: string | null
           cta_label?: string | null
           cta_url?: string | null
           description?: string | null
+          ends_at?: string | null
+          event_ids?: string[]
           headline?: string | null
+          home_sections?: string[]
           id?: string
           image_url?: string | null
           is_active?: boolean
           name?: string
           placement?: string
+          placements?: string[]
           priority?: number
+          starts_at?: string | null
           updated_at?: string
         }
         Relationships: []
