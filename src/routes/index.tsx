@@ -97,15 +97,11 @@ function Index() {
       <SiteHeader />
 
       {/* HERO */}
-      <section className="relative">
-        <div className="absolute inset-0 -z-10">
-          <img src={heroImg} alt="" width={1920} height={1088} className="size-full object-cover object-right" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-transparent md:via-background/80 lg:via-background/60" />
-          <div className="absolute inset-y-0 left-0 w-1/2 bg-background/70 md:bg-background/40 lg:bg-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-b from-transparent to-background" />
-        </div>
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-b from-transparent to-background -z-10 pointer-events-none" />
 
-        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-16 lg:pt-24 pb-20 lg:pb-32">
+        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-16 lg:pt-24 pb-20 lg:pb-32 grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+          {/* LEFT — plain text side */}
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-xs font-medium">
               <span className="live-pulse text-primary">LIVE NOW</span>
@@ -146,8 +142,24 @@ function Index() {
               ))}
             </div>
           </div>
+
+          {/* RIGHT — poster */}
+          <div className="relative">
+            <div className="relative rounded-3xl overflow-hidden border border-border shadow-[var(--shadow-glow)] aspect-[4/5] lg:aspect-[5/6]">
+              <img
+                src={heroImg}
+                alt="Lettflix broadcast showcase"
+                width={1920}
+                height={1088}
+                className="size-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-tr from-background/40 via-transparent to-transparent pointer-events-none" />
+            </div>
+            <div className="absolute -inset-6 -z-10 blur-3xl opacity-40" style={{ background: "var(--gradient-live)" }} />
+          </div>
         </div>
       </section>
+
 
       {/* LIVE NOW */}
       <Row
