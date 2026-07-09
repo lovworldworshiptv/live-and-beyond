@@ -127,8 +127,13 @@ function Index() {
               One ecosystem.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <button className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold shadow-[var(--shadow-glow)] hover:opacity-95 transition">
-                <Play className="size-4 fill-current" /> Watch Live
+              <button
+                className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
+                style={{
+                  boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 24px oklch(0.24 0.59 359.4 / 0.45), 0 0 50px oklch(0.24 0.59 359.4 / 0.2)",
+                }}
+              >
+                <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch Live
               </button>
               <button className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-elevated/80 border border-border backdrop-blur hover:bg-elevated transition font-medium">
                 <Tv className="size-4" /> Browse Channels
@@ -180,8 +185,13 @@ function Index() {
                 {c.viewers} watching
               </span>
               <button className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
-                <div className="size-14 rounded-full bg-white/95 grid place-items-center shadow-[var(--shadow-card)]">
-                  <Play className="size-5 text-background fill-current ml-0.5" />
+                <div
+                  className="size-16 rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
+                  style={{
+                    boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 24px oklch(0.24 0.59 359.4 / 0.45), 0 0 50px oklch(0.24 0.59 359.4 / 0.2)",
+                  }}
+                >
+                  <Play className="size-6 text-background fill-current ml-0.5" />
                 </div>
               </button>
             </div>
@@ -255,8 +265,13 @@ function Index() {
                 <img src={t.img} alt={t.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
                 <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
                 <span className="absolute top-3 left-3 text-[11px] font-bold px-2 py-1 rounded bg-black/60 backdrop-blur">#{i + 1}</span>
-                <button className="absolute bottom-3 right-3 size-10 rounded-full bg-white/95 grid place-items-center opacity-0 group-hover:opacity-100 transition shadow-[var(--shadow-card)]">
-                  <Play className="size-4 text-background fill-current ml-0.5" />
+                <button
+                  className="absolute bottom-3 right-3 size-11 rounded-full bg-white/95 grid place-items-center opacity-0 group-hover:opacity-100 transition"
+                  style={{
+                    boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 20px oklch(0.24 0.59 359.4 / 0.4), 0 0 45px oklch(0.24 0.59 359.4 / 0.18)",
+                  }}
+                >
+                  <Play className="size-5 text-background fill-current ml-0.5" />
                 </button>
               </div>
             </div>
@@ -275,11 +290,16 @@ function Index() {
             <div className="relative aspect-video overflow-hidden">
               <img src={c.img} alt={c.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
               <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
-              <button className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
-                <div className="size-12 rounded-full bg-white/95 grid place-items-center">
-                  <Play className="size-4 text-background fill-current ml-0.5" />
-                </div>
-              </button>
+                <button className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
+                  <div
+                    className="size-14 rounded-full bg-white/95 grid place-items-center"
+                    style={{
+                      boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 20px oklch(0.24 0.59 359.4 / 0.4), 0 0 45px oklch(0.24 0.59 359.4 / 0.18)",
+                    }}
+                  >
+                    <Play className="size-5 text-background fill-current ml-0.5" />
+                  </div>
+                </button>
               <div className="absolute bottom-0 inset-x-0 h-1 bg-white/15">
                 <div className="h-full bg-primary" style={{ width: `${c.progress}%` }} />
               </div>

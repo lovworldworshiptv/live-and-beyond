@@ -113,3 +113,9 @@
   70% { box-shadow: 0 0 0 8px oklch(1 0 0 / 0); }
   100% { box-shadow: 0 0 0 0 oklch(1 0 0 / 0); }
 }
+
+@keyframes play-pulse {
+  0% { box-shadow: 0 0 0 0 oklch(0.24 0.59 359.4 / 0.55); }
+  70% { box-shadow: 0 0 0 18px oklch(0.24 0.59 359.4 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.24 0.59 359.4 / 0); }
+}
