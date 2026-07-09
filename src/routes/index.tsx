@@ -130,7 +130,7 @@ function Index() {
               <button
                 className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
                 style={{
-                  boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 24px oklch(0.24 0.59 359.4 / 0.45), 0 0 50px oklch(0.24 0.59 359.4 / 0.2)",
+                boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 24px oklch(0.55 0.22 25 / 0.55), 0 0 50px oklch(0.55 0.22 25 / 0.25)",
                 }}
               >
                 <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch Live
@@ -188,7 +188,7 @@ function Index() {
                 <div
                   className="size-16 rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
                   style={{
-                    boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 24px oklch(0.24 0.59 359.4 / 0.45), 0 0 50px oklch(0.24 0.59 359.4 / 0.2)",
+                    boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 24px oklch(0.55 0.22 25 / 0.55), 0 0 50px oklch(0.55 0.22 25 / 0.25)",
                   }}
                 >
                   <Play className="size-6 text-background fill-current ml-0.5" />
@@ -268,7 +268,7 @@ function Index() {
                 <button
                   className="absolute bottom-3 right-3 size-11 rounded-full bg-white/95 grid place-items-center opacity-0 group-hover:opacity-100 transition"
                   style={{
-                    boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 20px oklch(0.24 0.59 359.4 / 0.4), 0 0 45px oklch(0.24 0.59 359.4 / 0.18)",
+                    boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 20px oklch(0.55 0.22 25 / 0.5), 0 0 45px oklch(0.55 0.22 25 / 0.22)",
                   }}
                 >
                   <Play className="size-5 text-background fill-current ml-0.5" />
@@ -294,7 +294,7 @@ function Index() {
                   <div
                     className="size-14 rounded-full bg-white/95 grid place-items-center"
                     style={{
-                      boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 20px oklch(0.24 0.59 359.4 / 0.4), 0 0 45px oklch(0.24 0.59 359.4 / 0.18)",
+                      boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 20px oklch(0.55 0.22 25 / 0.5), 0 0 45px oklch(0.55 0.22 25 / 0.22)",
                     }}
                   >
                     <Play className="size-5 text-background fill-current ml-0.5" />

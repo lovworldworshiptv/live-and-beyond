@@ -131,7 +131,7 @@ export function ChannelCard({ c }: { c: Channel }) {
               <div
                 className="size-16 rounded-full bg-white/95 grid place-items-center"
                 style={{
-                  boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 24px oklch(0.24 0.59 359.4 / 0.45), 0 0 50px oklch(0.24 0.59 359.4 / 0.2)",
+                  boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.3), 0 0 24px oklch(0.55 0.22 25 / 0.45), 0 0 50px oklch(0.55 0.22 25 / 0.2)",
                 }}
               >
                 <Play className="size-6 text-background fill-current ml-0.5" />
@@ -195,7 +195,7 @@ export function ChannelCard({ c }: { c: Channel }) {
         params={{ channelId: c.id }}
         className="mt-2 flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm transition hover:brightness-110"
         style={{
-          boxShadow: "0 0 0 2px oklch(0.24 0.59 359.4 / 0.35), 0 0 18px oklch(0.24 0.59 359.4 / 0.35), 0 0 40px oklch(0.24 0.59 359.4 / 0.15)",
+          boxShadow: "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
         }}
       >
         <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch Now
@@ -328,7 +328,7 @@ export function ChannelCard({ c }: { c: Channel }) {
               onClick={() => setScheduleOpen(false)}
               className="flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:brightness-110 transition"
               style={{
-                boxShadow: "0 0 0 2px oklch(0.24 0.59 359.4 / 0.35), 0 0 18px oklch(0.24 0.59 359.4 / 0.35), 0 0 40px oklch(0.24 0.59 359.4 / 0.15)",
+                boxShadow: "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
               }}
             >
               <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch {c.name}

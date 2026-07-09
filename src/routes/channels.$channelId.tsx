@@ -127,7 +127,7 @@ function ChannelPage() {
             <div
               className="size-[92px] rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
               style={{
-                boxShadow: "0 0 0 4px oklch(0.24 0.59 359.4 / 0.35), 0 0 30px oklch(0.24 0.59 359.4 / 0.55), 0 0 70px oklch(0.24 0.59 359.4 / 0.25)",
+                boxShadow: "0 0 0 4px oklch(0.55 0.22 25 / 0.35), 0 0 30px oklch(0.55 0.22 25 / 0.55), 0 0 70px oklch(0.55 0.22 25 / 0.25)",
               }}
             >
               {isRadio ? <Mic className="size-8 text-background" /> : <Play className="size-8 text-background fill-current ml-1" />}
@@ -168,7 +168,7 @@ function ChannelPage() {
             <button
               className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
               style={{
-                boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 24px oklch(0.24 0.59 359.4 / 0.45), 0 0 50px oklch(0.24 0.59 359.4 / 0.2)",
+                boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.3), 0 0 24px oklch(0.55 0.22 25 / 0.45), 0 0 50px oklch(0.55 0.22 25 / 0.2)",
               }}
             >
               <Play className="size-[19px] fill-current" strokeWidth={2.5} /> {isRadio ? "Listen Live" : "Watch Live"}
