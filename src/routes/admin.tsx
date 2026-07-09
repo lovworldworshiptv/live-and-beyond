@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2 } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -87,6 +87,7 @@ function AdminPage() {
             <TabsTrigger value="sponsors"><Megaphone className="size-4" /> Sponsors</TabsTrigger>
             <TabsTrigger value="leads"><Building2 className="size-4" /> Leads</TabsTrigger>
             <TabsTrigger value="users"><UsersIcon className="size-4" /> Users</TabsTrigger>
+            <TabsTrigger value="security"><KeyRound className="size-4" /> Security</TabsTrigger>
           </TabsList>
           <TabsContent value="overview"><OverviewCms /></TabsContent>
           <TabsContent value="channels"><ChannelsCms /></TabsContent>
@@ -97,7 +98,9 @@ function AdminPage() {
           <TabsContent value="sponsors"><SponsorsCms /></TabsContent>
           <TabsContent value="leads"><LeadsCms /></TabsContent>
           <TabsContent value="users"><UsersCms /></TabsContent>
+          <TabsContent value="security"><SecurityCms /></TabsContent>
         </Tabs>
+
       </main>
       <SiteFooter />
     </div>
