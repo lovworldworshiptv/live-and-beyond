@@ -212,7 +212,7 @@ function ChannelsCms() {
   const [editing, setEditing] = useState<Partial<Channel> | null>(null);
 
   function openNew() {
-    setEditing({ kind: "video", is_published: true, is_live: false });
+    setEditing({ kind: "tv", is_published: true, is_live: false, popularity: 0, is_trending: false });
   }
 
   if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
