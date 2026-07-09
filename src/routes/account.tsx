@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   User, Bell, CreditCard, Shield, Monitor, Globe, LogOut, Check, KeyRound, AlertTriangle,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useProfile, useSettings, type SettingsData } from "@/lib/personal";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -347,14 +350,11 @@ function AccountPage() {
                   Update password
                 </button>
               </div>
-              <Toggle
-                label="Two-factor authentication"
-                description="Extra security with an authenticator app."
-                value={true}
-                onChange={() => toast("2FA settings opened")}
-              />
+              <MfaPanel />
+              <LoginHistoryPanel />
             </Card>
           )}
+
 
           {active === "privacy" && (
             <Card title="Privacy" subtitle="Control your data and account.">
