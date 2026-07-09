@@ -285,11 +285,16 @@ function Index() {
             <div className="relative aspect-video overflow-hidden">
               <img src={c.img} alt={c.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
               <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
-              <button className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
-                <div className="size-12 rounded-full bg-white/95 grid place-items-center">
-                  <Play className="size-4 text-background fill-current ml-0.5" />
-                </div>
-              </button>
+                <button className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
+                  <div
+                    className="size-14 rounded-full bg-white/95 grid place-items-center"
+                    style={{
+                      boxShadow: "0 0 0 3px oklch(0.24 0.59 359.4 / 0.3), 0 0 20px oklch(0.24 0.59 359.4 / 0.4), 0 0 45px oklch(0.24 0.59 359.4 / 0.18)",
+                    }}
+                  >
+                    <Play className="size-5 text-background fill-current ml-0.5" />
+                  </div>
+                </button>
               <div className="absolute bottom-0 inset-x-0 h-1 bg-white/15">
                 <div className="h-full bg-primary" style={{ width: `${c.progress}%` }} />
               </div>
