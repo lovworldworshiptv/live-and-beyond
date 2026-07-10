@@ -22,6 +22,7 @@ type ChannelRow = {
   is_live: boolean;
   logo_url: string | null;
   banner_url: string | null;
+  stream_url: string | null;
   video_library: string[] | null;
   podcast_library: string[] | null;
   featured_content: string[] | null;
@@ -47,6 +48,7 @@ type TitleRow = {
   cast_list: string[] | null;
   poster_url: string | null;
   backdrop_url: string | null;
+  stream_url: string | null;
   is_published: boolean;
 };
 
