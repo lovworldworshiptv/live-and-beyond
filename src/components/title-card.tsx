@@ -157,7 +157,7 @@ export function TitleCard({
                 <img src={t.hero} alt="" className="size-full object-cover" />
                 <video
                   ref={videoRef}
-                  src={PREVIEW_VIDEO}
+                  src={t.streamUrl || PREVIEW_VIDEO}
                   loop
                   playsInline
                   muted

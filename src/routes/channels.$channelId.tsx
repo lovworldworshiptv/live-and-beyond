@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import { Play, Volume2, Maximize2, Users, Radio, Bell, Share2, Plus, ChevronRight, Cast, Signal, Sparkles, Tv, Mic } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Play, Volume2, VolumeX, Users, Radio, Bell, Share2, Plus, ChevronRight, Signal, Sparkles, Tv, Mic } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TitleCard } from "@/components/title-card";
@@ -69,6 +70,37 @@ function ChannelPage() {
   const podcastLib = (channel.podcastLibrary ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
   const featured = (channel.featuredContent ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
   const isRadio = channel.streamKind === "radio";
+  const streamSrc = channel.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+  const playerRef = useRef<HTMLDivElement>(null);
+  const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+
+  const startPlayback = () => {
+    setPlaying(true);
+    setMuted(false);
+    playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    requestAnimationFrame(() => {
+      const m = mediaRef.current;
+      if (m) {
+        m.muted = false;
+        m.play().catch(() => {
+          // fallback to muted autoplay if browser blocks unmuted
+          m.muted = true;
+          setMuted(true);
+          m.play().catch(() => {});
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash === "#watch") {
+      startPlayback();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channel.id]);
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -103,13 +135,40 @@ function ChannelPage() {
         </div>
       </section>
 
-      {/* PLAYER — Live Stream / Radio Stream */}
-      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-8">
-        <div className={`relative rounded-2xl overflow-hidden border border-border bg-black ${isRadio ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}`}>
-          <img src={channel.banner} alt="" className={`absolute inset-0 size-full object-cover ${isRadio ? "opacity-40 blur-sm scale-110" : "opacity-60"}`} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-          <div className="absolute top-4 left-4 flex items-center gap-2">
+      {/* PLAYER — Live Stream / Radio Stream */}
+      <section ref={playerRef} className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-8 scroll-mt-24">
+        <div className={`relative rounded-2xl overflow-hidden border border-border bg-black ${isRadio ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}`}>
+          {/* Poster / backdrop */}
+          <img src={channel.banner} alt="" className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${playing ? "opacity-0" : isRadio ? "opacity-40 blur-sm scale-110" : "opacity-60"}`} />
+          {!playing && <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />}
+
+          {/* Actual media element */}
+          {playing && (
+            isRadio ? (
+              <>
+                <img src={channel.banner} alt="" className="absolute inset-0 size-full object-cover opacity-40 blur-sm scale-110" />
+                <audio
+                  ref={(el) => { mediaRef.current = el; }}
+                  src={streamSrc}
+                  autoPlay
+                  controls={false}
+                  className="hidden"
+                />
+              </>
+            ) : (
+              <video
+                ref={(el) => { mediaRef.current = el; }}
+                src={streamSrc}
+                autoPlay
+                playsInline
+                controls
+                className="absolute inset-0 size-full object-contain bg-black"
+              />
+            )
+          )}
+
+          <div className="absolute top-4 left-4 flex items-center gap-2 pointer-events-none">
             {channel.isLive && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-bold bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
                 {isRadio ? "ON AIR" : "LIVE"}
@@ -123,31 +182,44 @@ function ChannelPage() {
             </span>
           </div>
 
-          <button className="absolute inset-0 grid place-items-center group">
-            <div
-              className="size-[92px] rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
-              style={{
-                boxShadow: "0 0 0 4px oklch(0.55 0.22 25 / 0.35), 0 0 30px oklch(0.55 0.22 25 / 0.55), 0 0 70px oklch(0.55 0.22 25 / 0.25)",
-              }}
-            >
-              {isRadio ? <Mic className="size-8 text-background" /> : <Play className="size-8 text-background fill-current ml-1" />}
-            </div>
-          </button>
+          {!playing && (
+            <button onClick={startPlayback} className="absolute inset-0 grid place-items-center group" aria-label={isRadio ? "Listen live" : "Watch live"}>
+              <div
+                className="size-[92px] rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
+                style={{
+                  boxShadow: "0 0 0 4px oklch(0.55 0.22 25 / 0.35), 0 0 30px oklch(0.55 0.22 25 / 0.55), 0 0 70px oklch(0.55 0.22 25 / 0.25)",
+                }}
+              >
+                {isRadio ? <Mic className="size-8 text-background" /> : <Play className="size-8 text-background fill-current ml-1" />}
+              </div>
+            </button>
+          )}
 
-          <div className="absolute bottom-0 inset-x-0 p-4 lg:p-6">
+          {/* Radio playback controls overlay */}
+          {playing && isRadio && (
+            <div className="absolute inset-0 grid place-items-center">
+              <button
+                onClick={() => {
+                  const m = mediaRef.current;
+                  if (!m) return;
+                  m.muted = !m.muted;
+                  setMuted(m.muted);
+                }}
+                className="size-16 rounded-full bg-white/95 grid place-items-center hover:scale-105 transition"
+                aria-label={muted ? "Unmute" : "Mute"}
+              >
+                {muted ? <VolumeX className="size-6 text-background" /> : <Volume2 className="size-6 text-background" />}
+              </button>
+            </div>
+          )}
+
+          <div className={`absolute bottom-0 inset-x-0 p-4 lg:p-6 ${playing && !isRadio ? "pointer-events-none opacity-0" : ""}`}>
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <div className="text-xs text-white/70 uppercase tracking-wider">
                   {isRadio ? "On Air Now" : "Now Playing"}
                 </div>
                 <div className="font-semibold text-lg truncate text-white">{channel.nowPlaying.title}</div>
-              </div>
-              <div className="flex items-center gap-1 text-white">
-                {[Volume2, Cast, Maximize2].map((Icon, i) => (
-                  <button key={i} className="size-9 grid place-items-center rounded-md hover:bg-white/10 transition" aria-label="Control">
-                    <Icon className="size-4" />
-                  </button>
-                ))}
               </div>
             </div>
             <div className="mt-3 h-1 rounded-full bg-white/15 overflow-hidden">
@@ -166,6 +238,7 @@ function ChannelPage() {
         <div>
           <div className="flex flex-wrap gap-3">
             <button
+              onClick={startPlayback}
               className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
               style={{
                 boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.3), 0 0 24px oklch(0.55 0.22 25 / 0.45), 0 0 50px oklch(0.55 0.22 25 / 0.2)",
@@ -183,6 +256,8 @@ function ChannelPage() {
               <Share2 className="size-4" /> Share
             </button>
           </div>
+
+
 
           {/* DESCRIPTION */}
           {channel.description && (

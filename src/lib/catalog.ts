@@ -25,6 +25,7 @@ export type Channel = {
   isLive: boolean;
   logoImg: string;
   banner: string;
+  streamUrl?: string;
   videoLibrary?: string[]; // title ids
   podcastLibrary?: string[]; // title ids
   featuredContent?: string[]; // title ids
@@ -402,6 +403,7 @@ export type Title = {
   episodes?: number;
   featured?: boolean;
   cast?: string[];
+  streamUrl?: string;
 };
 
 export const titles: Title[] = [
