@@ -82,6 +82,7 @@ export function mapChannelRow(r: ChannelRow): Channel {
     isLive: r.is_live,
     logoImg: r.logo_url ?? fallback?.logoImg ?? "",
     banner: r.banner_url ?? fallback?.banner ?? "",
+    streamUrl: r.stream_url ?? fallback?.streamUrl ?? undefined,
     videoLibrary: r.video_library ?? fallback?.videoLibrary,
     podcastLibrary: r.podcast_library ?? fallback?.podcastLibrary,
     featuredContent: r.featured_content ?? fallback?.featuredContent,
@@ -112,6 +113,7 @@ export function mapTitleRow(r: TitleRow): Title {
     episodes: r.episodes ?? fallback?.episodes ?? undefined,
     featured: r.is_featured ?? fallback?.featured,
     cast: (r.cast_list && r.cast_list.length ? r.cast_list : fallback?.cast) ?? undefined,
+    streamUrl: r.stream_url ?? fallback?.streamUrl ?? undefined,
   };
 }
 
