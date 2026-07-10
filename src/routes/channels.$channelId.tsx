@@ -135,36 +135,6 @@ function ChannelPage() {
         </div>
       </section>
 
-      {/* PLAYER — Live Stream / Radio Stream */}
-      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-8">
-        <div className={`relative rounded-2xl overflow-hidden border border-border bg-black ${isRadio ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}`}>
-          <img src={channel.banner} alt="" className={`absolute inset-0 size-full object-cover ${isRadio ? "opacity-40 blur-sm scale-110" : "opacity-60"}`} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-
-          <div className="absolute top-4 left-4 flex items-center gap-2">
-            {channel.isLive && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-bold bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
-                {isRadio ? "ON AIR" : "LIVE"}
-              </span>
-            )}
-            <span className="text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur inline-flex items-center gap-1">
-              <Users className="size-3" /> {channel.viewers} {isRadio ? "listening" : "watching"}
-            </span>
-            <span className="text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur inline-flex items-center gap-1 text-white/80">
-              <Signal className="size-3" /> {isRadio ? "Audio · 320kbps" : "1080p · HDR"}
-            </span>
-          </div>
-
-          <button className="absolute inset-0 grid place-items-center group">
-            <div
-              className="size-[92px] rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
-              style={{
-                boxShadow: "0 0 0 4px oklch(0.55 0.22 25 / 0.35), 0 0 30px oklch(0.55 0.22 25 / 0.55), 0 0 70px oklch(0.55 0.22 25 / 0.25)",
-              }}
-            >
-              {isRadio ? <Mic className="size-8 text-background" /> : <Play className="size-8 text-background fill-current ml-1" />}
-            </div>
-          </button>
 
       {/* PLAYER — Live Stream / Radio Stream */}
       <section ref={playerRef} className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-8 scroll-mt-24">
