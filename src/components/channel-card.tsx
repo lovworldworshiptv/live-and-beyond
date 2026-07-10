@@ -106,7 +106,7 @@ export function ChannelCard({ c }: { c: Channel }) {
           {canPreview && (
             <video
               ref={videoRef}
-              src={PREVIEW_VIDEO}
+              src={c.streamUrl || PREVIEW_VIDEO}
               loop
               playsInline
               muted
@@ -193,6 +193,7 @@ export function ChannelCard({ c }: { c: Channel }) {
       <Link
         to="/channels/$channelId"
         params={{ channelId: c.id }}
+        hash="watch"
         className="mt-2 flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm transition hover:brightness-110"
         style={{
           boxShadow: "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
