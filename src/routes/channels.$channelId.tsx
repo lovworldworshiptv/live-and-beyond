@@ -253,7 +253,7 @@ function ChannelPage() {
               className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-accent text-accent-foreground font-semibold hover:opacity-95 transition"
             >
               <LibraryBig className="size-4" /> View All Contents
-            </button>
+            </Link>
             <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
               <Plus className="size-4" /> Follow Channel
             </button>
