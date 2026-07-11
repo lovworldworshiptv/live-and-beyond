@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { LibraryBig } from "lucide-react";
 import { Play, Volume2, VolumeX, Users, Radio, Bell, Share2, Plus, ChevronRight, Signal, Sparkles, Tv, Mic } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -246,6 +247,13 @@ function ChannelPage() {
             >
               <Play className="size-[19px] fill-current" strokeWidth={2.5} /> {isRadio ? "Listen Live" : "Watch Live"}
             </button>
+            <Link
+              to="/channels/$channelId/contents"
+              params={{ channelId: channel.id }}
+              className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-accent text-accent-foreground font-semibold hover:opacity-95 transition"
+            >
+              <LibraryBig className="size-4" /> View All Contents
+            </Link>
             <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
               <Plus className="size-4" /> Follow Channel
             </button>
