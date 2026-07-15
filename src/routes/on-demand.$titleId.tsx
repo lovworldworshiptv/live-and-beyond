@@ -196,7 +196,7 @@ function TitleDetail() {
             >
               <Download className="size-4" /> Download
             </button>
-            <div className="inline-flex">
+            <div className="h-12 w-32">
               <ShareMenu title={title.title} path={`/on-demand/${title.id}`} variant="chip" />
             </div>
           </div>
