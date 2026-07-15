@@ -153,7 +153,7 @@ function useCrud<T extends { id: string }>(table: string, orderCol = "created_at
 }
 
 // ---------- Shared form primitives ----------
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+export function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
       <span className="text-xs font-medium text-[color:var(--muted-foreground)] mb-1.5 block">{label}</span>
@@ -162,14 +162,15 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-const inputClass =
+export const inputClass =
   "w-full h-10 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50";
-const textareaClass =
+export const textareaClass =
   "w-full min-h-24 px-3 py-2 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50";
 
 function Panel({ children }: { children: React.ReactNode }) {
   return <div className="rounded-xl border border-border bg-surface/50 p-6">{children}</div>;
 }
+
 
 function EmptyState({ label, onNew }: { label: string; onNew: () => void }) {
   return (
