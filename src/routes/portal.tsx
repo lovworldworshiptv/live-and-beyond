@@ -162,7 +162,15 @@ function PortalPage() {
                 revenue in real time.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {isCreator && (
+                <button
+                  onClick={() => setEditing(myChannel ?? { is_published: true, kind: "tv", is_live: false, popularity: 0, is_trending: false, name: "", slug: "" })}
+                  className="h-11 px-5 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition inline-flex items-center gap-2"
+                >
+                  <Pencil className="size-4" /> {myChannel ? "Edit Channel Profile" : "Complete Channel Profile"}
+                </button>
+              )}
               <button className="h-11 px-5 rounded-md bg-accent text-accent-foreground font-semibold hover:bg-accent/90 transition inline-flex items-center gap-2">
                 <Upload className="size-4" /> Upload
               </button>
@@ -170,6 +178,7 @@ function PortalPage() {
                 <Radio className="size-4" /> Go Live
               </button>
             </div>
+
           </div>
         </div>
       </section>
