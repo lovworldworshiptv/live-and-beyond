@@ -152,10 +152,10 @@ function ChannelContentsPage() {
       }
     })();
     return () => { cancelled = true; };
-  }, [staticChannel]);
+  }, [channelId]);
 
-  const isRadio = channel.streamKind === "radio";
-  const streamSrc = channel.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+  const isRadio = channel?.streamKind === "radio";
+  const streamSrc = channel?.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -173,9 +173,19 @@ function ChannelContentsPage() {
   };
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.hash === "#watch") startPlayback();
+    if (channel && typeof window !== "undefined" && window.location.hash === "#watch") startPlayback();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channel.id]);
+  }, [channel?.id]);
+
+  if (notFoundState) return <ChannelNotFound />;
+  if (!channel) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <SiteHeader />
+        <div className="mx-auto max-w-[1480px] px-6 py-24 text-center text-[color:var(--muted-foreground)]">Loading channel…</div>
+      </div>
+    );
+  }
 
   // Merge static schedule (fallback) into a unified list when CMS schedule is empty
   const scheduleFallback = !scheduleRows.length ? channel.schedule.map((s, i) => ({
