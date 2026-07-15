@@ -60,6 +60,7 @@ export type Database = {
           country: string | null
           created_at: string
           created_by: string | null
+          creator_id: string | null
           deleted_at: string | null
           deleted_by: string | null
           description: string | null
@@ -90,6 +91,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           created_by?: string | null
+          creator_id?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           description?: string | null
@@ -120,6 +122,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           created_by?: string | null
+          creator_id?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           description?: string | null
