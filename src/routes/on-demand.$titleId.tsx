@@ -1,26 +1,27 @@
-import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import { Play, Plus, Share2, ThumbsUp, Download, Volume2, Maximize2, Cast, ChevronRight, Star, Clock, Calendar } from "lucide-react";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Play, Plus, Share2, ThumbsUp, Download, ChevronRight, Star, Clock, Calendar } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { titles, getTitle } from "@/lib/catalog";
+import { StreamPlayer } from "@/components/stream-player";
+import { titles as staticTitles, getTitle, type Title } from "@/lib/catalog";
+import { supabase } from "@/integrations/supabase/client";
+import { mapTitleRow } from "@/lib/cms-catalog";
 
 export const Route = createFileRoute("/on-demand/$titleId")({
-  loader: ({ params }) => {
-    const title = getTitle(params.titleId);
-    if (!title) throw notFound();
-    return { title };
-  },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.title.title} — Watch on Lettflix` },
-          { name: "description", content: loaderData.title.synopsis.slice(0, 155) },
-          { property: "og:title", content: `${loaderData.title.title} — Lettflix` },
-          { property: "og:description", content: loaderData.title.synopsis.slice(0, 155) },
-        ]
-      : [],
+  head: () => ({
+    meta: [
+      { title: "Watch on Lettflix" },
+      { name: "description", content: "Stream on-demand premium content on Lettflix." },
+    ],
   }),
-  notFoundComponent: () => (
+  notFoundComponent: TitleNotFound,
+  errorComponent: TitleError,
+  component: TitleDetail,
+});
+
+function TitleNotFound() {
+  return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <div className="mx-auto max-w-[900px] px-6 py-24 text-center">
@@ -30,32 +31,62 @@ export const Route = createFileRoute("/on-demand/$titleId")({
         </Link>
       </div>
     </div>
-  ),
-  errorComponent: ({ error, reset }) => {
-    const router = useRouter();
+  );
+}
+
+function TitleError({ error, reset }: { error: Error; reset: () => void }) {
+  const router = useRouter();
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <SiteHeader />
+      <div className="mx-auto max-w-[900px] px-6 py-24 text-center">
+        <h1 className="text-2xl font-bold">Something went wrong</h1>
+        <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">{error.message}</p>
+        <button onClick={() => { router.invalidate(); reset(); }} className="mt-6 px-5 h-11 rounded-md bg-primary text-primary-foreground font-semibold">
+          Try again
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function TitleDetail() {
+  const { titleId } = Route.useParams();
+  const [title, setTitle] = useState<Title | null>(() => getTitle(titleId) ?? null);
+  const [notFoundState, setNotFoundState] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setNotFoundState(false);
+    const staticT = getTitle(titleId) ?? null;
+    setTitle(staticT);
+    (async () => {
+      const { data } = await supabase
+        .from("cms_titles")
+        .select("*")
+        .eq("slug", titleId)
+        .eq("is_published", true)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data) setTitle(mapTitleRow(data as never));
+      else if (!staticT) setNotFoundState(true);
+    })();
+    return () => { cancelled = true; };
+  }, [titleId]);
+
+  if (notFoundState) return <TitleNotFound />;
+  if (!title) {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <SiteHeader />
-        <div className="mx-auto max-w-[900px] px-6 py-24 text-center">
-          <h1 className="text-2xl font-bold">Something went wrong</h1>
-          <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">{error.message}</p>
-          <button
-            onClick={() => { router.invalidate(); reset(); }}
-            className="mt-6 px-5 h-11 rounded-md bg-primary text-primary-foreground font-semibold"
-          >
-            Try again
-          </button>
-        </div>
+        <div className="mx-auto max-w-[1480px] px-6 py-24 text-center text-[color:var(--muted-foreground)]">Loading title…</div>
       </div>
     );
-  },
-  component: TitleDetail,
-});
+  }
 
-function TitleDetail() {
-  const { title } = Route.useLoaderData();
-  const related = titles.filter((t) => t.id !== title.id && t.category === title.category);
-  const alsoLike = titles.filter((t) => t.id !== title.id).slice(0, 6);
+  const audioKind = title.kind === "Podcast";
+  const related = staticTitles.filter((t) => t.id !== title.id && t.category === title.category);
+  const alsoLike = staticTitles.filter((t) => t.id !== title.id).slice(0, 6);
 
   const episodes = Array.from({ length: title.episodes ? Math.min(title.episodes, 6) : 6 }, (_, i) => ({
     number: i + 1,
@@ -84,34 +115,20 @@ function TitleDetail() {
             <span className="text-foreground">{title.title}</span>
           </div>
 
-          <div className="mt-6 relative rounded-2xl overflow-hidden border border-border bg-black aspect-video max-w-5xl">
-            <img src={title.hero} alt="" className="absolute inset-0 size-full object-cover opacity-70" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-            <button className="absolute inset-0 grid place-items-center group" aria-label="Play">
-              <div
-                className="size-[110px] rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
-                style={{
-                  boxShadow: "0 0 0 4px oklch(0.55 0.22 25 / 0.35), 0 0 30px oklch(0.55 0.22 25 / 0.55), 0 0 70px oklch(0.55 0.22 25 / 0.25)",
-                }}
-              >
-                <Play className="size-10 text-background fill-current ml-1" />
-              </div>
-            </button>
-            <div className="absolute bottom-0 inset-x-0 p-4 lg:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs text-white/70 uppercase tracking-wider">Preview · 2:14</div>
-                  <div className="font-semibold truncate">Official Trailer — {title.title}</div>
-                </div>
-                <div className="flex items-center gap-1">
-                  {[Volume2, Cast, Maximize2].map((Icon, i) => (
-                    <button key={i} className="size-9 grid place-items-center rounded-md hover:bg-white/10 transition" aria-label="Control">
-                      <Icon className="size-4" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+          <div className="mt-6 max-w-5xl">
+            <StreamPlayer
+              src={title.streamUrl}
+              poster={title.hero || title.cover}
+              kind={audioKind ? "audio" : "video"}
+              className={audioKind ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}
+              posterOverlayLabel={`Play — ${title.title}`}
+              ariaPlayLabel={audioKind ? "Listen" : "Play"}
+            />
+            {!title.streamUrl && (
+              <p className="mt-2 text-xs text-[color:var(--muted-foreground)]">
+                No stream configured for this title yet. Add one from the admin CMS to enable playback.
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -130,14 +147,16 @@ function TitleDetail() {
             <span className="text-success font-semibold">98% Match</span>
           </div>
 
-          <p className="mt-5 text-[color:var(--secondary-foreground)] max-w-2xl">
-            {title.synopsis}
-          </p>
+          <p className="mt-5 text-[color:var(--secondary-foreground)] max-w-2xl">{title.synopsis}</p>
 
           <div className="mt-7 flex flex-wrap gap-3">
-            <button className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition">
+            <a
+              href="#top"
+              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition"
+            >
               <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Play
-            </button>
+            </a>
             <button className="inline-flex items-center gap-2 px-5 h-12 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
               <Plus className="size-4" /> My List
             </button>
@@ -152,7 +171,6 @@ function TitleDetail() {
             </button>
           </div>
 
-          {/* EPISODES / CHAPTERS */}
           {(title.kind === "Series" || title.kind === "Podcast") && (
             <div className="mt-12">
               <div className="flex items-end justify-between mb-4">
@@ -175,9 +193,7 @@ function TitleDetail() {
                         <div className="font-semibold truncate">{ep.title}</div>
                         <div className="text-xs text-[color:var(--muted-foreground)] shrink-0">{ep.duration}</div>
                       </div>
-                      <p className="mt-1.5 text-sm text-[color:var(--secondary-foreground)] line-clamp-2">
-                        {ep.synopsis}
-                      </p>
+                      <p className="mt-1.5 text-sm text-[color:var(--secondary-foreground)] line-clamp-2">{ep.synopsis}</p>
                     </div>
                   </div>
                 ))}
@@ -185,7 +201,6 @@ function TitleDetail() {
             </div>
           )}
 
-          {/* MORE LIKE THIS */}
           <div className="mt-12">
             <h2 className="text-xl font-semibold mb-4">More Like This</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -211,31 +226,15 @@ function TitleDetail() {
           </div>
         </div>
 
-        {/* SIDEBAR */}
         <aside className="space-y-6">
           <div className="rounded-xl border border-border bg-elevated/40 p-5">
             <div className="text-xs font-semibold uppercase tracking-wider text-[color:var(--muted-foreground)]">Details</div>
             <dl className="mt-3 space-y-3 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="text-[color:var(--muted-foreground)]">Type</dt>
-                <dd className="font-medium">{title.kind}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-[color:var(--muted-foreground)]">Category</dt>
-                <dd className="font-medium">{title.category}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-[color:var(--muted-foreground)]">Year</dt>
-                <dd className="font-medium">{title.year}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-[color:var(--muted-foreground)]">Duration</dt>
-                <dd className="font-medium">{title.duration}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-[color:var(--muted-foreground)]">Rating</dt>
-                <dd className="font-medium">{title.rating}</dd>
-              </div>
+              <div className="flex justify-between gap-4"><dt className="text-[color:var(--muted-foreground)]">Type</dt><dd className="font-medium">{title.kind}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-[color:var(--muted-foreground)]">Category</dt><dd className="font-medium">{title.category}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-[color:var(--muted-foreground)]">Year</dt><dd className="font-medium">{title.year}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-[color:var(--muted-foreground)]">Duration</dt><dd className="font-medium">{title.duration}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-[color:var(--muted-foreground)]">Rating</dt><dd className="font-medium">{title.rating}</dd></div>
               {title.cast && (
                 <div>
                   <dt className="text-[color:var(--muted-foreground)] mb-1">Featuring</dt>
