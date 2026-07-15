@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Play, Volume2, VolumeX, Users, Signal, Tv, Mic, CalendarClock, Radio, Sparkles, ChevronRight, ArrowLeft } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
@@ -10,20 +10,11 @@ import type { Title } from "@/lib/catalog";
 import { mapChannelRow, mapTitleRow } from "@/lib/cms-catalog";
 
 export const Route = createFileRoute("/channels/$channelId/contents")({
-  loader: ({ params }) => {
-    const channel = getChannel(params.channelId);
-    if (!channel) throw notFound();
-    return { channel };
-  },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.channel.name} — Contents & Live Player` },
-          { name: "description", content: `Watch ${loaderData.channel.name} live, browse its on-demand library and see what's coming up on Lettflix.` },
-          { property: "og:title", content: `${loaderData.channel.name} — Contents & Live Player` },
-          { property: "og:description", content: `Watch ${loaderData.channel.name} live and browse its on-demand library on Lettflix.` },
-        ]
-      : [],
+  head: () => ({
+    meta: [
+      { title: "Channel Contents — Lettflix" },
+      { name: "description", content: "Watch live, browse on-demand and see what's coming up on this Lettflix channel." },
+    ],
   }),
   notFoundComponent: ChannelNotFound,
   errorComponent: ChannelError,
@@ -84,8 +75,9 @@ function formatDate(iso: string) {
 }
 
 function ChannelContentsPage() {
-  const { channel: staticChannel } = Route.useLoaderData();
-  const [channel, setChannel] = useState<Channel>(staticChannel);
+  const { channelId } = Route.useParams();
+  const [channel, setChannel] = useState<Channel | null>(() => getChannel(channelId) ?? null);
+  const [notFoundState, setNotFoundState] = useState(false);
   const [cmsChannelUuid, setCmsChannelUuid] = useState<string | null>(null);
   const [libraryTitles, setLibraryTitles] = useState<Title[]>([]);
   const [scheduleRows, setScheduleRows] = useState<ScheduleRow[]>([]);
@@ -95,17 +87,20 @@ function ChannelContentsPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      const staticCh = getChannel(channelId) ?? null;
       const { data: chRow } = await supabase
         .from("cms_channels")
         .select("*")
-        .eq("slug", staticChannel.id)
+        .eq("slug", channelId)
         .eq("is_published", true)
         .maybeSingle();
 
-      const merged = chRow ? mapChannelRow(chRow as never) : staticChannel;
-      if (!cancelled) setChannel(merged);
+      const merged: Channel | null = chRow ? mapChannelRow(chRow as never) : staticCh;
+      if (cancelled) return;
+      if (!merged) { setNotFoundState(true); return; }
+      setChannel(merged);
       const uuid = (chRow as { id?: string } | null)?.id ?? null;
-      if (!cancelled) setCmsChannelUuid(uuid);
+      setCmsChannelUuid(uuid);
 
       // Titles: union of video_library + podcast_library + featured_content (slugs)
       const slugSet = new Set<string>([
@@ -157,10 +152,10 @@ function ChannelContentsPage() {
       }
     })();
     return () => { cancelled = true; };
-  }, [staticChannel]);
+  }, [channelId]);
 
-  const isRadio = channel.streamKind === "radio";
-  const streamSrc = channel.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+  const isRadio = channel?.streamKind === "radio";
+  const streamSrc = channel?.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -178,9 +173,19 @@ function ChannelContentsPage() {
   };
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.hash === "#watch") startPlayback();
+    if (channel && typeof window !== "undefined" && window.location.hash === "#watch") startPlayback();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channel.id]);
+  }, [channel?.id]);
+
+  if (notFoundState) return <ChannelNotFound />;
+  if (!channel) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <SiteHeader />
+        <div className="mx-auto max-w-[1480px] px-6 py-24 text-center text-[color:var(--muted-foreground)]">Loading channel…</div>
+      </div>
+    );
+  }
 
   // Merge static schedule (fallback) into a unified list when CMS schedule is empty
   const scheduleFallback = !scheduleRows.length ? channel.schedule.map((s, i) => ({

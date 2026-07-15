@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { LibraryBig } from "lucide-react";
 import { Play, Volume2, VolumeX, Users, Radio, Bell, Share2, Plus, ChevronRight, Signal, Sparkles, Tv, Mic } from "lucide-react";
@@ -6,22 +6,15 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TitleCard } from "@/components/title-card";
 import { channels, getChannel, getTitle, type Channel } from "@/lib/catalog";
+import { supabase } from "@/integrations/supabase/client";
+import { mapChannelRow } from "@/lib/cms-catalog";
 
 export const Route = createFileRoute("/channels/$channelId")({
-  loader: ({ params }) => {
-    const channel = getChannel(params.channelId);
-    if (!channel) throw notFound();
-    return { channel };
-  },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.channel.name} — Live on Lettflix` },
-          { name: "description", content: loaderData.channel.tagline },
-          { property: "og:title", content: `${loaderData.channel.name} — Live on Lettflix` },
-          { property: "og:description", content: loaderData.channel.tagline },
-        ]
-      : [],
+  head: () => ({
+    meta: [
+      { title: "Channel — Lettflix" },
+      { name: "description", content: "Watch live channels on Lettflix." },
+    ],
   }),
   notFoundComponent: ChannelNotFound,
   errorComponent: ChannelError,
@@ -61,17 +54,29 @@ function ChannelError({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 function ChannelPage() {
-  const { channel } = Route.useLoaderData();
-  const related = channels
-    .filter((c) => c.id !== channel.id && c.category === channel.category)
-    .concat(channels.filter((c) => c.id !== channel.id && c.category !== channel.category))
-    .slice(0, 4);
-  const recommendations = channels.filter((c) => c.id !== channel.id).sort((a, b) => b.popularity - a.popularity).slice(0, 6);
-  const videoLib = (channel.videoLibrary ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
-  const podcastLib = (channel.podcastLibrary ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
-  const featured = (channel.featuredContent ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
-  const isRadio = channel.streamKind === "radio";
-  const streamSrc = channel.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+  const { channelId } = Route.useParams();
+  const [channel, setChannel] = useState<Channel | null>(() => getChannel(channelId) ?? null);
+  const [notFoundState, setNotFoundState] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setNotFoundState(false);
+    const staticCh = getChannel(channelId) ?? null;
+    setChannel(staticCh);
+    (async () => {
+      const { data } = await supabase
+        .from("cms_channels")
+        .select("*")
+        .eq("slug", channelId)
+        .eq("is_published", true)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data) setChannel(mapChannelRow(data as never));
+      else if (!staticCh) setNotFoundState(true);
+    })();
+    return () => { cancelled = true; };
+  }, [channelId]);
+
   const playerRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -86,7 +91,6 @@ function ChannelPage() {
       if (m) {
         m.muted = false;
         m.play().catch(() => {
-          // fallback to muted autoplay if browser blocks unmuted
           m.muted = true;
           setMuted(true);
           m.play().catch(() => {});
@@ -96,11 +100,34 @@ function ChannelPage() {
   };
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.hash === "#watch") {
+    if (channel && typeof window !== "undefined" && window.location.hash === "#watch") {
       startPlayback();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channel.id]);
+  }, [channel?.id]);
+
+  if (notFoundState) return <ChannelNotFound />;
+  if (!channel) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <SiteHeader />
+        <div className="mx-auto max-w-[1480px] px-6 py-24 text-center text-[color:var(--muted-foreground)]">
+          Loading channel…
+        </div>
+      </div>
+    );
+  }
+
+  const related = channels
+    .filter((c) => c.id !== channel.id && c.category === channel.category)
+    .concat(channels.filter((c) => c.id !== channel.id && c.category !== channel.category))
+    .slice(0, 4);
+  const recommendations = channels.filter((c) => c.id !== channel.id).sort((a, b) => b.popularity - a.popularity).slice(0, 6);
+  const videoLib = (channel.videoLibrary ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
+  const podcastLib = (channel.podcastLibrary ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
+  const featured = (channel.featuredContent ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
+  const isRadio = channel.streamKind === "radio";
+  const streamSrc = channel.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
 
 
   return (
