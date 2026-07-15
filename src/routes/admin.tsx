@@ -1510,11 +1510,10 @@ function ApplicationsCms() {
       await supabase.from("cms_channels").insert({
         slug,
         name: app.channel_name,
-        category: app.category,
         description: app.description,
-        owner_id: app.user_id,
-        published: false,
-      });
+        is_published: false,
+        ...({ category: app.category, owner_id: app.user_id } as Record<string, unknown>),
+      } as never);
     }
     toast.success(`${app.channel_name} approved`);
     load();
