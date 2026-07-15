@@ -35,8 +35,10 @@ export function CreatorApprovalWatcher() {
       .update({ onboarded_at: new Date().toISOString() })
       .eq("id", app.id);
     setApp(null);
+    if (typeof window !== "undefined") sessionStorage.setItem("lettflix.completeChannel", "1");
     navigate({ to: "/portal" });
   }
+
 
   async function dismiss() {
     if (!app) return;
