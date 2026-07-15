@@ -21,6 +21,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnDemandIndexRouteImport } from './routes/on-demand.index'
 import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
 import { Route as OnDemandTitleIdRouteImport } from './routes/on-demand.$titleId'
 import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
@@ -87,6 +88,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnDemandIndexRoute = OnDemandIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OnDemandRoute,
+} as any)
 const ChannelsIndexRoute = ChannelsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/on-demand/$titleId': typeof OnDemandTitleIdRoute
   '/channels/': typeof ChannelsIndexRoute
+  '/on-demand/': typeof OnDemandIndexRoute
   '/channels/$channelId/contents': typeof ChannelsChannelIdContentsRoute
 }
 export interface FileRoutesByTo {
@@ -141,7 +148,6 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
-  '/on-demand': typeof OnDemandRouteWithChildren
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
@@ -149,6 +155,7 @@ export interface FileRoutesByTo {
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/on-demand/$titleId': typeof OnDemandTitleIdRoute
   '/channels': typeof ChannelsIndexRoute
+  '/on-demand': typeof OnDemandIndexRoute
   '/channels/$channelId/contents': typeof ChannelsChannelIdContentsRoute
 }
 export interface FileRoutesById {
@@ -169,6 +176,7 @@ export interface FileRoutesById {
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/on-demand/$titleId': typeof OnDemandTitleIdRoute
   '/channels/': typeof ChannelsIndexRoute
+  '/on-demand/': typeof OnDemandIndexRoute
   '/channels/$channelId/contents': typeof ChannelsChannelIdContentsRoute
 }
 export interface FileRouteTypes {
@@ -190,6 +198,7 @@ export interface FileRouteTypes {
     | '/collections/$collectionId'
     | '/on-demand/$titleId'
     | '/channels/'
+    | '/on-demand/'
     | '/channels/$channelId/contents'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -200,7 +209,6 @@ export interface FileRouteTypes {
     | '/community'
     | '/enterprise'
     | '/guide'
-    | '/on-demand'
     | '/portal'
     | '/pricing'
     | '/profile'
@@ -208,6 +216,7 @@ export interface FileRouteTypes {
     | '/collections/$collectionId'
     | '/on-demand/$titleId'
     | '/channels'
+    | '/on-demand'
     | '/channels/$channelId/contents'
   id:
     | '__root__'
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/collections/$collectionId'
     | '/on-demand/$titleId'
     | '/channels/'
+    | '/on-demand/'
     | '/channels/$channelId/contents'
   fileRoutesById: FileRoutesById
 }
@@ -332,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/on-demand/': {
+      id: '/on-demand/'
+      path: '/'
+      fullPath: '/on-demand/'
+      preLoaderRoute: typeof OnDemandIndexRouteImport
+      parentRoute: typeof OnDemandRoute
+    }
     '/channels/': {
       id: '/channels/'
       path: '/'
@@ -397,10 +414,12 @@ const ChannelsRouteWithChildren = ChannelsRoute._addFileChildren(
 
 interface OnDemandRouteChildren {
   OnDemandTitleIdRoute: typeof OnDemandTitleIdRoute
+  OnDemandIndexRoute: typeof OnDemandIndexRoute
 }
 
 const OnDemandRouteChildren: OnDemandRouteChildren = {
   OnDemandTitleIdRoute: OnDemandTitleIdRoute,
+  OnDemandIndexRoute: OnDemandIndexRoute,
 }
 
 const OnDemandRouteWithChildren = OnDemandRoute._addFileChildren(
