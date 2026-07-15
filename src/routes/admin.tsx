@@ -716,7 +716,7 @@ function UsersCms() {
 }
 
 // ---------- Modal shell ----------
-function ModalShell({ title, onClose, onSave, children }: { title: string; onClose: () => void; onSave: () => void | Promise<void>; children: React.ReactNode }) {
+export function ModalShell({ title, onClose, onSave, children }: { title: string; onClose: () => void; onSave: () => void | Promise<void>; children: React.ReactNode }) {
   const [saving, setSaving] = useState(false);
   async function handleSave() {
     setSaving(true);
