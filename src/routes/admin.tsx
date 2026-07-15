@@ -298,7 +298,7 @@ function ChannelsCms() {
   );
 }
 
-function ChannelEditor({ value, onClose, onSave }: { value: Partial<Channel>; onClose: () => void; onSave: (v: Partial<Channel>) => void | Promise<void> }) {
+export function ChannelEditor({ value, onClose, onSave }: { value: Partial<Channel>; onClose: () => void; onSave: (v: Partial<Channel>) => void | Promise<void> }) {
   const [form, setForm] = useState<Partial<Channel>>(value);
   const set = <K extends keyof Channel>(k: K, v: Channel[K]) => setForm((f) => ({ ...f, [k]: v }));
   const np = form.now_playing ?? {};
