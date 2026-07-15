@@ -57,6 +57,8 @@ function TitleDetail() {
   const { titleId } = Route.useParams();
   const [title, setTitle] = useState<Title | null>(() => getTitle(titleId) ?? null);
   const [notFoundState, setNotFoundState] = useState(false);
+  const [rated, setRated] = useState(false);
+  const { has: hasInList, toggle: toggleList } = useMyList();
 
   useEffect(() => {
     let cancelled = false;
