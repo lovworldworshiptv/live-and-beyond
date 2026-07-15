@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.handle_creator_approval() FROM PUBLIC, anon, authenticated;
