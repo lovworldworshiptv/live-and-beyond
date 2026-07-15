@@ -102,15 +102,16 @@ function PortalPage() {
     const payload = { ...v, creator_id: user.id };
     if (v.id) {
       const { error } = await supabase.from("cms_channels").update(payload as never).eq("id", v.id);
-      if (error) return toast.error(error.message);
+      if (error) { toast.error(error.message); return; }
     } else {
       const { error } = await supabase.from("cms_channels").insert(payload as never);
-      if (error) return toast.error(error.message);
+      if (error) { toast.error(error.message); return; }
     }
     toast.success("Channel profile saved");
     setEditing(null);
     loadChannel();
   }
+
 
 
   if (loading || !user) {
