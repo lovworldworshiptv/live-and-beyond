@@ -107,6 +107,10 @@ function ChannelPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel?.id]);
 
+  const streamSrc = channel?.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+  useHlsAttach(mediaRef, streamSrc, playing);
+
+
   if (notFoundState) return <ChannelNotFound />;
   if (!channel) {
     return (
@@ -128,7 +132,7 @@ function ChannelPage() {
   const podcastLib = (channel.podcastLibrary ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
   const featured = (channel.featuredContent ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
   const isRadio = channel.streamKind === "radio";
-  const streamSrc = channel.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+
 
 
   return (
