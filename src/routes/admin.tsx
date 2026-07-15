@@ -88,6 +88,7 @@ function AdminPage() {
             <TabsTrigger value="sponsors"><Megaphone className="size-4" /> Sponsors</TabsTrigger>
             <TabsTrigger value="leads"><Building2 className="size-4" /> Leads</TabsTrigger>
             <TabsTrigger value="users"><UsersIcon className="size-4" /> Users</TabsTrigger>
+            <TabsTrigger value="applications"><UserPlus className="size-4" /> Applications</TabsTrigger>
             <TabsTrigger value="security"><KeyRound className="size-4" /> Security</TabsTrigger>
           </TabsList>
           <TabsContent value="overview"><OverviewCms /></TabsContent>
@@ -99,6 +100,7 @@ function AdminPage() {
           <TabsContent value="sponsors"><SponsorsCms /></TabsContent>
           <TabsContent value="leads"><LeadsCms /></TabsContent>
           <TabsContent value="users"><UsersCms /></TabsContent>
+          <TabsContent value="applications"><ApplicationsCms /></TabsContent>
           <TabsContent value="security"><SecurityCms /></TabsContent>
         </Tabs>
 
