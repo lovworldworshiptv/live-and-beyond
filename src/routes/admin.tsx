@@ -184,7 +184,7 @@ function EmptyState({ label, onNew }: { label: string; onNew: () => void }) {
 }
 
 // ---------- Channels CMS ----------
-type Channel = {
+export type Channel = {
   id: string;
   slug: string;
   name: string;
@@ -203,11 +203,13 @@ type Channel = {
   kind: string;
   is_live: boolean;
   is_published: boolean;
+  creator_id?: string | null;
   now_playing: { title?: string; startsAt?: string; endsAt?: string; description?: string } | null;
   video_library: string[] | null;
   podcast_library: string[] | null;
   featured_content: string[] | null;
 };
+
 
 
 function ChannelsCms() {
