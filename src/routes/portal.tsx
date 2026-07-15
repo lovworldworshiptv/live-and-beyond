@@ -65,11 +65,53 @@ const revenueData = [
 function PortalPage() {
   const { user, isAdmin, isCreator, loading } = useAuth();
   const navigate = useNavigate();
+  const [myChannel, setMyChannel] = useState<Partial<Channel> | null>(null);
+  const [editing, setEditing] = useState<Partial<Channel> | null>(null);
+
+  const loadChannel = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("cms_channels")
+      .select("*")
+      .eq("creator_id", user.id)
+      .maybeSingle();
+    if (data) setMyChannel(data as unknown as Channel);
+  }, [user]);
 
   useEffect(() => {
     if (loading) return;
     if (!user) navigate({ to: "/auth", search: { redirect: "/portal" }, replace: true });
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (!user || !isCreator) return;
+    loadChannel();
+  }, [user, isCreator, loadChannel]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!myChannel) return;
+    if (sessionStorage.getItem("lettflix.completeChannel") === "1") {
+      sessionStorage.removeItem("lettflix.completeChannel");
+      setEditing(myChannel);
+    }
+  }, [myChannel]);
+
+  async function saveChannel(v: Partial<Channel>) {
+    if (!user) return;
+    const payload = { ...v, creator_id: user.id };
+    if (v.id) {
+      const { error } = await supabase.from("cms_channels").update(payload as never).eq("id", v.id);
+      if (error) return toast.error(error.message);
+    } else {
+      const { error } = await supabase.from("cms_channels").insert(payload as never);
+      if (error) return toast.error(error.message);
+    }
+    toast.success("Channel profile saved");
+    setEditing(null);
+    loadChannel();
+  }
+
 
   if (loading || !user) {
     return (
