@@ -354,6 +354,14 @@ function PortalPage() {
       </section>
 
       <SiteFooter />
+      {editing && (
+        <ChannelEditor
+          value={editing}
+          onClose={() => setEditing(null)}
+          onSave={saveChannel}
+        />
+      )}
+
     </div>
   );
 }
