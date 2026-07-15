@@ -290,15 +290,41 @@ function ChannelPage() {
             >
               <LibraryBig className="size-4" /> View All Contents
             </Link>
-            <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
-              <Plus className="size-4" /> Follow Channel
+            <button
+              onClick={() => {
+                const wasFollowing = isFollowing(channel.id);
+                toggleFollow(channel.id);
+                toast(wasFollowing ? "Unfollowed channel" : "Following channel", { description: channel.name });
+              }}
+              className={`inline-flex items-center gap-2 px-5 h-11 rounded-md border transition font-medium ${
+                isFollowing(channel.id)
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-elevated border-border hover:bg-elevated/70"
+              }`}
+            >
+              {isFollowing(channel.id) ? <Check className="size-4" /> : <Plus className="size-4" />}
+              {isFollowing(channel.id) ? "Following" : "Follow Channel"}
             </button>
-            <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
-              <Bell className="size-4" /> Notify Me
+            <button
+              onClick={() => {
+                const next = !settings.liveAlerts;
+                setSettings({ ...settings, liveAlerts: next });
+                toast(next ? "Live alerts on" : "Live alerts off", {
+                  description: next ? `We'll notify you when ${channel.name} goes live.` : "You won't receive live alerts.",
+                });
+              }}
+              className={`inline-flex items-center gap-2 px-5 h-11 rounded-md border transition font-medium ${
+                settings.liveAlerts
+                  ? "bg-accent text-accent-foreground border-accent"
+                  : "bg-elevated border-border hover:bg-elevated/70"
+              }`}
+            >
+              {settings.liveAlerts ? <BellRing className="size-4" /> : <Bell className="size-4" />}
+              {settings.liveAlerts ? "Notifying" : "Notify Me"}
             </button>
-            <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
-              <Share2 className="size-4" /> Share
-            </button>
+            <div className="h-11 w-28">
+              <ShareMenu title={channel.name} path={`/channels/${channel.id}`} variant="chip" />
+            </div>
           </div>
 
 
