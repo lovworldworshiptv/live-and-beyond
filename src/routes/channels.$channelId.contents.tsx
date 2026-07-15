@@ -8,6 +8,7 @@ import { getChannel, getTitle, type Channel } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import type { Title } from "@/lib/catalog";
 import { mapChannelRow, mapTitleRow } from "@/lib/cms-catalog";
+import { useHlsAttach } from "@/hooks/use-hls";
 
 export const Route = createFileRoute("/channels/$channelId/contents")({
   head: () => ({
@@ -177,6 +178,9 @@ function ChannelContentsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel?.id]);
 
+  useHlsAttach(mediaRef, streamSrc, playing);
+
+
   if (notFoundState) return <ChannelNotFound />;
   if (!channel) {
     return (
@@ -240,10 +244,10 @@ function ChannelContentsPage() {
             isRadio ? (
               <>
                 <img src={channel.banner} alt="" className="absolute inset-0 size-full object-cover opacity-40 blur-sm scale-110" />
-                <audio ref={(el) => { mediaRef.current = el; }} src={streamSrc} autoPlay controls={false} className="hidden" />
+                <audio ref={(el) => { mediaRef.current = el; }} autoPlay controls={false} className="hidden" />
               </>
             ) : (
-              <video ref={(el) => { mediaRef.current = el; }} src={streamSrc} autoPlay playsInline controls className="absolute inset-0 size-full object-contain bg-black" />
+              <video ref={(el) => { mediaRef.current = el; }} autoPlay playsInline controls className="absolute inset-0 size-full object-contain bg-black" />
             )
           )}
 
