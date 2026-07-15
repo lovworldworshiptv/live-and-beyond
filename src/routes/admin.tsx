@@ -1457,3 +1457,168 @@ function SecurityCms() {
   );
 }
 
+// ---------- Applications CMS ----------
+type CreatorApp = {
+  id: string;
+  user_id: string;
+  channel_name: string;
+  category: string;
+  description: string | null;
+  status: "pending" | "approved" | "rejected";
+  rejection_reason: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+};
+
+function ApplicationsCms() {
+  const [rows, setRows] = useState<CreatorApp[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, { display_name: string | null; handle: string | null }>>({});
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
+
+  async function load() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("creator_applications")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) toast.error(error.message);
+    const list = (data ?? []) as CreatorApp[];
+    setRows(list);
+    const ids = Array.from(new Set(list.map((r) => r.user_id)));
+    if (ids.length) {
+      const { data: prof } = await supabase.from("profiles").select("id, display_name, handle").in("id", ids);
+      const map: Record<string, { display_name: string | null; handle: string | null }> = {};
+      (prof ?? []).forEach((p) => { map[p.id] = { display_name: p.display_name, handle: p.handle }; });
+      setProfiles(map);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function approve(app: CreatorApp) {
+    const { error } = await supabase
+      .from("creator_applications")
+      .update({ status: "approved", rejection_reason: null })
+      .eq("id", app.id);
+    if (error) return toast.error(error.message);
+    // Also seed a cms_channel for the creator if not present
+    const slug = app.channel_name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const { data: existing } = await supabase.from("cms_channels").select("id").eq("slug", slug).maybeSingle();
+    if (!existing) {
+      await supabase.from("cms_channels").insert({
+        slug,
+        name: app.channel_name,
+        category: app.category,
+        description: app.description,
+        owner_id: app.user_id,
+        published: false,
+      });
+    }
+    toast.success(`${app.channel_name} approved`);
+    load();
+  }
+
+  async function reject(app: CreatorApp) {
+    const reason = window.prompt("Reason for rejection (optional)") ?? "";
+    const { error } = await supabase
+      .from("creator_applications")
+      .update({ status: "rejected", rejection_reason: reason || null, reviewed_at: new Date().toISOString() })
+      .eq("id", app.id);
+    if (error) return toast.error(error.message);
+    toast.success("Application rejected");
+    load();
+  }
+
+  const visible = rows.filter((r) => filter === "all" || r.status === filter);
+
+  return (
+    <section className="rounded-xl border border-border bg-surface p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 className="text-lg font-semibold">Creator Applications</h2>
+          <p className="text-xs text-[color:var(--muted-foreground)]">Review and approve creator signups. Approving grants the creator role and seeds a channel draft.</p>
+        </div>
+        <div className="flex gap-1 p-1 bg-elevated rounded-md">
+          {(["pending", "approved", "rejected", "all"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 h-8 text-xs rounded font-medium capitalize ${filter === f ? "bg-background shadow" : "text-[color:var(--muted-foreground)]"}`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="py-12 grid place-items-center"><Loader2 className="size-5 animate-spin text-primary" /></div>
+      ) : visible.length === 0 ? (
+        <div className="py-12 text-center text-sm text-[color:var(--muted-foreground)]">No applications.</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-left text-xs text-[color:var(--muted-foreground)] uppercase tracking-wider">
+              <tr className="border-b border-border">
+                <th className="py-2 pr-4">Channel</th>
+                <th className="py-2 pr-4">Applicant</th>
+                <th className="py-2 pr-4">Category</th>
+                <th className="py-2 pr-4">Submitted</th>
+                <th className="py-2 pr-4">Status</th>
+                <th className="py-2 pr-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((r) => {
+                const p = profiles[r.user_id];
+                return (
+                  <tr key={r.id} className="border-b border-border/50 align-top">
+                    <td className="py-3 pr-4">
+                      <div className="font-medium">{r.channel_name}</div>
+                      {r.description && <div className="text-xs text-[color:var(--muted-foreground)] max-w-xs mt-1">{r.description}</div>}
+                    </td>
+                    <td className="py-3 pr-4">
+                      <div>{p?.display_name ?? "—"}</div>
+                      <div className="text-xs text-[color:var(--muted-foreground)]">{p?.handle ?? ""}</div>
+                    </td>
+                    <td className="py-3 pr-4">{r.category}</td>
+                    <td className="py-3 pr-4 text-xs text-[color:var(--muted-foreground)]">{new Date(r.created_at).toLocaleDateString()}</td>
+                    <td className="py-3 pr-4">
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                        r.status === "approved" ? "bg-emerald-500/15 text-emerald-400"
+                        : r.status === "rejected" ? "bg-red-500/15 text-red-400"
+                        : "bg-amber-500/15 text-amber-400"
+                      }`}>{r.status}</span>
+                      {r.rejection_reason && <div className="text-xs text-[color:var(--muted-foreground)] mt-1">{r.rejection_reason}</div>}
+                    </td>
+                    <td className="py-3 pr-4 text-right whitespace-nowrap">
+                      {r.status === "pending" && (
+                        <div className="inline-flex gap-2">
+                          <button onClick={() => approve(r)} className="inline-flex items-center gap-1 h-8 px-3 rounded-md bg-emerald-500/90 hover:bg-emerald-500 text-white text-xs font-medium">
+                            <Check className="size-3.5" /> Approve
+                          </button>
+                          <button onClick={() => reject(r)} className="inline-flex items-center gap-1 h-8 px-3 rounded-md border border-border hover:bg-elevated text-xs font-medium">
+                            <X className="size-3.5" /> Reject
+                          </button>
+                        </div>
+                      )}
+                      {r.status === "approved" && (
+                        <button onClick={() => reject(r)} className="text-xs text-[color:var(--muted-foreground)] hover:text-foreground">Revoke</button>
+                      )}
+                      {r.status === "rejected" && (
+                        <button onClick={() => approve(r)} className="text-xs text-primary hover:underline">Approve now</button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
