@@ -75,8 +75,9 @@ function formatDate(iso: string) {
 }
 
 function ChannelContentsPage() {
-  const { channel: staticChannel } = Route.useLoaderData();
-  const [channel, setChannel] = useState<Channel>(staticChannel);
+  const { channelId } = Route.useParams();
+  const [channel, setChannel] = useState<Channel | null>(() => getChannel(channelId) ?? null);
+  const [notFoundState, setNotFoundState] = useState(false);
   const [cmsChannelUuid, setCmsChannelUuid] = useState<string | null>(null);
   const [libraryTitles, setLibraryTitles] = useState<Title[]>([]);
   const [scheduleRows, setScheduleRows] = useState<ScheduleRow[]>([]);
@@ -86,17 +87,20 @@ function ChannelContentsPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      const staticCh = getChannel(channelId) ?? null;
       const { data: chRow } = await supabase
         .from("cms_channels")
         .select("*")
-        .eq("slug", staticChannel.id)
+        .eq("slug", channelId)
         .eq("is_published", true)
         .maybeSingle();
 
-      const merged = chRow ? mapChannelRow(chRow as never) : staticChannel;
-      if (!cancelled) setChannel(merged);
+      const merged: Channel | null = chRow ? mapChannelRow(chRow as never) : staticCh;
+      if (cancelled) return;
+      if (!merged) { setNotFoundState(true); return; }
+      setChannel(merged);
       const uuid = (chRow as { id?: string } | null)?.id ?? null;
-      if (!cancelled) setCmsChannelUuid(uuid);
+      setCmsChannelUuid(uuid);
 
       // Titles: union of video_library + podcast_library + featured_content (slugs)
       const slugSet = new Set<string>([
