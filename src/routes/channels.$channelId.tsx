@@ -1,14 +1,17 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { LibraryBig } from "lucide-react";
-import { Play, Volume2, VolumeX, Users, Radio, Bell, Share2, Plus, ChevronRight, Signal, Sparkles, Tv, Mic } from "lucide-react";
+import { Play, Volume2, VolumeX, Users, Radio, Bell, BellRing, Plus, Check, ChevronRight, Signal, Sparkles, Tv, Mic } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TitleCard } from "@/components/title-card";
+import { ShareMenu } from "@/components/share-menu";
 import { channels, getChannel, getTitle, type Channel } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
 import { useHlsAttach } from "@/hooks/use-hls";
+import { useFollowing, useSettings } from "@/lib/personal";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/channels/$channelId")({
   head: () => ({
