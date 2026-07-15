@@ -1,12 +1,15 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Play, Plus, Share2, ThumbsUp, Download, ChevronRight, Star, Clock, Calendar } from "lucide-react";
+import { Play, Plus, Check, ThumbsUp, Download, ChevronRight, Star, Clock, Calendar } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { StreamPlayer } from "@/components/stream-player";
+import { ShareMenu } from "@/components/share-menu";
 import { titles as staticTitles, getTitle, type Title } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { mapTitleRow } from "@/lib/cms-catalog";
+import { useMyList } from "@/lib/personal";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/on-demand/$titleId")({
   head: () => ({
