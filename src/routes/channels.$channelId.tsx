@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { LibraryBig } from "lucide-react";
 import { Play, Volume2, VolumeX, Users, Radio, Bell, Share2, Plus, ChevronRight, Signal, Sparkles, Tv, Mic } from "lucide-react";
@@ -6,22 +6,15 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TitleCard } from "@/components/title-card";
 import { channels, getChannel, getTitle, type Channel } from "@/lib/catalog";
+import { supabase } from "@/integrations/supabase/client";
+import { mapChannelRow } from "@/lib/cms-catalog";
 
 export const Route = createFileRoute("/channels/$channelId")({
-  loader: ({ params }) => {
-    const channel = getChannel(params.channelId);
-    if (!channel) throw notFound();
-    return { channel };
-  },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.channel.name} — Live on Lettflix` },
-          { name: "description", content: loaderData.channel.tagline },
-          { property: "og:title", content: `${loaderData.channel.name} — Live on Lettflix` },
-          { property: "og:description", content: loaderData.channel.tagline },
-        ]
-      : [],
+  head: () => ({
+    meta: [
+      { title: "Channel — Lettflix" },
+      { name: "description", content: "Watch live channels on Lettflix." },
+    ],
   }),
   notFoundComponent: ChannelNotFound,
   errorComponent: ChannelError,
