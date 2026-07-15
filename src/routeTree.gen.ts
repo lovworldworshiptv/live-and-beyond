@@ -16,11 +16,11 @@ import { Route as OnDemandRouteImport } from './routes/on-demand'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as EnterpriseRouteImport } from './routes/enterprise'
 import { Route as CommunityRouteImport } from './routes/community'
-import { Route as ChannelsRouteImport } from './routes/channels'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
 import { Route as OnDemandTitleIdRouteImport } from './routes/on-demand.$titleId'
 import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
 import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
@@ -61,11 +61,6 @@ const CommunityRoute = CommunityRouteImport.update({
   path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChannelsRoute = ChannelsRouteImport.update({
-  id: '/channels',
-  path: '/channels',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -86,6 +81,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChannelsIndexRoute = ChannelsIndexRouteImport.update({
+  id: '/channels/',
+  path: '/channels/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnDemandTitleIdRoute = OnDemandTitleIdRouteImport.update({
   id: '/$titleId',
   path: '/$titleId',
@@ -97,9 +97,9 @@ const CollectionsCollectionIdRoute = CollectionsCollectionIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChannelsChannelIdRoute = ChannelsChannelIdRouteImport.update({
-  id: '/$channelId',
-  path: '/$channelId',
-  getParentRoute: () => ChannelsRoute,
+  id: '/channels/$channelId',
+  path: '/channels/$channelId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ChannelsChannelIdContentsRoute =
   ChannelsChannelIdContentsRouteImport.update({
@@ -113,7 +113,6 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/channels': typeof ChannelsRouteWithChildren
   '/community': typeof CommunityRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
@@ -124,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/on-demand/$titleId': typeof OnDemandTitleIdRoute
+  '/channels/': typeof ChannelsIndexRoute
   '/channels/$channelId/contents': typeof ChannelsChannelIdContentsRoute
 }
 export interface FileRoutesByTo {
@@ -131,7 +131,6 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/channels': typeof ChannelsRouteWithChildren
   '/community': typeof CommunityRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
@@ -142,6 +141,7 @@ export interface FileRoutesByTo {
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/on-demand/$titleId': typeof OnDemandTitleIdRoute
+  '/channels': typeof ChannelsIndexRoute
   '/channels/$channelId/contents': typeof ChannelsChannelIdContentsRoute
 }
 export interface FileRoutesById {
@@ -150,7 +150,6 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/channels': typeof ChannelsRouteWithChildren
   '/community': typeof CommunityRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
@@ -161,6 +160,7 @@ export interface FileRoutesById {
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/on-demand/$titleId': typeof OnDemandTitleIdRoute
+  '/channels/': typeof ChannelsIndexRoute
   '/channels/$channelId/contents': typeof ChannelsChannelIdContentsRoute
 }
 export interface FileRouteTypes {
@@ -170,7 +170,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
-    | '/channels'
     | '/community'
     | '/enterprise'
     | '/guide'
@@ -181,6 +180,7 @@ export interface FileRouteTypes {
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/on-demand/$titleId'
+    | '/channels/'
     | '/channels/$channelId/contents'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -188,7 +188,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
-    | '/channels'
     | '/community'
     | '/enterprise'
     | '/guide'
@@ -199,6 +198,7 @@ export interface FileRouteTypes {
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/on-demand/$titleId'
+    | '/channels'
     | '/channels/$channelId/contents'
   id:
     | '__root__'
@@ -206,7 +206,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/auth'
-    | '/channels'
     | '/community'
     | '/enterprise'
     | '/guide'
@@ -217,6 +216,7 @@ export interface FileRouteTypes {
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/on-demand/$titleId'
+    | '/channels/'
     | '/channels/$channelId/contents'
   fileRoutesById: FileRoutesById
 }
@@ -225,7 +225,6 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
-  ChannelsRoute: typeof ChannelsRouteWithChildren
   CommunityRoute: typeof CommunityRoute
   EnterpriseRoute: typeof EnterpriseRoute
   GuideRoute: typeof GuideRoute
@@ -233,7 +232,9 @@ export interface RootRouteChildren {
   PortalRoute: typeof PortalRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
+  ChannelsChannelIdRoute: typeof ChannelsChannelIdRouteWithChildren
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
+  ChannelsIndexRoute: typeof ChannelsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -287,13 +288,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/channels': {
-      id: '/channels'
-      path: '/channels'
-      fullPath: '/channels'
-      preLoaderRoute: typeof ChannelsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -322,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/channels/': {
+      id: '/channels/'
+      path: '/channels'
+      fullPath: '/channels/'
+      preLoaderRoute: typeof ChannelsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/on-demand/$titleId': {
       id: '/on-demand/$titleId'
       path: '/$titleId'
@@ -338,10 +339,10 @@ declare module '@tanstack/react-router' {
     }
     '/channels/$channelId': {
       id: '/channels/$channelId'
-      path: '/$channelId'
+      path: '/channels/$channelId'
       fullPath: '/channels/$channelId'
       preLoaderRoute: typeof ChannelsChannelIdRouteImport
-      parentRoute: typeof ChannelsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/channels/$channelId/contents': {
       id: '/channels/$channelId/contents'
@@ -352,29 +353,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-
-interface ChannelsChannelIdRouteChildren {
-  ChannelsChannelIdContentsRoute: typeof ChannelsChannelIdContentsRoute
-}
-
-const ChannelsChannelIdRouteChildren: ChannelsChannelIdRouteChildren = {
-  ChannelsChannelIdContentsRoute: ChannelsChannelIdContentsRoute,
-}
-
-const ChannelsChannelIdRouteWithChildren =
-  ChannelsChannelIdRoute._addFileChildren(ChannelsChannelIdRouteChildren)
-
-interface ChannelsRouteChildren {
-  ChannelsChannelIdRoute: typeof ChannelsChannelIdRouteWithChildren
-}
-
-const ChannelsRouteChildren: ChannelsRouteChildren = {
-  ChannelsChannelIdRoute: ChannelsChannelIdRouteWithChildren,
-}
-
-const ChannelsRouteWithChildren = ChannelsRoute._addFileChildren(
-  ChannelsRouteChildren,
-)
 
 interface OnDemandRouteChildren {
   OnDemandTitleIdRoute: typeof OnDemandTitleIdRoute
@@ -388,12 +366,22 @@ const OnDemandRouteWithChildren = OnDemandRoute._addFileChildren(
   OnDemandRouteChildren,
 )
 
+interface ChannelsChannelIdRouteChildren {
+  ChannelsChannelIdContentsRoute: typeof ChannelsChannelIdContentsRoute
+}
+
+const ChannelsChannelIdRouteChildren: ChannelsChannelIdRouteChildren = {
+  ChannelsChannelIdContentsRoute: ChannelsChannelIdContentsRoute,
+}
+
+const ChannelsChannelIdRouteWithChildren =
+  ChannelsChannelIdRoute._addFileChildren(ChannelsChannelIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
-  ChannelsRoute: ChannelsRouteWithChildren,
   CommunityRoute: CommunityRoute,
   EnterpriseRoute: EnterpriseRoute,
   GuideRoute: GuideRoute,
@@ -401,18 +389,10 @@ const rootRouteChildren: RootRouteChildren = {
   PortalRoute: PortalRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
+  ChannelsChannelIdRoute: ChannelsChannelIdRouteWithChildren,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
+  ChannelsIndexRoute: ChannelsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -13,7 +13,7 @@ import {
 } from "@/lib/catalog";
 import { useCmsChannels } from "@/lib/cms-catalog";
 
-export const Route = createFileRoute("/channels")({
+export const Route = createFileRoute("/channels/")({
   head: () => ({
     meta: [
       { title: "Live Channels — Lettflix" },
