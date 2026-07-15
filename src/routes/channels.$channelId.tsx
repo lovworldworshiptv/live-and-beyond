@@ -8,6 +8,7 @@ import { TitleCard } from "@/components/title-card";
 import { channels, getChannel, getTitle, type Channel } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
+import { useHlsAttach } from "@/hooks/use-hls";
 
 export const Route = createFileRoute("/channels/$channelId")({
   head: () => ({
@@ -106,6 +107,10 @@ function ChannelPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel?.id]);
 
+  const streamSrc = channel?.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+  useHlsAttach(mediaRef, streamSrc, playing);
+
+
   if (notFoundState) return <ChannelNotFound />;
   if (!channel) {
     return (
@@ -127,7 +132,7 @@ function ChannelPage() {
   const podcastLib = (channel.podcastLibrary ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
   const featured = (channel.featuredContent ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
   const isRadio = channel.streamKind === "radio";
-  const streamSrc = channel.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+
 
 
   return (
@@ -178,7 +183,6 @@ function ChannelPage() {
                 <img src={channel.banner} alt="" className="absolute inset-0 size-full object-cover opacity-40 blur-sm scale-110" />
                 <audio
                   ref={(el) => { mediaRef.current = el; }}
-                  src={streamSrc}
                   autoPlay
                   controls={false}
                   className="hidden"
@@ -187,7 +191,6 @@ function ChannelPage() {
             ) : (
               <video
                 ref={(el) => { mediaRef.current = el; }}
-                src={streamSrc}
                 autoPlay
                 playsInline
                 controls
@@ -195,6 +198,7 @@ function ChannelPage() {
               />
             )
           )}
+          
 
           <div className="absolute top-4 left-4 flex items-center gap-2 pointer-events-none">
             {channel.isLive && (
