@@ -11,7 +11,7 @@ import { useCmsTitles } from "@/lib/cms-catalog";
 import { useProgress } from "@/lib/personal";
 
 
-export const Route = createFileRoute("/on-demand")({
+export const Route = createFileRoute("/on-demand/")({
   head: () => ({
     meta: [
       { title: "On Demand — Lettflix" },
