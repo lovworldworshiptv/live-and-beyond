@@ -194,7 +194,7 @@ function ChannelPage() {
               />
             )
           )}
-          <HlsBinder mediaRef={mediaRef} src={streamSrc} playing={playing} />
+          
 
           <div className="absolute top-4 left-4 flex items-center gap-2 pointer-events-none">
             {channel.isLive && (
