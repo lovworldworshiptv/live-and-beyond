@@ -162,19 +162,45 @@ function TitleDetail() {
             >
               <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Play
             </a>
-            <button className="inline-flex items-center gap-2 px-5 h-12 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
-              <Plus className="size-4" /> My List
+            <button
+              onClick={() => {
+                const wasIn = hasInList(title.id);
+                toggleList(title.id);
+                toast(wasIn ? "Removed from My List" : "Added to My List", { description: title.title });
+              }}
+              className={`inline-flex items-center gap-2 px-5 h-12 rounded-md border transition font-medium ${
+                hasInList(title.id)
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-elevated border-border hover:bg-elevated/70"
+              }`}
+            >
+              {hasInList(title.id) ? <Check className="size-4" /> : <Plus className="size-4" />}
+              {hasInList(title.id) ? "In My List" : "My List"}
             </button>
-            <button className="inline-flex items-center gap-2 px-5 h-12 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
-              <ThumbsUp className="size-4" /> Rate
+            <button
+              onClick={() => {
+                setRated((r) => !r);
+                toast.success(rated ? "Rating removed" : "Thanks for rating!", { description: title.title });
+              }}
+              className={`inline-flex items-center gap-2 px-5 h-12 rounded-md border transition font-medium ${
+                rated
+                  ? "bg-accent text-accent-foreground border-accent"
+                  : "bg-elevated border-border hover:bg-elevated/70"
+              }`}
+            >
+              <ThumbsUp className={`size-4 ${rated ? "fill-current" : ""}`} /> {rated ? "Rated" : "Rate"}
             </button>
-            <button className="inline-flex items-center gap-2 px-5 h-12 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
+            <button
+              onClick={() => toast("Download unavailable", { description: "Downloads are available on the Lettflix mobile app." })}
+              className="inline-flex items-center gap-2 px-5 h-12 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium"
+            >
               <Download className="size-4" /> Download
             </button>
-            <button className="inline-flex items-center gap-2 px-5 h-12 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
-              <Share2 className="size-4" /> Share
-            </button>
+            <div className="inline-flex">
+              <ShareMenu title={title.title} path={`/on-demand/${title.id}`} variant="chip" />
+            </div>
           </div>
+
 
           {(title.kind === "Series" || title.kind === "Podcast") && (
             <div className="mt-12">
