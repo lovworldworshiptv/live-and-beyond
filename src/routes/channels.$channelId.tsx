@@ -8,6 +8,7 @@ import { TitleCard } from "@/components/title-card";
 import { channels, getChannel, getTitle, type Channel } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
+import { useHlsAttach } from "@/hooks/use-hls";
 
 export const Route = createFileRoute("/channels/$channelId")({
   head: () => ({
@@ -178,7 +179,6 @@ function ChannelPage() {
                 <img src={channel.banner} alt="" className="absolute inset-0 size-full object-cover opacity-40 blur-sm scale-110" />
                 <audio
                   ref={(el) => { mediaRef.current = el; }}
-                  src={streamSrc}
                   autoPlay
                   controls={false}
                   className="hidden"
@@ -187,7 +187,6 @@ function ChannelPage() {
             ) : (
               <video
                 ref={(el) => { mediaRef.current = el; }}
-                src={streamSrc}
                 autoPlay
                 playsInline
                 controls
@@ -195,6 +194,7 @@ function ChannelPage() {
               />
             )
           )}
+          <HlsBinder mediaRef={mediaRef} src={streamSrc} playing={playing} />
 
           <div className="absolute top-4 left-4 flex items-center gap-2 pointer-events-none">
             {channel.isLive && (
