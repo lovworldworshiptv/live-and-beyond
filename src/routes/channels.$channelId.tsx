@@ -77,6 +77,35 @@ function ChannelPage() {
     return () => { cancelled = true; };
   }, [channelId]);
 
+  const playerRef = useRef<HTMLDivElement>(null);
+  const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+
+  const startPlayback = () => {
+    setPlaying(true);
+    setMuted(false);
+    playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    requestAnimationFrame(() => {
+      const m = mediaRef.current;
+      if (m) {
+        m.muted = false;
+        m.play().catch(() => {
+          m.muted = true;
+          setMuted(true);
+          m.play().catch(() => {});
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (channel && typeof window !== "undefined" && window.location.hash === "#watch") {
+      startPlayback();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channel?.id]);
+
   if (notFoundState) return <ChannelNotFound />;
   if (!channel) {
     return (
@@ -99,35 +128,6 @@ function ChannelPage() {
   const featured = (channel.featuredContent ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
   const isRadio = channel.streamKind === "radio";
   const streamSrc = channel.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
-  const playerRef = useRef<HTMLDivElement>(null);
-  const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
-
-  const startPlayback = () => {
-    setPlaying(true);
-    setMuted(false);
-    playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    requestAnimationFrame(() => {
-      const m = mediaRef.current;
-      if (m) {
-        m.muted = false;
-        m.play().catch(() => {
-          // fallback to muted autoplay if browser blocks unmuted
-          m.muted = true;
-          setMuted(true);
-          m.play().catch(() => {});
-        });
-      }
-    });
-  };
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.location.hash === "#watch") {
-      startPlayback();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channel.id]);
 
 
   return (
