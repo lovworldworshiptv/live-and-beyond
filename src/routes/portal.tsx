@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   BarChart3,
   DollarSign,
@@ -13,6 +13,7 @@ import {
   Sparkles,
   Loader2,
   ShieldOff,
+  Pencil,
 } from "lucide-react";
 import {
   AreaChart,
@@ -25,9 +26,12 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { ChannelEditor, type Channel } from "@/routes/admin";
 
 export const Route = createFileRoute("/portal")({
   head: () => ({
@@ -42,6 +46,7 @@ export const Route = createFileRoute("/portal")({
   }),
   component: PortalPage,
 });
+
 
 const watchData = Array.from({ length: 14 }, (_, i) => ({
   day: `D${i + 1}`,
