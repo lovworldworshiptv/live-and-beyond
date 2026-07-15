@@ -61,6 +61,8 @@ function ChannelPage() {
   const { channelId } = Route.useParams();
   const [channel, setChannel] = useState<Channel | null>(() => getChannel(channelId) ?? null);
   const [notFoundState, setNotFoundState] = useState(false);
+  const { has: isFollowing, toggle: toggleFollow } = useFollowing();
+  const { settings, setSettings } = useSettings();
 
   useEffect(() => {
     let cancelled = false;
