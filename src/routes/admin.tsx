@@ -1511,7 +1511,7 @@ function ApplicationsCms() {
         slug,
         name: app.channel_name,
         description: app.description,
-        is_published: false,
+        is_published: true,
         ...({ category: app.category, owner_id: app.user_id } as Record<string, unknown>),
       } as never);
     }
