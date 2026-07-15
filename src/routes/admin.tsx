@@ -153,7 +153,7 @@ function useCrud<T extends { id: string }>(table: string, orderCol = "created_at
 }
 
 // ---------- Shared form primitives ----------
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+export function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
       <span className="text-xs font-medium text-[color:var(--muted-foreground)] mb-1.5 block">{label}</span>
@@ -162,14 +162,15 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-const inputClass =
+export const inputClass =
   "w-full h-10 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50";
-const textareaClass =
+export const textareaClass =
   "w-full min-h-24 px-3 py-2 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50";
 
 function Panel({ children }: { children: React.ReactNode }) {
   return <div className="rounded-xl border border-border bg-surface/50 p-6">{children}</div>;
 }
+
 
 function EmptyState({ label, onNew }: { label: string; onNew: () => void }) {
   return (
@@ -183,7 +184,7 @@ function EmptyState({ label, onNew }: { label: string; onNew: () => void }) {
 }
 
 // ---------- Channels CMS ----------
-type Channel = {
+export type Channel = {
   id: string;
   slug: string;
   name: string;
@@ -202,11 +203,13 @@ type Channel = {
   kind: string;
   is_live: boolean;
   is_published: boolean;
+  creator_id?: string | null;
   now_playing: { title?: string; startsAt?: string; endsAt?: string; description?: string } | null;
   video_library: string[] | null;
   podcast_library: string[] | null;
   featured_content: string[] | null;
 };
+
 
 
 function ChannelsCms() {
@@ -295,7 +298,7 @@ function ChannelsCms() {
   );
 }
 
-function ChannelEditor({ value, onClose, onSave }: { value: Partial<Channel>; onClose: () => void; onSave: (v: Partial<Channel>) => void | Promise<void> }) {
+export function ChannelEditor({ value, onClose, onSave }: { value: Partial<Channel>; onClose: () => void; onSave: (v: Partial<Channel>) => void | Promise<void> }) {
   const [form, setForm] = useState<Partial<Channel>>(value);
   const set = <K extends keyof Channel>(k: K, v: Channel[K]) => setForm((f) => ({ ...f, [k]: v }));
   const np = form.now_playing ?? {};
@@ -713,7 +716,7 @@ function UsersCms() {
 }
 
 // ---------- Modal shell ----------
-function ModalShell({ title, onClose, onSave, children }: { title: string; onClose: () => void; onSave: () => void | Promise<void>; children: React.ReactNode }) {
+export function ModalShell({ title, onClose, onSave, children }: { title: string; onClose: () => void; onSave: () => void | Promise<void>; children: React.ReactNode }) {
   const [saving, setSaving] = useState(false);
   async function handleSave() {
     setSaving(true);
@@ -1511,12 +1514,14 @@ function ApplicationsCms() {
         slug,
         name: app.channel_name,
         description: app.description,
+        category: app.category,
+        creator_id: app.user_id,
         is_published: true,
-        ...({ category: app.category, owner_id: app.user_id } as Record<string, unknown>),
       } as never);
     } else {
-      await supabase.from("cms_channels").update({ is_published: true } as never).eq("id", existing.id);
+      await supabase.from("cms_channels").update({ is_published: true, creator_id: app.user_id } as never).eq("id", existing.id);
     }
+
     toast.success(`${app.channel_name} approved`);
     load();
   }

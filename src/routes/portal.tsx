@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   BarChart3,
   DollarSign,
@@ -13,6 +13,7 @@ import {
   Sparkles,
   Loader2,
   ShieldOff,
+  Pencil,
 } from "lucide-react";
 import {
   AreaChart,
@@ -25,9 +26,12 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { ChannelEditor, type Channel } from "@/routes/admin";
 
 export const Route = createFileRoute("/portal")({
   head: () => ({
@@ -42,6 +46,7 @@ export const Route = createFileRoute("/portal")({
   }),
   component: PortalPage,
 });
+
 
 const watchData = Array.from({ length: 14 }, (_, i) => ({
   day: `D${i + 1}`,
@@ -60,11 +65,54 @@ const revenueData = [
 function PortalPage() {
   const { user, isAdmin, isCreator, loading } = useAuth();
   const navigate = useNavigate();
+  const [myChannel, setMyChannel] = useState<Partial<Channel> | null>(null);
+  const [editing, setEditing] = useState<Partial<Channel> | null>(null);
+
+  const loadChannel = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("cms_channels")
+      .select("*")
+      .eq("creator_id", user.id)
+      .maybeSingle();
+    if (data) setMyChannel(data as unknown as Channel);
+  }, [user]);
 
   useEffect(() => {
     if (loading) return;
     if (!user) navigate({ to: "/auth", search: { redirect: "/portal" }, replace: true });
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (!user || !isCreator) return;
+    loadChannel();
+  }, [user, isCreator, loadChannel]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!myChannel) return;
+    if (sessionStorage.getItem("lettflix.completeChannel") === "1") {
+      sessionStorage.removeItem("lettflix.completeChannel");
+      setEditing(myChannel);
+    }
+  }, [myChannel]);
+
+  async function saveChannel(v: Partial<Channel>) {
+    if (!user) return;
+    const payload = { ...v, creator_id: user.id };
+    if (v.id) {
+      const { error } = await supabase.from("cms_channels").update(payload as never).eq("id", v.id);
+      if (error) { toast.error(error.message); return; }
+    } else {
+      const { error } = await supabase.from("cms_channels").insert(payload as never);
+      if (error) { toast.error(error.message); return; }
+    }
+    toast.success("Channel profile saved");
+    setEditing(null);
+    loadChannel();
+  }
+
+
 
   if (loading || !user) {
     return (
@@ -115,7 +163,15 @@ function PortalPage() {
                 revenue in real time.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {isCreator && (
+                <button
+                  onClick={() => setEditing(myChannel ?? { is_published: true, kind: "tv", is_live: false, popularity: 0, is_trending: false, name: "", slug: "" })}
+                  className="h-11 px-5 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition inline-flex items-center gap-2"
+                >
+                  <Pencil className="size-4" /> {myChannel ? "Edit Channel Profile" : "Complete Channel Profile"}
+                </button>
+              )}
               <button className="h-11 px-5 rounded-md bg-accent text-accent-foreground font-semibold hover:bg-accent/90 transition inline-flex items-center gap-2">
                 <Upload className="size-4" /> Upload
               </button>
@@ -123,6 +179,7 @@ function PortalPage() {
                 <Radio className="size-4" /> Go Live
               </button>
             </div>
+
           </div>
         </div>
       </section>
@@ -298,6 +355,14 @@ function PortalPage() {
       </section>
 
       <SiteFooter />
+      {editing && (
+        <ChannelEditor
+          value={editing}
+          onClose={() => setEditing(null)}
+          onSave={saveChannel}
+        />
+      )}
+
     </div>
   );
 }
