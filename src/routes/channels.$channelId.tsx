@@ -54,7 +54,41 @@ function ChannelError({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 function ChannelPage() {
-  const { channel } = Route.useLoaderData();
+  const { channelId } = Route.useParams();
+  const [channel, setChannel] = useState<Channel | null>(() => getChannel(channelId) ?? null);
+  const [notFoundState, setNotFoundState] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setNotFoundState(false);
+    const staticCh = getChannel(channelId) ?? null;
+    setChannel(staticCh);
+    (async () => {
+      const { data } = await supabase
+        .from("cms_channels")
+        .select("*")
+        .eq("slug", channelId)
+        .eq("is_published", true)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data) setChannel(mapChannelRow(data as never));
+      else if (!staticCh) setNotFoundState(true);
+    })();
+    return () => { cancelled = true; };
+  }, [channelId]);
+
+  if (notFoundState) return <ChannelNotFound />;
+  if (!channel) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <SiteHeader />
+        <div className="mx-auto max-w-[1480px] px-6 py-24 text-center text-[color:var(--muted-foreground)]">
+          Loading channel…
+        </div>
+      </div>
+    );
+  }
+
   const related = channels
     .filter((c) => c.id !== channel.id && c.category === channel.category)
     .concat(channels.filter((c) => c.id !== channel.id && c.category !== channel.category))
