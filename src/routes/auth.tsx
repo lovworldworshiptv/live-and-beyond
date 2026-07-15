@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import logoIcon from "@/assets/lettflix-icon.png.asset.json";
 
 const searchSchema = z.object({
@@ -24,21 +24,33 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+const CREATOR_CATEGORIES = [
+  "Sports", "News", "Entertainment", "Christian Living", "Music",
+  "LoveWorld", "Radio", "Audio", "Video", "Education", "Lifestyle", "Kids & Family",
+];
+
+type AccountType = "user" | "creator";
+
 function AuthPage() {
   const { redirect, mode: initialMode } = useSearch({ from: "/auth" });
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">(initialMode ?? "signin");
+  const [accountType, setAccountType] = useState<AccountType>("user");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [channelName, setChannelName] = useState("");
+  const [category, setCategory] = useState(CREATOR_CATEGORIES[0]);
+  const [description, setDescription] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pendingModal, setPendingModal] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !pendingModal) {
       navigate({ to: (redirect as "/admin") ?? "/", replace: true });
     }
-  }, [user, loading, redirect, navigate]);
+  }, [user, loading, redirect, navigate, pendingModal]);
 
   async function recordLogin(userId: string, success: boolean, reason?: string) {
     try {
@@ -52,11 +64,18 @@ function AuthPage() {
       if (success) {
         await supabase.from("profiles").update({ last_sign_in_at: new Date().toISOString() }).eq("id", userId);
       }
-    } catch {
-      /* non-blocking */
-    }
+    } catch { /* non-blocking */ }
   }
 
+  async function submitCreatorApplication(userId: string) {
+    const { error } = await supabase.from("creator_applications").insert({
+      user_id: userId,
+      channel_name: channelName.trim(),
+      category,
+      description: description.trim() || null,
+    });
+    if (error) throw error;
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -64,29 +83,43 @@ function AuthPage() {
       toast.error("Password must be at least 12 characters");
       return;
     }
+    if (mode === "signup" && accountType === "creator" && !channelName.trim()) {
+      toast.error("Channel name is required");
+      return;
+    }
     setBusy(true);
     try {
       if (mode === "signup") {
+        const meta =
+          accountType === "creator"
+            ? { display_name: channelName.trim(), handle: "@" + channelName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") }
+            : { display_name: displayName || email.split("@")[0], handle: "@" + email.split("@")[0] };
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              display_name: displayName || email.split("@")[0],
-              handle: "@" + email.split("@")[0],
-            },
+            data: meta,
           },
         });
         if (error) throw error;
-        if (data.user) await recordLogin(data.user.id, true);
+        if (data.user) {
+          await recordLogin(data.user.id, true);
+          if (accountType === "creator") {
+            try {
+              await submitCreatorApplication(data.user.id);
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : "Could not submit creator application";
+              toast.error(msg);
+            }
+            setPendingModal(true);
+            return;
+          }
+        }
         toast.success("Account created", { description: "Check your email to verify your address." });
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          // Attempt to log failed attempt if we can resolve user id (best-effort skip)
-          throw error;
-        }
+        if (error) throw error;
         if (data.user) await recordLogin(data.user.id, true);
         toast.success("Signed in");
       }
@@ -97,7 +130,6 @@ function AuthPage() {
       setBusy(false);
     }
   }
-
 
   async function onOAuth(provider: "google" | "apple") {
     setBusy(true);
@@ -110,6 +142,11 @@ function AuthPage() {
     }
   }
 
+  function onKingsChat() {
+    toast.info("KingsChat sign-in is coming soon", { description: "This provider will be connected shortly." });
+  }
+
+  const isCreatorSignup = mode === "signup" && accountType === "creator";
 
   return (
     <div className="min-h-screen grid place-items-center px-4 py-16 bg-[radial-gradient(ellipse_at_top,rgba(156,21,51,0.15),transparent_60%),radial-gradient(ellipse_at_bottom,rgba(30,94,255,0.12),transparent_55%)]">
@@ -129,15 +166,40 @@ function AuthPage() {
                 type="button"
                 onClick={() => setMode(m)}
                 className={`flex-1 h-9 text-sm rounded-md font-medium transition ${
-                  mode === m
-                    ? "bg-background text-foreground shadow"
-                    : "text-[color:var(--muted-foreground)]"
+                  mode === m ? "bg-background text-foreground shadow" : "text-[color:var(--muted-foreground)]"
                 }`}
               >
                 {m === "signin" ? "Sign In" : "Sign Up"}
               </button>
             ))}
           </div>
+
+          {mode === "signup" && (
+            <div className="mb-5">
+              <div className="text-xs font-medium text-[color:var(--muted-foreground)] mb-2">I'm signing up as</div>
+              <div className="grid grid-cols-2 gap-2">
+                {(["user", "creator"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setAccountType(t)}
+                    className={`h-10 rounded-md text-sm font-medium border transition ${
+                      accountType === t
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-border bg-elevated text-[color:var(--muted-foreground)] hover:text-foreground"
+                    }`}
+                  >
+                    {t === "user" ? "Viewer" : "Creator"}
+                  </button>
+                ))}
+              </div>
+              {isCreatorSignup && (
+                <p className="text-[11px] text-[color:var(--muted-foreground)] mt-2">
+                  Creator accounts require admin approval. You can start watching immediately after signup.
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="space-y-2">
             <button
@@ -165,8 +227,18 @@ function AuthPage() {
               </svg>
               Continue with Apple
             </button>
+            <button
+              type="button"
+              onClick={onKingsChat}
+              disabled={busy}
+              className="w-full h-11 rounded-md border border-border bg-gradient-to-r from-[#0b3d91] to-[#1e5eff] text-white hover:opacity-90 transition flex items-center justify-center gap-2.5 text-sm font-semibold disabled:opacity-50"
+            >
+              <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden>
+                <path d="M4 4h3v6.5L13.2 4H17l-6.4 6.7L18 20h-3.7l-5.4-7.1L7 14.7V20H4z" />
+              </svg>
+              Continue with KingsChat
+            </button>
           </div>
-
 
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-border" />
@@ -175,7 +247,7 @@ function AuthPage() {
           </div>
 
           <form onSubmit={onSubmit} className="space-y-3">
-            {mode === "signup" && (
+            {mode === "signup" && accountType === "user" && (
               <input
                 type="text"
                 placeholder="Display name"
@@ -183,6 +255,18 @@ function AuthPage() {
                 onChange={(e) => setDisplayName(e.target.value)}
                 className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
+            )}
+            {isCreatorSignup && (
+              <>
+                <input
+                  type="text"
+                  required
+                  placeholder="Channel name"
+                  value={channelName}
+                  onChange={(e) => setChannelName(e.target.value)}
+                  className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </>
             )}
             <input
               type="email"
@@ -201,6 +285,24 @@ function AuthPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
+            {isCreatorSignup && (
+              <>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                >
+                  {CREATOR_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <textarea
+                  placeholder="Describe your channel (audience, content, cadence)"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                />
+              </>
+            )}
 
             <button
               type="submit"
@@ -208,7 +310,11 @@ function AuthPage() {
               className="w-full h-11 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm transition flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {busy && <Loader2 className="size-4 animate-spin" />}
-              {mode === "signin" ? "Sign In" : "Create Account"}
+              {mode === "signin"
+                ? "Sign In"
+                : isCreatorSignup
+                  ? "Apply as Creator"
+                  : "Create Account"}
             </button>
           </form>
 
@@ -217,6 +323,30 @@ function AuthPage() {
           </p>
         </div>
       </div>
+
+      {pendingModal && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-8 shadow-2xl text-center">
+            <div className="mx-auto size-14 rounded-full bg-primary/15 grid place-items-center mb-4">
+              <CheckCircle2 className="size-7 text-primary" />
+            </div>
+            <h2 className="text-xl font-bold">Creator application submitted</h2>
+            <p className="text-sm text-[color:var(--muted-foreground)] mt-2">
+              Your creator account for <span className="font-semibold text-foreground">{channelName}</span> is pending admin approval.
+              In the meantime, you can sign in and enjoy Lettflix as a viewer with the same email and password.
+            </p>
+            <button
+              onClick={() => {
+                setPendingModal(false);
+                navigate({ to: "/", replace: true });
+              }}
+              className="mt-6 w-full h-11 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm"
+            >
+              Continue to Lettflix
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

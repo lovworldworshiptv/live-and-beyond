@@ -495,6 +495,51 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_applications: {
+        Row: {
+          category: string
+          channel_name: string
+          created_at: string
+          description: string | null
+          id: string
+          onboarded_at: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          channel_name: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          onboarded_at?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          channel_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          onboarded_at?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       enterprise_leads: {
         Row: {
           created_at: string
