@@ -1511,9 +1511,11 @@ function ApplicationsCms() {
         slug,
         name: app.channel_name,
         description: app.description,
-        is_published: false,
+        is_published: true,
         ...({ category: app.category, owner_id: app.user_id } as Record<string, unknown>),
       } as never);
+    } else {
+      await supabase.from("cms_channels").update({ is_published: true } as never).eq("id", existing.id);
     }
     toast.success(`${app.channel_name} approved`);
     load();
