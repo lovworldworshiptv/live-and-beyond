@@ -1,14 +1,17 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { LibraryBig } from "lucide-react";
-import { Play, Volume2, VolumeX, Users, Radio, Bell, Share2, Plus, ChevronRight, Signal, Sparkles, Tv, Mic } from "lucide-react";
+import { Play, Volume2, VolumeX, Users, Radio, Bell, BellRing, Plus, Check, ChevronRight, Signal, Sparkles, Tv, Mic } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TitleCard } from "@/components/title-card";
+import { ShareMenu } from "@/components/share-menu";
 import { channels, getChannel, getTitle, type Channel } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
 import { useHlsAttach } from "@/hooks/use-hls";
+import { useFollowing, useSettings } from "@/lib/personal";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/channels/$channelId")({
   head: () => ({
@@ -58,6 +61,8 @@ function ChannelPage() {
   const { channelId } = Route.useParams();
   const [channel, setChannel] = useState<Channel | null>(() => getChannel(channelId) ?? null);
   const [notFoundState, setNotFoundState] = useState(false);
+  const { has: isFollowing, toggle: toggleFollow } = useFollowing();
+  const { settings, setSettings } = useSettings();
 
   useEffect(() => {
     let cancelled = false;
@@ -285,15 +290,41 @@ function ChannelPage() {
             >
               <LibraryBig className="size-4" /> View All Contents
             </Link>
-            <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
-              <Plus className="size-4" /> Follow Channel
+            <button
+              onClick={() => {
+                const wasFollowing = isFollowing(channel.id);
+                toggleFollow(channel.id);
+                toast(wasFollowing ? "Unfollowed channel" : "Following channel", { description: channel.name });
+              }}
+              className={`inline-flex items-center gap-2 px-5 h-11 rounded-md border transition font-medium ${
+                isFollowing(channel.id)
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-elevated border-border hover:bg-elevated/70"
+              }`}
+            >
+              {isFollowing(channel.id) ? <Check className="size-4" /> : <Plus className="size-4" />}
+              {isFollowing(channel.id) ? "Following" : "Follow Channel"}
             </button>
-            <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
-              <Bell className="size-4" /> Notify Me
+            <button
+              onClick={() => {
+                const next = !settings.liveAlerts;
+                setSettings({ ...settings, liveAlerts: next });
+                toast(next ? "Live alerts on" : "Live alerts off", {
+                  description: next ? `We'll notify you when ${channel.name} goes live.` : "You won't receive live alerts.",
+                });
+              }}
+              className={`inline-flex items-center gap-2 px-5 h-11 rounded-md border transition font-medium ${
+                settings.liveAlerts
+                  ? "bg-accent text-accent-foreground border-accent"
+                  : "bg-elevated border-border hover:bg-elevated/70"
+              }`}
+            >
+              {settings.liveAlerts ? <BellRing className="size-4" /> : <Bell className="size-4" />}
+              {settings.liveAlerts ? "Notifying" : "Notify Me"}
             </button>
-            <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium">
-              <Share2 className="size-4" /> Share
-            </button>
+            <div className="h-11 w-28">
+              <ShareMenu title={channel.name} path={`/channels/${channel.id}`} variant="chip" />
+            </div>
           </div>
 
 
