@@ -40,7 +40,17 @@ function OnDemand() {
   const [page, setPage] = useState(1);
   const { items: progress } = useProgress();
 
-  const featured = titles.find((t) => t.featured) ?? titles[0];
+  const featuredList = useMemo(() => {
+    const feat = titles.filter((t) => t.featured);
+    return feat.length ? feat : titles.slice(0, 1);
+  }, [titles]);
+  const [featIdx, setFeatIdx] = useState(0);
+  useEffect(() => {
+    if (featuredList.length < 2) return;
+    const t = setInterval(() => setFeatIdx((i) => (i + 1) % featuredList.length), 6500);
+    return () => clearInterval(t);
+  }, [featuredList.length]);
+  const featured = featuredList[Math.min(featIdx, featuredList.length - 1)];
 
   const filtered = useMemo(
     () =>
