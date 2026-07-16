@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Bookmark, Clock, Bell, Heart, Trash2, Radio, Mic, Users, Plus, Check, Sparkles,
+  Bookmark, Clock, Bell, Heart, Trash2, Radio, Mic, Users, Plus, Check, Sparkles, Loader2, KeyRound, Mail,
 } from "lucide-react";
+import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TitleCard } from "@/components/title-card";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import {
   useProfile, useProgress, useMyList, useReminders, useFollowing,
 } from "@/lib/personal";
