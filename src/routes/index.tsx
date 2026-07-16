@@ -295,7 +295,7 @@ function Index() {
                 <div className="p-4 flex items-start justify-between gap-3">
                   <div>
                     <div className="font-semibold leading-tight line-clamp-1">{t.title}</div>
-                    <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5 flex items-center gap-1.5"><Clock className="size-3" /> {remaining ? `${remaining} min left` : "Almost done"}</div>
+                    <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5 flex items-center gap-1.5"><Clock className="size-3" /> {remaining > 0 ? `${remaining}% left` : "Almost done"}</div>
                   </div>
                   <Plus className="text-[color:var(--muted-foreground)] size-4" />
                 </div>
