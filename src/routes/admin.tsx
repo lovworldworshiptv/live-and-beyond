@@ -333,6 +333,7 @@ export function ChannelEditor({ value, onClose, onSave }: { value: Partial<Chann
         <Field label="Region"><input className={inputClass} value={form.region ?? ""} onChange={(e) => set("region", e.target.value)} placeholder="Global" /></Field>
         <Field label="Viewers (display)"><input className={inputClass} value={form.viewers ?? ""} onChange={(e) => set("viewers", e.target.value)} placeholder="12.4K" /></Field>
         <Field label="Popularity (0-100)"><input type="number" min={0} max={100} className={inputClass} value={form.popularity ?? 0} onChange={(e) => set("popularity", Number(e.target.value))} /></Field>
+        <Field label="Display order (lower = first)"><input type="number" className={inputClass} value={form.display_order ?? 0} onChange={(e) => set("display_order", Number(e.target.value))} /></Field>
         <Field label="Stream URL (HLS / MP4 / radio)"><input className={inputClass} value={form.stream_url ?? ""} onChange={(e) => set("stream_url", e.target.value)} placeholder="https://…/index.m3u8" /></Field>
       </div>
 
