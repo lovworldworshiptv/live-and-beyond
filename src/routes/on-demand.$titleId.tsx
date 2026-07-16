@@ -7,7 +7,7 @@ import { StreamPlayer } from "@/components/stream-player";
 import { ShareMenu } from "@/components/share-menu";
 import { titles as staticTitles, getTitle, type Title } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
-import { mapTitleRow } from "@/lib/cms-catalog";
+import { mapTitleRow, useCmsTitles } from "@/lib/cms-catalog";
 import { useMyList } from "@/lib/personal";
 import { toast } from "sonner";
 
@@ -59,6 +59,7 @@ function TitleDetail() {
   const [notFoundState, setNotFoundState] = useState(false);
   const [rated, setRated] = useState(false);
   const { has: hasInList, toggle: toggleList } = useMyList();
+  const { titles: allTitles } = useCmsTitles();
 
   useEffect(() => {
     let cancelled = false;
@@ -90,8 +91,8 @@ function TitleDetail() {
   }
 
   const audioKind = title.kind === "Podcast";
-  const related = staticTitles.filter((t) => t.id !== title.id && t.category === title.category);
-  const alsoLike = staticTitles.filter((t) => t.id !== title.id).slice(0, 6);
+  const related = allTitles.filter((t) => t.id !== title.id && t.category === title.category);
+  const alsoLike = allTitles.filter((t) => t.id !== title.id).slice(0, 6);
 
   const episodes = Array.from({ length: title.episodes ? Math.min(title.episodes, 6) : 6 }, (_, i) => ({
     number: i + 1,

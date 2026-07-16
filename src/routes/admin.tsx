@@ -211,6 +211,7 @@ export type Channel = {
   video_library: string[] | null;
   podcast_library: string[] | null;
   featured_content: string[] | null;
+  display_order: number | null;
 };
 
 
@@ -332,6 +333,7 @@ export function ChannelEditor({ value, onClose, onSave }: { value: Partial<Chann
         <Field label="Region"><input className={inputClass} value={form.region ?? ""} onChange={(e) => set("region", e.target.value)} placeholder="Global" /></Field>
         <Field label="Viewers (display)"><input className={inputClass} value={form.viewers ?? ""} onChange={(e) => set("viewers", e.target.value)} placeholder="12.4K" /></Field>
         <Field label="Popularity (0-100)"><input type="number" min={0} max={100} className={inputClass} value={form.popularity ?? 0} onChange={(e) => set("popularity", Number(e.target.value))} /></Field>
+        <Field label="Display order (lower = first)"><input type="number" className={inputClass} value={form.display_order ?? 0} onChange={(e) => set("display_order", Number(e.target.value))} /></Field>
         <Field label="Stream URL (HLS / MP4 / radio)"><input className={inputClass} value={form.stream_url ?? ""} onChange={(e) => set("stream_url", e.target.value)} placeholder="https://…/index.m3u8" /></Field>
       </div>
 
@@ -402,6 +404,7 @@ type Title = {
   poster_url: string | null;
   backdrop_url: string | null;
   is_published: boolean;
+  display_order: number | null;
 };
 
 function TitlesCms() {
@@ -501,6 +504,7 @@ function TitleEditor({ value, onClose, onSave }: { value: Partial<Title>; onClos
         <Field label="Duration (minutes)"><input type="number" className={inputClass} value={form.duration_minutes ?? ""} onChange={(e) => set("duration_minutes", e.target.value ? Number(e.target.value) : null)} /></Field>
         <Field label="Seasons"><input type="number" className={inputClass} value={form.seasons ?? ""} onChange={(e) => set("seasons", e.target.value ? Number(e.target.value) : null)} /></Field>
         <Field label="Episodes"><input type="number" className={inputClass} value={form.episodes ?? ""} onChange={(e) => set("episodes", e.target.value ? Number(e.target.value) : null)} /></Field>
+        <Field label="Display order (lower = first)"><input type="number" className={inputClass} value={form.display_order ?? 0} onChange={(e) => set("display_order", Number(e.target.value))} /></Field>
       </div>
 
       <div className="grid gap-4 mt-4 md:grid-cols-2">
@@ -1783,6 +1787,52 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
             </div>
           ))}
           <button onClick={() => setStats([...stats, { k: "", v: "" }])} className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border hover:bg-elevated text-sm"><Plus className="size-4" /> Add stat</button>
+        </div>
+      </div>
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs font-medium text-[color:var(--muted-foreground)]">Auto-slide banners</div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-[color:var(--muted-foreground)]">Interval (ms)</label>
+            <input
+              type="number"
+              className={`${inputClass} w-24`}
+              value={value.intervalMs ?? 6000}
+              onChange={(e) => set({ intervalMs: Number(e.target.value) || 6000 })}
+            />
+          </div>
+        </div>
+        <div className="space-y-3">
+          {(value.slides ?? []).map((s: any, i: number) => (
+            <div key={i} className="rounded-md border border-border bg-background/40 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-semibold">Slide {i + 1}</div>
+                <button
+                  onClick={() => set({ slides: (value.slides ?? []).filter((_: any, j: number) => j !== i) })}
+                  className="h-8 px-2 rounded-md hover:bg-elevated text-destructive"
+                ><Trash2 className="size-4" /></button>
+              </div>
+              <MediaPicker
+                value={s.imageUrl ?? null}
+                onChange={(url) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, imageUrl: url } : x) })}
+                folder="hero"
+              />
+              <div className="grid gap-2 md:grid-cols-2">
+                <input className={inputClass} placeholder="Badge (e.g. LIVE NOW)" value={s.badge ?? ""} onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, badge: e.target.value } : x) })} />
+                <input className={inputClass} placeholder="Badge meta" value={s.badgeMeta ?? ""} onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, badgeMeta: e.target.value } : x) })} />
+                <input className={inputClass} placeholder="Title" value={s.title ?? ""} onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, title: e.target.value } : x) })} />
+                <input className={inputClass} placeholder="Title accent" value={s.titleAccent ?? ""} onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, titleAccent: e.target.value } : x) })} />
+              </div>
+              <textarea className={textareaClass} placeholder="Description" value={s.description ?? ""} onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, description: e.target.value } : x) })} />
+            </div>
+          ))}
+          <button
+            onClick={() => set({ slides: [...(value.slides ?? []), { imageUrl: value.imageUrl ?? null, badge: value.badge, badgeMeta: value.badgeMeta, title: value.title, titleAccent: value.titleAccent, description: value.description }] })}
+            className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border hover:bg-elevated text-sm"
+          ><Plus className="size-4" /> Add slide</button>
+          {(!value.slides || value.slides.length === 0) && (
+            <p className="text-xs text-[color:var(--muted-foreground)]">No slides added — the hero uses the single banner above. Add 2+ slides to enable auto-rotation.</p>
+          )}
         </div>
       </div>
     </div>

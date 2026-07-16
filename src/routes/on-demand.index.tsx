@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Play, Search, Filter, Sparkles, Info } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -40,7 +40,17 @@ function OnDemand() {
   const [page, setPage] = useState(1);
   const { items: progress } = useProgress();
 
-  const featured = titles.find((t) => t.featured) ?? titles[0];
+  const featuredList = useMemo(() => {
+    const feat = titles.filter((t) => t.featured);
+    return feat.length ? feat : titles.slice(0, 1);
+  }, [titles]);
+  const [featIdx, setFeatIdx] = useState(0);
+  useEffect(() => {
+    if (featuredList.length < 2) return;
+    const t = setInterval(() => setFeatIdx((i) => (i + 1) % featuredList.length), 6500);
+    return () => clearInterval(t);
+  }, [featuredList.length]);
+  const featured = featuredList[Math.min(featIdx, featuredList.length - 1)];
 
   const filtered = useMemo(
     () =>
@@ -78,9 +88,17 @@ function OnDemand() {
       <SiteHeader />
 
       {/* FEATURED SPOTLIGHT */}
-      <section className="relative border-b border-border">
+      <section className="relative border-b border-border overflow-hidden">
         <div className="absolute inset-0 -z-10">
-          <img src={featured.hero} alt="" className="size-full object-cover opacity-60" />
+          {featuredList.map((f, i) => (
+            <img
+              key={f.id}
+              src={f.hero}
+              alt=""
+              className="absolute inset-0 size-full object-cover opacity-60 transition-opacity duration-1000"
+              style={{ opacity: i === featIdx ? 0.6 : 0 }}
+            />
+          ))}
           <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-background" />
         </div>
@@ -119,6 +137,18 @@ function OnDemand() {
                 <Info className="size-4" /> More Info
               </Link>
             </div>
+            {featuredList.length > 1 && (
+              <div className="mt-8 flex gap-1.5">
+                {featuredList.map((_, i) => (
+                  <button
+                    key={i}
+                    aria-label={`Featured slide ${i + 1}`}
+                    onClick={() => setFeatIdx(i)}
+                    className={`h-1.5 rounded-full transition-all ${i === featIdx ? "w-6 bg-white" : "w-1.5 bg-white/40"}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
