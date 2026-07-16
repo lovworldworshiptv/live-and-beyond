@@ -292,8 +292,7 @@ function AuthPage() {
             </div>
             <h2 className="text-xl font-bold">Creator application submitted</h2>
             <p className="text-sm text-[color:var(--muted-foreground)] mt-2">
-              Your creator account for <span className="font-semibold text-foreground">{channelName}</span> is pending admin approval.
-              In the meantime, you can sign in and enjoy Lettflix as a viewer with the same email and password.
+              Your creator account is pending admin approval. In the meantime, you can sign in and enjoy Lettflix as a viewer with the same email and password. Once approved, you'll be prompted to create your first channel.
             </p>
             <button
               onClick={() => {
