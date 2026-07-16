@@ -211,6 +211,7 @@ export type Channel = {
   video_library: string[] | null;
   podcast_library: string[] | null;
   featured_content: string[] | null;
+  display_order: number | null;
 };
 
 
