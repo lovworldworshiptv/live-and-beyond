@@ -134,7 +134,7 @@ function ProfilePage() {
       >
         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {(progressTitles.length > 0 ? progressTitles.map(({ t }) => t) : titles.slice(0, 5)).map((t) => (
-            <TitleCard key={t.id} t={t} portrait={false} />
+            <TitleCard key={t.id} t={t} portrait={false} preview={false} />
           ))}
         </div>
       </Section>
