@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MediaPicker } from "@/components/media-picker";
-import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X, Home } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
