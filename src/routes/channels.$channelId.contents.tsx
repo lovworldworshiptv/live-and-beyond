@@ -383,12 +383,23 @@ function ChannelContentsPage() {
 
         {/* On-Demand library */}
         <section>
-          <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
-            <Sparkles className="size-4 text-accent" /> On-Demand Library
-          </h2>
-          <p className="text-sm text-[color:var(--muted-foreground)] mt-1">
-            Every on-demand title uploaded by {channel.name}.
-          </p>
+          <div className="flex items-end justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
+                <Sparkles className="size-4 text-accent" /> On-Demand Library
+              </h2>
+              <p className="text-sm text-[color:var(--muted-foreground)] mt-1">
+                Every on-demand title uploaded by {channel.name}.
+              </p>
+            </div>
+            <Link
+              to="/channels/$channelId/library"
+              params={{ channelId: channel.id }}
+              className="inline-flex items-center gap-1.5 text-xs px-3 h-9 rounded-md border border-border bg-elevated hover:bg-elevated/70 font-medium"
+            >
+              Browse full library <ChevronRight className="size-3.5" />
+            </Link>
+          </div>
           {libraryTitles.length === 0 ? (
             <div className="mt-4 rounded-xl border border-dashed border-border bg-elevated/30 p-8 text-center text-sm text-[color:var(--muted-foreground)]">
               No on-demand content uploaded to this channel yet.

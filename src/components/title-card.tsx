@@ -3,6 +3,7 @@ import { Play, Plus, Check, Info, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useMyList, useProgress } from "@/lib/personal";
+import { useHlsAttach } from "@/hooks/use-hls";
 import { ShareMenu } from "./share-menu";
 import type { Title } from "@/lib/catalog";
 
@@ -81,6 +82,9 @@ export function TitleCard({
     };
   }, [open]);
 
+  const previewSrc = t.streamUrl || PREVIEW_VIDEO;
+  useHlsAttach(videoRef as React.MutableRefObject<HTMLVideoElement | HTMLAudioElement | null>, previewSrc, open);
+
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -89,7 +93,7 @@ export function TitleCard({
       v.play().catch(() => {});
     } else {
       v.pause();
-      v.currentTime = 0;
+      try { v.currentTime = 0; } catch { /* ignore */ }
     }
   }, [open, muted]);
 
@@ -157,7 +161,6 @@ export function TitleCard({
                 <img src={t.hero} alt="" className="size-full object-cover" />
                 <video
                   ref={videoRef}
-                  src={t.streamUrl || PREVIEW_VIDEO}
                   loop
                   playsInline
                   muted

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { RemindButton } from "./remind-button";
 import { ShareMenu } from "./share-menu";
+import { useHlsAttach } from "@/hooks/use-hls";
 import { useFollowing, useReminders } from "@/lib/personal";
 import { toast } from "sonner";
 import type { Channel } from "@/lib/catalog";
@@ -71,6 +72,9 @@ export function ChannelCard({ c }: { c: Channel }) {
     setMuted(true);
   };
 
+  const previewSrc = c.streamUrl || PREVIEW_VIDEO;
+  useHlsAttach(videoRef as React.MutableRefObject<HTMLVideoElement | HTMLAudioElement | null>, previewSrc, hovering && canPreview);
+
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -79,7 +83,7 @@ export function ChannelCard({ c }: { c: Channel }) {
       v.play().catch(() => {});
     } else {
       v.pause();
-      v.currentTime = 0;
+      try { v.currentTime = 0; } catch { /* ignore */ }
     }
   }, [hovering, muted, canPreview]);
 
@@ -106,7 +110,6 @@ export function ChannelCard({ c }: { c: Channel }) {
           {canPreview && (
             <video
               ref={videoRef}
-              src={c.streamUrl || PREVIEW_VIDEO}
               loop
               playsInline
               muted
