@@ -235,26 +235,15 @@ function AuthPage() {
           </div>
 
           <form onSubmit={onSubmit} className="space-y-3">
-            {mode === "signup" && accountType === "user" && (
+            {mode === "signup" && (
               <input
                 type="text"
+                required
                 placeholder="Display name"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
-            )}
-            {isCreatorSignup && (
-              <>
-                <input
-                  type="text"
-                  required
-                  placeholder="Channel name"
-                  value={channelName}
-                  onChange={(e) => setChannelName(e.target.value)}
-                  className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
-              </>
             )}
             <input
               type="email"
@@ -273,24 +262,7 @@ function AuthPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
-            {isCreatorSignup && (
-              <>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                >
-                  {CREATOR_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <textarea
-                  placeholder="Describe your channel (audience, content, cadence)"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-                />
-              </>
-            )}
+
 
             <button
               type="submit"
