@@ -59,6 +59,7 @@ function TitleDetail() {
   const [notFoundState, setNotFoundState] = useState(false);
   const [rated, setRated] = useState(false);
   const { has: hasInList, toggle: toggleList } = useMyList();
+  const { titles: allTitles } = useCmsTitles();
 
   useEffect(() => {
     let cancelled = false;
