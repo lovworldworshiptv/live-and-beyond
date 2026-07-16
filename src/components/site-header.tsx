@@ -14,16 +14,13 @@ import logoHorizontal from "@/assets/lettflix-horizontal.png.asset.json";
 import { useProfile } from "@/lib/personal";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-
-const navItems = [
-  { label: "Home", to: "/" as const },
-  { label: "Channels", to: "/channels" as const },
-  { label: "Guide", to: "/guide" as const },
-  { label: "On Demand", to: "/on-demand" as const },
-  { label: "Pricing", to: "/pricing" as const },
-];
+import { useCmsSetting } from "@/lib/cms-catalog";
+import { defaultNav, type NavConfig } from "@/lib/homepage-defaults";
 
 export function SiteHeader() {
+  const { value: nav } = useCmsSetting<NavConfig>("nav", defaultNav);
+  const navItems = nav.items;
+
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { profile } = useProfile();
   const { user, isAdmin, isCreator, signOut } = useAuth();
