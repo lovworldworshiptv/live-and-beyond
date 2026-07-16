@@ -105,8 +105,8 @@ export function TitleCard({
     <div
       ref={cardRef}
       className={`group relative shrink-0 snap-start ${widthClass}`}
-      onMouseEnter={openSoon}
-      onMouseLeave={closeSoon}
+      onMouseEnter={preview ? openSoon : undefined}
+      onMouseLeave={preview ? closeSoon : undefined}
     >
       <Link
         to="/on-demand/$titleId"
