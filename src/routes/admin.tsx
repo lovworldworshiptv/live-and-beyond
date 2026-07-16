@@ -80,6 +80,7 @@ function AdminPage() {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="mb-6 flex flex-wrap h-auto">
             <TabsTrigger value="overview"><LayoutDashboard className="size-4" /> Overview</TabsTrigger>
+            <TabsTrigger value="homepage"><Home className="size-4" /> Homepage</TabsTrigger>
             <TabsTrigger value="channels"><Radio className="size-4" /> Channels</TabsTrigger>
             <TabsTrigger value="titles"><Video className="size-4" /> Titles</TabsTrigger>
             <TabsTrigger value="schedule"><CalendarClock className="size-4" /> Schedule</TabsTrigger>
@@ -92,6 +93,7 @@ function AdminPage() {
             <TabsTrigger value="security"><KeyRound className="size-4" /> Security</TabsTrigger>
           </TabsList>
           <TabsContent value="overview"><OverviewCms /></TabsContent>
+          <TabsContent value="homepage"><HomepageCms /></TabsContent>
           <TabsContent value="channels"><ChannelsCms /></TabsContent>
           <TabsContent value="titles"><TitlesCms /></TabsContent>
           <TabsContent value="schedule"><ScheduleCms /></TabsContent>
