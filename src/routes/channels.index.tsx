@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Filter, Search, TrendingUp, Clock, Flame, Sparkles, ArrowRight } from "lucide-react";
+import { Filter, Search, TrendingUp, Clock, Flame } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { SponsorBanner } from "@/components/sponsor-banner";
 import { ChannelCard } from "@/components/channel-card";
 import {
   genres,
