@@ -319,13 +319,13 @@ function Index() {
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {cmsCollections.slice(0, 8).map((col) => (
+            {cmsCollections.slice(0, 8).map((col, i) => (
               <Link
                 key={col.id}
                 to="/collections/$collectionId"
                 params={{ collectionId: col.slug }}
-                className="group relative overflow-hidden rounded-xl border border-border bg-elevated/50 p-5 h-32 flex flex-col justify-between hover:border-foreground/20 transition"
-                style={col.coverUrl ? { backgroundImage: `linear-gradient(135deg, oklch(0.24 0.59 359.4 / 0.7), oklch(0.14 0.09 264 / 0.85)), url(${col.coverUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+                className="group relative overflow-hidden rounded-xl border border-border p-5 h-32 flex flex-col justify-between hover:border-foreground/20 transition"
+                style={{ background: COLLECTION_GRADIENTS[i % COLLECTION_GRADIENTS.length] }}
               >
                 {col.isFeatured ? <Sparkles className="size-6 text-white/90" /> : <Heart className="size-6 text-white/90" />}
                 <div>
