@@ -13,7 +13,7 @@ import { useHlsAttach } from "@/hooks/use-hls";
 import { useFollowing, useSettings } from "@/lib/personal";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/channels/$channelId")({
+export const Route = createFileRoute("/channels/$channelId/")({
   head: () => ({
     meta: [
       { title: "Channel — Lettflix" },
