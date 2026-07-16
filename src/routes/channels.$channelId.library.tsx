@@ -104,6 +104,7 @@ function ChannelLibraryPage() {
       }
 
       void uuid;
+      if (!cancelled) { setTitles(collected); setLoading(false); }
     })();
     return () => { cancelled = true; };
   }, [channelId]);
