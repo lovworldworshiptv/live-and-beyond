@@ -18,7 +18,7 @@ import { SponsorBanner } from "@/components/sponsor-banner";
 import { useCmsChannels, useCmsTitles, useCmsEvents, useCmsCollections, useCmsSetting } from "@/lib/cms-catalog";
 import { defaultHero, type HeroConfig } from "@/lib/homepage-defaults";
 import { useProgress } from "@/lib/personal";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import heroImg from "@/assets/hero-broadcast.jpg";
 import ch1 from "@/assets/channel-1.jpg";
