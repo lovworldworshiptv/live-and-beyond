@@ -137,6 +137,18 @@ function OnDemand() {
                 <Info className="size-4" /> More Info
               </Link>
             </div>
+            {featuredList.length > 1 && (
+              <div className="mt-8 flex gap-1.5">
+                {featuredList.map((_, i) => (
+                  <button
+                    key={i}
+                    aria-label={`Featured slide ${i + 1}`}
+                    onClick={() => setFeatIdx(i)}
+                    className={`h-1.5 rounded-full transition-all ${i === featIdx ? "w-6 bg-white" : "w-1.5 bg-white/40"}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
