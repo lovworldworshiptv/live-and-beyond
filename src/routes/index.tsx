@@ -81,7 +81,7 @@ function Index() {
       <section className="relative isolate overflow-hidden min-h-[680px] md:min-h-[720px] lg:min-h-[760px]">
         <div className="absolute inset-0 bg-background" />
         <img
-          src={heroImg}
+          src={hero.imageUrl || heroImg}
           alt="Lettflix broadcast showcase"
           width={1920}
           height={1088}
