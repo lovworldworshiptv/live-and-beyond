@@ -125,6 +125,8 @@ export function useCmsChannels() {
       .from("cms_channels")
       .select("*")
       .eq("is_published", true)
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: false })
       .then(({ data }) => {
         if (data && data.length) setChannels((data as ChannelRow[]).map(mapChannelRow));
         setLoading(false);
