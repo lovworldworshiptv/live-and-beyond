@@ -62,9 +62,6 @@ function AuthPage() {
   async function submitCreatorApplication(userId: string) {
     const { error } = await supabase.from("creator_applications").insert({
       user_id: userId,
-      channel_name: channelName.trim(),
-      category,
-      description: description.trim() || null,
     });
     if (error) throw error;
   }
