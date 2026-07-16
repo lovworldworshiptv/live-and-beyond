@@ -47,7 +47,7 @@ function Index() {
   const { titles } = useCmsTitles();
   const { events } = useCmsEvents(8);
   const { collections: cmsCollections } = useCmsCollections();
-  const { progress } = useProgress();
+  const { items: progressItems } = useProgress();
 
   const liveNow = useMemo(() => channels.filter((c) => c.isLive).slice(0, 10), [channels]);
   const featuredChannels = useMemo(() => {
@@ -59,14 +59,16 @@ function Index() {
     return (feat.length ? feat : titles).slice(0, 10);
   }, [titles]);
   const continueWatching = useMemo(() => {
-    return Object.entries(progress)
-      .map(([id, p]) => {
-        const t = titles.find((x) => x.id === id);
-        return t ? { t, p } : null;
+    return progressItems
+      .slice()
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .map((p) => {
+        const t = titles.find((x) => x.id === p.titleId);
+        return t ? { t, pct: p.positionPct } : null;
       })
-      .filter(Boolean)
-      .slice(0, 6) as { t: (typeof titles)[number]; p: { seconds: number; duration: number } }[];
-  }, [progress, titles]);
+      .filter((x): x is { t: (typeof titles)[number]; pct: number } => !!x)
+      .slice(0, 6);
+  }, [progressItems, titles]);
 
   const heroBadgeMeta = hero.badgeMeta.replace(/^\d+/, String(channels.filter((c) => c.isLive).length || channels.length));
 
