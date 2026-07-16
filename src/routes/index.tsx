@@ -14,6 +14,7 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Row } from "@/components/row";
+import { SponsorBanner } from "@/components/sponsor-banner";
 import { useCmsChannels, useCmsTitles, useCmsEvents, useCmsCollections, useCmsSetting } from "@/lib/cms-catalog";
 import { defaultHero, type HeroConfig } from "@/lib/homepage-defaults";
 import { useProgress } from "@/lib/personal";
