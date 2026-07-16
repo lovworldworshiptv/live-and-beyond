@@ -1619,14 +1619,14 @@ function ApplicationsCms() {
                 return (
                   <tr key={r.id} className="border-b border-border/50 align-top">
                     <td className="py-3 pr-4">
-                      <div className="font-medium">{r.channel_name}</div>
+                      <div className="font-medium">{r.channel_name ?? <span className="text-[color:var(--muted-foreground)] italic">Pending channel</span>}</div>
                       {r.description && <div className="text-xs text-[color:var(--muted-foreground)] max-w-xs mt-1">{r.description}</div>}
                     </td>
                     <td className="py-3 pr-4">
                       <div>{p?.display_name ?? "—"}</div>
                       <div className="text-xs text-[color:var(--muted-foreground)]">{p?.handle ?? ""}</div>
                     </td>
-                    <td className="py-3 pr-4">{r.category}</td>
+                    <td className="py-3 pr-4">{r.category ?? "—"}</td>
                     <td className="py-3 pr-4 text-xs text-[color:var(--muted-foreground)]">{new Date(r.created_at).toLocaleDateString()}</td>
                     <td className="py-3 pr-4">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
