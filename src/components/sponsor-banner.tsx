@@ -95,11 +95,8 @@ function SponsorSlide({ sponsor }: { sponsor: CmsSponsor }) {
         </>
       ) : (
         <>
-          <div className="absolute inset-0 bg-[image:var(--gradient-live)] opacity-90" />
-          <div
-            className="absolute inset-0 mix-blend-overlay"
-            style={{ background: "radial-gradient(at 80% 50%, oklch(0.58 0.22 264 / 0.6), transparent 60%)" }}
-          />
+          <div className="absolute inset-0 opacity-90" style={{ background: "var(--gradient-hero)" }} />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(30,94,255,0.25),transparent_60%),radial-gradient(circle_at_80%_50%,rgba(156,21,51,0.35),transparent_60%)]" />
         </>
       )}
       <div className="relative h-full px-6 md:px-10 lg:px-14 flex flex-col justify-center gap-3 max-w-3xl">
