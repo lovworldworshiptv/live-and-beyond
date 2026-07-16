@@ -102,6 +102,11 @@ function ProfilePage() {
         </div>
       </section>
 
+      {/* Account */}
+      <AccountPanel initialName={displayName} email={email} onSaved={(n) => setAccount((a) => ({ display_name: n, handle: a?.handle ?? null }))} />
+
+
+
       {/* Family Profiles */}
       <Section icon={<Users className="size-4 text-accent" />} title="Who's Watching" subtitle="Up to 5 profiles with individual history and preferences.">
         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
