@@ -35,9 +35,6 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [channelName, setChannelName] = useState("");
-  const [category, setCategory] = useState(CREATOR_CATEGORIES[0]);
-  const [description, setDescription] = useState("");
   const [busy, setBusy] = useState(false);
   const [pendingModal, setPendingModal] = useState(false);
 
