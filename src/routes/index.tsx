@@ -213,32 +213,8 @@ function Index() {
       )}
 
       {/* SPONSORED */}
-      {events[0] && (
-        <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-14">
-          <div className="relative overflow-hidden rounded-2xl border border-border">
-            <div className="absolute inset-0 bg-[image:var(--gradient-live)] opacity-90" />
-            <div className="absolute inset-0 mix-blend-overlay" style={{ background: "radial-gradient(at 80% 50%, oklch(0.58 0.22 264 / 0.6), transparent 60%)" }} />
-            <div className="relative px-8 lg:px-14 py-10 lg:py-14 flex flex-wrap items-center justify-between gap-6">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-widest text-white/80">Featured Event</div>
-                <h3 className="mt-2 text-2xl lg:text-3xl font-display font-bold max-w-xl text-white">{events[0].name}</h3>
-                <p className="mt-2 text-white/80 max-w-xl">
-                  {formatEventDate(events[0].startsAt).date} · {formatEventDate(events[0].startsAt).time}
-                  {events[0].description ? ` — ${events[0].description}` : ""}
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition">
-                  <Bell className="size-4" /> Notify Me
-                </button>
-                <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-black/40 border border-white/20 backdrop-blur text-white font-medium hover:bg-black/60 transition">
-                  <CalendarDays className="size-4" /> Add to Calendar
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      <SponsorBanner placement="home" includeSponsoredEvents />
+
 
       {/* TRENDING */}
       {trending.length > 0 && (
