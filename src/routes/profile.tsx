@@ -38,11 +38,22 @@ function greeting() {
 }
 
 function ProfilePage() {
+  const { user } = useAuth();
   const { profile } = useProfile();
   const { items: progress, clear: clearProgress } = useProgress();
   const { ids: myList, toggle: toggleList } = useMyList();
   const { items: reminders, toggle: toggleReminder } = useReminders();
   const { ids: following, toggle: toggleFollow } = useFollowing();
+
+  const [account, setAccount] = useState<{ display_name: string | null; handle: string | null } | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("display_name, handle").eq("id", user.id).maybeSingle()
+      .then(({ data }) => setAccount(data ?? null));
+  }, [user]);
+
+  const displayName = account?.display_name || user?.user_metadata?.display_name || profile.displayName;
+  const email = user?.email ?? "";
 
   const progressTitles = progress
     .map((p) => ({ p, t: getTitle(p.titleId) }))
