@@ -1,0 +1,1 @@
+ALTER TABLE public.cms_events ADD COLUMN IF NOT EXISTS is_sponsored boolean NOT NULL DEFAULT false;

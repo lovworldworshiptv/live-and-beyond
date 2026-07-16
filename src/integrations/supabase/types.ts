@@ -210,6 +210,7 @@ export type Database = {
           ends_at: string | null
           id: string
           is_published: boolean
+          is_sponsored: boolean
           name: string
           slug: string
           starts_at: string
@@ -228,6 +229,7 @@ export type Database = {
           ends_at?: string | null
           id?: string
           is_published?: boolean
+          is_sponsored?: boolean
           name: string
           slug: string
           starts_at: string
@@ -246,6 +248,7 @@ export type Database = {
           ends_at?: string | null
           id?: string
           is_published?: boolean
+          is_sponsored?: boolean
           name?: string
           slug?: string
           starts_at?: string
