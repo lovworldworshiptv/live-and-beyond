@@ -3,6 +3,14 @@ export type NavConfig = { items: NavItem[] };
 
 export type HeroCta = { label: string; to: string };
 export type HeroStat = { k: string; v: string };
+export type HeroSlide = {
+  imageUrl?: string | null;
+  badge?: string;
+  badgeMeta?: string;
+  title?: string;
+  titleAccent?: string;
+  description?: string;
+};
 export type HeroConfig = {
   badge: string;
   badgeMeta: string;
@@ -14,6 +22,10 @@ export type HeroConfig = {
   secondaryCta: HeroCta;
   tertiaryCta: HeroCta;
   stats: HeroStat[];
+  /** Optional multi-banner autoslide. If empty, hero renders the single legacy image + text. */
+  slides?: HeroSlide[];
+  /** Auto-rotation interval in milliseconds. */
+  intervalMs?: number;
 };
 
 export type FooterLink = { label: string; href: string };
@@ -50,6 +62,8 @@ export const defaultHero: HeroConfig = {
     { k: "12K+", v: "On-demand titles" },
     { k: "320", v: "Radio stations" },
   ],
+  slides: [],
+  intervalMs: 6000,
 };
 
 export const defaultFooter: FooterConfig = {
