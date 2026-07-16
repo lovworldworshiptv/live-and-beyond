@@ -63,7 +63,7 @@ export function SiteHeader() {
               {navItems.map((item) => (
                 <Link
                   key={item.label}
-                  to={item.to}
+                  to={item.to as never}
                   onClick={() => setMobileOpen(false)}
                   className={`px-3 py-3 rounded-md text-sm transition-colors ${
                     isActive(item.to)
