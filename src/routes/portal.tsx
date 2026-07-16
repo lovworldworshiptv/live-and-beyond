@@ -90,12 +90,12 @@ function PortalPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!myChannel) return;
+    if (!isCreator) return;
     if (sessionStorage.getItem("lettflix.completeChannel") === "1") {
       sessionStorage.removeItem("lettflix.completeChannel");
-      setEditing(myChannel);
+      setEditing(myChannel ?? { is_published: true, kind: "tv", is_live: false, popularity: 0, is_trending: false, display_order: 0, name: "", slug: "" });
     }
-  }, [myChannel]);
+  }, [myChannel, isCreator]);
 
   async function saveChannel(v: Partial<Channel>) {
     if (!user) return;
