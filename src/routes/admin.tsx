@@ -114,13 +114,20 @@ function AdminPage() {
 }
 
 // ---------- Generic CRUD hook ----------
-function useCrud<T extends { id: string }>(table: string, orderCol = "created_at") {
+type OrderSpec = string | { col: string; ascending?: boolean } | Array<{ col: string; ascending?: boolean }>;
+
+function useCrud<T extends { id: string }>(table: string, order: OrderSpec = "created_at") {
   const [rows, setRows] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function refresh() {
     setLoading(true);
-    const { data, error } = await supabase.from(table as never).select("*").order(orderCol, { ascending: false });
+    let q = supabase.from(table as never).select("*");
+    const specs = typeof order === "string"
+      ? [{ col: order, ascending: false }]
+      : Array.isArray(order) ? order : [order];
+    for (const s of specs) q = q.order(s.col, { ascending: s.ascending ?? false });
+    const { data, error } = await q;
     if (error) toast.error(error.message);
     setRows((data ?? []) as T[]);
     setLoading(false);
