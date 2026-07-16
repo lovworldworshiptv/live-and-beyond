@@ -91,8 +91,8 @@ function TitleDetail() {
   }
 
   const audioKind = title.kind === "Podcast";
-  const related = staticTitles.filter((t) => t.id !== title.id && t.category === title.category);
-  const alsoLike = staticTitles.filter((t) => t.id !== title.id).slice(0, 6);
+  const related = allTitles.filter((t) => t.id !== title.id && t.category === title.category);
+  const alsoLike = allTitles.filter((t) => t.id !== title.id).slice(0, 6);
 
   const episodes = Array.from({ length: title.episodes ? Math.min(title.episodes, 6) : 6 }, (_, i) => ({
     number: i + 1,
