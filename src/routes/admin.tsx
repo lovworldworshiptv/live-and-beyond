@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MediaPicker } from "@/components/media-picker";
-import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X, Home } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -80,6 +80,7 @@ function AdminPage() {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="mb-6 flex flex-wrap h-auto">
             <TabsTrigger value="overview"><LayoutDashboard className="size-4" /> Overview</TabsTrigger>
+            <TabsTrigger value="homepage"><Home className="size-4" /> Homepage</TabsTrigger>
             <TabsTrigger value="channels"><Radio className="size-4" /> Channels</TabsTrigger>
             <TabsTrigger value="titles"><Video className="size-4" /> Titles</TabsTrigger>
             <TabsTrigger value="schedule"><CalendarClock className="size-4" /> Schedule</TabsTrigger>
@@ -92,6 +93,7 @@ function AdminPage() {
             <TabsTrigger value="security"><KeyRound className="size-4" /> Security</TabsTrigger>
           </TabsList>
           <TabsContent value="overview"><OverviewCms /></TabsContent>
+          <TabsContent value="homepage"><HomepageCms /></TabsContent>
           <TabsContent value="channels"><ChannelsCms /></TabsContent>
           <TabsContent value="titles"><TitlesCms /></TabsContent>
           <TabsContent value="schedule"><ScheduleCms /></TabsContent>
@@ -1628,3 +1630,163 @@ function ApplicationsCms() {
   );
 }
 
+
+// ============ Homepage CMS ============
+type SettingKey = "nav" | "hero" | "footer";
+
+function HomepageCms() {
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-lg font-semibold">Homepage & Chrome</h2>
+        <p className="text-sm text-[color:var(--muted-foreground)]">
+          Control the top navigation, hero section, and site footer. Changes publish immediately.
+        </p>
+      </div>
+      <SettingEditor
+        settingKey="nav"
+        title="Top Navigation"
+        description="Configure the primary nav links shown in the header."
+        sample={`{
+  "brand": "Lettflix",
+  "items": [
+    { "label": "Home", "to": "/" },
+    { "label": "Channels", "to": "/channels" },
+    { "label": "On-Demand", "to": "/on-demand" },
+    { "label": "Guide", "to": "/guide" },
+    { "label": "Pricing", "to": "/pricing" }
+  ]
+}`}
+      />
+      <SettingEditor
+        settingKey="hero"
+        title="Hero Section"
+        description="Headline, description, CTAs, and stat tiles on the homepage."
+        sample={`{
+  "badge": "LIVE NOW",
+  "badgeMeta": "184 channels broadcasting",
+  "title": "The future of",
+  "titleAccent": "broadcasting, streaming together.",
+  "description": "Live TV, radio, podcasts and on-demand — one subscription.",
+  "primaryCta":   { "label": "Watch Live",       "to": "/channels" },
+  "secondaryCta": { "label": "Browse Channels",  "to": "/channels" },
+  "tertiaryCta":  { "label": "Open Live Guide",  "to": "/guide" },
+  "stats": [
+    { "k": "184",  "v": "Live channels" },
+    { "k": "12K+", "v": "On-demand titles" },
+    { "k": "320",  "v": "Radio stations" }
+  ]
+}`}
+      />
+      <SettingEditor
+        settingKey="footer"
+        title="Footer"
+        description="Tagline, columns, and legal notes."
+        sample={`{
+  "tagline": "One subscription. Everything.",
+  "copyright": "Lettflix — LoveWorld Entertainment Flix",
+  "note": "All rights reserved.",
+  "columns": [
+    { "title": "Watch", "items": [
+      { "label": "Channels", "href": "/channels" },
+      { "label": "On-Demand", "href": "/on-demand" }
+    ]},
+    { "title": "Company", "items": [
+      { "label": "Pricing", "href": "/pricing" },
+      { "label": "Enterprise", "href": "/enterprise" }
+    ]}
+  ]
+}`}
+      />
+    </div>
+  );
+}
+
+function SettingEditor({ settingKey, title, description, sample }: { settingKey: SettingKey; title: string; description: string; sample: string }) {
+  const [value, setValue] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error: fetchErr } = await supabase
+        .from("cms_settings")
+        .select("value")
+        .eq("key", settingKey)
+        .maybeSingle();
+      if (cancelled) return;
+      if (fetchErr) {
+        setError(fetchErr.message);
+      } else if (data?.value) {
+        setValue(JSON.stringify(data.value, null, 2));
+      } else {
+        setValue(sample);
+      }
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [settingKey, sample]);
+
+  async function save() {
+    setError(null);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      setError("Invalid JSON — fix syntax and try again.");
+      return;
+    }
+    setSaving(true);
+    const { error: upsertErr } = await supabase
+      .from("cms_settings")
+      .upsert({ key: settingKey, value: parsed as never }, { onConflict: "key" });
+    setSaving(false);
+    if (upsertErr) {
+      setError(upsertErr.message);
+      toast.error(`Failed to save ${title}`);
+    } else {
+      toast.success(`${title} updated`);
+    }
+  }
+
+  return (
+    <section className="rounded-xl border border-border bg-elevated/40 p-5">
+      <div className="flex items-start justify-between gap-4 mb-3">
+        <div>
+          <h3 className="font-semibold">{title}</h3>
+          <p className="text-xs text-[color:var(--muted-foreground)] mt-0.5">{description}</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setValue(sample)}
+            className="h-9 px-3 text-xs rounded-md border border-border hover:bg-elevated transition"
+          >
+            Reset to sample
+          </button>
+          <button
+            type="button"
+            onClick={save}
+            disabled={loading || saving}
+            className="h-9 px-4 text-xs font-semibold rounded-md bg-primary text-primary-foreground disabled:opacity-60"
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
+        </div>
+      </div>
+      {loading ? (
+        <div className="h-40 grid place-items-center"><Loader2 className="size-4 animate-spin" /></div>
+      ) : (
+        <textarea
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          spellCheck={false}
+          className="w-full min-h-[280px] rounded-md bg-background border border-border p-3 font-mono text-xs leading-relaxed"
+        />
+      )}
+      {error && <div className="mt-2 text-xs text-primary">{error}</div>}
+    </section>
+  );
+}

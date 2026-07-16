@@ -148,3 +148,99 @@ export function useCmsTitles() {
   }, []);
   return { titles, loading };
 }
+
+export type CmsEvent = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  startsAt: string;
+  endsAt: string | null;
+  coverUrl: string | null;
+  channelId: string | null;
+};
+
+export function useCmsEvents(limit = 8) {
+  const [events, setEvents] = useState<CmsEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    supabase
+      .from("cms_events")
+      .select("*")
+      .eq("is_published", true)
+      .gte("starts_at", new Date().toISOString())
+      .order("starts_at", { ascending: true })
+      .limit(limit)
+      .then(({ data }) => {
+        setEvents(
+          (data ?? []).map((r: any) => ({
+            id: r.id,
+            slug: r.slug,
+            name: r.name,
+            description: r.description,
+            category: r.category,
+            startsAt: r.starts_at,
+            endsAt: r.ends_at,
+            coverUrl: r.cover_url,
+            channelId: r.channel_id,
+          })),
+        );
+        setLoading(false);
+      });
+  }, [limit]);
+  return { events, loading };
+}
+
+export type CmsCollection = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  coverUrl: string | null;
+  isFeatured: boolean;
+};
+
+export function useCmsCollections() {
+  const [collections, setCollections] = useState<CmsCollection[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    supabase
+      .from("cms_collections")
+      .select("*")
+      .eq("is_published", true)
+      .order("is_featured", { ascending: false })
+      .then(({ data }) => {
+        setCollections(
+          (data ?? []).map((r: any) => ({
+            id: r.id,
+            slug: r.slug,
+            name: r.name,
+            description: r.description,
+            coverUrl: r.cover_url,
+            isFeatured: r.is_featured,
+          })),
+        );
+        setLoading(false);
+      });
+  }, []);
+  return { collections, loading };
+}
+
+export function useCmsSetting<T>(key: "nav" | "hero" | "footer", fallback: T): { value: T; loading: boolean } {
+  const [value, setValue] = useState<T>(fallback);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    supabase
+      .from("cms_settings")
+      .select("value")
+      .eq("key", key)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) setValue(data.value as T);
+        setLoading(false);
+      });
+  }, [key]);
+  return { value, loading };
+}
+

@@ -14,16 +14,13 @@ import logoHorizontal from "@/assets/lettflix-horizontal.png.asset.json";
 import { useProfile } from "@/lib/personal";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-
-const navItems = [
-  { label: "Home", to: "/" as const },
-  { label: "Channels", to: "/channels" as const },
-  { label: "Guide", to: "/guide" as const },
-  { label: "On Demand", to: "/on-demand" as const },
-  { label: "Pricing", to: "/pricing" as const },
-];
+import { useCmsSetting } from "@/lib/cms-catalog";
+import { defaultNav, type NavConfig } from "@/lib/homepage-defaults";
 
 export function SiteHeader() {
+  const { value: nav } = useCmsSetting<NavConfig>("nav", defaultNav);
+  const navItems = nav.items;
+
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { profile } = useProfile();
   const { user, isAdmin, isCreator, signOut } = useAuth();
@@ -66,7 +63,7 @@ export function SiteHeader() {
               {navItems.map((item) => (
                 <Link
                   key={item.label}
-                  to={item.to}
+                  to={item.to as never}
                   onClick={() => setMobileOpen(false)}
                   className={`px-3 py-3 rounded-md text-sm transition-colors ${
                     isActive(item.to)
@@ -114,7 +111,7 @@ export function SiteHeader() {
           {navItems.map((item) => (
             <Link
               key={item.label}
-              to={item.to}
+              to={item.to as never}
               className={`px-3 py-2 rounded-md transition-colors ${
                 isActive(item.to)
                   ? "text-foreground bg-elevated/60"

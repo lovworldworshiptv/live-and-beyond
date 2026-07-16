@@ -1,31 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Play,
   Tv,
   CalendarDays,
   Bell,
   Plus,
-  Radio,
-  Mic,
-  Trophy,
   Sparkles,
-  Newspaper,
-  Music2,
   Heart,
   Clock,
   ArrowRight,
+  Radio as RadioIcon,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Row } from "@/components/row";
+import { useCmsChannels, useCmsTitles, useCmsEvents, useCmsCollections, useCmsSetting } from "@/lib/cms-catalog";
+import { defaultHero, type HeroConfig } from "@/lib/homepage-defaults";
+import { useProgress } from "@/lib/personal";
+import { useMemo } from "react";
 
 import heroImg from "@/assets/hero-broadcast.jpg";
 import ch1 from "@/assets/channel-1.jpg";
-import ch2 from "@/assets/channel-2.jpg";
-import ch3 from "@/assets/channel-3.jpg";
-import ch4 from "@/assets/channel-4.jpg";
-import ch5 from "@/assets/channel-5.jpg";
-import ch6 from "@/assets/channel-6.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,59 +34,44 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const liveNow = [
-  { img: ch1, channel: "LoveWorld Music", program: "Hallelujah Live Concert", category: "Music", viewers: "12.4K" },
-  { img: ch5, channel: "Faith Network", program: "Healing School Service", category: "Christian Living", viewers: "28.1K" },
-  { img: ch3, channel: "Global News 24", program: "World Briefing", category: "News", viewers: "4.7K" },
-  { img: ch4, channel: "Stadium+", program: "Premier Cup — Live", category: "Sports", viewers: "61.9K" },
-  { img: ch2, channel: "Studio Late", program: "The Morning Drive", category: "Radio", viewers: "2.3K" },
-  { img: ch6, channel: "Hot 100 FM", program: "On Air with DJ Solo", category: "Radio", viewers: "1.9K" },
-];
-
-const featuredChannels = [
-  { img: ch5, name: "LoveWorld Plus", tag: "Premium" },
-  { img: ch1, name: "Worship Live", tag: "Trending" },
-  { img: ch4, name: "Stadium+", tag: "Sports" },
-  { img: ch3, name: "Global News 24", tag: "News" },
-  { img: ch2, name: "Studio Late", tag: "Podcasts" },
-  { img: ch6, name: "Hot 100 FM", tag: "Radio" },
-];
-
-const trending = [
-  { img: ch1, title: "Night of Bliss — Lagos", meta: "Concert · 2h 14m" },
-  { img: ch5, title: "The Healing Streams", meta: "Series · S2 · 12 eps" },
-  { img: ch3, title: "Inside Africa Today", meta: "Documentary · 48m" },
-  { img: ch4, title: "Champions Final 2026", meta: "Sports · Replay" },
-  { img: ch2, title: "Founders Unfiltered", meta: "Podcast · Ep. 41" },
-  { img: ch6, title: "Sunday Drive Sessions", meta: "Radio · 1h 30m" },
-];
-
-const continueWatching = [
-  { img: ch5, title: "Your Loveworld Specials", meta: "S9 · E04 · 32 min left", progress: 62 },
-  { img: ch1, title: "Praise Night Atlanta", meta: "1h 12m left", progress: 28 },
-  { img: ch2, title: "Builders Podcast", meta: "Ep. 18 · 14 min left", progress: 78 },
-  { img: ch3, title: "World Briefing Weekly", meta: "9 min left", progress: 88 },
-];
-
-const upcoming = [
-  { img: ch5, title: "Global Day of Prayer", date: "Sat, Jul 11", time: "6:00 PM GMT" },
-  { img: ch1, title: "LoveWorld Music Awards", date: "Fri, Jul 17", time: "8:00 PM GMT" },
-  { img: ch4, title: "Africa Cup Opening", date: "Sun, Jul 19", time: "4:00 PM GMT" },
-  { img: ch3, title: "State of the World 2026", date: "Mon, Jul 21", time: "1:00 PM GMT" },
-];
-
-const collections = [
-  { title: "Christian Living", count: "240+ titles", icon: Heart, grad: "from-rose-500/30 to-primary/40" },
-  { title: "LoveWorld", count: "180+ titles", icon: Sparkles, grad: "from-violet-500/30 to-accent/40" },
-  { title: "Sports", count: "92 channels", icon: Trophy, grad: "from-emerald-500/30 to-cyan-500/30" },
-  { title: "News", count: "48 channels", icon: Newspaper, grad: "from-sky-500/30 to-accent/40" },
-  { title: "Music", count: "600+ titles", icon: Music2, grad: "from-fuchsia-500/30 to-primary/40" },
-  { title: "Radio", count: "320 stations", icon: Radio, grad: "from-amber-500/30 to-rose-500/30" },
-  { title: "Podcasts", count: "1.2K shows", icon: Mic, grad: "from-indigo-500/30 to-accent/40" },
-  { title: "Kids & Family", count: "140+ titles", icon: Sparkles, grad: "from-teal-500/30 to-emerald-500/30" },
-];
+function formatEventDate(iso: string) {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
+  return { date, time };
+}
 
 function Index() {
+  const { value: hero } = useCmsSetting<HeroConfig>("hero", defaultHero);
+  const { channels } = useCmsChannels();
+  const { titles } = useCmsTitles();
+  const { events } = useCmsEvents(8);
+  const { collections: cmsCollections } = useCmsCollections();
+  const { items: progressItems } = useProgress();
+
+  const liveNow = useMemo(() => channels.filter((c) => c.isLive).slice(0, 10), [channels]);
+  const featuredChannels = useMemo(() => {
+    const trending = channels.filter((c) => c.trending);
+    return (trending.length ? trending : channels).slice(0, 10);
+  }, [channels]);
+  const trending = useMemo(() => {
+    const feat = titles.filter((t) => t.featured);
+    return (feat.length ? feat : titles).slice(0, 10);
+  }, [titles]);
+  const continueWatching = useMemo(() => {
+    return progressItems
+      .slice()
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .map((p) => {
+        const t = titles.find((x) => x.id === p.titleId);
+        return t ? { t, pct: p.positionPct } : null;
+      })
+      .filter((x): x is { t: (typeof titles)[number]; pct: number } => !!x)
+      .slice(0, 6);
+  }, [progressItems, titles]);
+
+  const heroBadgeMeta = hero.badgeMeta.replace(/^\d+/, String(channels.filter((c) => c.isLive).length || channels.length));
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
@@ -113,42 +93,35 @@ function Index() {
         <div className="relative mx-auto max-w-[1480px] px-6 lg:px-10 pt-9 lg:pt-[54px] pb-20 lg:pb-32 flex min-h-[680px] md:min-h-[720px] lg:min-h-[760px] items-center">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-xs font-medium">
-              <span className="live-pulse text-primary">LIVE NOW</span>
-              <span className="text-[color:var(--secondary-foreground)]">· 184 channels broadcasting</span>
+              <span className="live-pulse text-primary">{hero.badge}</span>
+              <span className="text-[color:var(--secondary-foreground)]">· {heroBadgeMeta}</span>
             </div>
             <h1 className="mt-6 text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.02]">
-              The future of <span className="text-primary">broadcasting</span>,
-              <br />
-              streaming together.
+              {hero.title} <span className="text-primary">{hero.titleAccent}</span>
             </h1>
             <p className="mt-5 text-lg text-[color:var(--secondary-foreground)] max-w-xl">
-              Live television, radio, podcasts, events and premium on-demand — discover
-              everything from broadcasters, ministries and creators worldwide. One subscription.
-              One ecosystem.
+              {hero.description}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <button
+              <Link
+                to={hero.primaryCta.to as never}
                 className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
                 style={{
                 boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 24px oklch(0.55 0.22 25 / 0.55), 0 0 50px oklch(0.55 0.22 25 / 0.25)",
                 }}
               >
-                <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch Live
-              </button>
-              <button className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-elevated/80 border border-border backdrop-blur hover:bg-elevated transition font-medium">
-                <Tv className="size-4" /> Browse Channels
-              </button>
-              <button className="inline-flex items-center gap-2 px-6 h-12 rounded-md text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated/40 transition font-medium">
-                <CalendarDays className="size-4" /> Open Live Guide
-              </button>
+                <Play className="size-[19px] fill-current" strokeWidth={2.5} /> {hero.primaryCta.label}
+              </Link>
+              <Link to={hero.secondaryCta.to as never} className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-elevated/80 border border-border backdrop-blur hover:bg-elevated transition font-medium">
+                <Tv className="size-4" /> {hero.secondaryCta.label}
+              </Link>
+              <Link to={hero.tertiaryCta.to as never} className="inline-flex items-center gap-2 px-6 h-12 rounded-md text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated/40 transition font-medium">
+                <CalendarDays className="size-4" /> {hero.tertiaryCta.label}
+              </Link>
             </div>
 
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
-              {[
-                { k: "184", v: "Live channels" },
-                { k: "12K+", v: "On-demand titles" },
-                { k: "320", v: "Radio stations" },
-              ].map((s) => (
+              {hero.stats.map((s) => (
                 <div key={s.v}>
                   <div className="text-2xl font-display font-bold">{s.k}</div>
                   <div className="text-xs text-[color:var(--muted-foreground)] mt-1">{s.v}</div>
@@ -159,214 +132,235 @@ function Index() {
         </div>
       </section>
 
-
       {/* LIVE NOW */}
-      <Row
-        title="Live Right Now"
-        subtitle="Tune into what's broadcasting across the network."
-        action={
-          <a href="#" className="hidden sm:inline-flex items-center gap-1 text-sm text-[color:var(--secondary-foreground)] hover:text-foreground">
-            All live <ArrowRight className="size-4" />
-          </a>
-        }
-      >
-        {liveNow.map((c) => (
-          <article
-            key={c.program}
-            className="group relative shrink-0 w-[300px] md:w-[340px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/40 transition"
-          >
-            <div className="relative aspect-video overflow-hidden">
-              <img src={c.img} alt={c.program} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 50%, oklch(0.24 0.59 359.4 / 0.45) 100%)" }} />
-              <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded text-[11px] font-bold tracking-wide bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
-                LIVE
-              </span>
-              <span className="absolute top-3 right-3 text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur text-white/90">
-                {c.viewers} watching
-              </span>
-              <button className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
-                <div
-                  className="size-16 rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
-                  style={{
-                    boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 24px oklch(0.55 0.22 25 / 0.55), 0 0 50px oklch(0.55 0.22 25 / 0.25)",
-                  }}
-                >
-                  <Play className="size-6 text-background fill-current ml-0.5" />
+      {liveNow.length > 0 && (
+        <Row
+          title="Live Right Now"
+          subtitle="Tune into what's broadcasting across the network."
+          action={
+            <Link to="/channels" className="hidden sm:inline-flex items-center gap-1 text-sm text-[color:var(--secondary-foreground)] hover:text-foreground">
+              All live <ArrowRight className="size-4" />
+            </Link>
+          }
+        >
+          {liveNow.map((c) => (
+            <article
+              key={c.id}
+              className="group relative shrink-0 w-[300px] md:w-[340px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/40 transition"
+            >
+              <Link to="/channels/$channelId" params={{ channelId: c.id }} className="block">
+                <div className="relative aspect-video overflow-hidden">
+                  <img src={c.banner || ch1} alt={c.nowPlaying.title || c.name} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 50%, oklch(0.24 0.59 359.4 / 0.45) 100%)" }} />
+                  <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded text-[11px] font-bold tracking-wide bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
+                    LIVE
+                  </span>
+                  <span className="absolute top-3 right-3 text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur text-white/90">
+                    {c.viewers} watching
+                  </span>
+                  <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
+                    <div
+                      className="size-16 rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
+                      style={{
+                        boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 24px oklch(0.55 0.22 25 / 0.55), 0 0 50px oklch(0.55 0.22 25 / 0.25)",
+                      }}
+                    >
+                      <Play className="size-6 text-background fill-current ml-0.5" />
+                    </div>
+                  </div>
                 </div>
-              </button>
-            </div>
-            <div className="p-4" style={{ background: "linear-gradient(180deg, oklch(0.24 0.59 359.4 / 0.75), oklch(0.24 0.59 359.4 / 0.95))" }}>
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-xs font-semibold uppercase tracking-wider text-white/90">{c.category}</div>
-                <button className="text-white/70 hover:text-white" aria-label="Set reminder">
-                  <Bell className="size-3.5" />
-                </button>
-              </div>
-              <div className="mt-1.5 font-semibold leading-tight line-clamp-1 text-white">{c.program}</div>
-              <div className="text-sm text-white/70 mt-0.5">{c.channel}</div>
-            </div>
-          </article>
-        ))}
-      </Row>
+                <div className="p-4" style={{ background: "linear-gradient(180deg, oklch(0.24 0.59 359.4 / 0.75), oklch(0.24 0.59 359.4 / 0.95))" }}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-white/90">{c.category}</div>
+                    <span className="text-white/70" aria-label="Reminder">
+                      <Bell className="size-3.5" />
+                    </span>
+                  </div>
+                  <div className="mt-1.5 font-semibold leading-tight line-clamp-1 text-white">{c.nowPlaying.title || "Live broadcast"}</div>
+                  <div className="text-sm text-white/70 mt-0.5">{c.name}</div>
+                </div>
+              </Link>
+            </article>
+          ))}
+        </Row>
+      )}
 
       {/* FEATURED CHANNELS */}
-      <Row title="Featured Channels" subtitle="Premium broadcasters and trending networks.">
-        {featuredChannels.map((c) => (
-          <article
-            key={c.name}
-            className="group shrink-0 w-[220px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-accent/50 transition"
-          >
-            <div className="relative aspect-[4/5] overflow-hidden">
-              <img src={c.img} alt={c.name} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
-              <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
-              <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-accent/90 text-accent-foreground">
-                {c.tag}
-              </span>
-              <div className="absolute bottom-0 inset-x-0 p-4">
-                <div className="font-semibold leading-tight">{c.name}</div>
-                <div className="text-xs text-white/70 mt-0.5">24/7 broadcast</div>
+      {featuredChannels.length > 0 && (
+        <Row title="Featured Channels" subtitle="Premium broadcasters and trending networks.">
+          {featuredChannels.map((c) => (
+            <Link
+              key={c.id}
+              to="/channels/$channelId"
+              params={{ channelId: c.id }}
+              className="group shrink-0 w-[220px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-accent/50 transition"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden">
+                <img src={c.banner || ch1} alt={c.name} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
+                <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
+                <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-accent/90 text-accent-foreground">
+                  {c.trending ? "Trending" : c.category}
+                </span>
+                <div className="absolute bottom-0 inset-x-0 p-4">
+                  <div className="font-semibold leading-tight text-white">{c.name}</div>
+                  <div className="text-xs text-white/70 mt-0.5">24/7 broadcast</div>
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
-      </Row>
+            </Link>
+          ))}
+        </Row>
+      )}
 
       {/* SPONSORED */}
-      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-14">
-        <div className="relative overflow-hidden rounded-2xl border border-border">
-          <div className="absolute inset-0 bg-[image:var(--gradient-live)] opacity-90" />
-          <div className="absolute inset-0 mix-blend-overlay" style={{ background: "radial-gradient(at 80% 50%, oklch(0.58 0.22 264 / 0.6), transparent 60%)" }} />
-          <div className="relative px-8 lg:px-14 py-10 lg:py-14 flex flex-wrap items-center justify-between gap-6">
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-widest text-white/80">Sponsored Event</div>
-              <h3 className="mt-2 text-2xl lg:text-3xl font-display font-bold max-w-xl">
-                Global Day of Prayer — broadcast live to 140 nations.
-              </h3>
-              <p className="mt-2 text-white/80 max-w-xl">Saturday, July 11 · 6:00 PM GMT. Add it to your calendar and be reminded the moment it goes live.</p>
-            </div>
-            <div className="flex gap-3">
-              <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition">
-                <Bell className="size-4" /> Notify Me
-              </button>
-              <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-black/40 border border-white/20 backdrop-blur text-white font-medium hover:bg-black/60 transition">
-                <CalendarDays className="size-4" /> Add to Calendar
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TRENDING */}
-      <Row title="Trending On Lettflix" subtitle="Most watched across the platform this week.">
-        {trending.map((t, i) => (
-          <article key={t.title} className="group shrink-0 w-[260px] snap-start">
-            <div className="relative rounded-xl overflow-hidden border border-border bg-elevated/50">
-              <div className="relative aspect-video overflow-hidden">
-                <img src={t.img} alt={t.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
-                <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
-                <span className="absolute top-3 left-3 text-[11px] font-bold px-2 py-1 rounded bg-black/60 backdrop-blur">#{i + 1}</span>
-                <button
-                  className="absolute bottom-3 right-3 size-11 rounded-full bg-white/95 grid place-items-center opacity-0 group-hover:opacity-100 transition"
-                  style={{
-                    boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 20px oklch(0.55 0.22 25 / 0.5), 0 0 45px oklch(0.55 0.22 25 / 0.22)",
-                  }}
-                >
-                  <Play className="size-5 text-background fill-current ml-0.5" />
+      {events[0] && (
+        <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-14">
+          <div className="relative overflow-hidden rounded-2xl border border-border">
+            <div className="absolute inset-0 bg-[image:var(--gradient-live)] opacity-90" />
+            <div className="absolute inset-0 mix-blend-overlay" style={{ background: "radial-gradient(at 80% 50%, oklch(0.58 0.22 264 / 0.6), transparent 60%)" }} />
+            <div className="relative px-8 lg:px-14 py-10 lg:py-14 flex flex-wrap items-center justify-between gap-6">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-widest text-white/80">Featured Event</div>
+                <h3 className="mt-2 text-2xl lg:text-3xl font-display font-bold max-w-xl text-white">{events[0].name}</h3>
+                <p className="mt-2 text-white/80 max-w-xl">
+                  {formatEventDate(events[0].startsAt).date} · {formatEventDate(events[0].startsAt).time}
+                  {events[0].description ? ` — ${events[0].description}` : ""}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition">
+                  <Bell className="size-4" /> Notify Me
+                </button>
+                <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-black/40 border border-white/20 backdrop-blur text-white font-medium hover:bg-black/60 transition">
+                  <CalendarDays className="size-4" /> Add to Calendar
                 </button>
               </div>
             </div>
-            <div className="mt-2.5">
-              <div className="font-semibold leading-tight line-clamp-1">{t.title}</div>
-              <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5">{t.meta}</div>
-            </div>
-          </article>
-        ))}
-      </Row>
+          </div>
+        </section>
+      )}
 
-      {/* CONTINUE WATCHING */}
-      <Row title="Continue Watching" subtitle="Pick up where you left off, Esteemed Viewer.">
-        {continueWatching.map((c) => (
-          <article key={c.title} className="group shrink-0 w-[320px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50">
-            <div className="relative aspect-video overflow-hidden">
-              <img src={c.img} alt={c.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
-              <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
-                <button className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
+      {/* TRENDING */}
+      {trending.length > 0 && (
+        <Row title="Trending On Lettflix" subtitle="Most watched across the platform this week.">
+          {trending.map((t, i) => (
+            <Link key={t.id} to="/on-demand/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[260px] snap-start">
+              <div className="relative rounded-xl overflow-hidden border border-border bg-elevated/50">
+                <div className="relative aspect-video overflow-hidden">
+                  <img src={t.hero || t.cover} alt={t.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
+                  <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
+                  <span className="absolute top-3 left-3 text-[11px] font-bold px-2 py-1 rounded bg-black/60 backdrop-blur text-white">#{i + 1}</span>
                   <div
-                    className="size-14 rounded-full bg-white/95 grid place-items-center"
+                    className="absolute bottom-3 right-3 size-11 rounded-full bg-white/95 grid place-items-center opacity-0 group-hover:opacity-100 transition"
                     style={{
                       boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 20px oklch(0.55 0.22 25 / 0.5), 0 0 45px oklch(0.55 0.22 25 / 0.22)",
                     }}
                   >
                     <Play className="size-5 text-background fill-current ml-0.5" />
                   </div>
-                </button>
-              <div className="absolute bottom-0 inset-x-0 h-1 bg-white/15">
-                <div className="h-full bg-primary" style={{ width: `${c.progress}%` }} />
-              </div>
-            </div>
-            <div className="p-4 flex items-start justify-between gap-3">
-              <div>
-                <div className="font-semibold leading-tight line-clamp-1">{c.title}</div>
-                <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5 flex items-center gap-1.5"><Clock className="size-3" /> {c.meta}</div>
-              </div>
-              <button className="text-[color:var(--muted-foreground)] hover:text-foreground" aria-label="More">
-                <Plus className="size-4" />
-              </button>
-            </div>
-          </article>
-        ))}
-      </Row>
-
-      {/* UPCOMING EVENTS */}
-      <Row title="Upcoming Events" subtitle="Conferences, concerts and broadcasts coming soon.">
-        {upcoming.map((e) => (
-          <article key={e.title} className="group shrink-0 w-[340px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50">
-            <div className="relative aspect-[16/10] overflow-hidden">
-              <img src={e.img} alt={e.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
-              <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
-              <div className="absolute top-3 left-3 px-2.5 py-1.5 rounded bg-black/60 backdrop-blur text-xs">
-                <div className="font-bold">{e.date}</div>
-                <div className="text-white/70 text-[11px]">{e.time}</div>
-              </div>
-            </div>
-            <div className="p-4 flex items-center justify-between gap-3">
-              <div className="font-semibold leading-tight">{e.title}</div>
-              <button className="shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-3 h-8 rounded-md bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition">
-                <Bell className="size-3.5" /> Remind
-              </button>
-            </div>
-          </article>
-        ))}
-      </Row>
-
-      {/* FEATURED COLLECTIONS */}
-      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-14">
-        <div className="flex items-end justify-between mb-5">
-          <div>
-            <h2 className="text-xl lg:text-2xl font-semibold tracking-tight">Featured Collections</h2>
-            <p className="text-sm text-[color:var(--muted-foreground)] mt-1">Curated worlds across categories you love.</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {collections.map((col) => {
-            const Icon = col.icon;
-            return (
-              <a
-                key={col.title}
-                href="#"
-                className={`group relative overflow-hidden rounded-xl border border-border bg-gradient-to-br ${col.grad} p-5 h-32 flex flex-col justify-between hover:border-foreground/20 transition`}
-              >
-                <Icon className="size-6 text-white/90" />
-                <div>
-                  <div className="font-semibold">{col.title}</div>
-                  <div className="text-xs text-white/70">{col.count}</div>
                 </div>
-                <ArrowRight className="absolute top-5 right-5 size-4 text-white/60 group-hover:text-white group-hover:translate-x-0.5 transition" />
-              </a>
+              </div>
+              <div className="mt-2.5">
+                <div className="font-semibold leading-tight line-clamp-1">{t.title}</div>
+                <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5">{t.kind} · {t.duration}</div>
+              </div>
+            </Link>
+          ))}
+        </Row>
+      )}
+
+      {/* CONTINUE WATCHING */}
+      {continueWatching.length > 0 && (
+        <Row title="Continue Watching" subtitle="Pick up where you left off.">
+          {continueWatching.map(({ t, pct }) => {
+            const remaining = Math.max(0, 100 - pct);
+            return (
+              <Link key={t.id} to="/on-demand/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[320px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50">
+                <div className="relative aspect-video overflow-hidden">
+                  <img src={t.hero || t.cover} alt={t.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
+                  <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
+                  <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
+                    <div
+                      className="size-14 rounded-full bg-white/95 grid place-items-center"
+                      style={{
+                        boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 20px oklch(0.55 0.22 25 / 0.5), 0 0 45px oklch(0.55 0.22 25 / 0.22)",
+                      }}
+                    >
+                      <Play className="size-5 text-background fill-current ml-0.5" />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-0 inset-x-0 h-1 bg-white/15">
+                    <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+                <div className="p-4 flex items-start justify-between gap-3">
+                  <div>
+                    <div className="font-semibold leading-tight line-clamp-1">{t.title}</div>
+                    <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5 flex items-center gap-1.5"><Clock className="size-3" /> {remaining > 0 ? `${remaining}% left` : "Almost done"}</div>
+                  </div>
+                  <Plus className="text-[color:var(--muted-foreground)] size-4" />
+                </div>
+              </Link>
             );
           })}
-        </div>
-      </section>
+        </Row>
+      )}
+
+      {/* UPCOMING EVENTS */}
+      {events.length > 0 && (
+        <Row title="Upcoming Events" subtitle="Conferences, concerts and broadcasts coming soon.">
+          {events.map((e) => {
+            const { date, time } = formatEventDate(e.startsAt);
+            return (
+              <article key={e.id} className="group shrink-0 w-[340px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50">
+                <div className="relative aspect-[16/10] overflow-hidden">
+                  <img src={e.coverUrl || ch1} alt={e.name} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
+                  <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
+                  <div className="absolute top-3 left-3 px-2.5 py-1.5 rounded bg-black/60 backdrop-blur text-xs text-white">
+                    <div className="font-bold">{date}</div>
+                    <div className="text-white/70 text-[11px]">{time}</div>
+                  </div>
+                </div>
+                <div className="p-4 flex items-center justify-between gap-3">
+                  <div className="font-semibold leading-tight line-clamp-2">{e.name}</div>
+                  <button className="shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-3 h-8 rounded-md bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition">
+                    <Bell className="size-3.5" /> Remind
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </Row>
+      )}
+
+      {/* FEATURED COLLECTIONS */}
+      {cmsCollections.length > 0 && (
+        <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-14">
+          <div className="flex items-end justify-between mb-5">
+            <div>
+              <h2 className="text-xl lg:text-2xl font-semibold tracking-tight">Featured Collections</h2>
+              <p className="text-sm text-[color:var(--muted-foreground)] mt-1">Curated worlds across categories you love.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {cmsCollections.slice(0, 8).map((col) => (
+              <Link
+                key={col.id}
+                to="/collections/$collectionId"
+                params={{ collectionId: col.slug }}
+                className="group relative overflow-hidden rounded-xl border border-border bg-elevated/50 p-5 h-32 flex flex-col justify-between hover:border-foreground/20 transition"
+                style={col.coverUrl ? { backgroundImage: `linear-gradient(135deg, oklch(0.24 0.59 359.4 / 0.7), oklch(0.14 0.09 264 / 0.85)), url(${col.coverUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+              >
+                {col.isFeatured ? <Sparkles className="size-6 text-white/90" /> : <Heart className="size-6 text-white/90" />}
+                <div>
+                  <div className="font-semibold text-white">{col.name}</div>
+                  <div className="text-xs text-white/70 line-clamp-1">{col.description ?? "Curated collection"}</div>
+                </div>
+                <ArrowRight className="absolute top-5 right-5 size-4 text-white/60 group-hover:text-white group-hover:translate-x-0.5 transition" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-20">
@@ -382,12 +376,12 @@ function Index() {
             Join millions discovering channels, ministries and creators on the world's first unified broadcast ecosystem.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <button className="inline-flex items-center gap-2 px-7 h-12 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold shadow-[var(--shadow-glow)] hover:opacity-95 transition">
+            <Link to="/pricing" className="inline-flex items-center gap-2 px-7 h-12 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold shadow-[var(--shadow-glow)] hover:opacity-95 transition">
               Start Watching <ArrowRight className="size-4" />
-            </button>
-            <button className="inline-flex items-center gap-2 px-7 h-12 rounded-md bg-elevated/80 border border-border hover:bg-elevated transition font-medium">
-              See Pricing
-            </button>
+            </Link>
+            <Link to="/pricing" className="inline-flex items-center gap-2 px-7 h-12 rounded-md bg-elevated/80 border border-border hover:bg-elevated transition font-medium">
+              <RadioIcon className="size-4" /> See Pricing
+            </Link>
           </div>
         </div>
       </section>
