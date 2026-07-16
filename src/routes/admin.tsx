@@ -935,6 +935,7 @@ type EventRow = {
   cover_url: string | null;
   channel_id: string | null;
   is_published: boolean;
+  is_sponsored: boolean;
 };
 
 function EventsCms() {
