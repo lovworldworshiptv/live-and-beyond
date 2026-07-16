@@ -404,6 +404,7 @@ type Title = {
   poster_url: string | null;
   backdrop_url: string | null;
   is_published: boolean;
+  display_order: number | null;
 };
 
 function TitlesCms() {
