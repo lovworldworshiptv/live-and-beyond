@@ -1024,7 +1024,10 @@ function EventsCms() {
           <div className="mt-4">
             <Field label="Description"><textarea className={textareaClass} value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
           </div>
-          <label className="flex items-center gap-2 text-sm mt-4"><input type="checkbox" checked={editing.is_published ?? true} onChange={(e) => setEditing({ ...editing, is_published: e.target.checked })} /> Published</label>
+          <div className="flex flex-wrap items-center gap-6 mt-4">
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_published ?? true} onChange={(e) => setEditing({ ...editing, is_published: e.target.checked })} /> Published</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_sponsored ?? false} onChange={(e) => setEditing({ ...editing, is_sponsored: e.target.checked })} /> Sponsored (feature in homepage sponsor banner rotation)</label>
+          </div>
         </ModalShell>
       )}
     </div>
