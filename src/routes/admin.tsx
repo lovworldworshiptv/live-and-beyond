@@ -445,9 +445,12 @@ type Title = {
 };
 
 function TitlesCms() {
-  const { rows, loading, save, remove } = useCrud<Title>("cms_titles");
+  const { rows, loading, save, remove } = useCrud<Title>("cms_titles", [
+    { col: "display_order", ascending: true },
+    { col: "created_at", ascending: false },
+  ]);
   const [editing, setEditing] = useState<Partial<Title> | null>(null);
-  const openNew = () => setEditing({ kind: "movie", is_published: true });
+  const openNew = () => setEditing({ kind: "movie", is_published: true, display_order: 0 });
 
   if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
 
