@@ -24,11 +24,6 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const CREATOR_CATEGORIES = [
-  "Sports", "News", "Entertainment", "Christian Living", "Music",
-  "LoveWorld", "Radio", "Audio", "Video", "Education", "Lifestyle", "Kids & Family",
-];
-
 type AccountType = "user" | "creator";
 
 function AuthPage() {
