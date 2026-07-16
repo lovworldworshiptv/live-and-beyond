@@ -72,17 +72,16 @@ function AuthPage() {
       toast.error("Password must be at least 12 characters");
       return;
     }
-    if (mode === "signup" && accountType === "creator" && !channelName.trim()) {
-      toast.error("Channel name is required");
+    if (mode === "signup" && !displayName.trim()) {
+      toast.error("Display name is required");
       return;
     }
     setBusy(true);
     try {
       if (mode === "signup") {
-        const meta =
-          accountType === "creator"
-            ? { display_name: channelName.trim(), handle: "@" + channelName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") }
-            : { display_name: displayName || email.split("@")[0], handle: "@" + email.split("@")[0] };
+        const name = displayName.trim();
+        const handle = "@" + name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        const meta = { display_name: name, handle };
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
