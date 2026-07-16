@@ -474,6 +474,7 @@ function TitlesCms() {
             <table className="w-full text-sm">
               <thead className="text-left text-xs text-[color:var(--muted-foreground)] uppercase tracking-wide">
                 <tr className="border-b border-border">
+                  <th className="pb-3 pr-4 w-12">#</th>
                   <th className="pb-3 pr-4">Title</th>
                   <th className="pb-3 pr-4">Kind</th>
                   <th className="pb-3 pr-4">Genre</th>
@@ -485,6 +486,7 @@ function TitlesCms() {
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.id} className="border-b border-border/60 last:border-0">
+                    <td className="py-3 pr-4 text-[color:var(--muted-foreground)]">{r.display_order ?? 0}</td>
                     <td className="py-3 pr-4">
                       <div className="font-medium">{r.title}</div>
                       <div className="text-xs text-[color:var(--muted-foreground)]">{r.slug}</div>
