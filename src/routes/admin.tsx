@@ -224,11 +224,25 @@ export type Channel = {
 
 
 function ChannelsCms() {
-  const { rows, loading, save, remove } = useCrud<Channel>("cms_channels");
+  const { rows, loading, save, remove } = useCrud<Channel>("cms_channels", [
+    { col: "display_order", ascending: true },
+    { col: "created_at", ascending: false },
+  ]);
   const [editing, setEditing] = useState<Partial<Channel> | null>(null);
+  const [creators, setCreators] = useState<Record<string, { display_name: string | null; handle: string | null }>>({});
+
+  useEffect(() => {
+    const ids = Array.from(new Set(rows.map((r) => r.creator_id).filter((x): x is string => !!x)));
+    if (!ids.length) return;
+    supabase.from("profiles").select("id, display_name, handle").in("id", ids).then(({ data }) => {
+      const map: Record<string, { display_name: string | null; handle: string | null }> = {};
+      (data ?? []).forEach((p) => { map[p.id] = { display_name: p.display_name, handle: p.handle }; });
+      setCreators(map);
+    });
+  }, [rows]);
 
   function openNew() {
-    setEditing({ kind: "tv", is_published: true, is_live: false, popularity: 0, is_trending: false });
+    setEditing({ kind: "tv", is_published: true, is_live: false, popularity: 0, is_trending: false, display_order: 0 });
   }
 
   if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
@@ -253,7 +267,9 @@ function ChannelsCms() {
             <table className="w-full text-sm">
               <thead className="text-left text-xs text-[color:var(--muted-foreground)] uppercase tracking-wide">
                 <tr className="border-b border-border">
+                  <th className="pb-3 pr-4 w-12">#</th>
                   <th className="pb-3 pr-4">Name</th>
+                  <th className="pb-3 pr-4">Creator</th>
                   <th className="pb-3 pr-4">Category</th>
                   <th className="pb-3 pr-4">Kind</th>
                   <th className="pb-3 pr-4">Status</th>
@@ -262,11 +278,24 @@ function ChannelsCms() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {rows.map((r) => {
+                  const c = r.creator_id ? creators[r.creator_id] : null;
+                  return (
                   <tr key={r.id} className="border-b border-border/60 last:border-0">
+                    <td className="py-3 pr-4 text-[color:var(--muted-foreground)]">{r.display_order ?? 0}</td>
                     <td className="py-3 pr-4">
                       <div className="font-medium">{r.name}</div>
                       <div className="text-xs text-[color:var(--muted-foreground)]">{r.slug}</div>
+                    </td>
+                    <td className="py-3 pr-4">
+                      {r.creator_id ? (
+                        <>
+                          <div>{c?.display_name ?? "—"}</div>
+                          <div className="text-xs text-[color:var(--muted-foreground)]">{c?.handle ?? ""}</div>
+                        </>
+                      ) : (
+                        <span className="text-xs text-[color:var(--muted-foreground)]">Platform</span>
+                      )}
                     </td>
                     <td className="py-3 pr-4">{r.category ?? "—"}</td>
                     <td className="py-3 pr-4 capitalize">{r.kind}</td>
@@ -288,7 +317,8 @@ function ChannelsCms() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
