@@ -103,20 +103,7 @@ function ChannelLibraryPage() {
         }
       }
 
-      // Any CMS titles directly linked to this channel (creator uploads)
-      if (uuid) {
-        const { data: linked } = await supabase
-          .from("cms_titles")
-          .select("*")
-          .eq("channel_id", uuid)
-          .eq("is_published", true);
-        for (const r of linked ?? []) {
-          const t = mapTitleRow(r as never);
-          if (!seen.has(t.id)) { seen.add(t.id); collected.push(t); }
-        }
-      }
-
-      if (!cancelled) { setTitles(collected); setLoading(false); }
+      void uuid;
     })();
     return () => { cancelled = true; };
   }, [channelId]);
