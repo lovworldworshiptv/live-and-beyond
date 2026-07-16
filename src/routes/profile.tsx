@@ -74,17 +74,17 @@ function ProfilePage() {
       <section className="border-b border-border">
         <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-12 pb-8 flex items-center gap-6 flex-wrap">
           <div className="size-20 rounded-full bg-[image:var(--gradient-accent)] grid place-items-center text-3xl font-bold shadow-[var(--shadow-glow)]">
-            {profile.displayName.charAt(0)}
+            {displayName.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-xs uppercase tracking-widest text-accent font-semibold">
               {greeting()} · {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
             </div>
             <h1 className="mt-1 text-3xl lg:text-5xl font-extrabold tracking-tight">
-              {greeting()}, Esteemed {profile.displayName}
+              {greeting()}, Esteemed {displayName}
             </h1>
-            <div className="mt-1.5 text-sm text-[color:var(--muted-foreground)] max-w-xl">
-              {profile.bio}
+            <div className="mt-1.5 text-sm text-[color:var(--muted-foreground)] max-w-xl flex items-center gap-2">
+              <Mail className="size-3.5" /> {email || profile.bio}
             </div>
           </div>
           <div className="flex items-center gap-6">
