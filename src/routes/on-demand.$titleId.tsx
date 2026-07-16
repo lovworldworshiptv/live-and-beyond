@@ -7,7 +7,7 @@ import { StreamPlayer } from "@/components/stream-player";
 import { ShareMenu } from "@/components/share-menu";
 import { titles as staticTitles, getTitle, type Title } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
-import { mapTitleRow } from "@/lib/cms-catalog";
+import { mapTitleRow, useCmsTitles } from "@/lib/cms-catalog";
 import { useMyList } from "@/lib/personal";
 import { toast } from "sonner";
 
