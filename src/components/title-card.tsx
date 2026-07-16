@@ -150,7 +150,7 @@ export function TitleCard({
       </Link>
 
       {/* Hover preview — portaled + fixed so it never gets clipped by scroll rows */}
-      {open && pos && typeof document !== "undefined" &&
+      {preview && open && pos && typeof document !== "undefined" &&
         createPortal(
           <div
             className="fixed z-[100]"
