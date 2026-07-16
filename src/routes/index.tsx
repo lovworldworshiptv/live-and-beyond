@@ -82,7 +82,33 @@ function Index() {
       .slice(0, 6);
   }, [progressItems, titles]);
 
-  const heroBadgeMeta = hero.badgeMeta.replace(/^\d+/, String(channels.filter((c) => c.isLive).length || channels.length));
+  const heroSlides = useMemo(() => {
+    const s = hero.slides?.filter((x) => x && (x.imageUrl || x.title || x.badge)) ?? [];
+    if (s.length) return s;
+    return [{
+      imageUrl: hero.imageUrl || heroImg,
+      badge: hero.badge,
+      badgeMeta: hero.badgeMeta,
+      title: hero.title,
+      titleAccent: hero.titleAccent,
+      description: hero.description,
+    }];
+  }, [hero]);
+  const [slideIdx, setSlideIdx] = useState(0);
+  useEffect(() => {
+    if (heroSlides.length < 2) return;
+    const t = setInterval(() => setSlideIdx((i) => (i + 1) % heroSlides.length), hero.intervalMs ?? 6000);
+    return () => clearInterval(t);
+  }, [heroSlides.length, hero.intervalMs]);
+  const activeSlide = heroSlides[Math.min(slideIdx, heroSlides.length - 1)] ?? heroSlides[0];
+  const activeBadge = activeSlide.badge ?? hero.badge;
+  const activeBadgeMeta = (activeSlide.badgeMeta ?? hero.badgeMeta).replace(
+    /^\d+/,
+    String(channels.filter((c) => c.isLive).length || channels.length),
+  );
+  const activeTitle = activeSlide.title ?? hero.title;
+  const activeAccent = activeSlide.titleAccent ?? hero.titleAccent;
+  const activeDesc = activeSlide.description ?? hero.description;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
