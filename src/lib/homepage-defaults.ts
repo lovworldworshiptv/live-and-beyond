@@ -9,6 +9,7 @@ export type HeroConfig = {
   title: string;
   titleAccent: string;
   description: string;
+  imageUrl?: string | null;
   primaryCta: HeroCta;
   secondaryCta: HeroCta;
   tertiaryCta: HeroCta;
