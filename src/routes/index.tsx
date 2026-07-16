@@ -175,6 +175,18 @@ function Index() {
             </div>
           </div>
         </div>
+        {heroSlides.length > 1 && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+            {heroSlides.map((_, i) => (
+              <button
+                key={i}
+                aria-label={`Hero slide ${i + 1}`}
+                onClick={() => setSlideIdx(i)}
+                className={`h-1.5 rounded-full transition-all ${i === slideIdx ? "w-6 bg-white" : "w-1.5 bg-white/40"}`}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* LIVE NOW */}
