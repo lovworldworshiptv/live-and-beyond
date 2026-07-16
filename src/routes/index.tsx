@@ -271,9 +271,8 @@ function Index() {
       {/* CONTINUE WATCHING */}
       {continueWatching.length > 0 && (
         <Row title="Continue Watching" subtitle="Pick up where you left off.">
-          {continueWatching.map(({ t, p }) => {
-            const pct = p.duration ? Math.min(100, Math.round((p.seconds / p.duration) * 100)) : 0;
-            const remaining = p.duration ? Math.max(0, Math.round((p.duration - p.seconds) / 60)) : 0;
+          {continueWatching.map(({ t, pct }) => {
+            const remaining = Math.max(0, 100 - pct);
             return (
               <Link key={t.id} to="/on-demand/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[320px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50">
                 <div className="relative aspect-video overflow-hidden">
