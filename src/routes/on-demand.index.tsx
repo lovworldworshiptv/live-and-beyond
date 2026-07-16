@@ -88,9 +88,17 @@ function OnDemand() {
       <SiteHeader />
 
       {/* FEATURED SPOTLIGHT */}
-      <section className="relative border-b border-border">
+      <section className="relative border-b border-border overflow-hidden">
         <div className="absolute inset-0 -z-10">
-          <img src={featured.hero} alt="" className="size-full object-cover opacity-60" />
+          {featuredList.map((f, i) => (
+            <img
+              key={f.id}
+              src={f.hero}
+              alt=""
+              className="absolute inset-0 size-full object-cover opacity-60 transition-opacity duration-1000"
+              style={{ opacity: i === featIdx ? 0.6 : 0 }}
+            />
+          ))}
           <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-background" />
         </div>
