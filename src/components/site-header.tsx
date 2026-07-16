@@ -111,7 +111,7 @@ export function SiteHeader() {
           {navItems.map((item) => (
             <Link
               key={item.label}
-              to={item.to}
+              to={item.to as never}
               className={`px-3 py-2 rounded-md transition-colors ${
                 isActive(item.to)
                   ? "text-foreground bg-elevated/60"
