@@ -1581,7 +1581,7 @@ function ApplicationsCms() {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div>
           <h2 className="text-lg font-semibold">Creator Applications</h2>
-          <p className="text-xs text-[color:var(--muted-foreground)]">Review and approve creator signups. Approving grants the creator role and seeds a channel draft.</p>
+          <p className="text-xs text-[color:var(--muted-foreground)]">Review and approve creator signups. Approving grants the creator role so they can create their first channel.</p>
         </div>
         <div className="flex gap-1 p-1 bg-elevated rounded-md">
           {(["pending", "approved", "rejected", "all"] as const).map((f) => (
