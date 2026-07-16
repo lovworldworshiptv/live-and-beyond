@@ -20,7 +20,7 @@ export function CreatorApprovalWatcher() {
         .maybeSingle();
       if (cancelled) return;
       if (data && data.status === "approved" && !data.onboarded_at) {
-        setApp({ id: data.id, channel_name: data.channel_name });
+        setApp({ id: data.id, channel_name: data.channel_name ?? "" });
       }
     })();
     return () => { cancelled = true; };
@@ -57,9 +57,7 @@ export function CreatorApprovalWatcher() {
         </div>
         <h2 className="text-xl font-bold">You're approved as a Creator 🎉</h2>
         <p className="text-sm text-[color:var(--muted-foreground)] mt-2">
-          Congratulations! Your creator account for{" "}
-          <span className="font-semibold text-foreground">{app.channel_name}</span> has been approved.
-          Complete your channel profile to start publishing.
+          Congratulations! Your creator account has been approved. Create your first channel now to start publishing.
         </p>
         <div className="mt-6 grid grid-cols-2 gap-2">
           <button
@@ -72,7 +70,7 @@ export function CreatorApprovalWatcher() {
             onClick={complete}
             className="h-11 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm"
           >
-            Complete Profile
+            Create Channel
           </button>
         </div>
       </div>

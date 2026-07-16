@@ -509,8 +509,8 @@ export type Database = {
       }
       creator_applications: {
         Row: {
-          category: string
-          channel_name: string
+          category: string | null
+          channel_name: string | null
           created_at: string
           description: string | null
           id: string
@@ -523,8 +523,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          category: string
-          channel_name: string
+          category?: string | null
+          channel_name?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -537,8 +537,8 @@ export type Database = {
           user_id: string
         }
         Update: {
-          category?: string
-          channel_name?: string
+          category?: string | null
+          channel_name?: string | null
           created_at?: string
           description?: string | null
           id?: string

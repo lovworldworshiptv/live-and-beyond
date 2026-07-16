@@ -17,11 +17,13 @@ export function TitleCard({
   rank,
   portrait = true,
   size = "md",
+  preview = true,
 }: {
   t: Title;
   rank?: number;
   portrait?: boolean;
   size?: "sm" | "md" | "lg";
+  preview?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [muted, setMuted] = useState(true);
@@ -103,8 +105,8 @@ export function TitleCard({
     <div
       ref={cardRef}
       className={`group relative shrink-0 snap-start ${widthClass}`}
-      onMouseEnter={openSoon}
-      onMouseLeave={closeSoon}
+      onMouseEnter={preview ? openSoon : undefined}
+      onMouseLeave={preview ? closeSoon : undefined}
     >
       <Link
         to="/on-demand/$titleId"
@@ -148,7 +150,7 @@ export function TitleCard({
       </Link>
 
       {/* Hover preview — portaled + fixed so it never gets clipped by scroll rows */}
-      {open && pos && typeof document !== "undefined" &&
+      {preview && open && pos && typeof document !== "undefined" &&
         createPortal(
           <div
             className="fixed z-[100]"

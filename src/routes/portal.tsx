@@ -90,12 +90,12 @@ function PortalPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!myChannel) return;
+    if (!isCreator) return;
     if (sessionStorage.getItem("lettflix.completeChannel") === "1") {
       sessionStorage.removeItem("lettflix.completeChannel");
-      setEditing(myChannel);
+      setEditing(myChannel ?? { is_published: true, kind: "tv", is_live: false, popularity: 0, is_trending: false, display_order: 0, name: "", slug: "" });
     }
-  }, [myChannel]);
+  }, [myChannel, isCreator]);
 
   async function saveChannel(v: Partial<Channel>) {
     if (!user) return;
@@ -166,10 +166,10 @@ function PortalPage() {
             <div className="flex items-center gap-2 flex-wrap">
               {isCreator && (
                 <button
-                  onClick={() => setEditing(myChannel ?? { is_published: true, kind: "tv", is_live: false, popularity: 0, is_trending: false, name: "", slug: "" })}
+                  onClick={() => setEditing(myChannel ?? { is_published: true, kind: "tv", is_live: false, popularity: 0, is_trending: false, display_order: 0, name: "", slug: "" })}
                   className="h-11 px-5 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition inline-flex items-center gap-2"
                 >
-                  <Pencil className="size-4" /> {myChannel ? "Edit Channel Profile" : "Complete Channel Profile"}
+                  <Pencil className="size-4" /> {myChannel ? "Edit Channel Profile" : "Create Your Channel"}
                 </button>
               )}
               <button className="h-11 px-5 rounded-md bg-accent text-accent-foreground font-semibold hover:bg-accent/90 transition inline-flex items-center gap-2">

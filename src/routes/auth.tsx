@@ -24,11 +24,6 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const CREATOR_CATEGORIES = [
-  "Sports", "News", "Entertainment", "Christian Living", "Music",
-  "LoveWorld", "Radio", "Audio", "Video", "Education", "Lifestyle", "Kids & Family",
-];
-
 type AccountType = "user" | "creator";
 
 function AuthPage() {
@@ -40,9 +35,6 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [channelName, setChannelName] = useState("");
-  const [category, setCategory] = useState(CREATOR_CATEGORIES[0]);
-  const [description, setDescription] = useState("");
   const [busy, setBusy] = useState(false);
   const [pendingModal, setPendingModal] = useState(false);
 
@@ -70,9 +62,6 @@ function AuthPage() {
   async function submitCreatorApplication(userId: string) {
     const { error } = await supabase.from("creator_applications").insert({
       user_id: userId,
-      channel_name: channelName.trim(),
-      category,
-      description: description.trim() || null,
     });
     if (error) throw error;
   }
@@ -83,17 +72,16 @@ function AuthPage() {
       toast.error("Password must be at least 12 characters");
       return;
     }
-    if (mode === "signup" && accountType === "creator" && !channelName.trim()) {
-      toast.error("Channel name is required");
+    if (mode === "signup" && !displayName.trim()) {
+      toast.error("Display name is required");
       return;
     }
     setBusy(true);
     try {
       if (mode === "signup") {
-        const meta =
-          accountType === "creator"
-            ? { display_name: channelName.trim(), handle: "@" + channelName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") }
-            : { display_name: displayName || email.split("@")[0], handle: "@" + email.split("@")[0] };
+        const name = displayName.trim();
+        const handle = "@" + name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        const meta = { display_name: name, handle };
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -247,26 +235,15 @@ function AuthPage() {
           </div>
 
           <form onSubmit={onSubmit} className="space-y-3">
-            {mode === "signup" && accountType === "user" && (
+            {mode === "signup" && (
               <input
                 type="text"
+                required
                 placeholder="Display name"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
-            )}
-            {isCreatorSignup && (
-              <>
-                <input
-                  type="text"
-                  required
-                  placeholder="Channel name"
-                  value={channelName}
-                  onChange={(e) => setChannelName(e.target.value)}
-                  className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
-              </>
             )}
             <input
               type="email"
@@ -285,24 +262,7 @@ function AuthPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
-            {isCreatorSignup && (
-              <>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                >
-                  {CREATOR_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <textarea
-                  placeholder="Describe your channel (audience, content, cadence)"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-                />
-              </>
-            )}
+
 
             <button
               type="submit"
@@ -332,8 +292,7 @@ function AuthPage() {
             </div>
             <h2 className="text-xl font-bold">Creator application submitted</h2>
             <p className="text-sm text-[color:var(--muted-foreground)] mt-2">
-              Your creator account for <span className="font-semibold text-foreground">{channelName}</span> is pending admin approval.
-              In the meantime, you can sign in and enjoy Lettflix as a viewer with the same email and password.
+              Your creator account is pending admin approval. In the meantime, you can sign in and enjoy Lettflix as a viewer with the same email and password. Once approved, you'll be prompted to create your first channel.
             </p>
             <button
               onClick={() => {

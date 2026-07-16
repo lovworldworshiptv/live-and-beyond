@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Bookmark, Clock, Bell, Heart, Trash2, Radio, Mic, Users, Plus, Check, Sparkles,
+  Bookmark, Clock, Bell, Heart, Trash2, Radio, Mic, Users, Plus, Check, Sparkles, Loader2, KeyRound, Mail,
 } from "lucide-react";
+import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TitleCard } from "@/components/title-card";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import {
   useProfile, useProgress, useMyList, useReminders, useFollowing,
 } from "@/lib/personal";
@@ -35,11 +38,22 @@ function greeting() {
 }
 
 function ProfilePage() {
+  const { user } = useAuth();
   const { profile } = useProfile();
   const { items: progress, clear: clearProgress } = useProgress();
   const { ids: myList, toggle: toggleList } = useMyList();
   const { items: reminders, toggle: toggleReminder } = useReminders();
   const { ids: following, toggle: toggleFollow } = useFollowing();
+
+  const [account, setAccount] = useState<{ display_name: string | null; handle: string | null } | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("display_name, handle").eq("id", user.id).maybeSingle()
+      .then(({ data }) => setAccount(data ?? null));
+  }, [user]);
+
+  const displayName = account?.display_name || user?.user_metadata?.display_name || profile.displayName;
+  const email = user?.email ?? "";
 
   const progressTitles = progress
     .map((p) => ({ p, t: getTitle(p.titleId) }))
@@ -60,17 +74,17 @@ function ProfilePage() {
       <section className="border-b border-border">
         <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-12 pb-8 flex items-center gap-6 flex-wrap">
           <div className="size-20 rounded-full bg-[image:var(--gradient-accent)] grid place-items-center text-3xl font-bold shadow-[var(--shadow-glow)]">
-            {profile.displayName.charAt(0)}
+            {displayName.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-xs uppercase tracking-widest text-accent font-semibold">
               {greeting()} · {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
             </div>
             <h1 className="mt-1 text-3xl lg:text-5xl font-extrabold tracking-tight">
-              {greeting()}, Esteemed {profile.displayName}
+              {greeting()}, Esteemed {displayName}
             </h1>
-            <div className="mt-1.5 text-sm text-[color:var(--muted-foreground)] max-w-xl">
-              {profile.bio}
+            <div className="mt-1.5 text-sm text-[color:var(--muted-foreground)] max-w-xl flex items-center gap-2">
+              <Mail className="size-3.5" /> {email || profile.bio}
             </div>
           </div>
           <div className="flex items-center gap-6">
@@ -87,6 +101,11 @@ function ProfilePage() {
           </Link>
         </div>
       </section>
+
+      {/* Account */}
+      <AccountPanel initialName={displayName} email={email} onSaved={(n) => setAccount((a) => ({ display_name: n, handle: a?.handle ?? null }))} />
+
+
 
       {/* Family Profiles */}
       <Section icon={<Users className="size-4 text-accent" />} title="Who's Watching" subtitle="Up to 5 profiles with individual history and preferences.">
@@ -134,7 +153,7 @@ function ProfilePage() {
       >
         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {(progressTitles.length > 0 ? progressTitles.map(({ t }) => t) : titles.slice(0, 5)).map((t) => (
-            <TitleCard key={t.id} t={t} portrait={false} />
+            <TitleCard key={t.id} t={t} portrait={false} preview={false} />
           ))}
         </div>
       </Section>
@@ -402,5 +421,60 @@ function Empty({ label }: { label: string }) {
     <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-[color:var(--muted-foreground)]">
       {label}
     </div>
+  );
+}
+
+function AccountPanel({ initialName, email, onSaved }: { initialName: string; email: string; onSaved: (n: string) => void }) {
+  const { user } = useAuth();
+  const [name, setName] = useState(initialName);
+  const [pw, setPw] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { setName(initialName); }, [initialName]);
+
+  async function saveName() {
+    if (!user || !name.trim()) return;
+    setBusy(true);
+    const { error } = await supabase.from("profiles").update({ display_name: name.trim() }).eq("id", user.id);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Display name updated");
+    onSaved(name.trim());
+  }
+
+  async function changePassword() {
+    if (pw.length < 12) return toast.error("Password must be at least 12 characters");
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: pw });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setPw("");
+    toast.success("Password updated");
+  }
+
+  return (
+    <Section icon={<KeyRound className="size-4 text-accent" />} title="Account" subtitle="Your display name, email and password.">
+      <div className="grid gap-4 md:grid-cols-3">
+        <label className="rounded-xl border border-border bg-elevated/40 p-4 flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">Display name</span>
+          <input value={name} onChange={(e) => setName(e.target.value)} className="h-10 px-3 rounded-md bg-background border border-border text-sm" />
+          <button onClick={saveName} disabled={busy || !name.trim() || name === initialName} className="mt-1 h-9 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2">
+            {busy && <Loader2 className="size-3 animate-spin" />} Save
+          </button>
+        </label>
+        <div className="rounded-xl border border-border bg-elevated/40 p-4 flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">Email</span>
+          <div className="h-10 px-3 rounded-md bg-background border border-border text-sm inline-flex items-center">{email || "—"}</div>
+          <p className="text-[11px] text-[color:var(--muted-foreground)]">Contact support to change your email.</p>
+        </div>
+        <label className="rounded-xl border border-border bg-elevated/40 p-4 flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">Change password</span>
+          <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="New password (min 12 chars)" className="h-10 px-3 rounded-md bg-background border border-border text-sm" />
+          <button onClick={changePassword} disabled={busy || pw.length < 12} className="mt-1 h-9 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2">
+            {busy && <Loader2 className="size-3 animate-spin" />} Update password
+          </button>
+        </label>
+      </div>
+    </Section>
   );
 }

@@ -1,0 +1,1 @@
+ALTER TABLE public.creator_applications ALTER COLUMN channel_name DROP NOT NULL; ALTER TABLE public.creator_applications ALTER COLUMN category DROP NOT NULL;
