@@ -1559,23 +1559,7 @@ function ApplicationsCms() {
       .update({ status: "approved", rejection_reason: null })
       .eq("id", app.id);
     if (error) return toast.error(error.message);
-    // Also seed a cms_channel for the creator if not present
-    const slug = app.channel_name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const { data: existing } = await supabase.from("cms_channels").select("id").eq("slug", slug).maybeSingle();
-    if (!existing) {
-      await supabase.from("cms_channels").insert({
-        slug,
-        name: app.channel_name,
-        description: app.description,
-        category: app.category,
-        creator_id: app.user_id,
-        is_published: true,
-      } as never);
-    } else {
-      await supabase.from("cms_channels").update({ is_published: true, creator_id: app.user_id } as never).eq("id", existing.id);
-    }
-
-    toast.success(`${app.channel_name} approved`);
+    toast.success(`${app.channel_name ?? "Creator"} approved — they can now create their first channel`);
     load();
   }
 
