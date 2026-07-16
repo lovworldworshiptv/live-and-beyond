@@ -159,6 +159,7 @@ export type CmsEvent = {
   endsAt: string | null;
   coverUrl: string | null;
   channelId: string | null;
+  isSponsored: boolean;
 };
 
 export function useCmsEvents(limit = 8) {
@@ -184,12 +185,90 @@ export function useCmsEvents(limit = 8) {
             endsAt: r.ends_at,
             coverUrl: r.cover_url,
             channelId: r.channel_id,
+            isSponsored: !!r.is_sponsored,
           })),
         );
         setLoading(false);
       });
   }, [limit]);
   return { events, loading };
+}
+
+export type CmsSponsor = {
+  id: string;
+  name: string;
+  headline: string | null;
+  description: string | null;
+  ctaLabel: string | null;
+  ctaUrl: string | null;
+  imageUrl: string | null;
+  placements: string[];
+  homeSections: string[];
+  channelIds: string[];
+  eventIds: string[];
+  priority: number;
+  startsAt: string | null;
+  endsAt: string | null;
+};
+
+export function useCmsSponsors(filter: {
+  placement: string;
+  section?: string;
+  channelId?: string;
+  eventId?: string;
+}) {
+  const [sponsors, setSponsors] = useState<CmsSponsor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { placement, section, channelId, eventId } = filter;
+  useEffect(() => {
+    supabase
+      .from("cms_sponsors")
+      .select("*")
+      .eq("is_active", true)
+      .order("priority", { ascending: false })
+      .then(({ data }) => {
+        const now = new Date();
+        const rows = (data ?? []).filter((r: any) => {
+          if (r.starts_at && new Date(r.starts_at) > now) return false;
+          if (r.ends_at && new Date(r.ends_at) < now) return false;
+          const placements: string[] = r.placements?.length ? r.placements : [r.placement];
+          if (!placements.includes(placement)) return false;
+          if (placement === "home" && section) {
+            const sections: string[] = r.home_sections ?? [];
+            if (sections.length && !sections.includes(section)) return false;
+          }
+          if (placement === "channel_page" && channelId) {
+            const list: string[] = r.channel_ids ?? [];
+            if (list.length && !list.includes(channelId)) return false;
+          }
+          if (placement === "event_banner" && eventId) {
+            const list: string[] = r.event_ids ?? [];
+            if (list.length && !list.includes(eventId)) return false;
+          }
+          return true;
+        });
+        setSponsors(
+          rows.map((r: any) => ({
+            id: r.id,
+            name: r.name,
+            headline: r.headline,
+            description: r.description,
+            ctaLabel: r.cta_label,
+            ctaUrl: r.cta_url,
+            imageUrl: r.image_url,
+            placements: r.placements ?? [r.placement],
+            homeSections: r.home_sections ?? [],
+            channelIds: r.channel_ids ?? [],
+            eventIds: r.event_ids ?? [],
+            priority: r.priority ?? 0,
+            startsAt: r.starts_at,
+            endsAt: r.ends_at,
+          })),
+        );
+        setLoading(false);
+      });
+  }, [placement, section, channelId, eventId]);
+  return { sponsors, loading };
 }
 
 export type CmsCollection = {

@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MediaPicker } from "@/components/media-picker";
 import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X, Home } from "lucide-react";
 import { toast } from "sonner";
+import { defaultNav, defaultHero, defaultFooter } from "@/lib/homepage-defaults";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -935,6 +936,7 @@ type EventRow = {
   cover_url: string | null;
   channel_id: string | null;
   is_published: boolean;
+  is_sponsored: boolean;
 };
 
 function EventsCms() {
@@ -1023,7 +1025,10 @@ function EventsCms() {
           <div className="mt-4">
             <Field label="Description"><textarea className={textareaClass} value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
           </div>
-          <label className="flex items-center gap-2 text-sm mt-4"><input type="checkbox" checked={editing.is_published ?? true} onChange={(e) => setEditing({ ...editing, is_published: e.target.checked })} /> Published</label>
+          <div className="flex flex-wrap items-center gap-6 mt-4">
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_published ?? true} onChange={(e) => setEditing({ ...editing, is_published: e.target.checked })} /> Published</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_sponsored ?? false} onChange={(e) => setEditing({ ...editing, is_sponsored: e.target.checked })} /> Sponsored (feature in homepage sponsor banner rotation)</label>
+          </div>
         </ModalShell>
       )}
     </div>
@@ -1643,150 +1648,180 @@ function HomepageCms() {
           Control the top navigation, hero section, and site footer. Changes publish immediately.
         </p>
       </div>
-      <SettingEditor
-        settingKey="nav"
-        title="Top Navigation"
-        description="Configure the primary nav links shown in the header."
-        sample={`{
-  "brand": "Lettflix",
-  "items": [
-    { "label": "Home", "to": "/" },
-    { "label": "Channels", "to": "/channels" },
-    { "label": "On-Demand", "to": "/on-demand" },
-    { "label": "Guide", "to": "/guide" },
-    { "label": "Pricing", "to": "/pricing" }
-  ]
-}`}
-      />
-      <SettingEditor
-        settingKey="hero"
-        title="Hero Section"
-        description="Headline, description, CTAs, and stat tiles on the homepage."
-        sample={`{
-  "badge": "LIVE NOW",
-  "badgeMeta": "184 channels broadcasting",
-  "title": "The future of",
-  "titleAccent": "broadcasting, streaming together.",
-  "description": "Live TV, radio, podcasts and on-demand — one subscription.",
-  "primaryCta":   { "label": "Watch Live",       "to": "/channels" },
-  "secondaryCta": { "label": "Browse Channels",  "to": "/channels" },
-  "tertiaryCta":  { "label": "Open Live Guide",  "to": "/guide" },
-  "stats": [
-    { "k": "184",  "v": "Live channels" },
-    { "k": "12K+", "v": "On-demand titles" },
-    { "k": "320",  "v": "Radio stations" }
-  ]
-}`}
-      />
-      <SettingEditor
-        settingKey="footer"
-        title="Footer"
-        description="Tagline, columns, and legal notes."
-        sample={`{
-  "tagline": "One subscription. Everything.",
-  "copyright": "Lettflix — LoveWorld Entertainment Flix",
-  "note": "All rights reserved.",
-  "columns": [
-    { "title": "Watch", "items": [
-      { "label": "Channels", "href": "/channels" },
-      { "label": "On-Demand", "href": "/on-demand" }
-    ]},
-    { "title": "Company", "items": [
-      { "label": "Pricing", "href": "/pricing" },
-      { "label": "Enterprise", "href": "/enterprise" }
-    ]}
-  ]
-}`}
-      />
+      <SettingCard settingKey="nav" title="Top Navigation" description="Primary links shown in the header.">
+        {(value, setValue) => <NavForm value={value} onChange={setValue} />}
+      </SettingCard>
+      <SettingCard settingKey="hero" title="Hero Section" description="Headline, description, CTAs, banner image, and stats on the homepage.">
+        {(value, setValue) => <HeroForm value={value} onChange={setValue} />}
+      </SettingCard>
+      <SettingCard settingKey="footer" title="Footer" description="Tagline, link columns, and legal notes.">
+        {(value, setValue) => <FooterForm value={value} onChange={setValue} />}
+      </SettingCard>
     </div>
   );
 }
 
-function SettingEditor({ settingKey, title, description, sample }: { settingKey: SettingKey; title: string; description: string; sample: string }) {
-  const [value, setValue] = useState<string>("");
+function SettingCard({
+  settingKey,
+  title,
+  description,
+  children,
+}: {
+  settingKey: SettingKey;
+  title: string;
+  description: string;
+  children: (value: any, setValue: (v: any) => void) => React.ReactNode;
+}) {
+  const [value, setValue] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error: fetchErr } = await supabase
+      const { data } = await supabase
         .from("cms_settings")
         .select("value")
         .eq("key", settingKey)
         .maybeSingle();
       if (cancelled) return;
-      if (fetchErr) {
-        setError(fetchErr.message);
-      } else if (data?.value) {
-        setValue(JSON.stringify(data.value, null, 2));
-      } else {
-        setValue(sample);
-      }
+      setValue(data?.value ?? defaultFor(settingKey));
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [settingKey, sample]);
+  }, [settingKey]);
 
   async function save() {
-    setError(null);
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(value);
-    } catch {
-      setError("Invalid JSON — fix syntax and try again.");
-      return;
-    }
     setSaving(true);
-    const { error: upsertErr } = await supabase
+    const { error } = await supabase
       .from("cms_settings")
-      .upsert({ key: settingKey, value: parsed as never }, { onConflict: "key" });
+      .upsert({ key: settingKey, value: value as never }, { onConflict: "key" });
     setSaving(false);
-    if (upsertErr) {
-      setError(upsertErr.message);
-      toast.error(`Failed to save ${title}`);
-    } else {
-      toast.success(`${title} updated`);
-    }
+    if (error) toast.error(`Failed to save ${title}`);
+    else toast.success(`${title} updated`);
   }
 
   return (
     <section className="rounded-xl border border-border bg-elevated/40 p-5">
-      <div className="flex items-start justify-between gap-4 mb-3">
+      <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h3 className="font-semibold">{title}</h3>
           <p className="text-xs text-[color:var(--muted-foreground)] mt-0.5">{description}</p>
         </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setValue(sample)}
-            className="h-9 px-3 text-xs rounded-md border border-border hover:bg-elevated transition"
-          >
-            Reset to sample
-          </button>
-          <button
-            type="button"
-            onClick={save}
-            disabled={loading || saving}
-            className="h-9 px-4 text-xs font-semibold rounded-md bg-primary text-primary-foreground disabled:opacity-60"
-          >
-            {saving ? "Saving…" : "Save"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={save}
+          disabled={loading || saving}
+          className="h-9 px-4 text-xs font-semibold rounded-md bg-primary text-primary-foreground disabled:opacity-60"
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
       </div>
       {loading ? (
         <div className="h-40 grid place-items-center"><Loader2 className="size-4 animate-spin" /></div>
       ) : (
-        <textarea
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          spellCheck={false}
-          className="w-full min-h-[280px] rounded-md bg-background border border-border p-3 font-mono text-xs leading-relaxed"
-        />
+        children(value, setValue)
       )}
-      {error && <div className="mt-2 text-xs text-primary">{error}</div>}
     </section>
   );
 }
+
+function defaultFor(key: SettingKey): any {
+  if (key === "nav") return defaultNav;
+  if (key === "hero") return defaultHero;
+  return defaultFooter;
+}
+
+function NavForm({ value, onChange }: { value: any; onChange: (v: any) => void }) {
+  const items: { label: string; to: string }[] = value?.items ?? [];
+  const set = (next: { label: string; to: string }[]) => onChange({ ...value, items: next });
+  return (
+    <div className="space-y-3">
+      {items.map((item, i) => (
+        <div key={i} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2 items-center">
+          <input className={inputClass} placeholder="Label" value={item.label} onChange={(e) => set(items.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
+          <input className={inputClass} placeholder="/path" value={item.to} onChange={(e) => set(items.map((x, j) => j === i ? { ...x, to: e.target.value } : x))} />
+          <button onClick={() => set(items.filter((_, j) => j !== i))} className="h-10 px-3 rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+        </div>
+      ))}
+      <button onClick={() => set([...items, { label: "New", to: "/" }])} className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border hover:bg-elevated text-sm"><Plus className="size-4" /> Add link</button>
+    </div>
+  );
+}
+
+function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void }) {
+  const set = (patch: any) => onChange({ ...value, ...patch });
+  const setCta = (key: "primaryCta" | "secondaryCta" | "tertiaryCta", patch: any) => onChange({ ...value, [key]: { ...(value[key] ?? {}), ...patch } });
+  const stats: { k: string; v: string }[] = value?.stats ?? [];
+  const setStats = (next: { k: string; v: string }[]) => onChange({ ...value, stats: next });
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Badge label"><input className={inputClass} value={value.badge ?? ""} onChange={(e) => set({ badge: e.target.value })} /></Field>
+        <Field label="Badge meta"><input className={inputClass} value={value.badgeMeta ?? ""} onChange={(e) => set({ badgeMeta: e.target.value })} /></Field>
+        <Field label="Title"><input className={inputClass} value={value.title ?? ""} onChange={(e) => set({ title: e.target.value })} /></Field>
+        <Field label="Title accent (colored)"><input className={inputClass} value={value.titleAccent ?? ""} onChange={(e) => set({ titleAccent: e.target.value })} /></Field>
+      </div>
+      <Field label="Description"><textarea className={textareaClass} value={value.description ?? ""} onChange={(e) => set({ description: e.target.value })} /></Field>
+      <Field label="Hero banner image">
+        <MediaPicker value={value.imageUrl ?? null} onChange={(url) => set({ imageUrl: url })} folder="hero" />
+      </Field>
+      {(["primaryCta", "secondaryCta", "tertiaryCta"] as const).map((k) => (
+        <div key={k} className="grid gap-4 md:grid-cols-2">
+          <Field label={`${k} label`}><input className={inputClass} value={value[k]?.label ?? ""} onChange={(e) => setCta(k, { label: e.target.value })} /></Field>
+          <Field label={`${k} link`}><input className={inputClass} value={value[k]?.to ?? ""} onChange={(e) => setCta(k, { to: e.target.value })} /></Field>
+        </div>
+      ))}
+      <div>
+        <div className="text-xs font-medium mb-2 text-[color:var(--muted-foreground)]">Stats</div>
+        <div className="space-y-2">
+          {stats.map((s, i) => (
+            <div key={i} className="grid grid-cols-[1fr_2fr_auto] gap-2">
+              <input className={inputClass} placeholder="184" value={s.k} onChange={(e) => setStats(stats.map((x, j) => j === i ? { ...x, k: e.target.value } : x))} />
+              <input className={inputClass} placeholder="Live channels" value={s.v} onChange={(e) => setStats(stats.map((x, j) => j === i ? { ...x, v: e.target.value } : x))} />
+              <button onClick={() => setStats(stats.filter((_, j) => j !== i))} className="h-10 px-3 rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+            </div>
+          ))}
+          <button onClick={() => setStats([...stats, { k: "", v: "" }])} className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border hover:bg-elevated text-sm"><Plus className="size-4" /> Add stat</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FooterForm({ value, onChange }: { value: any; onChange: (v: any) => void }) {
+  const set = (patch: any) => onChange({ ...value, ...patch });
+  const columns: { title: string; items: { label: string; href: string }[] }[] = value?.columns ?? [];
+  const setColumns = (next: typeof columns) => onChange({ ...value, columns: next });
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4">
+        <Field label="Tagline"><textarea className={textareaClass} value={value.tagline ?? ""} onChange={(e) => set({ tagline: e.target.value })} /></Field>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Copyright"><input className={inputClass} value={value.copyright ?? ""} onChange={(e) => set({ copyright: e.target.value })} /></Field>
+          <Field label="Note"><input className={inputClass} value={value.note ?? ""} onChange={(e) => set({ note: e.target.value })} /></Field>
+        </div>
+      </div>
+      <div className="space-y-4">
+        {columns.map((col, ci) => (
+          <div key={ci} className="rounded-md border border-border bg-background/40 p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <input className={inputClass} placeholder="Column title" value={col.title} onChange={(e) => setColumns(columns.map((x, j) => j === ci ? { ...x, title: e.target.value } : x))} />
+              <button onClick={() => setColumns(columns.filter((_, j) => j !== ci))} className="h-10 px-3 rounded-md hover:bg-elevated text-destructive shrink-0"><Trash2 className="size-4" /></button>
+            </div>
+            {col.items.map((it, ii) => (
+              <div key={ii} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                <input className={inputClass} placeholder="Label" value={it.label} onChange={(e) => setColumns(columns.map((x, j) => j === ci ? { ...x, items: x.items.map((y, k) => k === ii ? { ...y, label: e.target.value } : y) } : x))} />
+                <input className={inputClass} placeholder="/path or https://" value={it.href} onChange={(e) => setColumns(columns.map((x, j) => j === ci ? { ...x, items: x.items.map((y, k) => k === ii ? { ...y, href: e.target.value } : y) } : x))} />
+                <button onClick={() => setColumns(columns.map((x, j) => j === ci ? { ...x, items: x.items.filter((_, k) => k !== ii) } : x))} className="h-10 px-3 rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+              </div>
+            ))}
+            <button onClick={() => setColumns(columns.map((x, j) => j === ci ? { ...x, items: [...x.items, { label: "", href: "" }] } : x))} className="inline-flex items-center gap-2 h-8 px-3 rounded-md border border-border hover:bg-elevated text-xs"><Plus className="size-3" /> Add link</button>
+          </div>
+        ))}
+        <button onClick={() => setColumns([...columns, { title: "New Column", items: [] }])} className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border hover:bg-elevated text-sm"><Plus className="size-4" /> Add column</button>
+      </div>
+    </div>
+  );
+}
+

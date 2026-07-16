@@ -14,6 +14,7 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Row } from "@/components/row";
+import { SponsorBanner } from "@/components/sponsor-banner";
 import { useCmsChannels, useCmsTitles, useCmsEvents, useCmsCollections, useCmsSetting } from "@/lib/cms-catalog";
 import { defaultHero, type HeroConfig } from "@/lib/homepage-defaults";
 import { useProgress } from "@/lib/personal";
@@ -40,6 +41,17 @@ function formatEventDate(iso: string) {
   const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
   return { date, time };
 }
+
+const COLLECTION_GRADIENTS = [
+  "linear-gradient(135deg, oklch(0.24 0.59 359.4), oklch(0.36 0.59 359.4))",
+  "linear-gradient(135deg, oklch(0.55 0.22 300), oklch(0.45 0.20 220))",
+  "linear-gradient(135deg, oklch(0.65 0.20 60), oklch(0.45 0.18 30))",
+  "linear-gradient(135deg, oklch(0.55 0.20 220), oklch(0.35 0.18 260))",
+  "linear-gradient(135deg, oklch(0.55 0.20 145), oklch(0.35 0.15 200))",
+  "linear-gradient(135deg, oklch(0.35 0.15 280), oklch(0.20 0.12 240))",
+  "linear-gradient(135deg, oklch(0.55 0.22 25), oklch(0.30 0.18 15))",
+  "linear-gradient(135deg, oklch(0.48 0.20 190), oklch(0.28 0.15 250))",
+];
 
 function Index() {
   const { value: hero } = useCmsSetting<HeroConfig>("hero", defaultHero);
@@ -80,7 +92,7 @@ function Index() {
       <section className="relative isolate overflow-hidden min-h-[680px] md:min-h-[720px] lg:min-h-[760px]">
         <div className="absolute inset-0 bg-background" />
         <img
-          src={heroImg}
+          src={hero.imageUrl || heroImg}
           alt="Lettflix broadcast showcase"
           width={1920}
           height={1088}
@@ -212,32 +224,8 @@ function Index() {
       )}
 
       {/* SPONSORED */}
-      {events[0] && (
-        <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-14">
-          <div className="relative overflow-hidden rounded-2xl border border-border">
-            <div className="absolute inset-0 bg-[image:var(--gradient-live)] opacity-90" />
-            <div className="absolute inset-0 mix-blend-overlay" style={{ background: "radial-gradient(at 80% 50%, oklch(0.58 0.22 264 / 0.6), transparent 60%)" }} />
-            <div className="relative px-8 lg:px-14 py-10 lg:py-14 flex flex-wrap items-center justify-between gap-6">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-widest text-white/80">Featured Event</div>
-                <h3 className="mt-2 text-2xl lg:text-3xl font-display font-bold max-w-xl text-white">{events[0].name}</h3>
-                <p className="mt-2 text-white/80 max-w-xl">
-                  {formatEventDate(events[0].startsAt).date} · {formatEventDate(events[0].startsAt).time}
-                  {events[0].description ? ` — ${events[0].description}` : ""}
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition">
-                  <Bell className="size-4" /> Notify Me
-                </button>
-                <button className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-black/40 border border-white/20 backdrop-blur text-white font-medium hover:bg-black/60 transition">
-                  <CalendarDays className="size-4" /> Add to Calendar
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      <SponsorBanner placement="home" includeSponsoredEvents />
+
 
       {/* TRENDING */}
       {trending.length > 0 && (
@@ -342,13 +330,13 @@ function Index() {
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {cmsCollections.slice(0, 8).map((col) => (
+            {cmsCollections.slice(0, 8).map((col, i) => (
               <Link
                 key={col.id}
                 to="/collections/$collectionId"
                 params={{ collectionId: col.slug }}
-                className="group relative overflow-hidden rounded-xl border border-border bg-elevated/50 p-5 h-32 flex flex-col justify-between hover:border-foreground/20 transition"
-                style={col.coverUrl ? { backgroundImage: `linear-gradient(135deg, oklch(0.24 0.59 359.4 / 0.7), oklch(0.14 0.09 264 / 0.85)), url(${col.coverUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+                className="group relative overflow-hidden rounded-xl border border-border p-5 h-32 flex flex-col justify-between hover:border-foreground/20 transition"
+                style={{ background: COLLECTION_GRADIENTS[i % COLLECTION_GRADIENTS.length] }}
               >
                 {col.isFeatured ? <Sparkles className="size-6 text-white/90" /> : <Heart className="size-6 text-white/90" />}
                 <div>
