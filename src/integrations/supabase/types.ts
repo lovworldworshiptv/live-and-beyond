@@ -64,6 +64,7 @@ export type Database = {
           deleted_at: string | null
           deleted_by: string | null
           description: string | null
+          display_order: number
           featured_content: string[]
           id: string
           is_live: boolean
@@ -95,6 +96,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           description?: string | null
+          display_order?: number
           featured_content?: string[]
           id?: string
           is_live?: boolean
@@ -126,6 +128,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           description?: string | null
+          display_order?: number
           featured_content?: string[]
           id?: string
           is_live?: boolean
@@ -425,6 +428,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           deleted_by: string | null
+          display_order: number
           duration_label: string | null
           duration_minutes: number | null
           episodes: number | null
@@ -452,6 +456,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          display_order?: number
           duration_label?: string | null
           duration_minutes?: number | null
           episodes?: number | null
@@ -479,6 +484,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          display_order?: number
           duration_label?: string | null
           duration_minutes?: number | null
           episodes?: number | null
