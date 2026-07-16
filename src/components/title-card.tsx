@@ -17,11 +17,13 @@ export function TitleCard({
   rank,
   portrait = true,
   size = "md",
+  preview = true,
 }: {
   t: Title;
   rank?: number;
   portrait?: boolean;
   size?: "sm" | "md" | "lg";
+  preview?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [muted, setMuted] = useState(true);
