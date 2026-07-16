@@ -93,9 +93,9 @@ function OnDemand() {
           {featuredList.map((f, i) => (
             <img
               key={f.id}
-              src={f.hero}
+              src={f.hero || f.cover}
               alt=""
-              className="absolute inset-0 size-full object-cover opacity-60 transition-opacity duration-1000"
+              className="absolute inset-0 size-full object-cover transition-opacity duration-1000"
               style={{ opacity: i === featIdx ? 0.6 : 0 }}
             />
           ))}
