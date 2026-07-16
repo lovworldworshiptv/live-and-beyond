@@ -504,6 +504,7 @@ function TitleEditor({ value, onClose, onSave }: { value: Partial<Title>; onClos
         <Field label="Duration (minutes)"><input type="number" className={inputClass} value={form.duration_minutes ?? ""} onChange={(e) => set("duration_minutes", e.target.value ? Number(e.target.value) : null)} /></Field>
         <Field label="Seasons"><input type="number" className={inputClass} value={form.seasons ?? ""} onChange={(e) => set("seasons", e.target.value ? Number(e.target.value) : null)} /></Field>
         <Field label="Episodes"><input type="number" className={inputClass} value={form.episodes ?? ""} onChange={(e) => set("episodes", e.target.value ? Number(e.target.value) : null)} /></Field>
+        <Field label="Display order (lower = first)"><input type="number" className={inputClass} value={form.display_order ?? 0} onChange={(e) => set("display_order", Number(e.target.value))} /></Field>
       </div>
 
       <div className="grid gap-4 mt-4 md:grid-cols-2">
