@@ -20,7 +20,7 @@ export function CreatorApprovalWatcher() {
         .maybeSingle();
       if (cancelled) return;
       if (data && data.status === "approved" && !data.onboarded_at) {
-        setApp({ id: data.id, channel_name: data.channel_name });
+        setApp({ id: data.id, channel_name: data.channel_name ?? "" });
       }
     })();
     return () => { cancelled = true; };
