@@ -42,6 +42,17 @@ function formatEventDate(iso: string) {
   return { date, time };
 }
 
+const COLLECTION_GRADIENTS = [
+  "linear-gradient(135deg, oklch(0.24 0.59 359.4), oklch(0.36 0.59 359.4))",
+  "linear-gradient(135deg, oklch(0.55 0.22 300), oklch(0.45 0.20 220))",
+  "linear-gradient(135deg, oklch(0.65 0.20 60), oklch(0.45 0.18 30))",
+  "linear-gradient(135deg, oklch(0.55 0.20 220), oklch(0.35 0.18 260))",
+  "linear-gradient(135deg, oklch(0.55 0.20 145), oklch(0.35 0.15 200))",
+  "linear-gradient(135deg, oklch(0.35 0.15 280), oklch(0.20 0.12 240))",
+  "linear-gradient(135deg, oklch(0.55 0.22 25), oklch(0.30 0.18 15))",
+  "linear-gradient(135deg, oklch(0.48 0.20 190), oklch(0.28 0.15 250))",
+];
+
 function Index() {
   const { value: hero } = useCmsSetting<HeroConfig>("hero", defaultHero);
   const { channels } = useCmsChannels();
