@@ -432,13 +432,13 @@ function ChannelPage() {
             <p className="text-sm text-[color:var(--muted-foreground)] mt-1">
               Channels popular with viewers of {channel.name}.
             </p>
-            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {recommendations.map((r) => (
                 <Link
                   key={r.id}
                   to="/channels/$channelId"
                   params={{ channelId: r.id }}
-                  className="group flex gap-3 p-3 rounded-xl border border-border bg-elevated/40 hover:border-accent/40 transition"
+                  className="group flex gap-3 p-3 rounded-xl border border-border bg-elevated/40 hover:border-accent/40 transition min-w-0"
                 >
                   <div className="relative size-16 shrink-0 rounded-md overflow-hidden">
                     <img src={r.banner} alt="" className="size-full object-cover" />
@@ -446,13 +446,14 @@ function ChannelPage() {
                       <span className="absolute top-1 left-1 text-[9px] font-bold px-1 py-0.5 rounded bg-primary text-primary-foreground">LIVE</span>
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-[10px] text-accent font-semibold uppercase tracking-wider">{r.category}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] text-accent font-semibold uppercase tracking-wider truncate">{r.category}</div>
                     <div className="text-sm font-semibold leading-tight line-clamp-1">{r.name}</div>
                     <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5 line-clamp-1">
                       Now: {r.nowPlaying.title}
                     </div>
                   </div>
+
                 </Link>
               ))}
             </div>
@@ -469,7 +470,7 @@ function ChannelPage() {
               key={r.id}
               to="/channels/$channelId"
               params={{ channelId: r.id }}
-              className="group flex gap-3 p-3 rounded-xl border border-border bg-elevated/40 hover:border-accent/40 transition"
+              className="group flex gap-3 p-3 rounded-xl border border-border bg-elevated/40 hover:border-accent/40 transition min-w-0"
             >
               <div className="relative size-20 shrink-0 rounded-md overflow-hidden">
                 <img src={r.banner} alt="" className="size-full object-cover" />
@@ -477,13 +478,14 @@ function ChannelPage() {
                   <span className="absolute top-1 left-1 text-[9px] font-bold px-1 py-0.5 rounded bg-primary text-primary-foreground">LIVE</span>
                 )}
               </div>
-              <div className="min-w-0">
-                <div className="text-[11px] text-accent font-semibold uppercase tracking-wider">{r.category}</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[11px] text-accent font-semibold uppercase tracking-wider truncate">{r.category}</div>
                 <div className="text-sm font-semibold leading-tight line-clamp-1">{r.name}</div>
                 <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5 line-clamp-1">
                   Now: {r.nowPlaying.title}
                 </div>
               </div>
+
             </Link>
           ))}
         </aside>
