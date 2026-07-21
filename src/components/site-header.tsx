@@ -138,7 +138,7 @@ export function SiteHeader() {
           {!user ? (
             <Link
               to="/auth"
-              className="h-9 px-3 sm:px-4 inline-flex items-center rounded-md bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition"
+              className="h-9 px-5 inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-semibold leading-none hover:bg-primary/90 transition whitespace-nowrap"
             >
               Sign in
             </Link>
