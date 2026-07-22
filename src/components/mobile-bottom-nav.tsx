@@ -36,12 +36,7 @@ export function MobileBottomNav() {
 
   return (
     <>
-      {/* Spacer so page content isn't hidden behind the fixed bar */}
-      <div
-        aria-hidden
-        className="lg:hidden"
-        style={{ height: `calc(${BAR_HEIGHT} + env(safe-area-inset-bottom, 0px))` }}
-      />
+
 
       <nav
         aria-label="Primary"
