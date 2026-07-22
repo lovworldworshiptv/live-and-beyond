@@ -41,65 +41,6 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border">
       <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 h-16 flex items-center gap-4 lg:gap-8">
-        {/* Mobile hamburger */}
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild>
-            <button
-              className="lg:hidden size-9 grid place-items-center rounded-md hover:bg-elevated transition"
-              aria-label="Open menu"
-            >
-              <Menu className="size-5" />
-            </button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0 bg-background border-border">
-            <SheetHeader className="p-5 border-b border-border">
-              <SheetTitle className="text-left">
-                <img src={logoHorizontal.url} alt="Lettflix" className="h-9 w-auto object-contain" />
-              </SheetTitle>
-            </SheetHeader>
-            <nav className="p-3 flex flex-col">
-              {navItems.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.to as never}
-                  onClick={() => setMobileOpen(false)}
-                  className={`px-3 py-3 rounded-md text-sm transition-colors ${
-                    isActive(item.to)
-                      ? "text-foreground bg-elevated/60 font-semibold"
-                      : "text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated/40"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              {(isCreator || isAdmin) && (
-                <>
-                  <div className="mt-3 mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-[color:var(--muted-foreground)]">
-                    Workspace
-                  </div>
-                  {isCreator && (
-                    <Link
-                      to="/portal"
-                      onClick={() => setMobileOpen(false)}
-                      className="px-3 py-3 rounded-md text-sm text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated/40"
-                    >
-                      Creator Portal
-                    </Link>
-                  )}
-                  {isAdmin && (
-                    <Link
-                      to="/admin"
-                      onClick={() => setMobileOpen(false)}
-                      className="px-3 py-3 rounded-md text-sm text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated/40"
-                    >
-                      CMS Admin
-                    </Link>
-                  )}
-                </>
-              )}
-            </nav>
-          </SheetContent>
-        </Sheet>
 
         <Link to="/" className="flex items-center group">
           <img src={logoHorizontal.url} alt="Lettflix" className="h-10 lg:h-11 w-auto object-contain" />
