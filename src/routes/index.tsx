@@ -124,15 +124,13 @@ function Index() {
             alt="Lettflix broadcast showcase"
             width={1920}
             height={1088}
-            className="absolute inset-y-0 right-0 h-full w-full object-cover object-[72%_center] pointer-events-none transition-opacity duration-1000"
+            className="absolute inset-y-0 right-0 h-full w-full object-cover object-center lg:object-[72%_center] pointer-events-none transition-opacity duration-1000 [mask-image:none] lg:[mask-image:linear-gradient(90deg,transparent_0%,transparent_38%,black_56%,black_100%)] [-webkit-mask-image:none] lg:[-webkit-mask-image:linear-gradient(90deg,transparent_0%,transparent_38%,black_56%,black_100%)]"
             style={{
               opacity: i === slideIdx ? 1 : 0,
-              maskImage: "linear-gradient(90deg, transparent 0%, transparent 38%, black 56%, black 100%)",
-              WebkitMaskImage: "linear-gradient(90deg, transparent 0%, transparent 38%, black 56%, black 100%)",
             }}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/20 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/30 lg:bg-gradient-to-r lg:from-background lg:via-background/95 lg:to-background/20 pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent to-background pointer-events-none" />
 
         <div className="relative mx-auto max-w-[1480px] px-6 lg:px-10 pt-6 lg:pt-[54px] pb-12 lg:pb-32 flex min-h-[520px] md:min-h-[600px] lg:min-h-[760px] items-center">
