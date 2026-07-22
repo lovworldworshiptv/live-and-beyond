@@ -18,7 +18,7 @@ export function Row({
   };
 
   return (
-    <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-12">
+    <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-6">
       <div className="flex items-end justify-between mb-4">
         <div>
           <h2 className="text-xl lg:text-2xl font-semibold tracking-tight">{title}</h2>

@@ -115,7 +115,7 @@ function Index() {
       <SiteHeader />
 
       {/* HERO */}
-      <section className="relative isolate overflow-hidden min-h-[680px] md:min-h-[720px] lg:min-h-[760px]">
+      <section className="relative isolate overflow-hidden min-h-[520px] md:min-h-[600px] lg:min-h-[760px]">
         <div className="absolute inset-0 bg-background" />
         {heroSlides.map((s, i) => (
           <img
@@ -135,7 +135,7 @@ function Index() {
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/20 pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent to-background pointer-events-none" />
 
-        <div className="relative mx-auto max-w-[1480px] px-6 lg:px-10 pt-9 lg:pt-[54px] pb-20 lg:pb-32 flex min-h-[680px] md:min-h-[720px] lg:min-h-[760px] items-center">
+        <div className="relative mx-auto max-w-[1480px] px-6 lg:px-10 pt-6 lg:pt-[54px] pb-12 lg:pb-32 flex min-h-[520px] md:min-h-[600px] lg:min-h-[760px] items-center">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-xs font-medium">
               <span className="live-pulse text-primary">{activeBadge}</span>
