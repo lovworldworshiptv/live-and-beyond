@@ -24,7 +24,6 @@ export function SiteHeader() {
   const { profile } = useProfile();
   const { user, isAdmin, isCreator, signOut } = useAuth();
   const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   const displayName = user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? profile.displayName;
   const handle = user?.email ?? profile.handle;
