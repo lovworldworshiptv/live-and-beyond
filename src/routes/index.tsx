@@ -115,7 +115,7 @@ function Index() {
       <SiteHeader />
 
       {/* HERO */}
-      <section className="relative isolate overflow-hidden -mt-16 lg:mt-0 min-h-[680px] md:min-h-[720px] lg:min-h-[760px]">
+      <section className="relative isolate overflow-hidden min-h-[520px] md:min-h-[600px] lg:min-h-[760px]">
         <div className="absolute inset-0 bg-background" />
         {heroSlides.map((s, i) => (
           <img
