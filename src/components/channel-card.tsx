@@ -205,7 +205,7 @@ export function ChannelCard({ c }: { c: Channel }) {
         <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch Now
       </Link>
 
-      {/* Action row: Notify · Schedule · Share — match Watch Now styling */}
+      {/* Action row: Notify · Schedule · Share — Watch Now shape, elevated bg */}
       <div className="mt-2 grid grid-cols-3 gap-2">
         <button
           aria-label={reminderActive ? "Reminder set" : "Notify me"}
@@ -214,7 +214,7 @@ export function ChannelCard({ c }: { c: Channel }) {
             stop(e);
             setReminderOpen(true);
           }}
-          className="inline-flex items-center justify-center h-11 rounded-xl bg-primary text-primary-foreground font-semibold transition hover:brightness-110 hover:scale-[1.03] active:scale-95"
+          className="inline-flex items-center justify-center h-11 rounded-xl bg-elevated/70 border border-border text-foreground font-semibold backdrop-blur transition hover:bg-elevated hover:border-primary/50 hover:scale-[1.03] active:scale-95"
           style={{
             boxShadow:
               "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
@@ -229,7 +229,7 @@ export function ChannelCard({ c }: { c: Channel }) {
             stop(e);
             setScheduleOpen(true);
           }}
-          className="inline-flex items-center justify-center h-11 rounded-xl bg-primary text-primary-foreground font-semibold transition hover:brightness-110 hover:scale-[1.03] active:scale-95"
+          className="inline-flex items-center justify-center h-11 rounded-xl bg-elevated/70 border border-border text-foreground font-semibold backdrop-blur transition hover:bg-elevated hover:border-primary/50 hover:scale-[1.03] active:scale-95"
           style={{
             boxShadow:
               "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
@@ -239,7 +239,7 @@ export function ChannelCard({ c }: { c: Channel }) {
         </button>
         <div
           onClick={stop}
-          className="[&>div]:w-full [&_button]:!w-full [&_button]:!h-11 [&_button]:!rounded-xl [&_button]:!bg-primary [&_button]:!text-primary-foreground [&_button]:!border-0 [&_button]:!font-semibold [&_button]:hover:!brightness-110 [&_button]:hover:!scale-[1.03] [&_button]:active:!scale-95 [&_button]:!transition [&_button]:![box-shadow:0_0_0_2px_oklch(0.55_0.22_25_/_0.35),0_0_18px_oklch(0.55_0.22_25_/_0.35),0_0_40px_oklch(0.55_0.22_25_/_0.15)] [&_button>span]:!hidden [&_button_svg]:!size-[18px]"
+          className="[&>div]:w-full [&_button]:!w-full [&_button]:!h-11 [&_button]:!rounded-xl [&_button]:!bg-elevated/70 [&_button]:!text-foreground [&_button]:!border [&_button]:!border-border [&_button]:!backdrop-blur [&_button]:!font-semibold [&_button]:hover:!bg-elevated [&_button]:hover:!border-primary/50 [&_button]:hover:!scale-[1.03] [&_button]:active:!scale-95 [&_button]:!transition [&_button]:![box-shadow:0_0_0_2px_oklch(0.55_0.22_25_/_0.35),0_0_18px_oklch(0.55_0.22_25_/_0.35),0_0_40px_oklch(0.55_0.22_25_/_0.15)] [&_button>span]:!hidden [&_button_svg]:!size-[18px]"
         >
           <ShareMenu title={c.name} path={`/channels/${c.id}`} variant="chip" />
         </div>
