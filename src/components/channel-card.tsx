@@ -205,35 +205,40 @@ export function ChannelCard({ c }: { c: Channel }) {
         <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch Now
       </Link>
 
-      {/* Action row: Notify Me · Schedule · Share */}
+      {/* Action row: Notify · Schedule · Share (icon-only, responsive) */}
       <div className="mt-2 grid grid-cols-3 gap-2">
         <button
+          aria-label={reminderActive ? "Reminder set" : "Notify me"}
+          title={reminderActive ? "Reminder set" : "Notify me"}
           onClick={(e) => {
             stop(e);
             setReminderOpen(true);
           }}
-          className={`inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border text-xs font-medium whitespace-nowrap transition shadow-sm ${
+          className={`group/btn relative inline-flex items-center justify-center h-10 sm:h-11 rounded-xl border overflow-hidden transition-all duration-300 hover:scale-[1.04] active:scale-95 ${
             reminderActive
-              ? "bg-primary text-primary-foreground border-primary hover:brightness-110"
-              : "bg-elevated border-border hover:bg-elevated/80 hover:border-primary/30"
+              ? "bg-primary text-primary-foreground border-primary shadow-[0_0_18px_oklch(0.55_0.22_25_/_0.5)]"
+              : "bg-elevated/70 border-border hover:border-primary/50 hover:bg-elevated backdrop-blur"
           }`}
         >
-          {reminderActive ? <BellRing className="size-3.5 shrink-0" /> : <Bell className="size-3.5 shrink-0" />}
-          <span className="hidden sm:inline">Notify Me</span>
-          <span className="sm:hidden">Notify</span>
+          <span className="pointer-events-none absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_at_center,oklch(0.55_0.22_25_/_0.28),transparent_70%)]" />
+          {reminderActive ? <BellRing className="size-4 relative" /> : <Bell className="size-4 relative" />}
         </button>
         <button
+          aria-label="View schedule"
+          title="Schedule"
           onClick={(e) => {
             stop(e);
             setScheduleOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border bg-elevated hover:bg-elevated/80 hover:border-primary/30 text-xs font-medium whitespace-nowrap transition shadow-sm"
+          className="group/btn relative inline-flex items-center justify-center h-10 sm:h-11 rounded-xl border border-border bg-elevated/70 hover:bg-elevated hover:border-primary/50 backdrop-blur transition-all duration-300 hover:scale-[1.04] active:scale-95 overflow-hidden"
         >
-          <CalendarClock className="size-3.5 shrink-0" />
-          <span className="hidden sm:inline">Add to Calendar</span>
-          <span className="sm:hidden">Calendar</span>
+          <span className="pointer-events-none absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_at_center,oklch(0.55_0.22_25_/_0.28),transparent_70%)]" />
+          <CalendarClock className="size-4 relative" />
         </button>
-        <div onClick={stop} className="[&>div]:w-full [&>div>button]:w-full [&>div>button]:whitespace-nowrap">
+        <div
+          onClick={stop}
+          className="[&>div]:w-full [&_button]:!w-full [&_button]:!h-10 sm:[&_button]:!h-11 [&_button]:!rounded-xl [&_button]:!bg-elevated/70 [&_button]:!border [&_button]:!border-border [&_button]:hover:!border-primary/50 [&_button]:!backdrop-blur [&_button]:!transition-all [&_button]:hover:!scale-[1.04] [&_button]:active:!scale-95 [&_button>span]:!hidden [&_button]:!text-foreground"
+        >
           <ShareMenu title={c.name} path={`/channels/${c.id}`} variant="chip" />
         </div>
       </div>
