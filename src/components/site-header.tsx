@@ -130,6 +130,7 @@ export function SiteHeader() {
           )}
         </div>
       </div>
+      <MobileBottomNav />
     </header>
   );
 }
