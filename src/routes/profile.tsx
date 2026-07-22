@@ -67,7 +67,7 @@ function ProfilePage() {
   const recommendations = titles.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <SiteHeader />
 
       {/* Greeting */}
