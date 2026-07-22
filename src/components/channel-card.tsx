@@ -16,6 +16,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { RemindButton } from "./remind-button";
 import { ShareMenu } from "./share-menu";
 import { useHlsAttach } from "@/hooks/use-hls";
