@@ -3,17 +3,17 @@ import { Home, Tv, Film, User } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 
 type NavItem = {
-  label: string;
   to: string;
-  icon: ComponentType<SVGProps<SVGSVGElement>>;
-  match: (path: string) => boolean;
+  label: string;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
+  exact?: boolean;
 };
 
-const items: NavItem[] = [
-  { label: "Home", to: "/", icon: Home, match: (p) => p === "/" },
-  { label: "Channels", to: "/channels", icon: Tv, match: (p) => p.startsWith("/channels") },
-  { label: "Movies", to: "/on-demand", icon: Film, match: (p) => p.startsWith("/on-demand") },
-  { label: "Profile", to: "/profile", icon: User, match: (p) => p.startsWith("/profile") || p.startsWith("/account") },
+const TABS: NavItem[] = [
+  { to: "/", label: "Home", Icon: Home, exact: true },
+  { to: "/channels", label: "Channels", Icon: Tv },
+  { to: "/on-demand", label: "Movies", Icon: Film },
+  { to: "/profile", label: "Profile", Icon: User },
 ];
 
 export function MobileBottomNav() {
@@ -22,47 +22,39 @@ export function MobileBottomNav() {
   return (
     <>
       {/* Spacer so page content isn't hidden behind the fixed bar */}
-      <div aria-hidden className="lg:hidden h-[calc(4.75rem+env(safe-area-inset-bottom))]" />
+      <div aria-hidden className="lg:hidden h-16 pb-[env(safe-area-inset-bottom)]" />
 
       <nav
         aria-label="Primary"
-        className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[min(94vw,520px)]"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        className="fixed inset-x-0 bottom-0 z-40 lg:hidden"
       >
-        <div className="relative rounded-2xl border border-border bg-background/70 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)]">
-          <ul className="grid grid-cols-4">
-            {items.map((item) => {
-              const active = item.match(pathname);
-              const Icon = item.icon;
+        <div className="border-t border-border/60 bg-background/70 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
+          <ul className="mx-auto grid max-w-xl grid-cols-4">
+            {TABS.map(({ to, label, Icon, exact }) => {
+              const active = exact
+                ? pathname === to
+                : pathname === to || pathname.startsWith(`${to}/`);
               return (
-                <li key={item.label} className="flex">
+                <li key={to}>
                   <Link
-                    to={item.to as never}
+                    to={to as "/"}
                     aria-current={active ? "page" : undefined}
-                    className="group relative flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[64px] outline-none"
+                    className={`flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium tracking-wide transition-colors ${
+                      active
+                        ? "text-primary"
+                        : "text-[color:var(--muted-foreground)] hover:text-foreground"
+                    }`}
                   >
                     <span
-                      className={`relative grid place-items-center size-10 rounded-xl transition-all duration-300 ${
+                      className={`grid h-9 w-12 place-items-center rounded-full transition-all ${
                         active
-                          ? "bg-[image:var(--gradient-live)] text-primary-foreground shadow-[0_10px_25px_-8px_var(--primary)] scale-110 -translate-y-2"
-                          : "text-[color:var(--secondary-foreground)] group-hover:text-foreground group-active:scale-95"
+                          ? "bg-primary/15 shadow-[var(--shadow-glow)]"
+                          : ""
                       }`}
                     >
-                      <Icon className={`transition-transform ${active ? "size-5" : "size-[22px]"}`} strokeWidth={active ? 2.4 : 2} />
+                      <Icon className={`h-5 w-5 ${active ? "stroke-[2.5]" : ""}`} />
                     </span>
-                    <span
-                      className={`text-[10.5px] font-semibold leading-none tracking-wide transition-colors ${
-                        active ? "text-foreground" : "text-[color:var(--muted-foreground)] group-hover:text-foreground"
-                      }`}
-                    >
-                      {item.label}
-                    </span>
-                    {active && (
-                      <span
-                        aria-hidden
-                        className="absolute top-1 h-1 w-8 rounded-full bg-primary/80 shadow-[0_0_12px_var(--primary)]"
-                      />
-                    )}
+                    <span>{label}</span>
                   </Link>
                 </li>
               );
