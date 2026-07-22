@@ -205,7 +205,7 @@ export function ChannelCard({ c }: { c: Channel }) {
         <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch Now
       </Link>
 
-      {/* Action row: Notify · Schedule · Share (icon-only, responsive) */}
+      {/* Action row: Notify · Schedule · Share — match Watch Now styling */}
       <div className="mt-2 grid grid-cols-3 gap-2">
         <button
           aria-label={reminderActive ? "Reminder set" : "Notify me"}
@@ -214,14 +214,13 @@ export function ChannelCard({ c }: { c: Channel }) {
             stop(e);
             setReminderOpen(true);
           }}
-          className={`group/btn relative inline-flex items-center justify-center h-10 sm:h-11 rounded-xl border overflow-hidden transition-all duration-300 hover:scale-[1.04] active:scale-95 ${
-            reminderActive
-              ? "bg-primary text-primary-foreground border-primary shadow-[0_0_18px_oklch(0.55_0.22_25_/_0.5)]"
-              : "bg-elevated/70 border-border hover:border-primary/50 hover:bg-elevated backdrop-blur"
-          }`}
+          className="inline-flex items-center justify-center h-11 rounded-xl bg-primary text-primary-foreground font-semibold transition hover:brightness-110 hover:scale-[1.03] active:scale-95"
+          style={{
+            boxShadow:
+              "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
+          }}
         >
-          <span className="pointer-events-none absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_at_center,oklch(0.55_0.22_25_/_0.28),transparent_70%)]" />
-          {reminderActive ? <BellRing className="size-4 relative" /> : <Bell className="size-4 relative" />}
+          {reminderActive ? <BellRing className="size-[18px]" strokeWidth={2.5} /> : <Bell className="size-[18px]" strokeWidth={2.5} />}
         </button>
         <button
           aria-label="View schedule"
@@ -230,14 +229,17 @@ export function ChannelCard({ c }: { c: Channel }) {
             stop(e);
             setScheduleOpen(true);
           }}
-          className="group/btn relative inline-flex items-center justify-center h-10 sm:h-11 rounded-xl border border-border bg-elevated/70 hover:bg-elevated hover:border-primary/50 backdrop-blur transition-all duration-300 hover:scale-[1.04] active:scale-95 overflow-hidden"
+          className="inline-flex items-center justify-center h-11 rounded-xl bg-primary text-primary-foreground font-semibold transition hover:brightness-110 hover:scale-[1.03] active:scale-95"
+          style={{
+            boxShadow:
+              "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
+          }}
         >
-          <span className="pointer-events-none absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_at_center,oklch(0.55_0.22_25_/_0.28),transparent_70%)]" />
-          <CalendarClock className="size-4 relative" />
+          <CalendarClock className="size-[18px]" strokeWidth={2.5} />
         </button>
         <div
           onClick={stop}
-          className="[&>div]:w-full [&_button]:!w-full [&_button]:!h-10 sm:[&_button]:!h-11 [&_button]:!rounded-xl [&_button]:!bg-elevated/70 [&_button]:!border [&_button]:!border-border [&_button]:hover:!border-primary/50 [&_button]:!backdrop-blur [&_button]:!transition-all [&_button]:hover:!scale-[1.04] [&_button]:active:!scale-95 [&_button>span]:!hidden [&_button]:!text-foreground"
+          className="[&>div]:w-full [&_button]:!w-full [&_button]:!h-11 [&_button]:!rounded-xl [&_button]:!bg-primary [&_button]:!text-primary-foreground [&_button]:!border-0 [&_button]:!font-semibold [&_button]:hover:!brightness-110 [&_button]:hover:!scale-[1.03] [&_button]:active:!scale-95 [&_button]:!transition [&_button]:![box-shadow:0_0_0_2px_oklch(0.55_0.22_25_/_0.35),0_0_18px_oklch(0.55_0.22_25_/_0.35),0_0_40px_oklch(0.55_0.22_25_/_0.15)] [&_button>span]:!hidden [&_button_svg]:!size-[18px]"
         >
           <ShareMenu title={c.name} path={`/channels/${c.id}`} variant="chip" />
         </div>
