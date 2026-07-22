@@ -1,6 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Search, Bell, LogOut, ShieldCheck, Menu } from "lucide-react";
+import { Search, Bell, LogOut, ShieldCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,13 +8,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import logoHorizontal from "@/assets/lettflix-horizontal.png.asset.json";
 import { useProfile } from "@/lib/personal";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useCmsSetting } from "@/lib/cms-catalog";
 import { defaultNav, type NavConfig } from "@/lib/homepage-defaults";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 
 export function SiteHeader() {
   const { value: nav } = useCmsSetting<NavConfig>("nav", defaultNav);
