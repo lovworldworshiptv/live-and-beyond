@@ -117,16 +117,16 @@ export function StreamPlayer({
       {!playing && (
         <button onClick={start} className="absolute inset-0 grid place-items-center group" aria-label={ariaPlayLabel}>
           <div
-            className="size-[92px] rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
+            className="size-[46px] lg:size-[92px] rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
             style={{
               boxShadow:
                 "0 0 0 4px oklch(0.55 0.22 25 / 0.35), 0 0 30px oklch(0.55 0.22 25 / 0.55), 0 0 70px oklch(0.55 0.22 25 / 0.25)",
             }}
           >
             {kind === "audio" ? (
-              <Mic className="size-8 text-background" />
+              <Mic className="size-4 lg:size-8 text-background" />
             ) : (
-              <Play className="size-8 text-background fill-current ml-1" strokeWidth={2.5} />
+              <Play className="size-4 lg:size-8 text-background fill-current ml-0.5 lg:ml-1" strokeWidth={2.5} />
             )}
           </div>
         </button>
