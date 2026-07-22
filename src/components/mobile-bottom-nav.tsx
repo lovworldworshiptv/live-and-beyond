@@ -30,15 +30,15 @@ export function MobileBottomNav() {
       <div
         aria-hidden
         className="lg:hidden"
-        style={{ height: "calc(5rem + max(env(safe-area-inset-bottom), 0.75rem))" }}
+        style={{ height: "calc(4.5rem + env(safe-area-inset-bottom, 0px))" }}
       />
 
       <nav
         aria-label="Primary"
-        className="lg:hidden fixed bottom-0 inset-x-0 z-50"
-        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)" }}
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 w-full max-w-full"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        <div className="relative border-t border-border bg-background/80 backdrop-blur-xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.6)]">
+        <div className="relative border-t border-border bg-background/90 backdrop-blur-xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.6)]">
           {/* Sliding active indicator */}
           <span
             aria-hidden
