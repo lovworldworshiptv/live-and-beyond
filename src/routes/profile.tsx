@@ -72,7 +72,7 @@ function ProfilePage() {
 
       {/* Greeting */}
       <section className="border-b border-border">
-        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-12 pb-8 flex items-center gap-6 flex-wrap">
+        <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 pt-12 pb-8 flex items-center gap-6 flex-wrap">
           <div className="size-20 rounded-full bg-[image:var(--gradient-accent)] grid place-items-center text-3xl font-bold shadow-[var(--shadow-glow)]">
             {displayName.charAt(0).toUpperCase()}
           </div>
@@ -400,7 +400,7 @@ function Section({
   icon: React.ReactNode; title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode;
 }) {
   return (
-    <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-10">
+    <section className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 mt-10">
       <div className="flex items-end justify-between mb-4 gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">
