@@ -119,3 +119,7 @@
   70% { box-shadow: 0 0 0 18px oklch(0.55 0.22 25 / 0); }
   100% { box-shadow: 0 0 0 0 oklch(0.55 0.22 25 / 0); }
 }
+
+@media (max-width: 1023.98px) {
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+}
