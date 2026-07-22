@@ -26,10 +26,10 @@ export function MobileBottomNav() {
 
       <nav
         aria-label="Primary"
-        className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[min(94vw,520px)]"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-50"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <div className="relative rounded-2xl border border-border bg-background/70 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)]">
+        <div className="relative border-t border-border bg-background/80 backdrop-blur-xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.6)]">
           <ul className="grid grid-cols-4">
             {items.map((item) => {
               const active = item.match(pathname);
