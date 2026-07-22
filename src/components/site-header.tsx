@@ -39,7 +39,8 @@ export function SiteHeader() {
     to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(to + "/");
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border">
+    <>
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border">
       <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 h-16 flex items-center gap-4 lg:gap-8">
 
         <Link to="/" className="flex items-center group">
@@ -130,7 +131,8 @@ export function SiteHeader() {
           )}
         </div>
       </div>
+      </header>
       <MobileBottomNav />
-    </header>
+    </>
   );
 }
