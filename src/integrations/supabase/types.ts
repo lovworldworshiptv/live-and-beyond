@@ -588,6 +588,48 @@ export type Database = {
         }
         Relationships: []
       }
+      kingschat_identities: {
+        Row: {
+          access_token: string | null
+          avatar_url: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          kingschat_user_id: string
+          name: string | null
+          refresh_token: string | null
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          kingschat_user_id: string
+          name?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          kingschat_user_id?: string
+          name?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
       login_history: {
         Row: {
           created_at: string
