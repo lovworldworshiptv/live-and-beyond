@@ -131,7 +131,9 @@ function AuthPage() {
   }
 
   function onKingsChat() {
-    toast.info("KingsChat sign-in is coming soon", { description: "This provider will be connected shortly." });
+    setBusy(true);
+    const next = typeof redirect === "string" && redirect.startsWith("/") ? redirect : "/";
+    window.location.href = `/api/public/kingschat/start?next=${encodeURIComponent(next)}`;
   }
 
   const isCreatorSignup = mode === "signup" && accountType === "creator";

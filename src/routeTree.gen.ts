@@ -29,6 +29,7 @@ import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channe
 import { Route as ChannelsChannelIdIndexRouteImport } from './routes/channels.$channelId.index'
 import { Route as ChannelsChannelIdLibraryRouteImport } from './routes/channels.$channelId.library'
 import { Route as ApiPublicKingschatStartRouteImport } from './routes/api/public/kingschat/start'
+import { Route as ApiPublicKingschatCallbackRouteImport } from './routes/api/public/kingschat/callback'
 
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
@@ -131,6 +132,12 @@ const ApiPublicKingschatStartRoute = ApiPublicKingschatStartRouteImport.update({
   path: '/api/public/kingschat/start',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicKingschatCallbackRoute =
+  ApiPublicKingschatCallbackRouteImport.update({
+    id: '/api/public/kingschat/callback',
+    path: '/api/public/kingschat/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/on-demand/': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
+  '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
   '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
 }
 export interface FileRoutesByTo {
@@ -171,6 +179,7 @@ export interface FileRoutesByTo {
   '/on-demand': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId': typeof ChannelsChannelIdIndexRoute
+  '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
   '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
 }
 export interface FileRoutesById {
@@ -194,6 +203,7 @@ export interface FileRoutesById {
   '/on-demand/': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
+  '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
   '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
 }
 export interface FileRouteTypes {
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/on-demand/'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
+    | '/api/public/kingschat/callback'
     | '/api/public/kingschat/start'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -237,6 +248,7 @@ export interface FileRouteTypes {
     | '/on-demand'
     | '/channels/$channelId/library'
     | '/channels/$channelId'
+    | '/api/public/kingschat/callback'
     | '/api/public/kingschat/start'
   id:
     | '__root__'
@@ -259,6 +271,7 @@ export interface FileRouteTypes {
     | '/on-demand/'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
+    | '/api/public/kingschat/callback'
     | '/api/public/kingschat/start'
   fileRoutesById: FileRoutesById
 }
@@ -276,6 +289,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
+  ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
   ApiPublicKingschatStartRoute: typeof ApiPublicKingschatStartRoute
 }
 
@@ -421,6 +435,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicKingschatStartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/kingschat/callback': {
+      id: '/api/public/kingschat/callback'
+      path: '/api/public/kingschat/callback'
+      fullPath: '/api/public/kingschat/callback'
+      preLoaderRoute: typeof ApiPublicKingschatCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -479,6 +500,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
+  ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
   ApiPublicKingschatStartRoute: ApiPublicKingschatStartRoute,
 }
 export const routeTree = rootRouteImport
