@@ -11,6 +11,7 @@ import logoIcon from "@/assets/lettflix-icon.png.asset.json";
 const searchSchema = z.object({
   redirect: z.string().optional(),
   mode: z.enum(["signin", "signup"]).optional(),
+  kingschat_error: z.string().optional(),
 });
 
 export const Route = createFileRoute("/auth")({
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/auth")({
 type AccountType = "user" | "creator";
 
 function AuthPage() {
-  const { redirect, mode: initialMode } = useSearch({ from: "/auth" });
+  const { redirect, mode: initialMode, kingschat_error: kingschatError } = useSearch({ from: "/auth" });
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">(initialMode ?? "signin");
@@ -37,6 +38,10 @@ function AuthPage() {
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
   const [pendingModal, setPendingModal] = useState(false);
+
+  useEffect(() => {
+    if (kingschatError) toast.error("KingsChat sign-in failed", { description: kingschatError });
+  }, [kingschatError]);
 
   useEffect(() => {
     if (!loading && user && !pendingModal) {
@@ -131,7 +136,9 @@ function AuthPage() {
   }
 
   function onKingsChat() {
-    toast.info("KingsChat sign-in is coming soon", { description: "This provider will be connected shortly." });
+    setBusy(true);
+    const next = typeof redirect === "string" && redirect.startsWith("/") ? redirect : "/";
+    window.location.href = `/api/public/kingschat/start?next=${encodeURIComponent(next)}`;
   }
 
   const isCreatorSignup = mode === "signup" && accountType === "creator";
