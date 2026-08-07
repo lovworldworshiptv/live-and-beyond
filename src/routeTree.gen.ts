@@ -28,6 +28,7 @@ import { Route as CollectionsCollectionIdRouteImport } from './routes/collection
 import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
 import { Route as ChannelsChannelIdIndexRouteImport } from './routes/channels.$channelId.index'
 import { Route as ChannelsChannelIdLibraryRouteImport } from './routes/channels.$channelId.library'
+import { Route as ApiPublicKingschatStartRouteImport } from './routes/api/public/kingschat/start'
 
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
@@ -125,6 +126,11 @@ const ChannelsChannelIdLibraryRoute =
     path: '/library',
     getParentRoute: () => ChannelsChannelIdRoute,
   } as any)
+const ApiPublicKingschatStartRoute = ApiPublicKingschatStartRouteImport.update({
+  id: '/api/public/kingschat/start',
+  path: '/api/public/kingschat/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/on-demand/': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
+  '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/on-demand': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId': typeof ChannelsChannelIdIndexRoute
+  '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/on-demand/': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
+  '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/on-demand/'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
+    | '/api/public/kingschat/start'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/on-demand'
     | '/channels/$channelId/library'
     | '/channels/$channelId'
+    | '/api/public/kingschat/start'
   id:
     | '__root__'
     | '/'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/on-demand/'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
+    | '/api/public/kingschat/start'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -264,6 +276,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
+  ApiPublicKingschatStartRoute: typeof ApiPublicKingschatStartRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -401,6 +414,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChannelsChannelIdLibraryRouteImport
       parentRoute: typeof ChannelsChannelIdRoute
     }
+    '/api/public/kingschat/start': {
+      id: '/api/public/kingschat/start'
+      path: '/api/public/kingschat/start'
+      fullPath: '/api/public/kingschat/start'
+      preLoaderRoute: typeof ApiPublicKingschatStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -459,17 +479,8 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
+  ApiPublicKingschatStartRoute: ApiPublicKingschatStartRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
