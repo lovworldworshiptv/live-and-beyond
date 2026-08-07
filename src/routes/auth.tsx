@@ -28,7 +28,7 @@ export const Route = createFileRoute("/auth")({
 type AccountType = "user" | "creator";
 
 function AuthPage() {
-  const { redirect, mode: initialMode } = useSearch({ from: "/auth" });
+  const { redirect, mode: initialMode, kingschat_error: kingschatError } = useSearch({ from: "/auth" });
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">(initialMode ?? "signin");
@@ -38,6 +38,10 @@ function AuthPage() {
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
   const [pendingModal, setPendingModal] = useState(false);
+
+  useEffect(() => {
+    if (kingschatError) toast.error("KingsChat sign-in failed", { description: kingschatError });
+  }, [kingschatError]);
 
   useEffect(() => {
     if (!loading && user && !pendingModal) {
