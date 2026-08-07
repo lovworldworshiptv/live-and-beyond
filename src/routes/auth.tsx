@@ -11,6 +11,7 @@ import logoIcon from "@/assets/lettflix-icon.png.asset.json";
 const searchSchema = z.object({
   redirect: z.string().optional(),
   mode: z.enum(["signin", "signup"]).optional(),
+  kingschat_error: z.string().optional(),
 });
 
 export const Route = createFileRoute("/auth")({
