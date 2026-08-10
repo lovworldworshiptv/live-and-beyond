@@ -1,4 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Search, Bell, LogOut, ShieldCheck } from "lucide-react";
 import {
   DropdownMenu,
@@ -15,6 +16,8 @@ import { toast } from "sonner";
 import { useCmsSetting } from "@/lib/cms-catalog";
 import { defaultNav, type NavConfig } from "@/lib/homepage-defaults";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { SearchDialog } from "@/components/search-dialog";
+
 
 export function SiteHeader() {
   const { value: nav } = useCmsSetting<NavConfig>("nav", defaultNav);
