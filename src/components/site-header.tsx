@@ -1,4 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Search, Bell, LogOut, ShieldCheck } from "lucide-react";
 import {
   DropdownMenu,
@@ -15,6 +16,8 @@ import { toast } from "sonner";
 import { useCmsSetting } from "@/lib/cms-catalog";
 import { defaultNav, type NavConfig } from "@/lib/homepage-defaults";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { SearchDialog } from "@/components/search-dialog";
+
 
 export function SiteHeader() {
   const { value: nav } = useCmsSetting<NavConfig>("nav", defaultNav);
@@ -24,6 +27,19 @@ export function SiteHeader() {
   const { profile } = useProfile();
   const { user, isAdmin, isCreator, signOut } = useAuth();
   const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setSearchOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
 
   const displayName = user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? profile.displayName;
   const handle = user?.email ?? profile.handle;
@@ -63,14 +79,26 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2">
-          <button className="hidden md:flex items-center gap-2 px-3 h-9 rounded-md bg-surface border border-border text-sm text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated transition w-56 xl:w-64 overflow-hidden">
+        <div className="ml-auto flex min-w-0 items-center gap-2">
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="hidden md:flex min-w-0 flex-1 items-center gap-2 px-3 h-9 rounded-md bg-surface border border-border text-sm text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated transition md:w-44 lg:w-56 xl:w-64 overflow-hidden"
+            aria-label="Search"
+          >
             <Search className="size-4 shrink-0" />
             <span className="truncate whitespace-nowrap">Search titles, channels, podcasts…</span>
+            <kbd className="ml-auto hidden xl:inline-flex shrink-0 items-center rounded border border-border px-1.5 py-0.5 text-[10px] text-[color:var(--muted-foreground)]">
+              ⌘K
+            </kbd>
           </button>
-          <button className="md:hidden size-9 grid place-items-center rounded-md hover:bg-elevated transition" aria-label="Search">
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="md:hidden size-9 shrink-0 grid place-items-center rounded-md hover:bg-elevated transition"
+            aria-label="Search"
+          >
             <Search className="size-4" />
           </button>
+
           <button className="size-9 grid place-items-center rounded-md hover:bg-elevated transition" aria-label="Notifications">
             <Bell className="size-4" />
           </button>
@@ -132,7 +160,9 @@ export function SiteHeader() {
         </div>
       </div>
       </header>
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       <MobileBottomNav />
+
     </>
   );
 }
