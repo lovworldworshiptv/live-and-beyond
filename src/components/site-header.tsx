@@ -160,7 +160,9 @@ export function SiteHeader() {
         </div>
       </div>
       </header>
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       <MobileBottomNav />
+
     </>
   );
 }
