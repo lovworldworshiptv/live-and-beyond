@@ -95,14 +95,14 @@ export function ChannelCard({ c }: { c: Channel }) {
 
   return (
     <div
-      className="group relative flex h-full flex-col"
+      className="group relative flex h-full min-w-0 flex-col"
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
     >
       <Link
         to="/channels/$channelId"
         params={{ channelId: c.id }}
-        className="flex flex-1 flex-col rounded-2xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/50 transition"
+        className="flex min-w-0 flex-1 flex-col rounded-2xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/50 transition"
       >
         <div className="relative aspect-[16/9] overflow-hidden">
           <img
@@ -165,7 +165,7 @@ export function ChannelCard({ c }: { c: Channel }) {
 
         </div>
 
-        <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
           <div className="flex items-center justify-between gap-2 min-w-0">
             <div className="truncate text-xs text-accent font-semibold uppercase tracking-wider">
               {c.category}
@@ -173,7 +173,7 @@ export function ChannelCard({ c }: { c: Channel }) {
             <div className="shrink-0 text-[11px] text-[color:var(--muted-foreground)]">{c.region}</div>
           </div>
           <div className="mt-1.5 font-semibold text-base sm:text-lg leading-tight line-clamp-2">{c.name}</div>
-          <div className="text-sm text-[color:var(--muted-foreground)] mt-1 line-clamp-1">
+          <div className="text-sm text-[color:var(--muted-foreground)] mt-1 line-clamp-1 min-w-0">
             {c.tagline}
           </div>
           <div className="mt-auto pt-4 flex items-center justify-between gap-2 text-sm">
