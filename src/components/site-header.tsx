@@ -66,14 +66,26 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2">
-          <button className="hidden md:flex items-center gap-2 px-3 h-9 rounded-md bg-surface border border-border text-sm text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated transition w-56 xl:w-64 overflow-hidden">
+        <div className="ml-auto flex min-w-0 items-center gap-2">
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="hidden md:flex min-w-0 flex-1 items-center gap-2 px-3 h-9 rounded-md bg-surface border border-border text-sm text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated transition md:w-44 lg:w-56 xl:w-64 overflow-hidden"
+            aria-label="Search"
+          >
             <Search className="size-4 shrink-0" />
             <span className="truncate whitespace-nowrap">Search titles, channels, podcasts…</span>
+            <kbd className="ml-auto hidden xl:inline-flex shrink-0 items-center rounded border border-border px-1.5 py-0.5 text-[10px] text-[color:var(--muted-foreground)]">
+              ⌘K
+            </kbd>
           </button>
-          <button className="md:hidden size-9 grid place-items-center rounded-md hover:bg-elevated transition" aria-label="Search">
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="md:hidden size-9 shrink-0 grid place-items-center rounded-md hover:bg-elevated transition"
+            aria-label="Search"
+          >
             <Search className="size-4" />
           </button>
+
           <button className="size-9 grid place-items-center rounded-md hover:bg-elevated transition" aria-label="Notifications">
             <Bell className="size-4" />
           </button>
