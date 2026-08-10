@@ -10,6 +10,9 @@ export type HeroSlide = {
   title?: string;
   titleAccent?: string;
   description?: string;
+  primaryCta?: HeroCta;
+  secondaryCta?: HeroCta;
+  tertiaryCta?: HeroCta;
 };
 export type HeroConfig = {
   badge: string;
