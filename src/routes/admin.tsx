@@ -1850,12 +1850,30 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
                 <input className={inputClass} placeholder="Title accent" value={s.titleAccent ?? ""} onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, titleAccent: e.target.value } : x) })} />
               </div>
               <textarea className={textareaClass} placeholder="Description" value={s.description ?? ""} onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, description: e.target.value } : x) })} />
+              <div className="text-xs font-medium text-[color:var(--muted-foreground)] pt-1">Slide CTAs (optional)</div>
+              {(["primaryCta", "secondaryCta", "tertiaryCta"] as const).map((k) => (
+                <div key={k} className="grid gap-2 md:grid-cols-2">
+                  <input
+                    className={inputClass}
+                    placeholder={`${k === "primaryCta" ? "Primary" : k === "secondaryCta" ? "Secondary" : "Tertiary"} label`}
+                    value={s[k]?.label ?? ""}
+                    onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, [k]: { ...(x[k] ?? {}), label: e.target.value } } : x) })}
+                  />
+                  <input
+                    className={inputClass}
+                    placeholder="Link (e.g. /channels)"
+                    value={s[k]?.to ?? ""}
+                    onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, [k]: { ...(x[k] ?? {}), to: e.target.value } } : x) })}
+                  />
+                </div>
+              ))}
             </div>
           ))}
           <button
-            onClick={() => set({ slides: [...(value.slides ?? []), { imageUrl: value.imageUrl ?? null, badge: value.badge, badgeMeta: value.badgeMeta, title: value.title, titleAccent: value.titleAccent, description: value.description }] })}
+            onClick={() => set({ slides: [...(value.slides ?? []), { imageUrl: null }] })}
             className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border hover:bg-elevated text-sm"
           ><Plus className="size-4" /> Add slide</button>
+
           {(!value.slides || value.slides.length === 0) && (
             <p className="text-xs text-[color:var(--muted-foreground)]">No slides added — the hero uses the single banner above. Add 2+ slides to enable auto-rotation.</p>
           )}
