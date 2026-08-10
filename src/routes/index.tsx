@@ -163,7 +163,7 @@ function Index() {
               </Link>
             </div>
 
-            <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
+            <div className="mt-10 grid grid-cols-3 gap-4 sm:gap-6 max-w-md">
               {hero.stats.map((s) => (
                 <div key={s.v}>
                   <div className="text-2xl font-display font-bold">{s.k}</div>
@@ -201,7 +201,7 @@ function Index() {
           {liveNow.map((c) => (
             <article
               key={c.id}
-              className="group relative shrink-0 w-[300px] md:w-[340px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/40 transition"
+              className="group relative shrink-0 w-[80vw] sm:w-[300px] md:w-[340px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/40 transition"
             >
               <Link to="/channels/$channelId" params={{ channelId: c.id }} className="block">
                 <div className="relative aspect-video overflow-hidden">
@@ -248,7 +248,7 @@ function Index() {
               key={c.id}
               to="/channels/$channelId"
               params={{ channelId: c.id }}
-              className="group shrink-0 w-[220px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-accent/50 transition"
+              className="group shrink-0 w-[60vw] sm:w-[220px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-accent/50 transition"
             >
               <div className="relative aspect-[4/5] overflow-hidden">
                 <img src={c.banner || ch1} alt={c.name} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
@@ -274,7 +274,7 @@ function Index() {
       {trending.length > 0 && (
         <Row title="Trending On Lettflix" subtitle="Most watched across the platform this week.">
           {trending.map((t, i) => (
-            <Link key={t.id} to="/on-demand/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[260px] snap-start">
+            <Link key={t.id} to="/on-demand/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[62vw] sm:w-[260px] snap-start">
               <div className="relative rounded-xl overflow-hidden border border-border bg-elevated/50">
                 <div className="relative aspect-video overflow-hidden">
                   <img src={t.hero || t.cover} alt={t.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
@@ -305,7 +305,7 @@ function Index() {
           {continueWatching.map(({ t, pct }) => {
             const remaining = Math.max(0, 100 - pct);
             return (
-              <Link key={t.id} to="/on-demand/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[320px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50">
+              <Link key={t.id} to="/on-demand/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[80vw] sm:w-[320px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50">
                 <div className="relative aspect-video overflow-hidden">
                   <img src={t.hero || t.cover} alt={t.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
                   <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
@@ -342,7 +342,7 @@ function Index() {
           {events.map((e) => {
             const { date, time } = formatEventDate(e.startsAt);
             return (
-              <article key={e.id} className="group shrink-0 w-[340px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50">
+              <article key={e.id} className="group shrink-0 w-[85vw] sm:w-[340px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50">
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <img src={e.coverUrl || ch1} alt={e.name} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
                   <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
@@ -372,7 +372,7 @@ function Index() {
               <p className="text-sm text-[color:var(--muted-foreground)] mt-1">Curated worlds across categories you love.</p>
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
             {cmsCollections.slice(0, 8).map((col, i) => (
               <Link
                 key={col.id}

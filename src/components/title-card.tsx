@@ -99,7 +99,7 @@ export function TitleCard({
     }
   }, [open, muted]);
 
-  const widthClass = !portrait ? (size === "lg" ? "w-[340px]" : "w-[260px]") : "";
+  const widthClass = !portrait ? (size === "lg" ? "w-[85vw] sm:w-[340px]" : "w-[62vw] sm:w-[260px]") : "";
 
   return (
     <div

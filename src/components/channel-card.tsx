@@ -95,14 +95,14 @@ export function ChannelCard({ c }: { c: Channel }) {
 
   return (
     <div
-      className="group relative"
+      className="group relative flex h-full min-w-0 flex-col"
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
     >
       <Link
         to="/channels/$channelId"
         params={{ channelId: c.id }}
-        className="block rounded-2xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/50 transition"
+        className="flex min-w-0 flex-1 flex-col rounded-2xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/50 transition"
       >
         <div className="relative aspect-[16/9] overflow-hidden">
           <img
@@ -165,19 +165,19 @@ export function ChannelCard({ c }: { c: Channel }) {
 
         </div>
 
-        <div className="p-5">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-xs text-accent font-semibold uppercase tracking-wider">
+        <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <div className="truncate text-xs text-accent font-semibold uppercase tracking-wider">
               {c.category}
             </div>
-            <div className="text-[11px] text-[color:var(--muted-foreground)]">{c.region}</div>
+            <div className="shrink-0 text-[11px] text-[color:var(--muted-foreground)]">{c.region}</div>
           </div>
-          <div className="mt-1.5 font-semibold text-lg leading-tight">{c.name}</div>
-          <div className="text-sm text-[color:var(--muted-foreground)] mt-1 line-clamp-1">
+          <div className="mt-1.5 font-semibold text-base sm:text-lg leading-tight line-clamp-2">{c.name}</div>
+          <div className="text-sm text-[color:var(--muted-foreground)] mt-1 line-clamp-1 min-w-0">
             {c.tagline}
           </div>
-          <div className="mt-4 flex items-center justify-between text-sm">
-            <div className="text-[color:var(--secondary-foreground)] line-clamp-1">
+          <div className="mt-auto pt-4 flex items-center justify-between gap-2 text-sm">
+            <div className="min-w-0 truncate text-[color:var(--secondary-foreground)]">
               <span className="text-foreground font-medium">Now:</span> {c.nowPlaying.title}
             </div>
             <button
@@ -186,7 +186,7 @@ export function ChannelCard({ c }: { c: Channel }) {
                 e.stopPropagation();
                 toggle(c.id);
               }}
-              className={`text-[11px] px-2 h-6 rounded-full border transition ${
+              className={`shrink-0 text-[11px] px-2 h-6 rounded-full border transition ${
                 following
                   ? "bg-accent/20 border-accent/40 text-accent"
                   : "bg-elevated border-border text-[color:var(--secondary-foreground)] hover:text-foreground"
@@ -203,7 +203,7 @@ export function ChannelCard({ c }: { c: Channel }) {
         to="/channels/$channelId"
         params={{ channelId: c.id }}
         hash="watch"
-        className="mt-2 flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm transition hover:brightness-110"
+        className="mt-2 flex items-center justify-center gap-2 h-10 sm:h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm transition hover:brightness-110"
         style={{
           boxShadow: "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
         }}
@@ -222,7 +222,7 @@ export function ChannelCard({ c }: { c: Channel }) {
                   stop(e);
                   setReminderOpen(true);
                 }}
-                className="inline-flex items-center justify-center h-11 rounded-xl bg-elevated/70 border border-border text-foreground font-semibold backdrop-blur transition hover:bg-elevated hover:border-primary/50 hover:scale-[1.03] active:scale-95"
+                className="inline-flex items-center justify-center h-10 sm:h-11 rounded-xl bg-elevated/70 border border-border text-foreground font-semibold backdrop-blur transition hover:bg-elevated hover:border-primary/50 hover:scale-[1.03] active:scale-95"
                 style={{
                   boxShadow:
                     "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
@@ -241,7 +241,7 @@ export function ChannelCard({ c }: { c: Channel }) {
                   stop(e);
                   setScheduleOpen(true);
                 }}
-                className="inline-flex items-center justify-center h-11 rounded-xl bg-elevated/70 border border-border text-foreground font-semibold backdrop-blur transition hover:bg-elevated hover:border-primary/50 hover:scale-[1.03] active:scale-95"
+                className="inline-flex items-center justify-center h-10 sm:h-11 rounded-xl bg-elevated/70 border border-border text-foreground font-semibold backdrop-blur transition hover:bg-elevated hover:border-primary/50 hover:scale-[1.03] active:scale-95"
                 style={{
                   boxShadow:
                     "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
@@ -256,7 +256,7 @@ export function ChannelCard({ c }: { c: Channel }) {
             <TooltipTrigger asChild>
               <div
                 onClick={stop}
-                className="[&>div]:w-full [&_button]:!w-full [&_button]:!h-11 [&_button]:!rounded-xl [&_button]:!bg-elevated/70 [&_button]:!text-foreground [&_button]:!border [&_button]:!border-border [&_button]:!backdrop-blur [&_button]:!font-semibold [&_button]:hover:!bg-elevated [&_button]:hover:!border-primary/50 [&_button]:hover:!scale-[1.03] [&_button]:active:!scale-95 [&_button]:!transition [&_button]:![box-shadow:0_0_0_2px_oklch(0.55_0.22_25_/_0.35),0_0_18px_oklch(0.55_0.22_25_/_0.35),0_0_40px_oklch(0.55_0.22_25_/_0.15)] [&_button>span]:!hidden [&_button_svg]:!size-[18px]"
+                className="[&>div]:w-full [&_button]:!w-full [&_button]:!h-10 sm:[&_button]:!h-11 [&_button]:!rounded-xl [&_button]:!bg-elevated/70 [&_button]:!text-foreground [&_button]:!border [&_button]:!border-border [&_button]:!backdrop-blur [&_button]:!font-semibold [&_button]:hover:!bg-elevated [&_button]:hover:!border-primary/50 [&_button]:hover:!scale-[1.03] [&_button]:active:!scale-95 [&_button]:!transition [&_button]:![box-shadow:0_0_0_2px_oklch(0.55_0.22_25_/_0.35),0_0_18px_oklch(0.55_0.22_25_/_0.35),0_0_40px_oklch(0.55_0.22_25_/_0.15)] [&_button>span]:!hidden [&_button_svg]:!size-[18px]"
               >
                 <ShareMenu title={c.name} path={`/channels/${c.id}`} variant="chip" />
               </div>

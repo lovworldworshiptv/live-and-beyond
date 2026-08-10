@@ -48,7 +48,7 @@ export function Row({
       </div>
       <div
         ref={ref}
-        className="flex gap-4 overflow-x-auto scrollbar-none snap-x snap-mandatory -mx-6 lg:-mx-10 px-6 lg:px-10 pb-2"
+        className="flex gap-4 overflow-x-auto scrollbar-none snap-x snap-proximity scroll-pl-6 lg:scroll-pl-10 -mx-6 lg:-mx-10 px-6 lg:px-10 pb-2"
       >
         {children}
       </div>

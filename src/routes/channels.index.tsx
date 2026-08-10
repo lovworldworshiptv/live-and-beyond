@@ -143,7 +143,7 @@ function ChannelsPage() {
         <div className="text-xs text-[color:var(--muted-foreground)] mb-4">
           Showing {filtered.length} channel{filtered.length === 1 ? "" : "s"}
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:gap-6 grid-cols-[minmax(0,1fr)] sm:grid-cols-2 lg:grid-cols-3 items-stretch">
           {filtered.map((c) => (
             <ChannelCard key={c.id} c={c} />
           ))}
