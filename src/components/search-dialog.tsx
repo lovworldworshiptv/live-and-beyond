@@ -50,7 +50,7 @@ export function SearchDialog({
           (t) =>
             q === "" ||
             t.title.toLowerCase().includes(q) ||
-            (t.genre ?? "").toLowerCase().includes(q) ||
+            (t.category ?? "").toLowerCase().includes(q) ||
             t.kind.toLowerCase().includes(q)
         )
         .slice(0, 6),
