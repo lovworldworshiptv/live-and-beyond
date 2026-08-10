@@ -82,9 +82,13 @@ function Index() {
       .slice(0, 6);
   }, [progressItems, titles]);
 
+  const cmsSlides = useMemo(
+    () => (hero.slides ?? []).filter((x) => x && (x.imageUrl || x.title || x.badge || x.description)),
+    [hero],
+  );
+  const isLegacy = cmsSlides.length === 0;
   const heroSlides = useMemo(() => {
-    const s = hero.slides?.filter((x) => x && (x.imageUrl || x.title || x.badge)) ?? [];
-    if (s.length) return s;
+    if (cmsSlides.length) return cmsSlides;
     return [{
       imageUrl: hero.imageUrl || heroImg,
       badge: hero.badge,
@@ -93,7 +97,7 @@ function Index() {
       titleAccent: hero.titleAccent,
       description: hero.description,
     }];
-  }, [hero]);
+  }, [cmsSlides, hero]);
   const [slideIdx, setSlideIdx] = useState(0);
   useEffect(() => {
     if (heroSlides.length < 2) return;
@@ -101,14 +105,21 @@ function Index() {
     return () => clearInterval(t);
   }, [heroSlides.length, hero.intervalMs]);
   const activeSlide = heroSlides[Math.min(slideIdx, heroSlides.length - 1)] ?? heroSlides[0];
-  const activeBadge = activeSlide.badge ?? hero.badge;
-  const activeBadgeMeta = (activeSlide.badgeMeta ?? hero.badgeMeta).replace(
+  const activeBadge = activeSlide.badge ?? "";
+  const activeBadgeMeta = (activeSlide.badgeMeta ?? "").replace(
     /^\d+/,
     String(channels.filter((c) => c.isLive).length || channels.length),
   );
-  const activeTitle = activeSlide.title ?? hero.title;
-  const activeAccent = activeSlide.titleAccent ?? hero.titleAccent;
-  const activeDesc = activeSlide.description ?? hero.description;
+  const activeTitle = activeSlide.title ?? "";
+  const activeAccent = activeSlide.titleAccent ?? "";
+  const activeDesc = activeSlide.description ?? "";
+  const hasHeroText = Boolean(activeBadge || activeTitle || activeAccent || activeDesc);
+  const heroCtas = useMemo(() => {
+    const list = isLegacy
+      ? [hero.primaryCta, hero.secondaryCta, hero.tertiaryCta]
+      : [activeSlide.primaryCta, activeSlide.secondaryCta, activeSlide.tertiaryCta];
+    return list.filter((c): c is { label: string; to: string } => Boolean(c?.label && c?.to));
+  }, [isLegacy, hero, activeSlide]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -124,53 +135,73 @@ function Index() {
             alt="Lettflix broadcast showcase"
             width={1920}
             height={1088}
-            className="absolute inset-y-0 right-0 h-full w-full object-cover object-center lg:object-[72%_center] pointer-events-none transition-opacity duration-1000 [mask-image:none] lg:[mask-image:linear-gradient(90deg,transparent_0%,transparent_38%,black_56%,black_100%)] [-webkit-mask-image:none] lg:[-webkit-mask-image:linear-gradient(90deg,transparent_0%,transparent_38%,black_56%,black_100%)]"
+            className={`absolute inset-y-0 right-0 h-full w-full object-cover object-center pointer-events-none transition-opacity duration-1000 ${
+              isLegacy
+                ? "lg:object-[72%_center] [mask-image:none] lg:[mask-image:linear-gradient(90deg,transparent_0%,transparent_38%,black_56%,black_100%)] [-webkit-mask-image:none] lg:[-webkit-mask-image:linear-gradient(90deg,transparent_0%,transparent_38%,black_56%,black_100%)]"
+                : ""
+            }`}
             style={{
               opacity: i === slideIdx ? 1 : 0,
             }}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/30 lg:bg-gradient-to-r lg:from-background lg:via-background/95 lg:to-background/20 pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent to-background pointer-events-none" />
+        {hasHeroText && (
+          <>
+            <div className={`absolute inset-0 pointer-events-none ${isLegacy ? "bg-gradient-to-t from-background via-background/80 to-background/30 lg:bg-gradient-to-r lg:from-background lg:via-background/95 lg:to-background/20" : "bg-gradient-to-t from-background/90 via-background/45 to-transparent"}`} />
+            <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent to-background pointer-events-none" />
+          </>
+        )}
 
-        <div className="relative mx-auto max-w-[1480px] px-6 lg:px-10 pt-6 lg:pt-[54px] pb-12 lg:pb-32 flex min-h-[520px] md:min-h-[600px] lg:min-h-[760px] items-center">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-xs font-medium">
-              <span className="live-pulse text-primary">{activeBadge}</span>
-              <span className="text-[color:var(--secondary-foreground)]">· {activeBadgeMeta}</span>
-            </div>
-            <h1 className="mt-6 text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.02]">
-              {activeTitle} <span className="text-primary">{activeAccent}</span>
-            </h1>
-            <p className="mt-5 text-lg text-[color:var(--secondary-foreground)] max-w-xl">
-              {activeDesc}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to={hero.primaryCta.to as never}
-                className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
-                style={{
-                boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 24px oklch(0.55 0.22 25 / 0.55), 0 0 50px oklch(0.55 0.22 25 / 0.25)",
-                }}
-              >
-                <Play className="size-[19px] fill-current" strokeWidth={2.5} /> {hero.primaryCta.label}
-              </Link>
-              <Link to={hero.secondaryCta.to as never} className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-elevated/80 border border-border backdrop-blur hover:bg-elevated transition font-medium">
-                <Tv className="size-4" /> {hero.secondaryCta.label}
-              </Link>
-              <Link to={hero.tertiaryCta.to as never} className="inline-flex items-center gap-2 px-6 h-12 rounded-md text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated/40 transition font-medium">
-                <CalendarDays className="size-4" /> {hero.tertiaryCta.label}
-              </Link>
-            </div>
+        <div className={`relative mx-auto max-w-[1480px] px-6 lg:px-10 pt-6 lg:pt-[54px] pb-12 lg:pb-32 flex min-h-[520px] md:min-h-[600px] lg:min-h-[760px] items-center ${isLegacy ? "" : "justify-center"}`}>
+          <div className={isLegacy ? "max-w-2xl" : "max-w-3xl text-center"}>
+            {(activeBadge || activeBadgeMeta) && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-xs font-medium">
+                {activeBadge && <span className="live-pulse text-primary">{activeBadge}</span>}
+                {activeBadgeMeta && <span className="text-[color:var(--secondary-foreground)]">· {activeBadgeMeta}</span>}
+              </div>
+            )}
+            {(activeTitle || activeAccent) && (
+              <h1 className="mt-6 text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.02]">
+                {activeTitle} <span className="text-primary">{activeAccent}</span>
+              </h1>
+            )}
+            {activeDesc && (
+              <p className={`mt-5 text-lg text-[color:var(--secondary-foreground)] max-w-xl ${isLegacy ? "" : "mx-auto"}`}>
+                {activeDesc}
+              </p>
+            )}
+            {heroCtas.length > 0 && (
+              <div className={`mt-8 flex flex-wrap gap-3 ${isLegacy ? "" : "justify-center"}`}>
+                {heroCtas.map((cta, i) => (
+                  <Link
+                    key={`${cta.to}-${i}`}
+                    to={cta.to as never}
+                    className={
+                      i === 0
+                        ? "inline-flex items-center gap-2 px-6 h-12 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
+                        : i === 1
+                          ? "inline-flex items-center gap-2 px-6 h-12 rounded-md bg-elevated/80 border border-border backdrop-blur hover:bg-elevated transition font-medium"
+                          : "inline-flex items-center gap-2 px-6 h-12 rounded-md text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated/40 transition font-medium"
+                    }
+                    style={i === 0 ? { boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 24px oklch(0.55 0.22 25 / 0.55), 0 0 50px oklch(0.55 0.22 25 / 0.25)" } : undefined}
+                  >
+                    {i === 0 ? <Play className="size-[19px] fill-current" strokeWidth={2.5} /> : i === 1 ? <Tv className="size-4" /> : <CalendarDays className="size-4" />}
+                    {cta.label}
+                  </Link>
+                ))}
+              </div>
+            )}
 
-            <div className="mt-10 grid grid-cols-3 gap-4 sm:gap-6 max-w-md">
-              {hero.stats.map((s) => (
-                <div key={s.v}>
-                  <div className="text-2xl font-display font-bold">{s.k}</div>
-                  <div className="text-xs text-[color:var(--muted-foreground)] mt-1">{s.v}</div>
-                </div>
-              ))}
-            </div>
+            {isLegacy && (
+              <div className="mt-10 grid grid-cols-3 gap-4 sm:gap-6 max-w-md">
+                {hero.stats.map((s) => (
+                  <div key={s.v}>
+                    <div className="text-2xl font-display font-bold">{s.k}</div>
+                    <div className="text-xs text-[color:var(--muted-foreground)] mt-1">{s.v}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         {heroSlides.length > 1 && (
@@ -186,6 +217,7 @@ function Index() {
           </div>
         )}
       </section>
+
 
       {/* LIVE NOW */}
       {liveNow.length > 0 && (
