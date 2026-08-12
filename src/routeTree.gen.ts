@@ -13,6 +13,7 @@ import { Route as SeriesRouteImport } from './routes/series'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PortalRouteImport } from './routes/portal'
+import { Route as PodcastsRouteImport } from './routes/podcasts'
 import { Route as MoviesRouteImport } from './routes/movies'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as EnterpriseRouteImport } from './routes/enterprise'
@@ -53,6 +54,11 @@ const PricingRoute = PricingRouteImport.update({
 const PortalRoute = PortalRouteImport.update({
   id: '/portal',
   path: '/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PodcastsRoute = PodcastsRouteImport.update({
+  id: '/podcasts',
+  path: '/podcasts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MoviesRoute = MoviesRouteImport.update({
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
   '/movies': typeof MoviesRouteWithChildren
+  '/podcasts': typeof PodcastsRoute
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
@@ -199,6 +206,7 @@ export interface FileRoutesByTo {
   '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
+  '/podcasts': typeof PodcastsRoute
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
@@ -226,6 +234,7 @@ export interface FileRoutesById {
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
   '/movies': typeof MoviesRouteWithChildren
+  '/podcasts': typeof PodcastsRoute
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
@@ -255,6 +264,7 @@ export interface FileRouteTypes {
     | '/enterprise'
     | '/guide'
     | '/movies'
+    | '/podcasts'
     | '/portal'
     | '/pricing'
     | '/profile'
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/documentaries'
     | '/enterprise'
     | '/guide'
+    | '/podcasts'
     | '/portal'
     | '/pricing'
     | '/profile'
@@ -306,6 +317,7 @@ export interface FileRouteTypes {
     | '/enterprise'
     | '/guide'
     | '/movies'
+    | '/podcasts'
     | '/portal'
     | '/pricing'
     | '/profile'
@@ -334,6 +346,7 @@ export interface RootRouteChildren {
   EnterpriseRoute: typeof EnterpriseRoute
   GuideRoute: typeof GuideRoute
   MoviesRoute: typeof MoviesRouteWithChildren
+  PodcastsRoute: typeof PodcastsRoute
   PortalRoute: typeof PortalRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
@@ -373,6 +386,13 @@ declare module '@tanstack/react-router' {
       path: '/portal'
       fullPath: '/portal'
       preLoaderRoute: typeof PortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/podcasts': {
+      id: '/podcasts'
+      path: '/podcasts'
+      fullPath: '/podcasts'
+      preLoaderRoute: typeof PodcastsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/movies': {
@@ -576,6 +596,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnterpriseRoute: EnterpriseRoute,
   GuideRoute: GuideRoute,
   MoviesRoute: MoviesRouteWithChildren,
+  PodcastsRoute: PodcastsRoute,
   PortalRoute: PortalRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
