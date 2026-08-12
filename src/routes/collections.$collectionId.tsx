@@ -31,7 +31,7 @@ export const Route = createFileRoute("/collections/$collectionId")({
     <div className="min-h-screen grid place-items-center bg-background text-foreground">
       <div className="text-center">
         <div className="text-sm text-[color:var(--muted-foreground)]">Collection not found.</div>
-        <Link to="/on-demand" className="text-accent hover:underline mt-2 inline-block">
+        <Link to="/movies" className="text-accent hover:underline mt-2 inline-block">
           Back to On Demand
         </Link>
       </div>
@@ -52,7 +52,7 @@ function CollectionPage() {
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative mx-auto max-w-[1480px] px-6 lg:px-10 pt-16 pb-14">
           <Link
-            to="/on-demand"
+            to="/movies"
             className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white mb-6"
           >
             <ArrowLeft className="size-4" /> On Demand
@@ -67,7 +67,7 @@ function CollectionPage() {
           <div className="mt-6 flex items-center gap-3">
             {titles[0] && (
               <Link
-                to="/on-demand/$titleId"
+                to="/movies/$titleId"
                 params={{ titleId: titles[0].id }}
                 className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition"
               >

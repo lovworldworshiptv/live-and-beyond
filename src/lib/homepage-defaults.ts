@@ -1,5 +1,8 @@
-export type NavItem = { label: string; to: string };
+export type NavItem = { label: string; to: string; children?: NavItem[] };
 export type NavConfig = { items: NavItem[] };
+
+export type BottomNavItem = { label: string; to: string; icon: string };
+export type BottomNavConfig = { items: BottomNavItem[] };
 
 export type HeroCta = { label: string; to: string };
 export type HeroStat = { k: string; v: string };
@@ -10,6 +13,10 @@ export type HeroSlide = {
   title?: string;
   titleAccent?: string;
   description?: string;
+  /** Meta line shown under the title, e.g. "Gritty · Action · Series" */
+  meta?: string;
+  /** Slug of the linked on-demand title — powers Watch Now / More Info. */
+  contentId?: string;
   primaryCta?: HeroCta;
   secondaryCta?: HeroCta;
   tertiaryCta?: HeroCta;
@@ -31,6 +38,7 @@ export type HeroConfig = {
   intervalMs?: number;
 };
 
+
 export type FooterLink = { label: string; href: string };
 export type FooterColumn = { title: string; items: FooterLink[] };
 export type FooterConfig = {
@@ -45,10 +53,43 @@ export const defaultNav: NavConfig = {
     { label: "Home", to: "/" },
     { label: "Channels", to: "/channels" },
     { label: "Guide", to: "/guide" },
-    { label: "On Demand", to: "/on-demand" },
+    {
+      label: "Browse",
+      to: "/movies",
+      children: [
+        { label: "Movies", to: "/movies" },
+        { label: "Series", to: "/series" },
+        { label: "Documentaries", to: "/documentaries" },
+        { label: "Podcasts", to: "/podcasts" },
+      ],
+    },
     { label: "Pricing", to: "/pricing" },
   ],
 };
+
+export const defaultBottomNav: BottomNavConfig = {
+  items: [
+    { label: "Home", to: "/", icon: "home" },
+    { label: "Channels", to: "/channels", icon: "tv" },
+    { label: "Movies", to: "/movies", icon: "film" },
+    { label: "Profile", to: "/profile", icon: "user" },
+  ],
+};
+
+/** Icon keys selectable for bottom nav items in the CMS. */
+export const bottomNavIcons = [
+  "home",
+  "tv",
+  "film",
+  "user",
+  "search",
+  "radio",
+  "calendar",
+  "mic",
+  "sparkles",
+  "list",
+] as const;
+
 
 export const defaultHero: HeroConfig = {
   badge: "LIVE NOW",
@@ -79,9 +120,11 @@ export const defaultFooter: FooterConfig = {
       title: "Platform",
       items: [
         { label: "Channels", href: "/channels" },
-        { label: "On Demand", href: "/on-demand" },
+        { label: "Movies", href: "/movies" },
+        { label: "Series", href: "/series" },
+        { label: "Documentaries", href: "/documentaries" },
         { label: "Radio", href: "/channels" },
-        { label: "Podcasts", href: "/on-demand" },
+        { label: "Podcasts", href: "/podcasts" },
         { label: "Live Guide", href: "/guide" },
       ],
     },

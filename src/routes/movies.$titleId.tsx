@@ -11,7 +11,7 @@ import { mapTitleRow, useCmsTitles } from "@/lib/cms-catalog";
 import { useMyList } from "@/lib/personal";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/on-demand/$titleId")({
+export const Route = createFileRoute("/movies/$titleId")({
   head: () => ({
     meta: [
       { title: "Watch on Lettflix" },
@@ -29,7 +29,7 @@ function TitleNotFound() {
       <SiteHeader />
       <div className="mx-auto max-w-[900px] px-6 py-24 text-center">
         <h1 className="text-3xl font-bold">Title not found</h1>
-        <Link to="/on-demand" className="inline-flex mt-6 px-5 h-11 items-center rounded-md bg-primary text-primary-foreground font-semibold">
+        <Link to="/movies" className="inline-flex mt-6 px-5 h-11 items-center rounded-md bg-primary text-primary-foreground font-semibold">
           Browse On Demand
         </Link>
       </div>
@@ -116,7 +116,7 @@ function TitleDetail() {
 
         <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-6">
           <div className="text-xs text-[color:var(--muted-foreground)] flex items-center gap-1.5">
-            <Link to="/on-demand" className="hover:text-foreground">On Demand</Link>
+            <Link to="/movies" className="hover:text-foreground">On Demand</Link>
             <ChevronRight className="size-3" />
             <span className="text-foreground">{title.title}</span>
           </div>
@@ -198,7 +198,7 @@ function TitleDetail() {
               <Download className="size-4" /> Download
             </button>
             <div className="h-12 w-32">
-              <ShareMenu title={title.title} path={`/on-demand/${title.id}`} variant="chip" />
+              <ShareMenu title={title.title} path={`/movies/${title.id}`} variant="chip" />
             </div>
           </div>
 
@@ -239,7 +239,7 @@ function TitleDetail() {
               {(related.length ? related : alsoLike).slice(0, 6).map((r) => (
                 <Link
                   key={r.id}
-                  to="/on-demand/$titleId"
+                  to="/movies/$titleId"
                   params={{ titleId: r.id }}
                   className="group rounded-xl overflow-hidden border border-border bg-elevated/40 hover:border-accent/40 transition"
                 >

@@ -109,7 +109,7 @@ export function TitleCard({
       onMouseLeave={preview ? closeSoon : undefined}
     >
       <Link
-        to="/on-demand/$titleId"
+        to="/movies/$titleId"
         params={{ titleId: t.id }}
         onClick={() => setProgress(t.id, Math.max(progress?.positionPct ?? 0, 8))}
         className="block"
@@ -186,7 +186,7 @@ export function TitleCard({
                 <div className="absolute inset-x-3 bottom-3 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <Link
-                      to="/on-demand/$titleId"
+                      to="/movies/$titleId"
                       params={{ titleId: t.id }}
                       onClick={() => setProgress(t.id, Math.max(progress?.positionPct ?? 0, 12))}
                       className="size-11 grid place-items-center rounded-full bg-white text-background hover:bg-white/90 transition"
@@ -210,10 +210,10 @@ export function TitleCard({
                     >
                       {inList ? <Check className="size-4" /> : <Plus className="size-4" />}
                     </button>
-                    <ShareMenu title={t.title} path={`/on-demand/${t.id}`} />
+                    <ShareMenu title={t.title} path={`/movies/${t.id}`} />
                   </div>
                   <Link
-                    to="/on-demand/$titleId"
+                    to="/movies/$titleId"
                     params={{ titleId: t.id }}
                     className="size-9 grid place-items-center rounded-full bg-black/60 border border-white/20 hover:bg-black/80 transition"
                     aria-label="More info"

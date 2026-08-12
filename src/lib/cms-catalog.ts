@@ -310,7 +310,7 @@ export function useCmsCollections() {
   return { collections, loading };
 }
 
-export function useCmsSetting<T>(key: "nav" | "hero" | "footer", fallback: T): { value: T; loading: boolean } {
+export function useCmsSetting<T>(key: "nav" | "hero" | "footer" | "bottomNav", fallback: T): { value: T; loading: boolean } {
   const [value, setValue] = useState<T>(fallback);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
