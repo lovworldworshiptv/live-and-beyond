@@ -1667,7 +1667,7 @@ function ApplicationsCms() {
 
 
 // ============ Homepage CMS ============
-type SettingKey = "nav" | "hero" | "footer";
+type SettingKey = "nav" | "hero" | "footer" | "bottomNav";
 
 function HomepageCms() {
   return (
@@ -1675,14 +1675,17 @@ function HomepageCms() {
       <div>
         <h2 className="text-lg font-semibold">Homepage & Chrome</h2>
         <p className="text-sm text-[color:var(--muted-foreground)]">
-          Control the top navigation, hero section, and site footer. Changes publish immediately.
+          Control the top navigation, hero showcase, bottom navigation, and site footer. Changes publish immediately.
         </p>
       </div>
-      <SettingCard settingKey="nav" title="Top Navigation" description="Primary links shown in the header.">
+      <SettingCard settingKey="nav" title="Top Navigation" description="Primary links shown in the header. Add sub-links to reveal a hover dropdown.">
         {(value, setValue) => <NavForm value={value} onChange={setValue} />}
       </SettingCard>
-      <SettingCard settingKey="hero" title="Hero Section" description="Headline, description, CTAs, banner image, and stats on the homepage.">
+      <SettingCard settingKey="hero" title="Hero Showcase" description="Rounded hero banner carousel — image, text, and per-slide CTAs.">
         {(value, setValue) => <HeroForm value={value} onChange={setValue} />}
+      </SettingCard>
+      <SettingCard settingKey="bottomNav" title="Bottom Navigation (tablet & mobile)" description="Up to 5 tabs shown in the mobile bottom bar.">
+        {(value, setValue) => <BottomNavForm value={value} onChange={setValue} />}
       </SettingCard>
       <SettingCard settingKey="footer" title="Footer" description="Tagline, link columns, and legal notes.">
         {(value, setValue) => <FooterForm value={value} onChange={setValue} />}
@@ -1690,6 +1693,7 @@ function HomepageCms() {
     </div>
   );
 }
+
 
 function SettingCard({
   settingKey,
