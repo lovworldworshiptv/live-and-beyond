@@ -24,10 +24,8 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as OnDemandIndexRouteImport } from './routes/on-demand.index'
 import { Route as MoviesIndexRouteImport } from './routes/movies.index'
 import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
-import { Route as OnDemandSplatRouteImport } from './routes/on-demand.$'
 import { Route as MoviesTitleIdRouteImport } from './routes/movies.$titleId'
 import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
 import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
@@ -113,11 +111,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OnDemandIndexRoute = OnDemandIndexRouteImport.update({
-  id: '/on-demand/',
-  path: '/on-demand/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MoviesIndexRoute = MoviesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -127,11 +120,6 @@ const ChannelsIndexRoute = ChannelsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ChannelsRoute,
-} as any)
-const OnDemandSplatRoute = OnDemandSplatRouteImport.update({
-  id: '/on-demand/$',
-  path: '/on-demand/$',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const MoviesTitleIdRoute = MoviesTitleIdRouteImport.update({
   id: '/$titleId',
@@ -200,10 +188,8 @@ export interface FileRoutesByFullPath {
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
-  '/on-demand/$': typeof OnDemandSplatRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
-  '/on-demand/': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -227,10 +213,8 @@ export interface FileRoutesByTo {
   '/series': typeof SeriesRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
-  '/on-demand/$': typeof OnDemandSplatRoute
   '/channels': typeof ChannelsIndexRoute
   '/movies': typeof MoviesIndexRoute
-  '/on-demand': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -258,10 +242,8 @@ export interface FileRoutesById {
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
-  '/on-demand/$': typeof OnDemandSplatRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
-  '/on-demand/': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -290,10 +272,8 @@ export interface FileRouteTypes {
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/movies/$titleId'
-    | '/on-demand/$'
     | '/channels/'
     | '/movies/'
-    | '/on-demand/'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
@@ -317,10 +297,8 @@ export interface FileRouteTypes {
     | '/series'
     | '/collections/$collectionId'
     | '/movies/$titleId'
-    | '/on-demand/$'
     | '/channels'
     | '/movies'
-    | '/on-demand'
     | '/channels/$channelId/library'
     | '/channels/$channelId'
     | '/api/public/kingschat/callback'
@@ -347,10 +325,8 @@ export interface FileRouteTypes {
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/movies/$titleId'
-    | '/on-demand/$'
     | '/channels/'
     | '/movies/'
-    | '/on-demand/'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
@@ -376,8 +352,6 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   SeriesRoute: typeof SeriesRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
-  OnDemandSplatRoute: typeof OnDemandSplatRoute
-  OnDemandIndexRoute: typeof OnDemandIndexRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
   ApiPublicKingschatLoginRoute: typeof ApiPublicKingschatLoginRoute
   ApiPublicKingschatPollRoute: typeof ApiPublicKingschatPollRoute
@@ -491,13 +465,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/on-demand/': {
-      id: '/on-demand/'
-      path: '/on-demand'
-      fullPath: '/on-demand/'
-      preLoaderRoute: typeof OnDemandIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/movies/': {
       id: '/movies/'
       path: '/'
@@ -511,13 +478,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/channels/'
       preLoaderRoute: typeof ChannelsIndexRouteImport
       parentRoute: typeof ChannelsRoute
-    }
-    '/on-demand/$': {
-      id: '/on-demand/$'
-      path: '/on-demand/$'
-      fullPath: '/on-demand/$'
-      preLoaderRoute: typeof OnDemandSplatRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/movies/$titleId': {
       id: '/movies/$titleId'
@@ -642,8 +602,6 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   SeriesRoute: SeriesRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
-  OnDemandSplatRoute: OnDemandSplatRoute,
-  OnDemandIndexRoute: OnDemandIndexRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
   ApiPublicKingschatLoginRoute: ApiPublicKingschatLoginRoute,
   ApiPublicKingschatPollRoute: ApiPublicKingschatPollRoute,

@@ -1839,6 +1839,14 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
   const setStats = (next: { k: string; v: string }[]) => onChange({ ...value, stats: next });
   return (
     <div className="space-y-4">
+      <label className="inline-flex items-center gap-2 text-xs text-[color:var(--muted-foreground)]">
+        <input
+          type="checkbox"
+          checked={value.visible !== false}
+          onChange={(e) => set({ visible: e.target.checked })}
+        />
+        Main banner visible (included in the auto-slide carousel)
+      </label>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Badge label"><input className={inputClass} value={value.badge ?? ""} onChange={(e) => set({ badge: e.target.value })} /></Field>
         <Field label="Badge meta"><input className={inputClass} value={value.badgeMeta ?? ""} onChange={(e) => set({ badgeMeta: e.target.value })} /></Field>
@@ -1886,10 +1894,20 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
             <div key={i} className="rounded-md border border-border bg-background/40 p-3 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="text-xs font-semibold">Slide {i + 1}</div>
-                <button
-                  onClick={() => set({ slides: (value.slides ?? []).filter((_: any, j: number) => j !== i) })}
-                  className="h-8 px-2 rounded-md hover:bg-elevated text-destructive"
-                ><Trash2 className="size-4" /></button>
+                <div className="flex items-center gap-3">
+                  <label className="inline-flex items-center gap-2 text-xs text-[color:var(--muted-foreground)]">
+                    <input
+                      type="checkbox"
+                      checked={s.visible !== false}
+                      onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, visible: e.target.checked } : x) })}
+                    />
+                    Visible
+                  </label>
+                  <button
+                    onClick={() => set({ slides: (value.slides ?? []).filter((_: any, j: number) => j !== i) })}
+                    className="h-8 px-2 rounded-md hover:bg-elevated text-destructive"
+                  ><Trash2 className="size-4" /></button>
+                </div>
               </div>
               <MediaPicker
                 value={s.imageUrl ?? null}
@@ -1917,7 +1935,7 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
                   onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, contentId: e.target.value } : x) })}
                 />
               </div>
-              <div className="text-xs font-medium text-[color:var(--muted-foreground)] pt-1">Slide CTAs (leave blank to use Watch Now / More Info for the linked content)</div>
+              <div className="text-xs font-medium text-[color:var(--muted-foreground)] pt-1">Slide CTAs (leave a label blank to turn that CTA off)</div>
 
               {(["primaryCta", "secondaryCta", "tertiaryCta"] as const).map((k) => (
                 <div key={k} className="grid gap-2 md:grid-cols-2">
@@ -1938,12 +1956,12 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
             </div>
           ))}
           <button
-            onClick={() => set({ slides: [...(value.slides ?? []), { imageUrl: null }] })}
+            onClick={() => set({ slides: [...(value.slides ?? []), { imageUrl: null, visible: true }] })}
             className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border hover:bg-elevated text-sm"
           ><Plus className="size-4" /> Add slide</button>
 
           {(!value.slides || value.slides.length === 0) && (
-            <p className="text-xs text-[color:var(--muted-foreground)]">No slides added — the hero uses the single banner above. Add 2+ slides to enable auto-rotation.</p>
+            <p className="text-xs text-[color:var(--muted-foreground)]">No slides added — the hero shows the main banner above. Every visible banner (main banner included) rotates in the carousel.</p>
           )}
         </div>
       </div>
