@@ -2,14 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 
 type CallbackPayload = { code?: string; origin?: string };
 
-function closingPage(message: string, ok: boolean): Response {
+function closingPage(message: string, ok: boolean, fallbackPath = "/auth"): Response {
   return new Response(
     `<!doctype html><html><head><meta charset="utf-8"><title>KingsChat</title>
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111315;color:#fff;font-family:system-ui,sans-serif;text-align:center;padding:24px}
 .c{max-width:340px}.d{width:44px;height:44px;border-radius:999px;margin:0 auto 16px;background:${ok ? "#1E5EFF" : "#9C1533"}}
 p{opacity:.75;font-size:14px;line-height:1.5}</style></head>
 <body><div class="c"><div class="d"></div><p>${message}</p></div>
-<script>setTimeout(function(){try{window.close()}catch(e){}},${ok ? 600 : 2500})</script>
+<script>setTimeout(function(){
+  if (window.opener && window.opener !== window) { try { window.close() } catch (e) {} }
+  else { window.location.replace(${JSON.stringify(fallbackPath)}) }
+},${ok ? 600 : 2000})</script>
 </body></html>`,
     { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } },
   );
@@ -46,7 +49,7 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
     console.error(`[KingsChat] callback failed: ${message}`);
     if (attempt) {
       await markAttemptFailed(message);
-      return closingPage("KingsChat sign-in failed. You can close this window.", false);
+      return closingPage("KingsChat sign-in failed. You can close this window.", false, "/auth");
     }
     return Response.redirect(
       new URL(`/auth?kingschat_error=${encodeURIComponent(message)}`, appOrigin).toString(),
@@ -130,7 +133,7 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
         })
         .eq("id", attempt.attemptId);
       if (attemptError) return fail(attemptError.message);
-      return closingPage("Signed in with KingsChat. You can close this window.", true);
+      return closingPage("Signed in with KingsChat. You can close this window.", true, "/auth");
     }
 
     // Non-popup fallback: hand the tokens to the app via the URL hash.
