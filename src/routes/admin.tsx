@@ -1839,6 +1839,14 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
   const setStats = (next: { k: string; v: string }[]) => onChange({ ...value, stats: next });
   return (
     <div className="space-y-4">
+      <label className="inline-flex items-center gap-2 text-xs text-[color:var(--muted-foreground)]">
+        <input
+          type="checkbox"
+          checked={value.visible !== false}
+          onChange={(e) => set({ visible: e.target.checked })}
+        />
+        Main banner visible (included in the auto-slide carousel)
+      </label>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Badge label"><input className={inputClass} value={value.badge ?? ""} onChange={(e) => set({ badge: e.target.value })} /></Field>
         <Field label="Badge meta"><input className={inputClass} value={value.badgeMeta ?? ""} onChange={(e) => set({ badgeMeta: e.target.value })} /></Field>
