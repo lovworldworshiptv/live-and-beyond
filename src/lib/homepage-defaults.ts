@@ -24,6 +24,8 @@ export type HeroSlide = {
   tertiaryCta?: HeroCta;
 };
 export type HeroConfig = {
+  /** When false, the main banner is excluded from the carousel. Defaults to visible. */
+  visible?: boolean;
   badge: string;
   badgeMeta: string;
   title: string;
