@@ -6,6 +6,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2 } from "lucide-react";
+import { useKingsChatLogin } from "@/hooks/use-kingschat-login";
 import logoIcon from "@/assets/lettflix-icon.png.asset.json";
 
 const searchSchema = z.object({
