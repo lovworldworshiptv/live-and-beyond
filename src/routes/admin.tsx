@@ -1927,7 +1927,7 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
                   onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, contentId: e.target.value } : x) })}
                 />
               </div>
-              <div className="text-xs font-medium text-[color:var(--muted-foreground)] pt-1">Slide CTAs (leave blank to use Watch Now / More Info for the linked content)</div>
+              <div className="text-xs font-medium text-[color:var(--muted-foreground)] pt-1">Slide CTAs (leave a label blank to turn that CTA off)</div>
 
               {(["primaryCta", "secondaryCta", "tertiaryCta"] as const).map((k) => (
                 <div key={k} className="grid gap-2 md:grid-cols-2">
