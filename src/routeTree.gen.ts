@@ -24,6 +24,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnDemandIndexRouteImport } from './routes/on-demand.index'
 import { Route as MoviesIndexRouteImport } from './routes/movies.index'
 import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
 import { Route as OnDemandSplatRouteImport } from './routes/on-demand.$'
@@ -112,6 +113,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnDemandIndexRoute = OnDemandIndexRouteImport.update({
+  id: '/on-demand/',
+  path: '/on-demand/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MoviesIndexRoute = MoviesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/on-demand/$': typeof OnDemandSplatRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
+  '/on-demand/': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/on-demand/$': typeof OnDemandSplatRoute
   '/channels': typeof ChannelsIndexRoute
   '/movies': typeof MoviesIndexRoute
+  '/on-demand': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/on-demand/$': typeof OnDemandSplatRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
+  '/on-demand/': typeof OnDemandIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -284,6 +293,7 @@ export interface FileRouteTypes {
     | '/on-demand/$'
     | '/channels/'
     | '/movies/'
+    | '/on-demand/'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/on-demand/$'
     | '/channels'
     | '/movies'
+    | '/on-demand'
     | '/channels/$channelId/library'
     | '/channels/$channelId'
     | '/api/public/kingschat/callback'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/on-demand/$'
     | '/channels/'
     | '/movies/'
+    | '/on-demand/'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
@@ -365,6 +377,7 @@ export interface RootRouteChildren {
   SeriesRoute: typeof SeriesRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   OnDemandSplatRoute: typeof OnDemandSplatRoute
+  OnDemandIndexRoute: typeof OnDemandIndexRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
   ApiPublicKingschatLoginRoute: typeof ApiPublicKingschatLoginRoute
   ApiPublicKingschatPollRoute: typeof ApiPublicKingschatPollRoute
@@ -476,6 +489,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/on-demand/': {
+      id: '/on-demand/'
+      path: '/on-demand'
+      fullPath: '/on-demand/'
+      preLoaderRoute: typeof OnDemandIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/movies/': {
@@ -623,6 +643,7 @@ const rootRouteChildren: RootRouteChildren = {
   SeriesRoute: SeriesRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   OnDemandSplatRoute: OnDemandSplatRoute,
+  OnDemandIndexRoute: OnDemandIndexRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
   ApiPublicKingschatLoginRoute: ApiPublicKingschatLoginRoute,
   ApiPublicKingschatPollRoute: ApiPublicKingschatPollRoute,
