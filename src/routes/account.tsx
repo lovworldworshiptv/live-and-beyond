@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  User, Bell, CreditCard, Shield, Monitor, Globe, LogOut, Check, KeyRound, AlertTriangle,
+  User, Bell, CreditCard, Shield, Monitor, Globe, LogOut, Check, KeyRound, AlertTriangle, Loader2,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -92,6 +92,7 @@ function AccountPage() {
         <div className="space-y-4">
           {active === "profile" && (
             <Card title="Profile" subtitle="How you appear across Lettflix.">
+              <AccountPanel />
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Display name">
                   <input
@@ -614,3 +615,67 @@ function LoginHistoryPanel() {
   );
 }
 
+
+function AccountPanel() {
+  const { user } = useAuth();
+  const email = user?.email ?? "";
+  const [initialName, setInitialName] = useState("");
+  const [name, setName] = useState("");
+  const [pw, setPw] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle().then(({ data }) => {
+      const n = data?.display_name ?? (user.user_metadata?.display_name as string | undefined) ?? "";
+      setInitialName(n);
+      setName(n);
+    });
+  }, [user]);
+
+  async function saveName() {
+    if (!user || !name.trim()) return;
+    setBusy(true);
+    const { error } = await supabase.from("profiles").update({ display_name: name.trim() }).eq("id", user.id);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setInitialName(name.trim());
+    toast.success("Display name updated");
+  }
+
+  async function changePassword() {
+    if (pw.length < 12) return toast.error("Password must be at least 12 characters");
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: pw });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setPw("");
+    toast.success("Password updated");
+  }
+
+  if (!user) return null;
+
+  return (
+    <div className="mb-6 grid gap-4 md:grid-cols-3">
+      <label className="rounded-xl border border-border bg-elevated/40 p-4 flex flex-col gap-2">
+        <span className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">Account name</span>
+        <input value={name} onChange={(e) => setName(e.target.value)} className="h-10 px-3 rounded-md bg-background border border-border text-sm" />
+        <button onClick={saveName} disabled={busy || !name.trim() || name === initialName} className="mt-1 h-9 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2">
+          {busy && <Loader2 className="size-3 animate-spin" />} Save
+        </button>
+      </label>
+      <div className="rounded-xl border border-border bg-elevated/40 p-4 flex flex-col gap-2">
+        <span className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">Email</span>
+        <div className="h-10 px-3 rounded-md bg-background border border-border text-sm inline-flex items-center truncate">{email || "—"}</div>
+        <p className="text-[11px] text-[color:var(--muted-foreground)]">Contact support to change your email.</p>
+      </div>
+      <label className="rounded-xl border border-border bg-elevated/40 p-4 flex flex-col gap-2">
+        <span className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">Change password</span>
+        <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="New password (min 12 chars)" className="h-10 px-3 rounded-md bg-background border border-border text-sm" />
+        <button onClick={changePassword} disabled={busy || pw.length < 12} className="mt-1 h-9 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2">
+          {busy && <Loader2 className="size-3 animate-spin" />} Update password
+        </button>
+      </label>
+    </div>
+  );
+}
