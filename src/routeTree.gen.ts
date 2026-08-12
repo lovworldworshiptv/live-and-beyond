@@ -16,6 +16,7 @@ import { Route as PortalRouteImport } from './routes/portal'
 import { Route as MoviesRouteImport } from './routes/movies'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as EnterpriseRouteImport } from './routes/enterprise'
+import { Route as DocumentariesRouteImport } from './routes/documentaries'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChannelsRouteImport } from './routes/channels'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -67,6 +68,11 @@ const GuideRoute = GuideRouteImport.update({
 const EnterpriseRoute = EnterpriseRouteImport.update({
   id: '/enterprise',
   path: '/enterprise',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentariesRoute = DocumentariesRouteImport.update({
+  id: '/documentaries',
+  path: '/documentaries',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityRoute = CommunityRouteImport.update({
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/channels': typeof ChannelsRouteWithChildren
   '/community': typeof CommunityRoute
+  '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
   '/movies': typeof MoviesRouteWithChildren
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
   '/portal': typeof PortalRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/channels': typeof ChannelsRouteWithChildren
   '/community': typeof CommunityRoute
+  '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
   '/movies': typeof MoviesRouteWithChildren
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/channels'
     | '/community'
+    | '/documentaries'
     | '/enterprise'
     | '/guide'
     | '/movies'
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/community'
+    | '/documentaries'
     | '/enterprise'
     | '/guide'
     | '/portal'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/channels'
     | '/community'
+    | '/documentaries'
     | '/enterprise'
     | '/guide'
     | '/movies'
@@ -318,6 +330,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ChannelsRoute: typeof ChannelsRouteWithChildren
   CommunityRoute: typeof CommunityRoute
+  DocumentariesRoute: typeof DocumentariesRoute
   EnterpriseRoute: typeof EnterpriseRoute
   GuideRoute: typeof GuideRoute
   MoviesRoute: typeof MoviesRouteWithChildren
@@ -381,6 +394,13 @@ declare module '@tanstack/react-router' {
       path: '/enterprise'
       fullPath: '/enterprise'
       preLoaderRoute: typeof EnterpriseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documentaries': {
+      id: '/documentaries'
+      path: '/documentaries'
+      fullPath: '/documentaries'
+      preLoaderRoute: typeof DocumentariesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/community': {
@@ -552,6 +572,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ChannelsRoute: ChannelsRouteWithChildren,
   CommunityRoute: CommunityRoute,
+  DocumentariesRoute: DocumentariesRoute,
   EnterpriseRoute: EnterpriseRoute,
   GuideRoute: GuideRoute,
   MoviesRoute: MoviesRouteWithChildren,
