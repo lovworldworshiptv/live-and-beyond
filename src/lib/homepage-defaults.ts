@@ -1,5 +1,8 @@
-export type NavItem = { label: string; to: string };
+export type NavItem = { label: string; to: string; children?: NavItem[] };
 export type NavConfig = { items: NavItem[] };
+
+export type BottomNavItem = { label: string; to: string; icon: string };
+export type BottomNavConfig = { items: BottomNavItem[] };
 
 export type HeroCta = { label: string; to: string };
 export type HeroStat = { k: string; v: string };
@@ -10,6 +13,10 @@ export type HeroSlide = {
   title?: string;
   titleAccent?: string;
   description?: string;
+  /** Meta line shown under the title, e.g. "Gritty · Action · Series" */
+  meta?: string;
+  /** Slug of the linked on-demand title — powers Watch Now / More Info. */
+  contentId?: string;
   primaryCta?: HeroCta;
   secondaryCta?: HeroCta;
   tertiaryCta?: HeroCta;
@@ -30,6 +37,7 @@ export type HeroConfig = {
   /** Auto-rotation interval in milliseconds. */
   intervalMs?: number;
 };
+
 
 export type FooterLink = { label: string; href: string };
 export type FooterColumn = { title: string; items: FooterLink[] };
