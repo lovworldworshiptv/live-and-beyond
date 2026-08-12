@@ -1959,7 +1959,7 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
                   />
                 </div>
               ))}
-            </div>
+            </details>
           ))}
           <button
             onClick={() => set({ slides: [...(value.slides ?? []), { imageUrl: null, visible: true }] })}
