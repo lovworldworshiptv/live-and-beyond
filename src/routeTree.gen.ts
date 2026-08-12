@@ -12,7 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PortalRouteImport } from './routes/portal'
-import { Route as OnDemandRouteImport } from './routes/on-demand'
+import { Route as MoviesRouteImport } from './routes/movies'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as EnterpriseRouteImport } from './routes/enterprise'
 import { Route as CommunityRouteImport } from './routes/community'
@@ -21,9 +21,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as OnDemandIndexRouteImport } from './routes/on-demand.index'
+import { Route as MoviesIndexRouteImport } from './routes/movies.index'
 import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
-import { Route as OnDemandTitleIdRouteImport } from './routes/on-demand.$titleId'
+import { Route as MoviesTitleIdRouteImport } from './routes/movies.$titleId'
 import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
 import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
 import { Route as ChannelsChannelIdIndexRouteImport } from './routes/channels.$channelId.index'
@@ -48,9 +48,9 @@ const PortalRoute = PortalRouteImport.update({
   path: '/portal',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OnDemandRoute = OnDemandRouteImport.update({
-  id: '/on-demand',
-  path: '/on-demand',
+const MoviesRoute = MoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuideRoute = GuideRouteImport.update({
@@ -93,20 +93,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OnDemandIndexRoute = OnDemandIndexRouteImport.update({
+const MoviesIndexRoute = MoviesIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => OnDemandRoute,
+  getParentRoute: () => MoviesRoute,
 } as any)
 const ChannelsIndexRoute = ChannelsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ChannelsRoute,
 } as any)
-const OnDemandTitleIdRoute = OnDemandTitleIdRouteImport.update({
+const MoviesTitleIdRoute = MoviesTitleIdRouteImport.update({
   id: '/$titleId',
   path: '/$titleId',
-  getParentRoute: () => OnDemandRoute,
+  getParentRoute: () => MoviesRoute,
 } as any)
 const CollectionsCollectionIdRoute = CollectionsCollectionIdRouteImport.update({
   id: '/collections/$collectionId',
@@ -160,15 +160,15 @@ export interface FileRoutesByFullPath {
   '/community': typeof CommunityRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
-  '/on-demand': typeof OnDemandRouteWithChildren
+  '/movies': typeof MoviesRouteWithChildren
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
-  '/on-demand/$titleId': typeof OnDemandTitleIdRoute
+  '/movies/$titleId': typeof MoviesTitleIdRoute
   '/channels/': typeof ChannelsIndexRoute
-  '/on-demand/': typeof OnDemandIndexRoute
+  '/movies/': typeof MoviesIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -188,9 +188,9 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
-  '/on-demand/$titleId': typeof OnDemandTitleIdRoute
+  '/movies/$titleId': typeof MoviesTitleIdRoute
   '/channels': typeof ChannelsIndexRoute
-  '/on-demand': typeof OnDemandIndexRoute
+  '/movies': typeof MoviesIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -208,15 +208,15 @@ export interface FileRoutesById {
   '/community': typeof CommunityRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
-  '/on-demand': typeof OnDemandRouteWithChildren
+  '/movies': typeof MoviesRouteWithChildren
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
-  '/on-demand/$titleId': typeof OnDemandTitleIdRoute
+  '/movies/$titleId': typeof MoviesTitleIdRoute
   '/channels/': typeof ChannelsIndexRoute
-  '/on-demand/': typeof OnDemandIndexRoute
+  '/movies/': typeof MoviesIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -235,15 +235,15 @@ export interface FileRouteTypes {
     | '/community'
     | '/enterprise'
     | '/guide'
-    | '/on-demand'
+    | '/movies'
     | '/portal'
     | '/pricing'
     | '/profile'
     | '/channels/$channelId'
     | '/collections/$collectionId'
-    | '/on-demand/$titleId'
+    | '/movies/$titleId'
     | '/channels/'
-    | '/on-demand/'
+    | '/movies/'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
@@ -263,9 +263,9 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/profile'
     | '/collections/$collectionId'
-    | '/on-demand/$titleId'
+    | '/movies/$titleId'
     | '/channels'
-    | '/on-demand'
+    | '/movies'
     | '/channels/$channelId/library'
     | '/channels/$channelId'
     | '/api/public/kingschat/callback'
@@ -282,15 +282,15 @@ export interface FileRouteTypes {
     | '/community'
     | '/enterprise'
     | '/guide'
-    | '/on-demand'
+    | '/movies'
     | '/portal'
     | '/pricing'
     | '/profile'
     | '/channels/$channelId'
     | '/collections/$collectionId'
-    | '/on-demand/$titleId'
+    | '/movies/$titleId'
     | '/channels/'
-    | '/on-demand/'
+    | '/movies/'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
@@ -308,7 +308,7 @@ export interface RootRouteChildren {
   CommunityRoute: typeof CommunityRoute
   EnterpriseRoute: typeof EnterpriseRoute
   GuideRoute: typeof GuideRoute
-  OnDemandRoute: typeof OnDemandRouteWithChildren
+  MoviesRoute: typeof MoviesRouteWithChildren
   PortalRoute: typeof PortalRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
@@ -342,11 +342,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/on-demand': {
-      id: '/on-demand'
-      path: '/on-demand'
-      fullPath: '/on-demand'
-      preLoaderRoute: typeof OnDemandRouteImport
+    '/movies': {
+      id: '/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof MoviesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guide': {
@@ -405,12 +405,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/on-demand/': {
-      id: '/on-demand/'
+    '/movies/': {
+      id: '/movies/'
       path: '/'
-      fullPath: '/on-demand/'
-      preLoaderRoute: typeof OnDemandIndexRouteImport
-      parentRoute: typeof OnDemandRoute
+      fullPath: '/movies/'
+      preLoaderRoute: typeof MoviesIndexRouteImport
+      parentRoute: typeof MoviesRoute
     }
     '/channels/': {
       id: '/channels/'
@@ -419,12 +419,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChannelsIndexRouteImport
       parentRoute: typeof ChannelsRoute
     }
-    '/on-demand/$titleId': {
-      id: '/on-demand/$titleId'
+    '/movies/$titleId': {
+      id: '/movies/$titleId'
       path: '/$titleId'
-      fullPath: '/on-demand/$titleId'
-      preLoaderRoute: typeof OnDemandTitleIdRouteImport
-      parentRoute: typeof OnDemandRoute
+      fullPath: '/movies/$titleId'
+      preLoaderRoute: typeof MoviesTitleIdRouteImport
+      parentRoute: typeof MoviesRoute
     }
     '/collections/$collectionId': {
       id: '/collections/$collectionId'
@@ -512,19 +512,18 @@ const ChannelsRouteWithChildren = ChannelsRoute._addFileChildren(
   ChannelsRouteChildren,
 )
 
-interface OnDemandRouteChildren {
-  OnDemandTitleIdRoute: typeof OnDemandTitleIdRoute
-  OnDemandIndexRoute: typeof OnDemandIndexRoute
+interface MoviesRouteChildren {
+  MoviesTitleIdRoute: typeof MoviesTitleIdRoute
+  MoviesIndexRoute: typeof MoviesIndexRoute
 }
 
-const OnDemandRouteChildren: OnDemandRouteChildren = {
-  OnDemandTitleIdRoute: OnDemandTitleIdRoute,
-  OnDemandIndexRoute: OnDemandIndexRoute,
+const MoviesRouteChildren: MoviesRouteChildren = {
+  MoviesTitleIdRoute: MoviesTitleIdRoute,
+  MoviesIndexRoute: MoviesIndexRoute,
 }
 
-const OnDemandRouteWithChildren = OnDemandRoute._addFileChildren(
-  OnDemandRouteChildren,
-)
+const MoviesRouteWithChildren =
+  MoviesRoute._addFileChildren(MoviesRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -535,7 +534,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityRoute: CommunityRoute,
   EnterpriseRoute: EnterpriseRoute,
   GuideRoute: GuideRoute,
-  OnDemandRoute: OnDemandRouteWithChildren,
+  MoviesRoute: MoviesRouteWithChildren,
   PortalRoute: PortalRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
