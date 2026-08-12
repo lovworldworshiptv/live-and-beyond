@@ -125,98 +125,105 @@ function Index() {
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
 
-      {/* HERO */}
-      <section className="relative isolate overflow-hidden min-h-[520px] md:min-h-[600px] lg:min-h-[760px]">
-        <div className="absolute inset-0 bg-background" />
-        {heroSlides.map((s, i) => (
-          <img
-            key={i}
-            src={s.imageUrl || heroImg}
-            alt="Lettflix broadcast showcase"
-            width={1920}
-            height={1088}
-            className={`absolute inset-y-0 right-0 h-full w-full object-cover object-center pointer-events-none transition-opacity duration-1000 ${
-              isLegacy
-                ? "lg:object-[72%_center] [mask-image:none] lg:[mask-image:linear-gradient(90deg,transparent_0%,transparent_38%,black_56%,black_100%)] [-webkit-mask-image:none] lg:[-webkit-mask-image:linear-gradient(90deg,transparent_0%,transparent_38%,black_56%,black_100%)]"
-                : ""
-            }`}
-            style={{
-              opacity: i === slideIdx ? 1 : 0,
-            }}
-          />
-        ))}
-        {hasHeroText && (
-          <>
-            <div className={`absolute inset-0 pointer-events-none ${isLegacy ? "bg-gradient-to-t from-background via-background/80 to-background/30 lg:bg-gradient-to-r lg:from-background lg:via-background/95 lg:to-background/20" : "bg-gradient-to-t from-background/90 via-background/45 to-transparent"}`} />
-            <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent to-background pointer-events-none" />
-          </>
-        )}
+      {/* HERO — Netflix-style rounded showcase card */}
+      <section className="px-3 sm:px-6 lg:px-10 pt-3 lg:pt-5">
+        <div className="mx-auto max-w-[1480px]">
+          <div className="relative isolate overflow-hidden rounded-2xl lg:rounded-3xl border border-white/10 bg-elevated/40 shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]">
+            <div className="relative aspect-[3/4] sm:aspect-[16/10] lg:aspect-[21/9] max-h-[78vh] w-full">
+              {heroSlides.map((s, i) => (
+                <img
+                  key={i}
+                  src={s.imageUrl || heroImg}
+                  alt={s.title || "Lettflix broadcast showcase"}
+                  className="absolute inset-0 size-full object-cover transition-opacity duration-1000"
+                  style={{ opacity: i === slideIdx ? 1 : 0 }}
+                />
+              ))}
 
-        <div className={`relative mx-auto max-w-[1480px] px-6 lg:px-10 pt-6 lg:pt-[54px] pb-12 lg:pb-32 flex min-h-[520px] md:min-h-[600px] lg:min-h-[760px] items-center ${isLegacy ? "" : "justify-center"}`}>
-          <div className={isLegacy ? "max-w-2xl" : "max-w-3xl text-center"}>
-            {(activeBadge || activeBadgeMeta) && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-xs font-medium">
-                {activeBadge && <span className="live-pulse text-primary">{activeBadge}</span>}
-                {activeBadgeMeta && <span className="text-[color:var(--secondary-foreground)]">· {activeBadgeMeta}</span>}
-              </div>
-            )}
-            {(activeTitle || activeAccent) && (
-              <h1 className="mt-6 text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.02]">
-                {activeTitle} <span className="text-primary">{activeAccent}</span>
-              </h1>
-            )}
-            {activeDesc && (
-              <p className={`mt-5 text-lg text-[color:var(--secondary-foreground)] max-w-xl ${isLegacy ? "" : "mx-auto"}`}>
-                {activeDesc}
-              </p>
-            )}
-            {heroCtas.length > 0 && (
-              <div className={`mt-8 flex flex-wrap gap-3 ${isLegacy ? "" : "justify-center"}`}>
-                {heroCtas.map((cta, i) => (
-                  <Link
-                    key={`${cta.to}-${i}`}
-                    to={cta.to as never}
-                    className={
-                      i === 0
-                        ? "inline-flex items-center gap-2 px-6 h-12 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
-                        : i === 1
-                          ? "inline-flex items-center gap-2 px-6 h-12 rounded-md bg-elevated/80 border border-border backdrop-blur hover:bg-elevated transition font-medium"
-                          : "inline-flex items-center gap-2 px-6 h-12 rounded-md text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated/40 transition font-medium"
-                    }
-                    style={i === 0 ? { boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 24px oklch(0.55 0.22 25 / 0.55), 0 0 50px oklch(0.55 0.22 25 / 0.25)" } : undefined}
-                  >
-                    {i === 0 ? <Play className="size-[19px] fill-current" strokeWidth={2.5} /> : i === 1 ? <Tv className="size-4" /> : <CalendarDays className="size-4" />}
-                    {cta.label}
-                  </Link>
-                ))}
-              </div>
-            )}
+              {hasHeroText && (
+                <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              )}
 
-            {isLegacy && (
-              <div className="mt-10 grid grid-cols-3 gap-4 sm:gap-6 max-w-md">
-                {hero.stats.map((s) => (
-                  <div key={s.v}>
-                    <div className="text-2xl font-display font-bold">{s.k}</div>
-                    <div className="text-xs text-[color:var(--muted-foreground)] mt-1">{s.v}</div>
-                  </div>
-                ))}
+              {/* Content — bottom left */}
+              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 lg:p-12">
+                <div className="max-w-xl text-left">
+                  {(activeBadge || activeBadgeMeta) && (
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/45 backdrop-blur border border-white/15 text-[11px] sm:text-xs font-medium">
+                      {activeBadge && <span className="live-pulse text-primary">{activeBadge}</span>}
+                      {activeBadgeMeta && <span className="text-white/80">· {activeBadgeMeta}</span>}
+                    </div>
+                  )}
+                  {(activeTitle || activeAccent) && (
+                    <h1 className="mt-3 sm:mt-4 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.03] text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+                      {activeTitle} {activeAccent && <span className="text-primary">{activeAccent}</span>}
+                    </h1>
+                  )}
+                  {activeMeta && (
+                    <div className="mt-2.5 text-xs sm:text-sm text-white/75 font-medium">{activeMeta}</div>
+                  )}
+                  {activeDesc && (
+                    <p className="mt-3 text-sm sm:text-base lg:text-lg text-white/80 line-clamp-3">
+                      {activeDesc}
+                    </p>
+                  )}
+                  {heroCtas.length > 0 && (
+                    <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-3">
+                      {heroCtas.map((cta, i) => (
+                        <Link
+                          key={`${cta.to}-${i}`}
+                          to={cta.to as never}
+                          className={
+                            i === 0
+                              ? "inline-flex items-center justify-center gap-2 px-6 sm:px-8 h-11 sm:h-12 rounded-lg bg-white text-background font-semibold hover:bg-white/90 transition"
+                              : i === 1
+                                ? "inline-flex items-center justify-center gap-2 px-6 sm:px-8 h-11 sm:h-12 rounded-lg bg-white/20 text-white backdrop-blur border border-white/20 hover:bg-white/30 transition font-semibold"
+                                : "inline-flex items-center justify-center gap-2 px-5 h-11 sm:h-12 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition font-medium"
+                          }
+                          style={i === 0 ? { boxShadow: "0 0 30px oklch(1 0 0 / 0.22)" } : undefined}
+                        >
+                          {i === 0 ? (
+                            <Play className="size-[19px] fill-current" strokeWidth={2.5} />
+                          ) : i === 1 ? (
+                            <Info className="size-[18px]" strokeWidth={2.4} />
+                          ) : (
+                            <CalendarDays className="size-4" />
+                          )}
+                          {cta.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {isLegacy && hero.stats?.length > 0 && (
+                    <div className="mt-7 grid grid-cols-3 gap-4 sm:gap-6 max-w-md">
+                      {hero.stats.map((s) => (
+                        <div key={s.v}>
+                          <div className="text-xl sm:text-2xl font-display font-bold text-white">{s.k}</div>
+                          <div className="text-[11px] sm:text-xs text-white/65 mt-1">{s.v}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+
+              {heroSlides.length > 1 && (
+                <div className="absolute bottom-3 right-4 sm:bottom-5 sm:right-6 flex gap-1.5 z-10">
+                  {heroSlides.map((_, i) => (
+                    <button
+                      key={i}
+                      aria-label={`Hero slide ${i + 1}`}
+                      onClick={() => setSlideIdx(i)}
+                      className={`h-1.5 rounded-full transition-all ${i === slideIdx ? "w-6 bg-white" : "w-1.5 bg-white/40"}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-        {heroSlides.length > 1 && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-            {heroSlides.map((_, i) => (
-              <button
-                key={i}
-                aria-label={`Hero slide ${i + 1}`}
-                onClick={() => setSlideIdx(i)}
-                className={`h-1.5 rounded-full transition-all ${i === slideIdx ? "w-6 bg-white" : "w-1.5 bg-white/40"}`}
-              />
-            ))}
-          </div>
-        )}
       </section>
+
 
 
       {/* LIVE NOW */}
