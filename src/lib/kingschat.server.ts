@@ -101,23 +101,33 @@ export function safeRelativePath(value: string | null | undefined, fallback = "/
 /* Popup login attempts (poll-based handoff, like loveworldmusic.org)  */
 /* ------------------------------------------------------------------ */
 
-const ATTEMPT_PREFIX = "/kc/";
+const LEGACY_ATTEMPT_PREFIX = "/kc/";
 
-export function buildAttemptOrigin(attemptId: string, next: string): string {
-  return `${ATTEMPT_PREFIX}${attemptId}?next=${encodeURIComponent(next)}`;
+/** KingsChat echoes `origin` back verbatim. Keep it opaque and URL-safe. */
+export function buildAttemptOrigin(attemptId: string): string {
+  return attemptId.replace(/-/g, "");
 }
 
 export function parseAttemptOrigin(
   origin: string | null | undefined,
-): { attemptId: string; next: string } | null {
-  if (!origin || !origin.startsWith(ATTEMPT_PREFIX)) return null;
-  const [path, query] = origin.slice(ATTEMPT_PREFIX.length).split("?");
-  if (!path) return null;
-  const next = safeRelativePath(
-    new URLSearchParams(query ?? "").get("next"),
-    "/",
-  );
-  return { attemptId: path, next };
+): { attemptId: string; next?: string } | null {
+  if (!origin) return null;
+
+  // Compatibility with attempts started by the previous implementation.
+  if (origin.startsWith(LEGACY_ATTEMPT_PREFIX)) {
+    const [path, query] = origin.slice(LEGACY_ATTEMPT_PREFIX.length).split("?");
+    if (!path) return null;
+    return {
+      attemptId: path,
+      next: safeRelativePath(new URLSearchParams(query ?? "").get("next"), "/"),
+    };
+  }
+
+  const compact = origin.trim();
+  if (!/^[a-f0-9]{32}$/i.test(compact)) return null;
+  return {
+    attemptId: `${compact.slice(0, 8)}-${compact.slice(8, 12)}-${compact.slice(12, 16)}-${compact.slice(16, 20)}-${compact.slice(20)}`,
+  };
 }
 
 /** Mints a real Supabase session server-side for the given email. */
