@@ -113,13 +113,37 @@ function Index() {
   const activeTitle = activeSlide.title ?? "";
   const activeAccent = activeSlide.titleAccent ?? "";
   const activeDesc = activeSlide.description ?? "";
-  const hasHeroText = Boolean(activeBadge || activeTitle || activeAccent || activeDesc);
+  const linkedTitle = useMemo(
+    () => (activeSlide.contentId ? titles.find((t) => t.id === activeSlide.contentId) : undefined),
+    [activeSlide.contentId, titles],
+  );
+  const activeMeta =
+    activeSlide.meta ||
+    (linkedTitle ? [linkedTitle.category, linkedTitle.kind, String(linkedTitle.year), linkedTitle.rating].filter(Boolean).join(" · ") : "");
+  const hasHeroText = Boolean(activeBadge || activeTitle || activeAccent || activeDesc || activeMeta);
   const heroCtas = useMemo(() => {
-    const list = isLegacy
-      ? [hero.primaryCta, hero.secondaryCta, hero.tertiaryCta]
-      : [activeSlide.primaryCta, activeSlide.secondaryCta, activeSlide.tertiaryCta];
+    if (isLegacy) {
+      return [hero.primaryCta, hero.secondaryCta, hero.tertiaryCta].filter(
+        (c): c is { label: string; to: string } => Boolean(c?.label && c?.to),
+      );
+    }
+    const contentPath = activeSlide.contentId ? `/movies/${activeSlide.contentId}` : "";
+    const list = [
+      activeSlide.primaryCta?.label
+        ? { label: activeSlide.primaryCta.label, to: activeSlide.primaryCta.to || contentPath }
+        : contentPath
+          ? { label: "Watch Now", to: contentPath }
+          : null,
+      activeSlide.secondaryCta?.label
+        ? { label: activeSlide.secondaryCta.label, to: activeSlide.secondaryCta.to || contentPath }
+        : contentPath
+          ? { label: "More Info", to: contentPath }
+          : null,
+      activeSlide.tertiaryCta?.label && activeSlide.tertiaryCta?.to ? activeSlide.tertiaryCta : null,
+    ];
     return list.filter((c): c is { label: string; to: string } => Boolean(c?.label && c?.to));
   }, [isLegacy, hero, activeSlide]);
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
