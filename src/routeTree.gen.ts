@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SeriesRouteImport } from './routes/series'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PortalRouteImport } from './routes/portal'
@@ -33,6 +34,11 @@ import { Route as ApiPublicKingschatPollRouteImport } from './routes/api/public/
 import { Route as ApiPublicKingschatLoginRouteImport } from './routes/api/public/kingschat/login'
 import { Route as ApiPublicKingschatCallbackRouteImport } from './routes/api/public/kingschat/callback'
 
+const SeriesRoute = SeriesRouteImport.update({
+  id: '/series',
+  path: '/series',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/series': typeof SeriesRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/series': typeof SeriesRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
   '/channels': typeof ChannelsIndexRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/series': typeof SeriesRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/pricing'
     | '/profile'
+    | '/series'
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/movies/$titleId'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/pricing'
     | '/profile'
+    | '/series'
     | '/collections/$collectionId'
     | '/movies/$titleId'
     | '/channels'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/pricing'
     | '/profile'
+    | '/series'
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/movies/$titleId'
@@ -312,6 +324,7 @@ export interface RootRouteChildren {
   PortalRoute: typeof PortalRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
+  SeriesRoute: typeof SeriesRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
   ApiPublicKingschatLoginRoute: typeof ApiPublicKingschatLoginRoute
@@ -321,6 +334,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/series': {
+      id: '/series'
+      path: '/series'
+      fullPath: '/series'
+      preLoaderRoute: typeof SeriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -538,6 +558,7 @@ const rootRouteChildren: RootRouteChildren = {
   PortalRoute: PortalRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
+  SeriesRoute: SeriesRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
   ApiPublicKingschatLoginRoute: ApiPublicKingschatLoginRoute,
