@@ -96,3 +96,65 @@ export function safeRelativePath(value: string | null | undefined, fallback = "/
   if (!value.startsWith("/") || value.startsWith("//")) return fallback;
   return value;
 }
+
+/* ------------------------------------------------------------------ */
+/* Popup login attempts (poll-based handoff, like loveworldmusic.org)  */
+/* ------------------------------------------------------------------ */
+
+const ATTEMPT_PREFIX = "/kc/";
+
+export function buildAttemptOrigin(attemptId: string, next: string): string {
+  return `${ATTEMPT_PREFIX}${attemptId}?next=${encodeURIComponent(next)}`;
+}
+
+export function parseAttemptOrigin(
+  origin: string | null | undefined,
+): { attemptId: string; next: string } | null {
+  if (!origin || !origin.startsWith(ATTEMPT_PREFIX)) return null;
+  const [path, query] = origin.slice(ATTEMPT_PREFIX.length).split("?");
+  if (!path) return null;
+  const next = safeRelativePath(
+    new URLSearchParams(query ?? "").get("next"),
+    "/",
+  );
+  return { attemptId: path, next };
+}
+
+/** Mints a real Supabase session server-side for the given email. */
+export async function createSessionForEmail(email: string): Promise<{
+  userId: string;
+  access_token: string;
+  refresh_token: string;
+}> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: link, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+  });
+  const tokenHash = link?.properties?.hashed_token;
+  if (linkError || !tokenHash || !link?.user) {
+    throw new Error(linkError?.message ?? "Could not start a Lettflix session");
+  }
+
+  const { createClient } = await import("@supabase/supabase-js");
+  const url = process.env["SUPABASE_URL"];
+  const publishable = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!url || !publishable) throw new Error("Supabase is not configured");
+
+  const anon = createClient(url, publishable, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: verified, error: verifyError } = await anon.auth.verifyOtp({
+    type: "magiclink",
+    token_hash: tokenHash,
+  });
+  if (verifyError || !verified?.session) {
+    throw new Error(verifyError?.message ?? "Could not verify the KingsChat session");
+  }
+
+  return {
+    userId: link.user.id,
+    access_token: verified.session.access_token,
+    refresh_token: verified.session.refresh_token,
+  };
+}
