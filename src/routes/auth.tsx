@@ -241,14 +241,26 @@ function AuthPage() {
             <button
               type="button"
               onClick={onKingsChat}
-              disabled={busy}
-              className="w-full h-11 rounded-md border border-border bg-gradient-to-r from-[#0b3d91] to-[#1e5eff] text-white hover:opacity-90 transition flex items-center justify-center gap-2.5 text-sm font-semibold disabled:opacity-50"
+              disabled={busy || kcLoading || kcWaiting}
+              className="group relative w-full h-11 rounded-md border border-border bg-gradient-to-r from-[#0b3d91] to-[#1e5eff] text-white hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2.5 text-sm font-semibold disabled:opacity-50 disabled:hover:scale-100 overflow-hidden"
             >
-              <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden>
-                <path d="M4 4h3v6.5L13.2 4H17l-6.4 6.7L18 20h-3.7l-5.4-7.1L7 14.7V20H4z" />
-              </svg>
-              Continue with KingsChat
+              <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              {kcLoading || kcWaiting ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden>
+                  <path d="M4 4h3v6.5L13.2 4H17l-6.4 6.7L18 20h-3.7l-5.4-7.1L7 14.7V20H4z" />
+                </svg>
+              )}
+              <span className="relative">
+                {kcWaiting
+                  ? "Waiting for KingsChat…"
+                  : kcLoading
+                    ? "Connecting…"
+                    : "Continue with KingsChat"}
+              </span>
             </button>
+
           </div>
 
           <div className="flex items-center gap-3 my-6">
