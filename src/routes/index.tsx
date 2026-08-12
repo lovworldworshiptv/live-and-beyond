@@ -74,6 +74,8 @@ function Index() {
     const feat = titles.filter((t) => t.featured);
     return (feat.length ? feat : titles).slice(0, 10);
   }, [titles]);
+  const featuredOnDemand = useMemo(() => titles.filter((t) => t.featured).slice(0, 12), [titles]);
+
   const continueWatching = useMemo(() => {
     return progressItems
       .slice()
