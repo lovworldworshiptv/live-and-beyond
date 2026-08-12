@@ -253,7 +253,7 @@ function ProfilePage() {
             {progressTitles.map(({ p, t }) => (
               <Link
                 key={t.id}
-                to="/on-demand/$titleId"
+                to="/movies/$titleId"
                 params={{ titleId: t.id }}
                 className="flex items-center gap-4 p-3 hover:bg-elevated/50 transition"
               >

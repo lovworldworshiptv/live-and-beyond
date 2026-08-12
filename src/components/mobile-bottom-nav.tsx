@@ -12,7 +12,7 @@ type NavItem = {
 const items: NavItem[] = [
   { label: "Home", to: "/", icon: Home, match: (p) => p === "/" },
   { label: "Channels", to: "/channels", icon: Tv, match: (p) => p.startsWith("/channels") },
-  { label: "Movies", to: "/on-demand", icon: Film, match: (p) => p.startsWith("/on-demand") },
+  { label: "Movies", to: "/movies", icon: Film, match: (p) => p.startsWith("/movies") },
   { label: "Profile", to: "/profile", icon: User, match: (p) => p.startsWith("/profile") || p.startsWith("/account") },
 ];
 

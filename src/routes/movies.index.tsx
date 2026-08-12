@@ -11,7 +11,7 @@ import { useCmsTitles } from "@/lib/cms-catalog";
 import { useProgress } from "@/lib/personal";
 
 
-export const Route = createFileRoute("/on-demand/")({
+export const Route = createFileRoute("/movies/")({
   head: () => ({
     meta: [
       { title: "On Demand — Lettflix" },
@@ -123,14 +123,14 @@ function OnDemand() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
-                to="/on-demand/$titleId"
+                to="/movies/$titleId"
                 params={{ titleId: featured.id }}
                 className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition"
               >
                 <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Play Now
               </Link>
               <Link
-                to="/on-demand/$titleId"
+                to="/movies/$titleId"
                 params={{ titleId: featured.id }}
                 className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-elevated/80 border border-border backdrop-blur hover:bg-elevated transition font-medium"
               >

@@ -100,7 +100,7 @@ export function SearchDialog({
               <CommandItem
                 key={t.id}
                 value={`title ${t.title} ${t.kind}`}
-                onSelect={() => go(`/on-demand/${t.id}`)}
+                onSelect={() => go(`/movies/${t.id}`)}
               >
                 <Film className="size-4 shrink-0" />
                 <span className="truncate">{t.title}</span>

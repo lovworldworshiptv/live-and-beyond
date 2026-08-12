@@ -306,7 +306,7 @@ function Index() {
       {trending.length > 0 && (
         <Row title="Trending On Lettflix" subtitle="Most watched across the platform this week.">
           {trending.map((t, i) => (
-            <Link key={t.id} to="/on-demand/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[62vw] sm:w-[260px] snap-start">
+            <Link key={t.id} to="/movies/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[62vw] sm:w-[260px] snap-start">
               <div className="relative rounded-xl overflow-hidden border border-border bg-elevated/50">
                 <div className="relative aspect-video overflow-hidden">
                   <img src={t.hero || t.cover} alt={t.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
@@ -337,7 +337,7 @@ function Index() {
           {continueWatching.map(({ t, pct }) => {
             const remaining = Math.max(0, 100 - pct);
             return (
-              <Link key={t.id} to="/on-demand/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[80vw] sm:w-[320px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50">
+              <Link key={t.id} to="/movies/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[80vw] sm:w-[320px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50">
                 <div className="relative aspect-video overflow-hidden">
                   <img src={t.hero || t.cover} alt={t.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
                   <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />

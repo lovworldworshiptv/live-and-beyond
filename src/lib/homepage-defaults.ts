@@ -45,7 +45,7 @@ export const defaultNav: NavConfig = {
     { label: "Home", to: "/" },
     { label: "Channels", to: "/channels" },
     { label: "Guide", to: "/guide" },
-    { label: "On Demand", to: "/on-demand" },
+    { label: "On Demand", to: "/movies" },
     { label: "Pricing", to: "/pricing" },
   ],
 };
@@ -79,9 +79,9 @@ export const defaultFooter: FooterConfig = {
       title: "Platform",
       items: [
         { label: "Channels", href: "/channels" },
-        { label: "On Demand", href: "/on-demand" },
+        { label: "On Demand", href: "/movies" },
         { label: "Radio", href: "/channels" },
-        { label: "Podcasts", href: "/on-demand" },
+        { label: "Podcasts", href: "/movies" },
         { label: "Live Guide", href: "/guide" },
       ],
     },
