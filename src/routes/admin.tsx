@@ -1891,9 +1891,15 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
         </div>
         <div className="space-y-3">
           {(value.slides ?? []).map((s: any, i: number) => (
-            <div key={i} className="rounded-md border border-border bg-background/40 p-3 space-y-2">
+            <details key={i} className="rounded-md border border-border bg-background/40 p-3 space-y-2 group">
+              <summary className="cursor-pointer list-none text-xs font-semibold flex items-center gap-2 select-none">
+                <span className="transition-transform group-open:rotate-90">▶</span>
+                <span>Slide {i + 1}{s.title ? ` — ${s.title}` : ""}</span>
+                {s.visible === false && <span className="text-[color:var(--muted-foreground)] font-normal">(hidden)</span>}
+              </summary>
               <div className="flex items-center justify-between">
                 <div className="text-xs font-semibold">Slide {i + 1}</div>
+
                 <div className="flex items-center gap-3">
                   <label className="inline-flex items-center gap-2 text-xs text-[color:var(--muted-foreground)]">
                     <input
@@ -1953,7 +1959,7 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
                   />
                 </div>
               ))}
-            </div>
+            </details>
           ))}
           <button
             onClick={() => set({ slides: [...(value.slides ?? []), { imageUrl: null, visible: true }] })}
