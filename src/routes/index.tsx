@@ -11,6 +11,7 @@ import {
   ArrowRight,
   Radio as RadioIcon,
   Info,
+  Info,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -84,7 +85,7 @@ function Index() {
   }, [progressItems, titles]);
 
   const cmsSlides = useMemo(
-    () => (hero.slides ?? []).filter((x) => x && (x.imageUrl || x.title || x.badge || x.description)),
+    () => (hero.slides ?? []).filter((x) => x && (x.imageUrl || x.title || x.badge || x.description || x.contentId)),
     [hero],
   );
   const isLegacy = cmsSlides.length === 0;
