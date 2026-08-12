@@ -182,37 +182,37 @@ function Index() {
                     </div>
                   )}
                   {(activeTitle || activeAccent) && (
-                    <h1 className="mt-3 sm:mt-4 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.03] text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+                    <h1 className="mt-2.5 sm:mt-3 text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.06] text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
                       {activeTitle} {activeAccent && <span className="text-primary">{activeAccent}</span>}
                     </h1>
                   )}
                   {activeMeta && (
-                    <div className="mt-2.5 text-xs sm:text-sm text-white/75 font-medium">{activeMeta}</div>
+                    <div className="mt-2 text-[11px] sm:text-xs text-white/75 font-medium">{activeMeta}</div>
                   )}
                   {activeDesc && (
-                    <p className="mt-3 text-sm sm:text-base lg:text-lg text-white/80 line-clamp-3">
+                    <p className="mt-2 text-xs sm:text-sm text-white/80 line-clamp-2 sm:line-clamp-3 max-w-md">
                       {activeDesc}
                     </p>
                   )}
                   {heroCtas.length > 0 && (
-                    <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-3">
+                    <div className="mt-4 sm:mt-5 flex flex-row flex-wrap sm:flex-nowrap items-center gap-2.5">
                       {heroCtas.map((cta, i) => (
                         <Link
                           key={`${cta.to}-${i}`}
                           to={cta.to as never}
                           className={
                             i === 0
-                              ? "inline-flex items-center justify-center gap-2 px-6 sm:px-8 h-11 sm:h-12 rounded-lg bg-white text-background font-semibold hover:bg-white/90 transition"
+                              ? "inline-flex shrink-0 items-center justify-center gap-2 px-4 sm:px-6 h-9 sm:h-10 rounded-lg bg-white text-background text-sm font-semibold hover:bg-white/90 transition"
                               : i === 1
-                                ? "inline-flex items-center justify-center gap-2 px-6 sm:px-8 h-11 sm:h-12 rounded-lg bg-white/20 text-white backdrop-blur border border-white/20 hover:bg-white/30 transition font-semibold"
-                                : "inline-flex items-center justify-center gap-2 px-5 h-11 sm:h-12 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition font-medium"
+                                ? "inline-flex shrink-0 items-center justify-center gap-2 px-4 sm:px-6 h-9 sm:h-10 rounded-lg bg-white/20 text-white text-sm backdrop-blur border border-white/20 hover:bg-white/30 transition font-semibold"
+                                : "inline-flex shrink-0 items-center justify-center gap-2 px-3.5 sm:px-5 h-9 sm:h-10 rounded-lg text-sm text-white/85 hover:text-white bg-white/10 hover:bg-white/20 transition font-medium"
                           }
-                          style={i === 0 ? { boxShadow: "0 0 30px oklch(1 0 0 / 0.22)" } : undefined}
+                          style={i === 0 ? { boxShadow: "0 0 24px oklch(1 0 0 / 0.2)" } : undefined}
                         >
                           {i === 0 ? (
-                            <Play className="size-[19px] fill-current" strokeWidth={2.5} />
+                            <Play className="size-4 fill-current" strokeWidth={2.5} />
                           ) : i === 1 ? (
-                            <Info className="size-[18px]" strokeWidth={2.4} />
+                            <Info className="size-4" strokeWidth={2.4} />
                           ) : (
                             <CalendarDays className="size-4" />
                           )}
@@ -221,6 +221,7 @@ function Index() {
                       ))}
                     </div>
                   )}
+
 
                   {isLegacy && hero.stats?.length > 0 && (
                     <div className="mt-7 grid grid-cols-3 gap-4 sm:gap-6 max-w-md">
