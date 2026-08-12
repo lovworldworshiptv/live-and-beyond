@@ -7,6 +7,8 @@ export type BottomNavConfig = { items: BottomNavItem[] };
 export type HeroCta = { label: string; to: string };
 export type HeroStat = { k: string; v: string };
 export type HeroSlide = {
+  /** When false, the slide is hidden from the homepage carousel. Defaults to visible. */
+  visible?: boolean;
   imageUrl?: string | null;
   badge?: string;
   badgeMeta?: string;
