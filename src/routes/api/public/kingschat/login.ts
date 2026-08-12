@@ -31,7 +31,7 @@ async function start(request: Request): Promise<Response> {
     if (error || !data) throw new Error(error?.message ?? "Could not start KingsChat login");
 
     const authUrl = buildLoginUrl({
-      origin: buildAttemptOrigin(data.id, returnPath),
+      origin: buildAttemptOrigin(data.id),
       forceLogin: body.force_login === true,
     });
 

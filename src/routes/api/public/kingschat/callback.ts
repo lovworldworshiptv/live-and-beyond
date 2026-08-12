@@ -23,14 +23,23 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
   const {
     exchangeCodeForTokens,
     fetchProfile,
-    safeRelativePath,
     syntheticEmail,
     parseAttemptOrigin,
     createSessionForEmail,
   } = await import("@/lib/kingschat.server");
 
   const attempt = parseAttemptOrigin(payload.origin);
-  const next = attempt ? attempt.next : safeRelativePath(payload.origin, "/");
+  let next = "/";
+
+  if (attempt) {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: attemptData } = await supabaseAdmin
+      .from("kingschat_login_attempts")
+      .select("return_path")
+      .eq("id", attempt.attemptId)
+      .maybeSingle();
+    next = attempt.next ?? attemptData?.return_path ?? "/";
+  }
 
   const markAttemptFailed = async (message: string) => {
     if (!attempt) return;
@@ -58,6 +67,7 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
   };
 
   if (!payload.code) return fail("Missing authorization code from KingsChat");
+  if (!attempt) return fail("Invalid or expired KingsChat login attempt");
 
   try {
     // Codes expire after 1 hour — exchange immediately.
@@ -119,27 +129,20 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
     );
     if (identityError) console.error(`[KingsChat] identity upsert failed: ${identityError.message}`);
 
-    if (attempt) {
-      const { error: attemptError } = await supabaseAdmin
-        .from("kingschat_login_attempts")
-        .update({
-          status: "ready",
-          session: {
-            access_token: session.access_token,
-            refresh_token: session.refresh_token,
-          },
-          return_path: next,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", attempt.attemptId);
-      if (attemptError) return fail(attemptError.message);
-      return closingPage("Signed in with KingsChat. You can close this window.", true, "/auth");
-    }
-
-    // Non-popup fallback: hand the tokens to the app via the URL hash.
-    const target = new URL(next, appOrigin);
-    target.hash = `access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=kingschat`;
-    return Response.redirect(target.toString(), 303);
+    const { error: attemptError } = await supabaseAdmin
+      .from("kingschat_login_attempts")
+      .update({
+        status: "ready",
+        session: {
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+        },
+        return_path: next,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", attempt.attemptId);
+    if (attemptError) return fail(attemptError.message);
+    return closingPage("Signed in with KingsChat. You can close this window.", true, "/auth");
   } catch (error) {
     return fail(error instanceof Error ? error.message : "KingsChat sign-in failed");
   }
