@@ -40,9 +40,24 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [pendingModal, setPendingModal] = useState(false);
 
+  const {
+    startLogin: startKingsChat,
+    loading: kcLoading,
+    waiting: kcWaiting,
+    error: kcError,
+  } = useKingsChatLogin((returnPath) => {
+    toast.success("Signed in with KingsChat");
+    navigate({ to: (returnPath as "/") ?? "/", replace: true });
+  });
+
   useEffect(() => {
     if (kingschatError) toast.error("KingsChat sign-in failed", { description: kingschatError });
   }, [kingschatError]);
+
+  useEffect(() => {
+    if (kcError) toast.error("KingsChat sign-in failed", { description: kcError });
+  }, [kcError]);
+
 
   useEffect(() => {
     if (!loading && user && !pendingModal) {
