@@ -120,9 +120,11 @@ export const defaultFooter: FooterConfig = {
       title: "Platform",
       items: [
         { label: "Channels", href: "/channels" },
-        { label: "On Demand", href: "/movies" },
+        { label: "Movies", href: "/movies" },
+        { label: "Series", href: "/series" },
+        { label: "Documentaries", href: "/documentaries" },
         { label: "Radio", href: "/channels" },
-        { label: "Podcasts", href: "/movies" },
+        { label: "Podcasts", href: "/podcasts" },
         { label: "Live Guide", href: "/guide" },
       ],
     },

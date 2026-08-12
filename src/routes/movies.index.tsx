@@ -14,13 +14,13 @@ import { useProgress } from "@/lib/personal";
 export const Route = createFileRoute("/movies/")({
   head: () => ({
     meta: [
-      { title: "On Demand — Lettflix" },
+      { title: "Movies — Lettflix" },
       {
         name: "description",
         content:
           "Watch premium on-demand series, films, concerts, documentaries and podcasts on Lettflix. 12,000+ titles, one subscription.",
       },
-      { property: "og:title", content: "On Demand — Lettflix" },
+      { property: "og:title", content: "Movies — Lettflix" },
       {
         property: "og:description",
         content:
@@ -105,7 +105,7 @@ function OnDemand() {
         <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-16 pb-20 lg:pt-24 lg:pb-28">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-xs font-medium">
-              <Sparkles className="size-3.5 text-accent" /> Featured On Demand
+              <Sparkles className="size-3.5 text-accent" /> Featured Movie
             </div>
             <h1 className="mt-5 text-4xl lg:text-6xl font-extrabold tracking-tight leading-[1.02]">
               {featured.title}
@@ -171,7 +171,7 @@ function OnDemand() {
       </Row>
 
       {/* ROWS */}
-      <Row title="Trending On Demand" subtitle="What Lettflix is watching this week.">
+      <Row title="Trending Movies" subtitle="What Lettflix is watching this week.">
         {trending.map((t, i) => (
           <TitleCard key={t.id} t={t} rank={i + 1} portrait={false} />
         ))}
