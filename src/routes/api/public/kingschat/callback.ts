@@ -2,6 +2,22 @@ import { createFileRoute } from "@tanstack/react-router";
 
 type CallbackPayload = { code?: string; origin?: string };
 
+function closingPage(message: string, ok: boolean, fallbackPath = "/auth"): Response {
+  return new Response(
+    `<!doctype html><html><head><meta charset="utf-8"><title>KingsChat</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111315;color:#fff;font-family:system-ui,sans-serif;text-align:center;padding:24px}
+.c{max-width:340px}.d{width:44px;height:44px;border-radius:999px;margin:0 auto 16px;background:${ok ? "#1E5EFF" : "#9C1533"}}
+p{opacity:.75;font-size:14px;line-height:1.5}</style></head>
+<body><div class="c"><div class="d"></div><p>${message}</p></div>
+<script>setTimeout(function(){
+  if (window.opener && window.opener !== window) { try { window.close() } catch (e) {} }
+  else { window.location.replace(${JSON.stringify(fallbackPath)}) }
+},${ok ? 600 : 2000})</script>
+</body></html>`,
+    { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } },
+  );
+}
+
 async function handleCallback(request: Request, payload: CallbackPayload): Promise<Response> {
   const appOrigin = new URL(request.url).origin;
   const {
@@ -9,11 +25,32 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
     fetchProfile,
     safeRelativePath,
     syntheticEmail,
+    parseAttemptOrigin,
+    createSessionForEmail,
   } = await import("@/lib/kingschat.server");
 
-  const next = safeRelativePath(payload.origin, "/");
-  const fail = (message: string) => {
+  const attempt = parseAttemptOrigin(payload.origin);
+  const next = attempt ? attempt.next : safeRelativePath(payload.origin, "/");
+
+  const markAttemptFailed = async (message: string) => {
+    if (!attempt) return;
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin
+        .from("kingschat_login_attempts")
+        .update({ status: "failed", error: message, updated_at: new Date().toISOString() })
+        .eq("id", attempt.attemptId);
+    } catch (err) {
+      console.error(`[KingsChat] could not mark attempt failed: ${String(err)}`);
+    }
+  };
+
+  const fail = async (message: string) => {
     console.error(`[KingsChat] callback failed: ${message}`);
+    if (attempt) {
+      await markAttemptFailed(message);
+      return closingPage("KingsChat sign-in failed. You can close this window.", false, "/auth");
+    }
     return Response.redirect(
       new URL(`/auth?kingschat_error=${encodeURIComponent(message)}`, appOrigin).toString(),
       303,
@@ -64,19 +101,11 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
       }
     }
 
-    const redirectTo = new URL(next, appOrigin).toString();
-    const { data: link, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: "magiclink",
-      email,
-      options: { redirectTo },
-    });
-    if (linkError || !link?.properties?.action_link || !link.user) {
-      return fail(linkError?.message ?? "Could not start a Lettflix session");
-    }
+    const session = await createSessionForEmail(email);
 
     const { error: identityError } = await supabaseAdmin.from("kingschat_identities").upsert(
       {
-        user_id: link.user.id,
+        user_id: session.userId,
         kingschat_user_id: profile.kingschatUserId,
         username: profile.username,
         name: profile.name,
@@ -90,7 +119,27 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
     );
     if (identityError) console.error(`[KingsChat] identity upsert failed: ${identityError.message}`);
 
-    return Response.redirect(link.properties.action_link, 303);
+    if (attempt) {
+      const { error: attemptError } = await supabaseAdmin
+        .from("kingschat_login_attempts")
+        .update({
+          status: "ready",
+          session: {
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+          },
+          return_path: next,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", attempt.attemptId);
+      if (attemptError) return fail(attemptError.message);
+      return closingPage("Signed in with KingsChat. You can close this window.", true, "/auth");
+    }
+
+    // Non-popup fallback: hand the tokens to the app via the URL hash.
+    const target = new URL(next, appOrigin);
+    target.hash = `access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=kingschat`;
+    return Response.redirect(target.toString(), 303);
   } catch (error) {
     return fail(error instanceof Error ? error.message : "KingsChat sign-in failed");
   }

@@ -29,6 +29,8 @@ import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channe
 import { Route as ChannelsChannelIdIndexRouteImport } from './routes/channels.$channelId.index'
 import { Route as ChannelsChannelIdLibraryRouteImport } from './routes/channels.$channelId.library'
 import { Route as ApiPublicKingschatStartRouteImport } from './routes/api/public/kingschat/start'
+import { Route as ApiPublicKingschatPollRouteImport } from './routes/api/public/kingschat/poll'
+import { Route as ApiPublicKingschatLoginRouteImport } from './routes/api/public/kingschat/login'
 import { Route as ApiPublicKingschatCallbackRouteImport } from './routes/api/public/kingschat/callback'
 
 const ProfileRoute = ProfileRouteImport.update({
@@ -132,6 +134,16 @@ const ApiPublicKingschatStartRoute = ApiPublicKingschatStartRouteImport.update({
   path: '/api/public/kingschat/start',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicKingschatPollRoute = ApiPublicKingschatPollRouteImport.update({
+  id: '/api/public/kingschat/poll',
+  path: '/api/public/kingschat/poll',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicKingschatLoginRoute = ApiPublicKingschatLoginRouteImport.update({
+  id: '/api/public/kingschat/login',
+  path: '/api/public/kingschat/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicKingschatCallbackRoute =
   ApiPublicKingschatCallbackRouteImport.update({
     id: '/api/public/kingschat/callback',
@@ -160,6 +172,8 @@ export interface FileRoutesByFullPath {
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
+  '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
+  '/api/public/kingschat/poll': typeof ApiPublicKingschatPollRoute
   '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
 }
 export interface FileRoutesByTo {
@@ -180,6 +194,8 @@ export interface FileRoutesByTo {
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
+  '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
+  '/api/public/kingschat/poll': typeof ApiPublicKingschatPollRoute
   '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
 }
 export interface FileRoutesById {
@@ -204,6 +220,8 @@ export interface FileRoutesById {
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
+  '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
+  '/api/public/kingschat/poll': typeof ApiPublicKingschatPollRoute
   '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
 }
 export interface FileRouteTypes {
@@ -229,6 +247,8 @@ export interface FileRouteTypes {
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
+    | '/api/public/kingschat/login'
+    | '/api/public/kingschat/poll'
     | '/api/public/kingschat/start'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -249,6 +269,8 @@ export interface FileRouteTypes {
     | '/channels/$channelId/library'
     | '/channels/$channelId'
     | '/api/public/kingschat/callback'
+    | '/api/public/kingschat/login'
+    | '/api/public/kingschat/poll'
     | '/api/public/kingschat/start'
   id:
     | '__root__'
@@ -272,6 +294,8 @@ export interface FileRouteTypes {
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
+    | '/api/public/kingschat/login'
+    | '/api/public/kingschat/poll'
     | '/api/public/kingschat/start'
   fileRoutesById: FileRoutesById
 }
@@ -290,6 +314,8 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
+  ApiPublicKingschatLoginRoute: typeof ApiPublicKingschatLoginRoute
+  ApiPublicKingschatPollRoute: typeof ApiPublicKingschatPollRoute
   ApiPublicKingschatStartRoute: typeof ApiPublicKingschatStartRoute
 }
 
@@ -435,6 +461,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicKingschatStartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/kingschat/poll': {
+      id: '/api/public/kingschat/poll'
+      path: '/api/public/kingschat/poll'
+      fullPath: '/api/public/kingschat/poll'
+      preLoaderRoute: typeof ApiPublicKingschatPollRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/kingschat/login': {
+      id: '/api/public/kingschat/login'
+      path: '/api/public/kingschat/login'
+      fullPath: '/api/public/kingschat/login'
+      preLoaderRoute: typeof ApiPublicKingschatLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/kingschat/callback': {
       id: '/api/public/kingschat/callback'
       path: '/api/public/kingschat/callback'
@@ -501,18 +541,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
+  ApiPublicKingschatLoginRoute: ApiPublicKingschatLoginRoute,
+  ApiPublicKingschatPollRoute: ApiPublicKingschatPollRoute,
   ApiPublicKingschatStartRoute: ApiPublicKingschatStartRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

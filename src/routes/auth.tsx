@@ -6,6 +6,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2 } from "lucide-react";
+import { useKingsChatLogin } from "@/hooks/use-kingschat-login";
 import logoIcon from "@/assets/lettflix-icon.png.asset.json";
 
 const searchSchema = z.object({
@@ -39,9 +40,24 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [pendingModal, setPendingModal] = useState(false);
 
+  const {
+    startLogin: startKingsChat,
+    loading: kcLoading,
+    waiting: kcWaiting,
+    error: kcError,
+  } = useKingsChatLogin((returnPath) => {
+    toast.success("Signed in with KingsChat");
+    navigate({ to: (returnPath as "/") ?? "/", replace: true });
+  });
+
   useEffect(() => {
     if (kingschatError) toast.error("KingsChat sign-in failed", { description: kingschatError });
   }, [kingschatError]);
+
+  useEffect(() => {
+    if (kcError) toast.error("KingsChat sign-in failed", { description: kcError });
+  }, [kcError]);
+
 
   useEffect(() => {
     if (!loading && user && !pendingModal) {
@@ -136,10 +152,10 @@ function AuthPage() {
   }
 
   function onKingsChat() {
-    setBusy(true);
     const next = typeof redirect === "string" && redirect.startsWith("/") ? redirect : "/";
-    window.location.href = `/api/public/kingschat/start?next=${encodeURIComponent(next)}`;
+    void startKingsChat(next);
   }
+
 
   const isCreatorSignup = mode === "signup" && accountType === "creator";
 
@@ -225,14 +241,26 @@ function AuthPage() {
             <button
               type="button"
               onClick={onKingsChat}
-              disabled={busy}
-              className="w-full h-11 rounded-md border border-border bg-gradient-to-r from-[#0b3d91] to-[#1e5eff] text-white hover:opacity-90 transition flex items-center justify-center gap-2.5 text-sm font-semibold disabled:opacity-50"
+              disabled={busy || kcLoading || kcWaiting}
+              className="group relative w-full h-11 rounded-md border border-border bg-gradient-to-r from-[#0b3d91] to-[#1e5eff] text-white hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2.5 text-sm font-semibold disabled:opacity-50 disabled:hover:scale-100 overflow-hidden"
             >
-              <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden>
-                <path d="M4 4h3v6.5L13.2 4H17l-6.4 6.7L18 20h-3.7l-5.4-7.1L7 14.7V20H4z" />
-              </svg>
-              Continue with KingsChat
+              <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              {kcLoading || kcWaiting ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden>
+                  <path d="M4 4h3v6.5L13.2 4H17l-6.4 6.7L18 20h-3.7l-5.4-7.1L7 14.7V20H4z" />
+                </svg>
+              )}
+              <span className="relative">
+                {kcWaiting
+                  ? "Waiting for KingsChat…"
+                  : kcLoading
+                    ? "Connecting…"
+                    : "Continue with KingsChat"}
+              </span>
             </button>
+
           </div>
 
           <div className="flex items-center gap-3 my-6">
