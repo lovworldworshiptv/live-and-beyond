@@ -19,9 +19,18 @@ import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { SearchDialog } from "@/components/search-dialog";
 
 
-export function SiteHeader() {
+export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const { value: nav } = useCmsSetting<NavConfig>("nav", defaultNav);
   const navItems = nav.items;
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    if (!overlay) return;
+    const onScroll = () => setScrolled(window.scrollY > 120);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [overlay]);
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { profile } = useProfile();
