@@ -26,6 +26,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MoviesIndexRouteImport } from './routes/movies.index'
 import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
+import { Route as OnDemandSplatRouteImport } from './routes/on-demand.$'
 import { Route as MoviesTitleIdRouteImport } from './routes/movies.$titleId'
 import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
 import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
@@ -121,6 +122,11 @@ const ChannelsIndexRoute = ChannelsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ChannelsRoute,
 } as any)
+const OnDemandSplatRoute = OnDemandSplatRouteImport.update({
+  id: '/on-demand/$',
+  path: '/on-demand/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MoviesTitleIdRoute = MoviesTitleIdRouteImport.update({
   id: '/$titleId',
   path: '/$titleId',
@@ -188,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
+  '/on-demand/$': typeof OnDemandSplatRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
@@ -213,6 +220,7 @@ export interface FileRoutesByTo {
   '/series': typeof SeriesRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
+  '/on-demand/$': typeof OnDemandSplatRoute
   '/channels': typeof ChannelsIndexRoute
   '/movies': typeof MoviesIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
@@ -242,6 +250,7 @@ export interface FileRoutesById {
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
+  '/on-demand/$': typeof OnDemandSplatRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
@@ -272,6 +281,7 @@ export interface FileRouteTypes {
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/movies/$titleId'
+    | '/on-demand/$'
     | '/channels/'
     | '/movies/'
     | '/channels/$channelId/library'
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/series'
     | '/collections/$collectionId'
     | '/movies/$titleId'
+    | '/on-demand/$'
     | '/channels'
     | '/movies'
     | '/channels/$channelId/library'
@@ -325,6 +336,7 @@ export interface FileRouteTypes {
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/movies/$titleId'
+    | '/on-demand/$'
     | '/channels/'
     | '/movies/'
     | '/channels/$channelId/library'
@@ -352,6 +364,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   SeriesRoute: typeof SeriesRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
+  OnDemandSplatRoute: typeof OnDemandSplatRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
   ApiPublicKingschatLoginRoute: typeof ApiPublicKingschatLoginRoute
   ApiPublicKingschatPollRoute: typeof ApiPublicKingschatPollRoute
@@ -479,6 +492,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChannelsIndexRouteImport
       parentRoute: typeof ChannelsRoute
     }
+    '/on-demand/$': {
+      id: '/on-demand/$'
+      path: '/on-demand/$'
+      fullPath: '/on-demand/$'
+      preLoaderRoute: typeof OnDemandSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/movies/$titleId': {
       id: '/movies/$titleId'
       path: '/$titleId'
@@ -602,6 +622,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   SeriesRoute: SeriesRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
+  OnDemandSplatRoute: OnDemandSplatRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
   ApiPublicKingschatLoginRoute: ApiPublicKingschatLoginRoute,
   ApiPublicKingschatPollRoute: ApiPublicKingschatPollRoute,
