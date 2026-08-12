@@ -308,6 +308,24 @@ function Index() {
         </Row>
       )}
 
+      {/* FEATURED ON-DEMAND */}
+      {featuredOnDemand.length > 0 && (
+        <Row
+          title="Featured On-Demand"
+          subtitle="Hand-picked films, series, documentaries and podcasts."
+          action={
+            <Link to="/movies" className="hidden sm:inline-flex items-center gap-1 text-sm text-[color:var(--secondary-foreground)] hover:text-foreground">
+              Browse all <ArrowRight className="size-4" />
+            </Link>
+          }
+        >
+          {featuredOnDemand.map((t) => (
+            <TitleCard key={t.id} t={t} portrait={false} />
+          ))}
+        </Row>
+      )}
+
+
       {/* FEATURED CHANNELS */}
       {featuredChannels.length > 0 && (
         <Row title="Featured Channels" subtitle="Premium broadcasters and trending networks.">
