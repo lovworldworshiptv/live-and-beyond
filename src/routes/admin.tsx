@@ -1763,25 +1763,74 @@ function SettingCard({
 function defaultFor(key: SettingKey): any {
   if (key === "nav") return defaultNav;
   if (key === "hero") return defaultHero;
+  if (key === "bottomNav") return defaultBottomNav;
   return defaultFooter;
 }
 
+type AdminNavItem = { label: string; to: string; children?: { label: string; to: string }[] };
+
 function NavForm({ value, onChange }: { value: any; onChange: (v: any) => void }) {
-  const items: { label: string; to: string }[] = value?.items ?? [];
-  const set = (next: { label: string; to: string }[]) => onChange({ ...value, items: next });
+  const items: AdminNavItem[] = value?.items ?? [];
+  const set = (next: AdminNavItem[]) => onChange({ ...value, items: next });
+  const patch = (i: number, p: Partial<AdminNavItem>) => set(items.map((x, j) => (j === i ? { ...x, ...p } : x)));
   return (
-    <div className="space-y-3">
-      {items.map((item, i) => (
-        <div key={i} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2 items-center">
-          <input className={inputClass} placeholder="Label" value={item.label} onChange={(e) => set(items.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
-          <input className={inputClass} placeholder="/path" value={item.to} onChange={(e) => set(items.map((x, j) => j === i ? { ...x, to: e.target.value } : x))} />
-          <button onClick={() => set(items.filter((_, j) => j !== i))} className="h-10 px-3 rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
-        </div>
-      ))}
+    <div className="space-y-4">
+      {items.map((item, i) => {
+        const children = item.children ?? [];
+        return (
+          <div key={i} className="rounded-lg border border-border bg-background/40 p-3 space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2 items-center">
+              <input className={inputClass} placeholder="Label" value={item.label} onChange={(e) => patch(i, { label: e.target.value })} />
+              <input className={inputClass} placeholder="/path" value={item.to} onChange={(e) => patch(i, { to: e.target.value })} />
+              <button onClick={() => set(items.filter((_, j) => j !== i))} className="h-10 px-3 rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+            </div>
+
+            <div className="pl-3 border-l border-border space-y-2">
+              <p className="text-[11px] uppercase tracking-wide text-[color:var(--muted-foreground)]">
+                Sub-navigation {children.length > 0 && `(${children.length})`}
+              </p>
+              {children.map((c, ci) => (
+                <div key={ci} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2 items-center">
+                  <input className={inputClass} placeholder="Sub label" value={c.label} onChange={(e) => patch(i, { children: children.map((x, k) => (k === ci ? { ...x, label: e.target.value } : x)) })} />
+                  <input className={inputClass} placeholder="/path" value={c.to} onChange={(e) => patch(i, { children: children.map((x, k) => (k === ci ? { ...x, to: e.target.value } : x)) })} />
+                  <button onClick={() => patch(i, { children: children.filter((_, k) => k !== ci) })} className="h-10 px-3 rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+                </div>
+              ))}
+              <button onClick={() => patch(i, { children: [...children, { label: "New", to: "/" }] })} className="inline-flex items-center gap-2 h-8 px-3 rounded-md border border-border hover:bg-elevated text-xs"><Plus className="size-3.5" /> Add sub-link</button>
+            </div>
+          </div>
+        );
+      })}
       <button onClick={() => set([...items, { label: "New", to: "/" }])} className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border hover:bg-elevated text-sm"><Plus className="size-4" /> Add link</button>
     </div>
   );
 }
+
+function BottomNavForm({ value, onChange }: { value: any; onChange: (v: any) => void }) {
+  const items: { label: string; to: string; icon: string }[] = value?.items ?? [];
+  const set = (next: typeof items) => onChange({ ...value, items: next });
+  return (
+    <div className="space-y-3">
+      {items.map((item, i) => (
+        <div key={i} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_150px_auto] gap-2 items-center">
+          <input className={inputClass} placeholder="Label" value={item.label} onChange={(e) => set(items.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} />
+          <input className={inputClass} placeholder="/path" value={item.to} onChange={(e) => set(items.map((x, j) => (j === i ? { ...x, to: e.target.value } : x)))} />
+          <select className={inputClass} value={item.icon} onChange={(e) => set(items.map((x, j) => (j === i ? { ...x, icon: e.target.value } : x)))}>
+            {bottomNavIcons.map((ic) => (
+              <option key={ic} value={ic}>{ic}</option>
+            ))}
+          </select>
+          <button onClick={() => set(items.filter((_, j) => j !== i))} className="h-10 px-3 rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+        </div>
+      ))}
+      {items.length < 5 && (
+        <button onClick={() => set([...items, { label: "New", to: "/", icon: "home" }])} className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border hover:bg-elevated text-sm"><Plus className="size-4" /> Add tab</button>
+      )}
+      <p className="text-xs text-[color:var(--muted-foreground)]">Maximum 5 tabs. Shown only on tablet and mobile.</p>
+    </div>
+  );
+}
+
 
 function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void }) {
   const set = (patch: any) => onChange({ ...value, ...patch });
