@@ -152,10 +152,10 @@ function AuthPage() {
   }
 
   function onKingsChat() {
-    setBusy(true);
     const next = typeof redirect === "string" && redirect.startsWith("/") ? redirect : "/";
-    window.location.href = `/api/public/kingschat/start?next=${encodeURIComponent(next)}`;
+    void startKingsChat(next);
   }
+
 
   const isCreatorSignup = mode === "signup" && accountType === "creator";
 
