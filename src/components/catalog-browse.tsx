@@ -83,7 +83,7 @@ export function CatalogBrowse({
 
       {/* FEATURED SPOTLIGHT */}
       <section className="relative border-b border-border overflow-hidden">
-        <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0">
           {featuredList.map((f, i) => (
             <img
               key={f.id}
@@ -96,7 +96,7 @@ export function CatalogBrowse({
           <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-background" />
         </div>
-        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-10 pb-14 lg:pt-14 lg:pb-16">
+        <div className="relative mx-auto max-w-[1480px] px-6 lg:px-10 pt-10 pb-14 lg:pt-14 lg:pb-16">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-[11px] sm:text-xs font-medium">
               <Sparkles className="size-3.5 text-accent" /> {eyebrow}
@@ -157,7 +157,7 @@ export function CatalogBrowse({
       {trending.length > 0 && (
         <Row title={`Trending ${heading}`} subtitle="Most watched across the network this week.">
           {trending.map((t, i) => (
-            <TitleCard key={t.id} t={t} rank={i + 1} portrait={shape === "portrait"} />
+            <TitleCard key={t.id} t={t} rank={i + 1} portrait={false} />
           ))}
         </Row>
       )}
@@ -167,7 +167,7 @@ export function CatalogBrowse({
       {newest.length > 0 && (
         <Row title="New & Recently Added" subtitle="Fresh drops, straight from our creators.">
           {newest.map((t) => (
-            <TitleCard key={t.id} t={t} portrait={shape === "portrait"} />
+            <TitleCard key={t.id} t={t} portrait={false} />
           ))}
         </Row>
       )}
@@ -219,7 +219,7 @@ export function CatalogBrowse({
 
         <div className={`mt-6 ${gridClass}`}>
           {pageItems.map((t) => (
-            <TitleCard key={t.id} t={t} portrait={shape === "portrait"} />
+            <TitleCard key={t.id} t={t} portrait={false} />
           ))}
         </div>
 
