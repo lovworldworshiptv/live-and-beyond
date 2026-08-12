@@ -630,6 +630,39 @@ export type Database = {
         }
         Relationships: []
       }
+      kingschat_login_attempts: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          poll_secret: string
+          return_path: string
+          session: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          poll_secret: string
+          return_path?: string
+          session?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          poll_secret?: string
+          return_path?: string
+          session?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       login_history: {
         Row: {
           created_at: string
