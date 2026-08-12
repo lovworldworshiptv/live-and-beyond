@@ -64,20 +64,48 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1 text-sm">
-          {navItems.map((item) => (
-            <Link
-              key={item.label}
-              to={item.to as never}
-              className={`px-3 py-2 rounded-md transition-colors ${
-                isActive(item.to)
-                  ? "text-foreground bg-elevated/60"
-                  : "text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated/40"
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const children = item.children?.filter((c) => c.label && c.to) ?? [];
+            const active = isActive(item.to) || children.some((c) => isActive(c.to));
+            return (
+              <div key={item.label} className="relative group">
+                <Link
+                  to={item.to as never}
+                  className={`inline-flex items-center gap-1 px-3 py-2 rounded-md transition-colors ${
+                    active
+                      ? "text-foreground bg-elevated/60"
+                      : "text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated/40"
+                  }`}
+                >
+                  {item.label}
+                  {children.length > 0 && (
+                    <ChevronDown className="size-3.5 transition-transform duration-200 group-hover:rotate-180" />
+                  )}
+                </Link>
+                {children.length > 0 && (
+                  <div className="absolute left-0 top-full pt-2 opacity-0 invisible translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0">
+                    <div className="min-w-48 rounded-xl border border-border bg-background/95 backdrop-blur-xl p-1.5 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]">
+                      {children.map((c) => (
+                        <Link
+                          key={c.label}
+                          to={c.to as never}
+                          className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
+                            isActive(c.to)
+                              ? "text-foreground bg-elevated/70"
+                              : "text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated/50"
+                          }`}
+                        >
+                          {c.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </nav>
+
 
         <div className="ml-auto flex min-w-0 items-center gap-2">
           <button
