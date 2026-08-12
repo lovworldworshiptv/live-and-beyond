@@ -65,7 +65,17 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border">
+      <header
+        className={
+          overlay
+            ? `fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${
+                scrolled
+                  ? "backdrop-blur-xl bg-background/70 border-b border-border"
+                  : "bg-transparent border-b border-transparent"
+              }`
+            : "sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border"
+        }
+      >
       <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 h-16 flex items-center gap-4 lg:gap-8">
 
         <Link to="/" className="flex items-center group">
