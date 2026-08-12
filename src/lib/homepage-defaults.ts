@@ -53,10 +53,43 @@ export const defaultNav: NavConfig = {
     { label: "Home", to: "/" },
     { label: "Channels", to: "/channels" },
     { label: "Guide", to: "/guide" },
-    { label: "On Demand", to: "/movies" },
+    {
+      label: "Browse",
+      to: "/movies",
+      children: [
+        { label: "Movies", to: "/movies" },
+        { label: "Series", to: "/series" },
+        { label: "Documentaries", to: "/documentaries" },
+        { label: "Podcasts", to: "/podcasts" },
+      ],
+    },
     { label: "Pricing", to: "/pricing" },
   ],
 };
+
+export const defaultBottomNav: BottomNavConfig = {
+  items: [
+    { label: "Home", to: "/", icon: "home" },
+    { label: "Channels", to: "/channels", icon: "tv" },
+    { label: "Movies", to: "/movies", icon: "film" },
+    { label: "Profile", to: "/profile", icon: "user" },
+  ],
+};
+
+/** Icon keys selectable for bottom nav items in the CMS. */
+export const bottomNavIcons = [
+  "home",
+  "tv",
+  "film",
+  "user",
+  "search",
+  "radio",
+  "calendar",
+  "mic",
+  "sparkles",
+  "list",
+] as const;
+
 
 export const defaultHero: HeroConfig = {
   badge: "LIVE NOW",
