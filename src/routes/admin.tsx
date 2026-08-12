@@ -1948,12 +1948,12 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
             </div>
           ))}
           <button
-            onClick={() => set({ slides: [...(value.slides ?? []), { imageUrl: null }] })}
+            onClick={() => set({ slides: [...(value.slides ?? []), { imageUrl: null, visible: true }] })}
             className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border hover:bg-elevated text-sm"
           ><Plus className="size-4" /> Add slide</button>
 
           {(!value.slides || value.slides.length === 0) && (
-            <p className="text-xs text-[color:var(--muted-foreground)]">No slides added — the hero uses the single banner above. Add 2+ slides to enable auto-rotation.</p>
+            <p className="text-xs text-[color:var(--muted-foreground)]">No slides added — the hero shows the main banner above. Every visible banner (main banner included) rotates in the carousel.</p>
           )}
         </div>
       </div>
