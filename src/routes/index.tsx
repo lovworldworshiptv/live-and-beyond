@@ -85,20 +85,29 @@ function Index() {
   }, [progressItems, titles]);
 
   const cmsSlides = useMemo(
-    () => (hero.slides ?? []).filter((x) => x && (x.imageUrl || x.title || x.badge || x.description || x.contentId)),
+    () =>
+      (hero.slides ?? []).filter(
+        (x) => x && x.visible !== false && (x.imageUrl || x.title || x.badge || x.description || x.contentId),
+      ),
     [hero],
   );
-  const isLegacy = cmsSlides.length === 0;
   const heroSlides = useMemo(() => {
-    if (cmsSlides.length) return cmsSlides;
-    return [{
+    const mainVisible =
+      hero.visible !== false && Boolean(hero.imageUrl || hero.title || hero.badge || hero.description);
+    const main = {
+      isLegacy: true,
       imageUrl: hero.imageUrl || heroImg,
       badge: hero.badge,
       badgeMeta: hero.badgeMeta,
       title: hero.title,
       titleAccent: hero.titleAccent,
       description: hero.description,
-    }];
+    } as (typeof cmsSlides)[number] & { isLegacy?: boolean };
+    const list = [
+      ...(mainVisible ? [main] : []),
+      ...cmsSlides.map((s) => ({ ...s, isLegacy: false })),
+    ];
+    return list.length ? list : [main];
   }, [cmsSlides, hero]);
   const [slideIdx, setSlideIdx] = useState(0);
   useEffect(() => {
@@ -107,6 +116,7 @@ function Index() {
     return () => clearInterval(t);
   }, [heroSlides.length, hero.intervalMs]);
   const activeSlide = heroSlides[Math.min(slideIdx, heroSlides.length - 1)] ?? heroSlides[0];
+  const isLegacy = Boolean((activeSlide as { isLegacy?: boolean }).isLegacy);
   const activeBadge = activeSlide.badge ?? "";
   const activeBadgeMeta = (activeSlide.badgeMeta ?? "").replace(
     /^\d+/,
@@ -129,22 +139,14 @@ function Index() {
         (c): c is { label: string; to: string } => Boolean(c?.label && c?.to),
       );
     }
+    // Blank CTA fields mean the CTA is turned off for this slide.
     const contentPath = activeSlide.contentId ? `/movies/${activeSlide.contentId}` : "";
-    const list = [
-      activeSlide.primaryCta?.label
-        ? { label: activeSlide.primaryCta.label, to: activeSlide.primaryCta.to || contentPath }
-        : contentPath
-          ? { label: "Watch Now", to: contentPath }
-          : null,
-      activeSlide.secondaryCta?.label
-        ? { label: activeSlide.secondaryCta.label, to: activeSlide.secondaryCta.to || contentPath }
-        : contentPath
-          ? { label: "More Info", to: contentPath }
-          : null,
-      activeSlide.tertiaryCta?.label && activeSlide.tertiaryCta?.to ? activeSlide.tertiaryCta : null,
-    ];
+    const list = [activeSlide.primaryCta, activeSlide.secondaryCta, activeSlide.tertiaryCta].map((c) =>
+      c?.label ? { label: c.label, to: c.to || contentPath } : null,
+    );
     return list.filter((c): c is { label: string; to: string } => Boolean(c?.label && c?.to));
   }, [isLegacy, hero, activeSlide]);
+
 
 
   return (
