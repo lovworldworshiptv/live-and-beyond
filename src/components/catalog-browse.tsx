@@ -219,7 +219,7 @@ export function CatalogBrowse({
 
         <div className={`mt-6 ${gridClass}`}>
           {pageItems.map((t) => (
-            <TitleCard key={t.id} t={t} portrait={false} />
+            <TitleCard key={t.id} t={t} portrait={shape === "portrait"} />
           ))}
         </div>
 
