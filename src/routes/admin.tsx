@@ -1886,10 +1886,20 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
             <div key={i} className="rounded-md border border-border bg-background/40 p-3 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="text-xs font-semibold">Slide {i + 1}</div>
-                <button
-                  onClick={() => set({ slides: (value.slides ?? []).filter((_: any, j: number) => j !== i) })}
-                  className="h-8 px-2 rounded-md hover:bg-elevated text-destructive"
-                ><Trash2 className="size-4" /></button>
+                <div className="flex items-center gap-3">
+                  <label className="inline-flex items-center gap-2 text-xs text-[color:var(--muted-foreground)]">
+                    <input
+                      type="checkbox"
+                      checked={s.visible !== false}
+                      onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, visible: e.target.checked } : x) })}
+                    />
+                    Visible
+                  </label>
+                  <button
+                    onClick={() => set({ slides: (value.slides ?? []).filter((_: any, j: number) => j !== i) })}
+                    className="h-8 px-2 rounded-md hover:bg-elevated text-destructive"
+                  ><Trash2 className="size-4" /></button>
+                </div>
               </div>
               <MediaPicker
                 value={s.imageUrl ?? null}
