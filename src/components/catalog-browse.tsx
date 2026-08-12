@@ -81,75 +81,78 @@ export function CatalogBrowse({
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
 
-      {/* SPOTLIGHT */}
-      <section className="px-3 sm:px-6 lg:px-10 pt-3 lg:pt-5">
-        <div className="mx-auto max-w-[1480px]">
-          <div className="relative isolate overflow-hidden rounded-2xl lg:rounded-3xl border border-white/10 bg-elevated/40 shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]">
-            <div className="relative aspect-[3/4] sm:aspect-[16/10] lg:aspect-[21/9] max-h-[70vh] w-full">
-              {featuredList.map((f, i) => (
-                <img
-                  key={f.id}
-                  src={f.hero || f.cover}
-                  alt={f.title}
-                  className="absolute inset-0 size-full object-cover transition-opacity duration-1000"
-                  style={{ opacity: i === featIdx ? 1 : 0 }}
-                />
-              ))}
-              <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 lg:p-12">
-                <div className="max-w-xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/45 backdrop-blur border border-white/15 text-[11px] sm:text-xs font-medium text-white/85">
-                    <Sparkles className="size-3.5 text-accent" /> {eyebrow}
-                  </div>
-                  <h1 className="mt-3 sm:mt-4 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.03] text-white">
-                    {featured ? featured.title : heading}
-                  </h1>
-                  {featured ? (
-                    <>
-                      <div className="mt-2.5 text-xs sm:text-sm text-white/75 font-medium">
-                        {[featured.rating, String(featured.year), featured.duration, featured.category]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </div>
-                      <p className="mt-3 text-sm sm:text-base text-white/80 line-clamp-3">{featured.synopsis}</p>
-                      <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-3">
-                        <Link
-                          to="/movies/$titleId"
-                          params={{ titleId: featured.id }}
-                          className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 h-11 sm:h-12 rounded-lg bg-white text-background font-semibold hover:bg-white/90 transition"
-                        >
-                          <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Watch Now
-                        </Link>
-                        <Link
-                          to="/movies/$titleId"
-                          params={{ titleId: featured.id }}
-                          className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 h-11 sm:h-12 rounded-lg bg-white/20 text-white backdrop-blur border border-white/20 hover:bg-white/30 transition font-semibold"
-                        >
-                          <Info className="size-[18px]" strokeWidth={2.4} /> More Info
-                        </Link>
-                      </div>
-                    </>
-                  ) : (
-                    <p className="mt-3 text-sm sm:text-base text-white/80">{subheading}</p>
-                  )}
-                  {featuredList.length > 1 && (
-                    <div className="mt-6 flex gap-1.5">
-                      {featuredList.map((_, i) => (
-                        <button
-                          key={i}
-                          aria-label={`Spotlight ${i + 1}`}
-                          onClick={() => setFeatIdx(i)}
-                          className={`h-1.5 rounded-full transition-all ${i === featIdx ? "w-6 bg-white" : "w-1.5 bg-white/40"}`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+      {/* FEATURED SPOTLIGHT */}
+      <section className="relative border-b border-border overflow-hidden">
+        <div className="absolute inset-0 -z-10">
+          {featuredList.map((f, i) => (
+            <img
+              key={f.id}
+              src={f.hero || f.cover}
+              alt=""
+              className="absolute inset-0 size-full object-cover transition-opacity duration-1000"
+              style={{ opacity: i === featIdx ? 0.6 : 0 }}
+            />
+          ))}
+          <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-background" />
+        </div>
+        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-10 pb-14 lg:pt-14 lg:pb-16">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-[11px] sm:text-xs font-medium">
+              <Sparkles className="size-3.5 text-accent" /> {eyebrow}
             </div>
+            <h1 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.06]">
+              {featured ? featured.title : heading}
+            </h1>
+            {featured ? (
+              <>
+                <div className="mt-3 flex flex-wrap items-center gap-2.5 text-xs sm:text-sm text-[color:var(--muted-foreground)]">
+                  {featured.rating && <span className="px-2 py-0.5 rounded border border-border">{featured.rating}</span>}
+                  <span>{featured.year}</span>
+                  <span>·</span>
+                  <span>{featured.duration}</span>
+                  <span>·</span>
+                  <span className="text-accent font-semibold">{featured.category}</span>
+                </div>
+                <p className="mt-3 text-xs sm:text-sm text-[color:var(--secondary-foreground)] max-w-xl line-clamp-3">
+                  {featured.synopsis}
+                </p>
+                <div className="mt-5 flex flex-row flex-wrap sm:flex-nowrap items-center gap-2.5">
+                  <Link
+                    to="/movies/$titleId"
+                    params={{ titleId: featured.id }}
+                    className="inline-flex shrink-0 items-center gap-2 px-4 sm:px-6 h-9 sm:h-10 rounded-md bg-white text-background text-sm font-semibold hover:bg-white/90 transition"
+                  >
+                    <Play className="size-4 fill-current" strokeWidth={2.5} /> Watch Now
+                  </Link>
+                  <Link
+                    to="/movies/$titleId"
+                    params={{ titleId: featured.id }}
+                    className="inline-flex shrink-0 items-center gap-2 px-4 sm:px-6 h-9 sm:h-10 rounded-md bg-elevated/80 border border-border text-sm backdrop-blur hover:bg-elevated transition font-medium"
+                  >
+                    <Info className="size-4" /> More Info
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <p className="mt-3 text-xs sm:text-sm text-[color:var(--secondary-foreground)]">{subheading}</p>
+            )}
+            {featuredList.length > 1 && (
+              <div className="mt-6 flex gap-1.5">
+                {featuredList.map((_, i) => (
+                  <button
+                    key={i}
+                    aria-label={`Featured slide ${i + 1}`}
+                    onClick={() => setFeatIdx(i)}
+                    className={`h-1.5 rounded-full transition-all ${i === featIdx ? "w-6 bg-white" : "w-1.5 bg-white/40"}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
+
 
       {trending.length > 0 && (
         <Row title={`Trending ${heading}`} subtitle="Most watched across the network this week.">

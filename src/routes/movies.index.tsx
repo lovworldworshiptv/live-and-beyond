@@ -34,7 +34,8 @@ export const Route = createFileRoute("/movies/")({
 const PAGE_SIZE = 12;
 
 function OnDemand() {
-  const { titles } = useCmsTitles();
+  const { titles: allTitles } = useCmsTitles();
+  const titles = useMemo(() => allTitles.filter((t) => t.kind === "Film"), [allTitles]);
   const [genre, setGenre] = useState("All");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -70,13 +71,14 @@ function OnDemand() {
   );
 
   const trending = titles.slice(0, 8);
-  const newReleases = [...titles].reverse().slice(0, 8);
+  const newReleases = [...titles].sort((a, b) => (b.year ?? 0) - (a.year ?? 0)).slice(0, 8);
   const titleById = new Map(titles.map((t) => [t.id, t] as const));
   const continueWatching = progress
     .map((p) => ({ p, t: titleById.get(p.titleId) }))
     .filter((x): x is { p: (typeof progress)[number]; t: NonNullable<ReturnType<typeof titleById.get>> } => !!x.t);
 
   if (!featured) return null;
+
 
   const resetPage = <T,>(fn: (v: T) => void) => (v: T) => {
     fn(v);
@@ -102,15 +104,15 @@ function OnDemand() {
           <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-background" />
         </div>
-        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-16 pb-20 lg:pt-24 lg:pb-28">
+        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-10 pb-14 lg:pt-14 lg:pb-16">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-xs font-medium">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 backdrop-blur border border-border text-[11px] sm:text-xs font-medium">
               <Sparkles className="size-3.5 text-accent" /> Featured Movie
             </div>
-            <h1 className="mt-5 text-4xl lg:text-6xl font-extrabold tracking-tight leading-[1.02]">
+            <h1 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.06]">
               {featured.title}
             </h1>
-            <div className="mt-4 flex items-center gap-3 text-sm text-[color:var(--muted-foreground)]">
+            <div className="mt-3 flex items-center gap-2.5 text-xs sm:text-sm text-[color:var(--muted-foreground)]">
               <span className="px-2 py-0.5 rounded border border-border">{featured.rating}</span>
               <span>{featured.year}</span>
               <span>·</span>
@@ -118,25 +120,26 @@ function OnDemand() {
               <span>·</span>
               <span className="text-accent font-semibold">{featured.category}</span>
             </div>
-            <p className="mt-5 text-lg text-[color:var(--secondary-foreground)] max-w-xl">
+            <p className="mt-3 text-xs sm:text-sm text-[color:var(--secondary-foreground)] max-w-xl line-clamp-3">
               {featured.synopsis}
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-row flex-wrap sm:flex-nowrap items-center gap-2.5">
               <Link
                 to="/movies/$titleId"
                 params={{ titleId: featured.id }}
-                className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition"
+                className="inline-flex shrink-0 items-center gap-2 px-4 sm:px-6 h-9 sm:h-10 rounded-md bg-white text-background text-sm font-semibold hover:bg-white/90 transition"
               >
-                <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Play Now
+                <Play className="size-4 fill-current" strokeWidth={2.5} /> Watch Now
               </Link>
               <Link
                 to="/movies/$titleId"
                 params={{ titleId: featured.id }}
-                className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-elevated/80 border border-border backdrop-blur hover:bg-elevated transition font-medium"
+                className="inline-flex shrink-0 items-center gap-2 px-4 sm:px-6 h-9 sm:h-10 rounded-md bg-elevated/80 border border-border text-sm backdrop-blur hover:bg-elevated transition font-medium"
               >
                 <Info className="size-4" /> More Info
               </Link>
             </div>
+
             {featuredList.length > 1 && (
               <div className="mt-8 flex gap-1.5">
                 {featuredList.map((_, i) => (
