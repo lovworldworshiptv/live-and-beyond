@@ -1903,7 +1903,22 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
                 <input className={inputClass} placeholder="Title accent" value={s.titleAccent ?? ""} onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, titleAccent: e.target.value } : x) })} />
               </div>
               <textarea className={textareaClass} placeholder="Description" value={s.description ?? ""} onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, description: e.target.value } : x) })} />
-              <div className="text-xs font-medium text-[color:var(--muted-foreground)] pt-1">Slide CTAs (optional)</div>
+              <div className="grid gap-2 md:grid-cols-2">
+                <input
+                  className={inputClass}
+                  placeholder="Meta line (e.g. Action · Series · 2026)"
+                  value={s.meta ?? ""}
+                  onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, meta: e.target.value } : x) })}
+                />
+                <input
+                  className={inputClass}
+                  placeholder="Linked content slug (powers Watch Now / More Info)"
+                  value={s.contentId ?? ""}
+                  onChange={(e) => set({ slides: (value.slides ?? []).map((x: any, j: number) => j === i ? { ...x, contentId: e.target.value } : x) })}
+                />
+              </div>
+              <div className="text-xs font-medium text-[color:var(--muted-foreground)] pt-1">Slide CTAs (leave blank to use Watch Now / More Info for the linked content)</div>
+
               {(["primaryCta", "secondaryCta", "tertiaryCta"] as const).map((k) => (
                 <div key={k} className="grid gap-2 md:grid-cols-2">
                   <input
