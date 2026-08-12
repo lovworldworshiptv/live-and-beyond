@@ -34,7 +34,8 @@ export const Route = createFileRoute("/movies/")({
 const PAGE_SIZE = 12;
 
 function OnDemand() {
-  const { titles } = useCmsTitles();
+  const { titles: allTitles } = useCmsTitles();
+  const titles = useMemo(() => allTitles.filter((t) => t.kind === "Film"), [allTitles]);
   const [genre, setGenre] = useState("All");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -70,13 +71,14 @@ function OnDemand() {
   );
 
   const trending = titles.slice(0, 8);
-  const newReleases = [...titles].reverse().slice(0, 8);
+  const newReleases = [...titles].sort((a, b) => (b.year ?? 0) - (a.year ?? 0)).slice(0, 8);
   const titleById = new Map(titles.map((t) => [t.id, t] as const));
   const continueWatching = progress
     .map((p) => ({ p, t: titleById.get(p.titleId) }))
     .filter((x): x is { p: (typeof progress)[number]; t: NonNullable<ReturnType<typeof titleById.get>> } => !!x.t);
 
   if (!featured) return null;
+
 
   const resetPage = <T,>(fn: (v: T) => void) => (v: T) => {
     fn(v);
