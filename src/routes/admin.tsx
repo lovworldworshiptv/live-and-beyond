@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MediaPicker } from "@/components/media-picker";
 import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X, Home } from "lucide-react";
 import { toast } from "sonner";
-import { defaultNav, defaultHero, defaultFooter } from "@/lib/homepage-defaults";
+import { defaultNav, defaultHero, defaultFooter, defaultBottomNav, bottomNavIcons } from "@/lib/homepage-defaults";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
