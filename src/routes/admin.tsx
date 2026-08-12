@@ -1839,6 +1839,12 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
   const setStats = (next: { k: string; v: string }[]) => onChange({ ...value, stats: next });
   return (
     <div className="space-y-4">
+      <details className="rounded-md border border-border bg-background/40 p-3 space-y-3 group">
+      <summary className="cursor-pointer list-none text-xs font-semibold flex items-center gap-2 select-none">
+        <span className="transition-transform group-open:rotate-90">▶</span>
+        <span>Main banner{value.title ? ` — ${value.title}` : ""}</span>
+        {value.visible === false && <span className="text-[color:var(--muted-foreground)] font-normal">(hidden)</span>}
+      </summary>
       <label className="inline-flex items-center gap-2 text-xs text-[color:var(--muted-foreground)]">
         <input
           type="checkbox"
@@ -1876,6 +1882,7 @@ function HeroForm({ value, onChange }: { value: any; onChange: (v: any) => void 
           <button onClick={() => setStats([...stats, { k: "", v: "" }])} className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border hover:bg-elevated text-sm"><Plus className="size-4" /> Add stat</button>
         </div>
       </div>
+      </details>
       <div>
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs font-medium text-[color:var(--muted-foreground)]">Auto-slide banners</div>
