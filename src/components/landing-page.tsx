@@ -106,9 +106,9 @@ export function LandingPage() {
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-sm text-[color:var(--muted-foreground)] sm:text-base">
               Live channels, radio, podcasts, events and premium films — streaming together on Lettflix.
-              Ready to watch? Enter your email to get started.
+              Ready to watch? Get started in seconds.
             </p>
-            <EmailCta />
+            <StartHereCta />
           </div>
         </div>
       </section>
@@ -190,9 +190,9 @@ export function LandingPage() {
           ))}
         </div>
         <p className="mt-10 text-center text-sm text-[color:var(--muted-foreground)]">
-          Ready to watch? Enter your email to create your account.
+          Ready to watch? Get started in seconds.
         </p>
-        <EmailCta />
+        <StartHereCta />
       </section>
 
       {/* FOOTER */}
