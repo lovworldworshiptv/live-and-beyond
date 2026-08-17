@@ -41,12 +41,22 @@ export const Route = createFileRoute("/")({
   component: HomeRoute,
 });
 
+function hasStoredSession() {
+  if (typeof window === "undefined") return false;
+  try {
+    return Object.keys(window.localStorage).some((k) => k.startsWith("sb-") && k.endsWith("-auth-token"));
+  } catch {
+    return false;
+  }
+}
+
 function HomeRoute() {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-background" />;
+  if (loading) return hasStoredSession() ? <div className="min-h-screen bg-background" /> : <LandingPage />;
   if (!user) return <LandingPage />;
   return <Index />;
 }
+
 
 function formatEventDate(iso: string) {
   const d = new Date(iso);
