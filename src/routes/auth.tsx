@@ -170,6 +170,10 @@ function AuthPage() {
         </Link>
 
         <div className="rounded-2xl border border-border bg-surface/90 backdrop-blur-xl p-8 shadow-2xl">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-[color:var(--muted-foreground)] hover:text-foreground transition mb-4">
+            <ArrowLeft className="size-4" />
+            Back
+          </Link>
           <div className="flex gap-1 p-1 bg-elevated rounded-lg mb-6">
             {(["signin", "signup"] as const).map((m) => (
               <button
