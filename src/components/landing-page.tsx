@@ -55,7 +55,7 @@ function StartHereCta({ label = "Start Here" }: { label?: string }) {
     <Link
       to="/auth"
       search={{ mode: "signup" as const }}
-      className="mx-auto mt-7 inline-flex h-13 items-center justify-center gap-2 rounded-md bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-[0_0_30px_-6px_var(--primary)] transition hover:brightness-110"
+      className="mx-auto mt-7 flex w-fit items-center justify-center gap-2 rounded-md bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-[0_0_30px_-6px_var(--primary)] transition hover:brightness-110"
     >
       {label}
       <ArrowRight className="size-4" />
