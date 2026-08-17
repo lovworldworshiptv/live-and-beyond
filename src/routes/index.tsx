@@ -23,6 +23,8 @@ import { useCmsChannels, useCmsTitles, useCmsEvents, useCmsCollections, useCmsSe
 import { defaultHero, type HeroConfig } from "@/lib/homepage-defaults";
 import { useProgress } from "@/lib/personal";
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { LandingPage } from "@/components/landing-page";
 
 import heroImg from "@/assets/hero-broadcast.jpg";
 import ch1 from "@/assets/channel-1.jpg";
@@ -36,8 +38,25 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "The future of digital broadcasting. Discover live channels and on-demand content from broadcasters, ministries and creators worldwide." },
     ],
   }),
-  component: Index,
+  component: HomeRoute,
 });
+
+function hasStoredSession() {
+  if (typeof window === "undefined") return false;
+  try {
+    return Object.keys(window.localStorage).some((k) => k.startsWith("sb-") && k.endsWith("-auth-token"));
+  } catch {
+    return false;
+  }
+}
+
+function HomeRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return hasStoredSession() ? <div className="min-h-screen bg-background" /> : <LandingPage />;
+  if (!user) return <LandingPage />;
+  return <Index />;
+}
+
 
 function formatEventDate(iso: string) {
   const d = new Date(iso);
