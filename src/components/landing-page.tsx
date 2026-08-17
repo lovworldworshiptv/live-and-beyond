@@ -50,24 +50,16 @@ const FAQS = [
   },
 ];
 
-function EmailCta({ label = "Start Here" }: { label?: string }) {
+function StartHereCta({ label = "Start Here" }: { label?: string }) {
   return (
-    <div className="mx-auto mt-7 flex w-full max-w-xl flex-col items-stretch gap-3 sm:flex-row">
-      <input
-        type="email"
-        placeholder="Email address"
-        aria-label="Email address"
-        className="h-13 flex-1 rounded-md border border-white/25 bg-black/50 px-4 py-3.5 text-sm text-foreground placeholder:text-[color:var(--muted-foreground)] outline-none backdrop-blur focus:border-primary"
-      />
-      <Link
-        to="/auth"
-        search={{ mode: "signup" as const }}
-        className="inline-flex h-13 items-center justify-center gap-2 rounded-md bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground shadow-[0_0_30px_-6px_var(--primary)] transition hover:brightness-110"
-      >
-        {label}
-        <ArrowRight className="size-4" />
-      </Link>
-    </div>
+    <Link
+      to="/auth"
+      search={{ mode: "signup" as const }}
+      className="mx-auto mt-7 inline-flex h-13 items-center justify-center gap-2 rounded-md bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-[0_0_30px_-6px_var(--primary)] transition hover:brightness-110"
+    >
+      {label}
+      <ArrowRight className="size-4" />
+    </Link>
   );
 }
 
@@ -114,9 +106,9 @@ export function LandingPage() {
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-sm text-[color:var(--muted-foreground)] sm:text-base">
               Live channels, radio, podcasts, events and premium films — streaming together on Lettflix.
-              Ready to watch? Enter your email to get started.
+              Ready to watch? Get started in seconds.
             </p>
-            <EmailCta />
+            <StartHereCta />
           </div>
         </div>
       </section>
@@ -198,9 +190,9 @@ export function LandingPage() {
           ))}
         </div>
         <p className="mt-10 text-center text-sm text-[color:var(--muted-foreground)]">
-          Ready to watch? Enter your email to create your account.
+          Ready to watch? Get started in seconds.
         </p>
-        <EmailCta />
+        <StartHereCta />
       </section>
 
       {/* FOOTER */}
