@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as PodcastsRouteImport } from './routes/podcasts'
@@ -44,6 +45,11 @@ const SeriesRoute = SeriesRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/podcasts': typeof PodcastsRoute
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/series': typeof SeriesRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/podcasts': typeof PodcastsRoute
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/series': typeof SeriesRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/podcasts': typeof PodcastsRoute
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/series': typeof SeriesRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
@@ -267,6 +276,7 @@ export interface FileRouteTypes {
     | '/podcasts'
     | '/portal'
     | '/pricing'
+    | '/privacy'
     | '/profile'
     | '/series'
     | '/channels/$channelId'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/podcasts'
     | '/portal'
     | '/pricing'
+    | '/privacy'
     | '/profile'
     | '/series'
     | '/collections/$collectionId'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/podcasts'
     | '/portal'
     | '/pricing'
+    | '/privacy'
     | '/profile'
     | '/series'
     | '/channels/$channelId'
@@ -349,6 +361,7 @@ export interface RootRouteChildren {
   PodcastsRoute: typeof PodcastsRoute
   PortalRoute: typeof PortalRoute
   PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   SeriesRoute: typeof SeriesRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
@@ -372,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -599,6 +619,7 @@ const rootRouteChildren: RootRouteChildren = {
   PodcastsRoute: PodcastsRoute,
   PortalRoute: PortalRoute,
   PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   SeriesRoute: SeriesRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
