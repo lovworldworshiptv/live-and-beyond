@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as PodcastsRouteImport } from './routes/podcasts'
@@ -18,6 +20,7 @@ import { Route as MoviesRouteImport } from './routes/movies'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as EnterpriseRouteImport } from './routes/enterprise'
 import { Route as DocumentariesRouteImport } from './routes/documentaries'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChannelsRouteImport } from './routes/channels'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -36,6 +39,11 @@ import { Route as ApiPublicKingschatPollRouteImport } from './routes/api/public/
 import { Route as ApiPublicKingschatLoginRouteImport } from './routes/api/public/kingschat/login'
 import { Route as ApiPublicKingschatCallbackRouteImport } from './routes/api/public/kingschat/callback'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SeriesRoute = SeriesRouteImport.update({
   id: '/series',
   path: '/series',
@@ -44,6 +52,11 @@ const SeriesRoute = SeriesRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -79,6 +92,11 @@ const EnterpriseRoute = EnterpriseRouteImport.update({
 const DocumentariesRoute = DocumentariesRouteImport.update({
   id: '/documentaries',
   path: '/documentaries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityRoute = CommunityRouteImport.update({
@@ -176,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/channels': typeof ChannelsRouteWithChildren
   '/community': typeof CommunityRoute
+  '/cookies': typeof CookiesRoute
   '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
@@ -183,8 +202,10 @@ export interface FileRoutesByFullPath {
   '/podcasts': typeof PodcastsRoute
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/series': typeof SeriesRoute
+  '/terms': typeof TermsRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
@@ -203,14 +224,17 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
+  '/cookies': typeof CookiesRoute
   '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
   '/podcasts': typeof PodcastsRoute
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/series': typeof SeriesRoute
+  '/terms': typeof TermsRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
   '/channels': typeof ChannelsIndexRoute
@@ -230,6 +254,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/channels': typeof ChannelsRouteWithChildren
   '/community': typeof CommunityRoute
+  '/cookies': typeof CookiesRoute
   '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
   '/guide': typeof GuideRoute
@@ -237,8 +262,10 @@ export interface FileRoutesById {
   '/podcasts': typeof PodcastsRoute
   '/portal': typeof PortalRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/series': typeof SeriesRoute
+  '/terms': typeof TermsRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
@@ -260,6 +287,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/channels'
     | '/community'
+    | '/cookies'
     | '/documentaries'
     | '/enterprise'
     | '/guide'
@@ -267,8 +295,10 @@ export interface FileRouteTypes {
     | '/podcasts'
     | '/portal'
     | '/pricing'
+    | '/privacy'
     | '/profile'
     | '/series'
+    | '/terms'
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/movies/$titleId'
@@ -287,14 +317,17 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/community'
+    | '/cookies'
     | '/documentaries'
     | '/enterprise'
     | '/guide'
     | '/podcasts'
     | '/portal'
     | '/pricing'
+    | '/privacy'
     | '/profile'
     | '/series'
+    | '/terms'
     | '/collections/$collectionId'
     | '/movies/$titleId'
     | '/channels'
@@ -313,6 +346,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/channels'
     | '/community'
+    | '/cookies'
     | '/documentaries'
     | '/enterprise'
     | '/guide'
@@ -320,8 +354,10 @@ export interface FileRouteTypes {
     | '/podcasts'
     | '/portal'
     | '/pricing'
+    | '/privacy'
     | '/profile'
     | '/series'
+    | '/terms'
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/movies/$titleId'
@@ -342,6 +378,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ChannelsRoute: typeof ChannelsRouteWithChildren
   CommunityRoute: typeof CommunityRoute
+  CookiesRoute: typeof CookiesRoute
   DocumentariesRoute: typeof DocumentariesRoute
   EnterpriseRoute: typeof EnterpriseRoute
   GuideRoute: typeof GuideRoute
@@ -349,8 +386,10 @@ export interface RootRouteChildren {
   PodcastsRoute: typeof PodcastsRoute
   PortalRoute: typeof PortalRoute
   PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   SeriesRoute: typeof SeriesRoute
+  TermsRoute: typeof TermsRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
   ApiPublicKingschatLoginRoute: typeof ApiPublicKingschatLoginRoute
@@ -360,6 +399,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/series': {
       id: '/series'
       path: '/series'
@@ -372,6 +418,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -421,6 +474,13 @@ declare module '@tanstack/react-router' {
       path: '/documentaries'
       fullPath: '/documentaries'
       preLoaderRoute: typeof DocumentariesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/community': {
@@ -592,6 +652,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ChannelsRoute: ChannelsRouteWithChildren,
   CommunityRoute: CommunityRoute,
+  CookiesRoute: CookiesRoute,
   DocumentariesRoute: DocumentariesRoute,
   EnterpriseRoute: EnterpriseRoute,
   GuideRoute: GuideRoute,
@@ -599,8 +660,10 @@ const rootRouteChildren: RootRouteChildren = {
   PodcastsRoute: PodcastsRoute,
   PortalRoute: PortalRoute,
   PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   SeriesRoute: SeriesRoute,
+  TermsRoute: TermsRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
   ApiPublicKingschatLoginRoute: ApiPublicKingschatLoginRoute,

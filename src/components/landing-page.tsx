@@ -208,6 +208,9 @@ export function LandingPage() {
             <div className="flex flex-wrap gap-5 text-sm text-[color:var(--muted-foreground)]">
               <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
               <Link to="/enterprise" className="hover:text-foreground">Enterprise</Link>
+              <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+              <Link to="/terms" className="hover:text-foreground">Terms</Link>
+              <Link to="/cookies" className="hover:text-foreground">Cookies</Link>
               <Link to="/auth" search={{ mode: "signin" as const }} className="hover:text-foreground">Sign In</Link>
             </div>
           </div>
