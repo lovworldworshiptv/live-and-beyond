@@ -148,7 +148,14 @@ export const defaultFooter: FooterConfig = {
         { label: "Careers", href: "#" },
         { label: "Press", href: "#" },
         { label: "Contact", href: "#" },
-        { label: "Privacy", href: "#" },
+      ],
+    },
+    {
+      title: "Legal",
+      items: [
+        { label: "Privacy Policy", href: "/privacy" },
+        { label: "Terms of Use", href: "/terms" },
+        { label: "Cookies Notice", href: "/cookies" },
       ],
     },
   ],
