@@ -531,12 +531,10 @@ function TitleEditor({ value, onClose, onSave }: { value: Partial<Title>; onClos
         <Field label="Slug"><input className={inputClass} value={form.slug ?? ""} onChange={(e) => set("slug", e.target.value)} /></Field>
         <Field label="Kind">
           <select className={inputClass} value={form.kind ?? "movie"} onChange={(e) => set("kind", e.target.value)}>
-            <option value="movie">Movie</option>
-            <option value="series">Series</option>
-            <option value="podcast">Podcast</option>
-            <option value="documentary">Documentary</option>
-            <option value="concert">Concert</option>
-            <option value="event">Event</option>
+            <option value="movie">Movie → /movies</option>
+            <option value="series">Series → /series</option>
+            <option value="podcast">Podcast → /podcasts</option>
+            <option value="documentary">Documentary → /documentaries</option>
           </select>
         </Field>
         <Field label="Genre"><input className={inputClass} value={form.genre ?? ""} onChange={(e) => set("genre", e.target.value)} /></Field>

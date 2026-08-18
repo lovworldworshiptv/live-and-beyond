@@ -105,7 +105,8 @@ export function mapTitleRow(r: TitleRow): Title {
     cover: r.poster_url ?? fallback?.cover ?? "",
     hero: r.backdrop_url ?? fallback?.hero ?? "",
     category: r.genre ?? fallback?.category ?? "",
-    kind: kindLabel[r.kind] ?? fallback?.kind ?? "Film",
+    // The CMS kind is authoritative: it decides which page the title appears on.
+    kind: kindLabel[r.kind] ?? "Film",
     year: r.year ?? fallback?.year ?? new Date().getFullYear(),
     rating: r.rating ?? fallback?.rating ?? "TV-PG",
     duration: r.duration_label ?? (r.duration_minutes ? `${r.duration_minutes}m` : fallback?.duration ?? ""),
