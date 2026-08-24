@@ -152,7 +152,7 @@ export function BroadcastPanel({
       live_input_id: input?.id ?? null,
       title,
       status: "scheduled",
-      playback_hls_url: input?.playback_hls_url ?? externalUrl || null,
+      playback_hls_url: input?.playback_hls_url ?? (externalUrl || null),
     } as never);
     if (error) { toast.error(error.message); return; }
     setNewTitle("");
