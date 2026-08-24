@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as StudioRouteImport } from './routes/studio'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -42,6 +43,11 @@ import { Route as ApiPublicKingschatCallbackRouteImport } from './routes/api/pub
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SeriesRoute = SeriesRouteImport.update({
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/series': typeof SeriesRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/series': typeof SeriesRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/series': typeof SeriesRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/series'
+    | '/studio'
     | '/terms'
     | '/channels/$channelId'
     | '/collections/$collectionId'
@@ -327,6 +337,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/series'
+    | '/studio'
     | '/terms'
     | '/collections/$collectionId'
     | '/movies/$titleId'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/series'
+    | '/studio'
     | '/terms'
     | '/channels/$channelId'
     | '/collections/$collectionId'
@@ -389,6 +401,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   SeriesRoute: typeof SeriesRoute
+  StudioRoute: typeof StudioRoute
   TermsRoute: typeof TermsRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
@@ -404,6 +417,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/series': {
@@ -663,6 +683,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   SeriesRoute: SeriesRoute,
+  StudioRoute: StudioRoute,
   TermsRoute: TermsRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,

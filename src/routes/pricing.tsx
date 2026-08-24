@@ -446,7 +446,7 @@ function PricingPage() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                to="/portal"
+                to="/studio"
                 className="h-11 px-5 rounded-md bg-accent text-accent-foreground font-semibold text-sm inline-flex items-center gap-2 hover:bg-accent/90 transition"
               >
                 Open Creator Portal <ArrowRight className="size-4" />

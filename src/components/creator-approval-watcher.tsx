@@ -36,7 +36,7 @@ export function CreatorApprovalWatcher() {
       .eq("id", app.id);
     setApp(null);
     if (typeof window !== "undefined") sessionStorage.setItem("lettflix.completeChannel", "1");
-    navigate({ to: "/portal" });
+    navigate({ to: "/studio" });
   }
 
 
