@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const provisionSchema = z.object({
   channelId: z.string().uuid(),
@@ -14,9 +15,7 @@ const inputSchema = z.object({
 
 /** Create (or re-create) a Lettflix live ingest endpoint for a channel service. */
 export const provisionLiveInput = createServerFn({ method: "POST" })
-  .middleware([
-    (await import("@/integrations/supabase/auth-middleware")).requireSupabaseAuth,
-  ])
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => provisionSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -69,9 +68,7 @@ export const provisionLiveInput = createServerFn({ method: "POST" })
 
 /** Read the live input for a channel service and refresh its status from the provider. */
 export const refreshLiveInput = createServerFn({ method: "POST" })
-  .middleware([
-    (await import("@/integrations/supabase/auth-middleware")).requireSupabaseAuth,
-  ])
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -107,9 +104,7 @@ export const refreshLiveInput = createServerFn({ method: "POST" })
 
 /** Remove a live input from the provider and Lettflix. */
 export const deleteLiveInput = createServerFn({ method: "POST" })
-  .middleware([
-    (await import("@/integrations/supabase/auth-middleware")).requireSupabaseAuth,
-  ])
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
