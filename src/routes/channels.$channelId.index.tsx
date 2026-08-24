@@ -112,7 +112,32 @@ function ChannelPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel?.id]);
 
-  const streamSrc = channel?.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+  // A running Lettflix Live broadcast takes precedence over the configured source.
+  const [liveUrl, setLiveUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setLiveUrl(null);
+    const slug = channelId;
+    (async () => {
+      const { data: ch } = await supabase
+        .from("cms_channels").select("id").eq("slug", slug).maybeSingle();
+      const chId = (ch as { id?: string } | null)?.id;
+      if (!chId || cancelled) return;
+      const { data } = await supabase
+        .from("live_sessions")
+        .select("playback_hls_url")
+        .eq("channel_id", chId)
+        .eq("status", "live")
+        .order("started_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const url = (data as { playback_hls_url?: string | null } | null)?.playback_hls_url ?? null;
+      if (!cancelled && url) setLiveUrl(url);
+    })();
+    return () => { cancelled = true; };
+  }, [channelId]);
+
+  const streamSrc = liveUrl || channel?.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
   useHlsAttach(mediaRef, streamSrc, playing);
 
 
