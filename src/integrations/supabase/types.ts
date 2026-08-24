@@ -719,6 +719,143 @@ export type Database = {
         }
         Relationships: []
       }
+      live_inputs: {
+        Row: {
+          channel_id: string
+          created_at: string
+          id: string
+          last_connected_at: string | null
+          meta: Json
+          playback_dash_url: string | null
+          playback_hls_url: string | null
+          provider: string
+          provider_input_id: string | null
+          recording_enabled: boolean
+          rtmps_stream_key: string | null
+          rtmps_url: string | null
+          service: string
+          srt_url: string | null
+          status: string
+          updated_at: string
+          webrtc_url: string | null
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          id?: string
+          last_connected_at?: string | null
+          meta?: Json
+          playback_dash_url?: string | null
+          playback_hls_url?: string | null
+          provider?: string
+          provider_input_id?: string | null
+          recording_enabled?: boolean
+          rtmps_stream_key?: string | null
+          rtmps_url?: string | null
+          service?: string
+          srt_url?: string | null
+          status?: string
+          updated_at?: string
+          webrtc_url?: string | null
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          id?: string
+          last_connected_at?: string | null
+          meta?: Json
+          playback_dash_url?: string | null
+          playback_hls_url?: string | null
+          provider?: string
+          provider_input_id?: string | null
+          recording_enabled?: boolean
+          rtmps_stream_key?: string | null
+          rtmps_url?: string | null
+          service?: string
+          srt_url?: string | null
+          status?: string
+          updated_at?: string
+          webrtc_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_inputs_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_sessions: {
+        Row: {
+          channel_id: string
+          created_at: string
+          description: string | null
+          ended_at: string | null
+          id: string
+          live_input_id: string | null
+          peak_viewers: number
+          playback_hls_url: string | null
+          poster_url: string | null
+          recording_url: string | null
+          scheduled_start: string | null
+          started_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          live_input_id?: string | null
+          peak_viewers?: number
+          playback_hls_url?: string | null
+          poster_url?: string | null
+          recording_url?: string | null
+          scheduled_start?: string | null
+          started_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          live_input_id?: string | null
+          peak_viewers?: number
+          playback_hls_url?: string | null
+          poster_url?: string | null
+          recording_url?: string | null
+          scheduled_start?: string | null
+          started_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_sessions_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_sessions_live_input_id_fkey"
+            columns: ["live_input_id"]
+            isOneToOne: false
+            referencedRelation: "live_inputs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_history: {
         Row: {
           created_at: string
