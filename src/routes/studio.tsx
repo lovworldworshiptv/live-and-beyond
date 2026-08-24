@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { ChannelEditor, type Channel } from "@/routes/admin";
 import { ChannelSetupWizard } from "@/components/studio/channel-setup-wizard";
+import { BroadcastPanel } from "@/components/studio/broadcast-panel";
 import {
   SERVICE_CATALOG, fetchChannelServices, saveChannelServices, type ServiceKey,
 } from "@/lib/channel-services";
