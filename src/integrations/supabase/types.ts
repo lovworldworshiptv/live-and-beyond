@@ -53,10 +53,53 @@ export type Database = {
         }
         Relationships: []
       }
+      channel_services: {
+        Row: {
+          channel_id: string
+          config: Json
+          created_at: string
+          display_order: number
+          enabled: boolean
+          id: string
+          service: string
+          updated_at: string
+        }
+        Insert: {
+          channel_id: string
+          config?: Json
+          created_at?: string
+          display_order?: number
+          enabled?: boolean
+          id?: string
+          service: string
+          updated_at?: string
+        }
+        Update: {
+          channel_id?: string
+          config?: Json
+          created_at?: string
+          display_order?: number
+          enabled?: boolean
+          id?: string
+          service?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_services_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cms_channels: {
         Row: {
           banner_url: string | null
           category: string | null
+          contact_email: string | null
+          contact_phone: string | null
           country: string | null
           created_at: string
           created_by: string | null
@@ -78,17 +121,22 @@ export type Database = {
           podcast_library: string[]
           popularity: number
           region: string | null
+          setup_completed_at: string | null
           slug: string
+          social_links: Json
           stream_url: string | null
           tagline: string | null
           updated_at: string
           updated_by: string | null
           video_library: string[]
           viewers: string | null
+          website: string | null
         }
         Insert: {
           banner_url?: string | null
           category?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           country?: string | null
           created_at?: string
           created_by?: string | null
@@ -110,17 +158,22 @@ export type Database = {
           podcast_library?: string[]
           popularity?: number
           region?: string | null
+          setup_completed_at?: string | null
           slug: string
+          social_links?: Json
           stream_url?: string | null
           tagline?: string | null
           updated_at?: string
           updated_by?: string | null
           video_library?: string[]
           viewers?: string | null
+          website?: string | null
         }
         Update: {
           banner_url?: string | null
           category?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           country?: string | null
           created_at?: string
           created_by?: string | null
@@ -142,13 +195,16 @@ export type Database = {
           podcast_library?: string[]
           popularity?: number
           region?: string | null
+          setup_completed_at?: string | null
           slug?: string
+          social_links?: Json
           stream_url?: string | null
           tagline?: string | null
           updated_at?: string
           updated_by?: string | null
           video_library?: string[]
           viewers?: string | null
+          website?: string | null
         }
         Relationships: []
       }
