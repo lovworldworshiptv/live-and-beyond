@@ -136,9 +136,9 @@ export const defaultFooter: FooterConfig = {
       title: "Creators",
       items: [
         { label: "Become a Partner", href: "/auth" },
-        { label: "Creator Portal", href: "/portal" },
-        { label: "Channel Portal", href: "/portal" },
-        { label: "Analytics", href: "/portal" },
+        { label: "Creator Studio", href: "/studio" },
+        { label: "Channel Portal", href: "/studio" },
+        { label: "Analytics", href: "/studio" },
       ],
     },
     {

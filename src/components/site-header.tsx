@@ -189,7 +189,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
                 {(isCreator || isAdmin) && <DropdownMenuSeparator />}
                 {isCreator && (
                   <DropdownMenuItem asChild>
-                    <Link to="/portal">Creator Portal</Link>
+                    <Link to="/studio">Creator Studio</Link>
                   </DropdownMenuItem>
                 )}
                 {isAdmin && (
