@@ -415,26 +415,14 @@ function StudioPage() {
           </div>
         )}
 
-        {tab === "broadcast" && (
-          <div className="rounded-2xl border border-border bg-elevated/40 p-8 max-w-3xl">
-            <Radio className="size-8 text-primary" />
-            <h2 className="mt-4 text-xl font-bold">Broadcast Studio</h2>
-            <p className="mt-2 text-sm text-[color:var(--secondary-foreground)]">
-              Live broadcasting is set up next: connect an existing stream, or receive Lettflix
-              RTMP credentials for OBS and vMix with a persistent playback URL.
-            </p>
-            <div className="mt-5 grid gap-2 sm:grid-cols-3 text-sm">
-              {["Existing stream", "Lettflix live (RTMP)", "Automated playout"].map((m) => (
-                <div key={m} className="rounded-lg border border-border bg-surface px-4 py-3">{m}</div>
-              ))}
-            </div>
-            {channel?.stream_url && (
-              <p className="mt-5 text-xs text-[color:var(--muted-foreground)] break-all">
-                Current stream source: {channel.stream_url}
-              </p>
-            )}
-          </div>
+        {tab === "broadcast" && channel?.id && (
+          <BroadcastPanel
+            channelId={channel.id}
+            channelStreamUrl={channel.stream_url ?? null}
+            onChannelUpdated={load}
+          />
         )}
+
       </main>
 
       <SiteFooter />
