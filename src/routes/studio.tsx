@@ -49,7 +49,7 @@ const watchData = Array.from({ length: 14 }, (_, i) => ({
   hours: 1200 + Math.round(Math.sin(i / 2) * 400 + Math.random() * 300),
 }));
 
-type Tab = "overview" | "channel" | "services" | "broadcast";
+type Tab = "overview" | "channel" | "services" | "content" | "playout" | "broadcast";
 
 function StudioPage() {
   const { user, isAdmin, isCreator, loading } = useAuth();
