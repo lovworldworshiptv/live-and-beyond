@@ -445,9 +445,27 @@ function ScheduleSection({
         </div>
       )}
 
-      <button onClick={create} className="mt-4 h-11 px-5 rounded-md bg-primary text-primary-foreground font-semibold text-sm inline-flex items-center gap-2">
-        <Plus className="size-4" /> Add block
-      </button>
+      <div className="mt-4 flex gap-2 flex-wrap">
+        <button onClick={create} className="h-11 px-5 rounded-md bg-primary text-primary-foreground font-semibold text-sm inline-flex items-center gap-2">
+          <Plus className="size-4" /> Add block
+        </button>
+        <button
+          onClick={async () => {
+            setPublishing(true);
+            try {
+              const n = await publishScheduleToGuide(channelId);
+              toast.success(`${n} programmes published to the guide`);
+            } catch (e) {
+              toast.error(e instanceof Error ? e.message : "Could not publish schedule");
+            } finally { setPublishing(false); }
+          }}
+          disabled={publishing}
+          className="h-11 px-5 rounded-md border border-border bg-surface text-sm font-medium inline-flex items-center gap-2 disabled:opacity-50"
+        >
+          {publishing ? <Loader2 className="size-4 animate-spin" /> : <CalendarClock className="size-4" />}
+          Publish to guide
+        </button>
+      </div>
 
       <div className="mt-5 space-y-2">
         {schedules.length === 0 && (
