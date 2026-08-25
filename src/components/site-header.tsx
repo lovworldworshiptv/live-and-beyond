@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Search, Bell, LogOut, ShieldCheck, ChevronDown } from "lucide-react";
+import { Search, LogOut, ShieldCheck, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,7 @@ import { useCmsSetting } from "@/lib/cms-catalog";
 import { defaultNav, type NavConfig } from "@/lib/homepage-defaults";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { SearchDialog } from "@/components/search-dialog";
+import { NotificationBell } from "@/components/notification-bell";
 
 
 export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
@@ -146,9 +147,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
             <Search className="size-4" />
           </button>
 
-          <button className="size-9 grid place-items-center rounded-md hover:bg-elevated transition" aria-label="Notifications">
-            <Bell className="size-4" />
-          </button>
+          <NotificationBell />
 
           {!user ? (
             <Link
