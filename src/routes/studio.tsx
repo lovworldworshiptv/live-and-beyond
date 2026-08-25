@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChannelEditor, type Channel } from "@/routes/admin";
 import { ChannelSetupWizard } from "@/components/studio/channel-setup-wizard";
 import { BroadcastPanel } from "@/components/studio/broadcast-panel";
+import { MediaLibraryPanel } from "@/components/studio/media-library-panel";
+import { PlayoutPanel } from "@/components/studio/playout-panel";
 import {
   SERVICE_CATALOG, fetchChannelServices, saveChannelServices, type ServiceKey,
 } from "@/lib/channel-services";
@@ -49,7 +51,7 @@ const watchData = Array.from({ length: 14 }, (_, i) => ({
   hours: 1200 + Math.round(Math.sin(i / 2) * 400 + Math.random() * 300),
 }));
 
-type Tab = "overview" | "channel" | "services" | "broadcast";
+type Tab = "overview" | "channel" | "services" | "content" | "playout" | "broadcast";
 
 function StudioPage() {
   const { user, isAdmin, isCreator, loading } = useAuth();
@@ -245,6 +247,8 @@ function StudioPage() {
               ["overview", "Overview"],
               ["channel", "Channel"],
               ["services", "Services"],
+              ["content", "Content"],
+              ["playout", "Automated TV"],
               ["broadcast", "Broadcast"],
             ] as [Tab, string][]).map(([k, label]) => (
               <button
@@ -415,6 +419,18 @@ function StudioPage() {
             })}
           </div>
         )}
+
+        {tab === "content" && channel?.id && <MediaLibraryPanel channelId={channel.id} />}
+
+        {tab === "playout" && channel?.id && (
+          <PlayoutPanel
+            channelId={channel.id}
+            playoutEnabled={(channel as { playout_enabled?: boolean }).playout_enabled}
+            fallbackPlaylistId={(channel as { fallback_playlist_id?: string | null }).fallback_playlist_id ?? null}
+            onChannelUpdated={load}
+          />
+        )}
+
 
         {tab === "broadcast" && channel?.id && (
           <BroadcastPanel

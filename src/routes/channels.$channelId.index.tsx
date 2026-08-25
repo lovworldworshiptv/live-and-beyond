@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { useFollowing, useSettings } from "@/lib/personal";
+import { resolveNowPlaying, type NowPlaying } from "@/lib/playout";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/channels/$channelId/")({
@@ -112,16 +113,20 @@ function ChannelPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel?.id]);
 
-  // A running Lettflix Live broadcast takes precedence over the configured source.
+  // A running Lettflix Live broadcast takes precedence over the configured source,
+  // which in turn takes precedence over automated playout.
   const [liveUrl, setLiveUrl] = useState<string | null>(null);
+  const [playout, setPlayout] = useState<NowPlaying | null>(null);
   useEffect(() => {
     let cancelled = false;
     setLiveUrl(null);
+    setPlayout(null);
     const slug = channelId;
     (async () => {
       const { data: ch } = await supabase
-        .from("cms_channels").select("id").eq("slug", slug).maybeSingle();
-      const chId = (ch as { id?: string } | null)?.id;
+        .from("cms_channels").select("id, playout_enabled").eq("slug", slug).maybeSingle();
+      const row = ch as { id?: string; playout_enabled?: boolean } | null;
+      const chId = row?.id;
       if (!chId || cancelled) return;
       const { data } = await supabase
         .from("live_sessions")
@@ -132,13 +137,33 @@ function ChannelPage() {
         .limit(1)
         .maybeSingle();
       const url = (data as { playback_hls_url?: string | null } | null)?.playback_hls_url ?? null;
-      if (!cancelled && url) setLiveUrl(url);
+      if (cancelled) return;
+      if (url) { setLiveUrl(url); return; }
+      if (row?.playout_enabled) {
+        const np = await resolveNowPlaying(chId);
+        if (!cancelled) setPlayout(np);
+      }
     })();
     return () => { cancelled = true; };
   }, [channelId]);
 
-  const streamSrc = liveUrl || channel?.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+  const streamSrc =
+    liveUrl ||
+    channel?.streamUrl ||
+    playout?.asset.source_url ||
+    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
   useHlsAttach(mediaRef, streamSrc, playing);
+
+  // Join automated playout mid-programme, exactly like a real TV feed.
+  useEffect(() => {
+    if (!playing || !playout || liveUrl || channel?.streamUrl) return;
+    const m = mediaRef.current;
+    if (!m) return;
+    const seek = () => { try { m.currentTime = playout.offsetSeconds; } catch { /* not seekable yet */ } };
+    if (m.readyState >= 1) seek();
+    else m.addEventListener("loadedmetadata", seek, { once: true });
+  }, [playing, playout, liveUrl, channel?.streamUrl]);
+
 
 
   if (notFoundState) return <ChannelNotFound />;
