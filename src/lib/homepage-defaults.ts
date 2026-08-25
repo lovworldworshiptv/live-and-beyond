@@ -65,6 +65,7 @@ export const defaultNav: NavConfig = {
         { label: "Series", to: "/series" },
         { label: "Documentaries", to: "/documentaries" },
         { label: "Podcasts", to: "/podcasts" },
+        { label: "Radio", to: "/radio" },
       ],
     },
     { label: "Pricing", to: "/pricing" },

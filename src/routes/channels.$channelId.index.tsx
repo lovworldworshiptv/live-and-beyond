@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { useFollowing, useSettings } from "@/lib/personal";
+import { useChannelFollow } from "@/lib/follows";
+import { recordPlaybackEvent } from "@/lib/analytics";
 import { resolveNowPlaying, type NowPlaying } from "@/lib/playout";
 import { toast } from "sonner";
 
@@ -62,7 +64,9 @@ function ChannelPage() {
   const { channelId } = Route.useParams();
   const [channel, setChannel] = useState<Channel | null>(() => getChannel(channelId) ?? null);
   const [notFoundState, setNotFoundState] = useState(false);
-  const { has: isFollowing, toggle: toggleFollow } = useFollowing();
+  const { has: isFollowingLocal, toggle: toggleFollowLocal } = useFollowing();
+  const [dbChannelId, setDbChannelId] = useState<string | null>(null);
+  const { following: followingDb, toggle: toggleFollowDb } = useChannelFollow(dbChannelId);
   const { settings, setSettings } = useSettings();
 
   useEffect(() => {
@@ -78,7 +82,10 @@ function ChannelPage() {
         .eq("is_published", true)
         .maybeSingle();
       if (cancelled) return;
-      if (data) setChannel(mapChannelRow(data as never));
+      if (data) {
+        setChannel(mapChannelRow(data as never));
+        setDbChannelId((data as { id: string }).id);
+      }
       else if (!staticCh) setNotFoundState(true);
     })();
     return () => { cancelled = true; };
@@ -147,12 +154,25 @@ function ChannelPage() {
     return () => { cancelled = true; };
   }, [channelId]);
 
+  const isFollowing = dbChannelId ? followingDb : isFollowingLocal(channel?.id ?? "");
+
   const streamSrc =
     liveUrl ||
     channel?.streamUrl ||
     playout?.asset.source_url ||
     "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
   useHlsAttach(mediaRef, streamSrc, playing);
+
+  // Anonymous playback signals feed creator analytics.
+  useEffect(() => {
+    if (!playing || !dbChannelId) return;
+    const service = channel?.streamKind === "radio" ? "radio" : "tv";
+    recordPlaybackEvent({ channelId: dbChannelId, service, event: "start" });
+    const t = setInterval(() => {
+      recordPlaybackEvent({ channelId: dbChannelId, service, event: "heartbeat", seconds: 30 });
+    }, 30_000);
+    return () => clearInterval(t);
+  }, [playing, dbChannelId, channel?.streamKind]);
 
   // Join automated playout mid-programme, exactly like a real TV feed.
   useEffect(() => {
@@ -341,19 +361,20 @@ function ChannelPage() {
               <LibraryBig className="size-4" /> Browse Library
             </Link>
             <button
-              onClick={() => {
-                const wasFollowing = isFollowing(channel.id);
-                toggleFollow(channel.id);
+              onClick={async () => {
+                const wasFollowing = isFollowing;
+                if (dbChannelId) await toggleFollowDb();
+                else toggleFollowLocal(channel.id);
                 toast(wasFollowing ? "Unfollowed channel" : "Following channel", { description: channel.name });
               }}
               className={`inline-flex items-center gap-2 px-5 h-11 rounded-md border transition font-medium ${
-                isFollowing(channel.id)
+                isFollowing
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-elevated border-border hover:bg-elevated/70"
               }`}
             >
-              {isFollowing(channel.id) ? <Check className="size-4" /> : <Plus className="size-4" />}
-              {isFollowing(channel.id) ? "Following" : "Follow Channel"}
+              {isFollowing ? <Check className="size-4" /> : <Plus className="size-4" />}
+              {isFollowing ? "Following" : "Follow Channel"}
             </button>
             <button
               onClick={() => {

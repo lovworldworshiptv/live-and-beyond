@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   provisionLiveInput, refreshLiveInput, deleteLiveInput,
 } from "@/lib/live.functions";
+import { notifyFollowersLive } from "@/lib/notify.functions";
 
 type Service = "tv" | "radio";
 
@@ -87,6 +88,7 @@ export function BroadcastPanel({
   const provision = useServerFn(provisionLiveInput);
   const refresh = useServerFn(refreshLiveInput);
   const remove = useServerFn(deleteLiveInput);
+  const notifyLive = useServerFn(notifyFollowersLive);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -168,6 +170,17 @@ export function BroadcastPanel({
     const { error } = await supabase.from("live_sessions").update(patch as never).eq("id", id);
     if (error) { toast.error(error.message); return; }
     await supabase.from("cms_channels").update({ is_live: next === "live" } as never).eq("id", channelId);
+    if (next === "live") {
+      const session = sessions.find((s) => s.id === id);
+      try {
+        const res = await notifyLive({
+          data: { channelId, title: session?.title ? `Live now: ${session.title}` : "We're live now" },
+        });
+        if (res.notified) toast.success(`${res.notified} follower${res.notified === 1 ? "" : "s"} notified`);
+      } catch {
+        /* notifications are best-effort */
+      }
+    }
     toast.success(next === "live" ? "You are live" : "Broadcast ended");
     onChannelUpdated?.();
     load();

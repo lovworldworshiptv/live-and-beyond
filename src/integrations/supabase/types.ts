@@ -53,6 +53,73 @@ export type Database = {
         }
         Relationships: []
       }
+      channel_follows: {
+        Row: {
+          channel_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_follows_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channel_members: {
+        Row: {
+          channel_id: string
+          created_at: string
+          id: string
+          invited_email: string | null
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          id?: string
+          invited_email?: string | null
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          id?: string
+          invited_email?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_members_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channel_services: {
         Row: {
           channel_id: string
@@ -969,6 +1036,93 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          kind: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      playback_events: {
+        Row: {
+          channel_id: string | null
+          created_at: string
+          event: string
+          id: string
+          seconds: number
+          service: string
+          session_id: string | null
+          title_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          channel_id?: string | null
+          created_at?: string
+          event?: string
+          id?: string
+          seconds?: number
+          service?: string
+          session_id?: string | null
+          title_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          channel_id?: string | null
+          created_at?: string
+          event?: string
+          id?: string
+          seconds?: number
+          service?: string
+          session_id?: string | null
+          title_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playback_events_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playback_events_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "cms_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playlist_items: {
         Row: {
           created_at: string
@@ -1157,6 +1311,68 @@ export type Database = {
         }
         Relationships: []
       }
+      radio_settings: {
+        Row: {
+          bitrate_kbps: number
+          channel_id: string
+          created_at: string
+          format: string
+          id: string
+          is_enabled: boolean
+          metadata_provider: string
+          metadata_url: string | null
+          now_playing_artist: string | null
+          now_playing_artwork_url: string | null
+          now_playing_title: string | null
+          now_playing_updated_at: string | null
+          station_message: string | null
+          stream_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          bitrate_kbps?: number
+          channel_id: string
+          created_at?: string
+          format?: string
+          id?: string
+          is_enabled?: boolean
+          metadata_provider?: string
+          metadata_url?: string | null
+          now_playing_artist?: string | null
+          now_playing_artwork_url?: string | null
+          now_playing_title?: string | null
+          now_playing_updated_at?: string | null
+          station_message?: string | null
+          stream_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bitrate_kbps?: number
+          channel_id?: string
+          created_at?: string
+          format?: string
+          id?: string
+          is_enabled?: boolean
+          metadata_provider?: string
+          metadata_url?: string | null
+          now_playing_artist?: string | null
+          now_playing_artwork_url?: string | null
+          now_playing_title?: string | null
+          now_playing_updated_at?: string | null
+          station_message?: string | null
+          stream_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "radio_settings_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: true
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1203,6 +1419,10 @@ export type Database = {
       }
     }
     Functions: {
+      can_manage_channel: {
+        Args: { _channel_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

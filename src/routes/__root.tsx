@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
 import { CreatorApprovalWatcher } from "@/components/creator-approval-watcher";
+import { RadioPlayerProvider } from "@/components/radio-player";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -124,10 +125,12 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <CreatorApprovalWatcher />
-        <Toaster position="bottom-right" theme="dark" richColors />
+        <RadioPlayerProvider>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <CreatorApprovalWatcher />
+          <Toaster position="bottom-right" theme="dark" richColors />
+        </RadioPlayerProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
