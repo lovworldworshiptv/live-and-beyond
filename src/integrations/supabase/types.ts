@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -108,6 +108,7 @@ export type Database = {
           deleted_by: string | null
           description: string | null
           display_order: number
+          fallback_playlist_id: string | null
           featured_content: string[]
           id: string
           is_live: boolean
@@ -118,6 +119,7 @@ export type Database = {
           logo_url: string | null
           name: string
           now_playing: Json | null
+          playout_enabled: boolean
           podcast_library: string[]
           popularity: number
           region: string | null
@@ -145,6 +147,7 @@ export type Database = {
           deleted_by?: string | null
           description?: string | null
           display_order?: number
+          fallback_playlist_id?: string | null
           featured_content?: string[]
           id?: string
           is_live?: boolean
@@ -155,6 +158,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           now_playing?: Json | null
+          playout_enabled?: boolean
           podcast_library?: string[]
           popularity?: number
           region?: string | null
@@ -182,6 +186,7 @@ export type Database = {
           deleted_by?: string | null
           description?: string | null
           display_order?: number
+          fallback_playlist_id?: string | null
           featured_content?: string[]
           id?: string
           is_live?: boolean
@@ -192,6 +197,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           now_playing?: Json | null
+          playout_enabled?: boolean
           podcast_library?: string[]
           popularity?: number
           region?: string | null
@@ -206,7 +212,15 @@ export type Database = {
           viewers?: string | null
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cms_channels_fallback_playlist_id_fkey"
+            columns: ["fallback_playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cms_collections: {
         Row: {
@@ -888,6 +902,227 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      media_assets: {
+        Row: {
+          channel_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          duration_seconds: number
+          id: string
+          media_type: string
+          meta: Json
+          poster_url: string | null
+          source_url: string | null
+          status: string
+          title: string
+          title_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_seconds?: number
+          id?: string
+          media_type?: string
+          meta?: Json
+          poster_url?: string | null
+          source_url?: string | null
+          status?: string
+          title: string
+          title_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_seconds?: number
+          id?: string
+          media_type?: string
+          meta?: Json
+          poster_url?: string | null
+          source_url?: string | null
+          status?: string
+          title?: string
+          title_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_assets_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_assets_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "cms_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlist_items: {
+        Row: {
+          created_at: string
+          id: string
+          media_asset_id: string
+          playlist_id: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_asset_id: string
+          playlist_id: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_asset_id?: string
+          playlist_id?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_items_media_asset_id_fkey"
+            columns: ["media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playlist_items_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlists: {
+        Row: {
+          channel_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          loop_enabled: boolean
+          name: string
+          service: string
+          shuffle: boolean
+          updated_at: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          loop_enabled?: boolean
+          name: string
+          service?: string
+          shuffle?: boolean
+          updated_at?: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          loop_enabled?: boolean
+          name?: string
+          service?: string
+          shuffle?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlists_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playout_schedules: {
+        Row: {
+          channel_id: string
+          created_at: string
+          created_by: string | null
+          days_of_week: number[]
+          duration_minutes: number
+          id: string
+          is_active: boolean
+          name: string
+          playlist_id: string | null
+          priority: number
+          recurrence: string
+          service: string
+          starts_at: string
+          updated_at: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          created_by?: string | null
+          days_of_week?: number[]
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          playlist_id?: string | null
+          priority?: number
+          recurrence?: string
+          service?: string
+          starts_at: string
+          updated_at?: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          created_by?: string | null
+          days_of_week?: number[]
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          playlist_id?: string | null
+          priority?: number
+          recurrence?: string
+          service?: string
+          starts_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playout_schedules_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playout_schedules_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
