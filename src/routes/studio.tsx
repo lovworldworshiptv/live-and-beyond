@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChannelEditor, type Channel } from "@/routes/admin";
 import { ChannelSetupWizard } from "@/components/studio/channel-setup-wizard";
 import { BroadcastPanel } from "@/components/studio/broadcast-panel";
+import { MediaLibraryPanel } from "@/components/studio/media-library-panel";
+import { PlayoutPanel } from "@/components/studio/playout-panel";
 import {
   SERVICE_CATALOG, fetchChannelServices, saveChannelServices, type ServiceKey,
 } from "@/lib/channel-services";
