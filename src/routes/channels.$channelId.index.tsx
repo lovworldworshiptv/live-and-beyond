@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { useFollowing, useSettings } from "@/lib/personal";
+import { resolveNowPlaying, type NowPlaying } from "@/lib/playout";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/channels/$channelId/")({
