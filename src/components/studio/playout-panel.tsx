@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
   DAY_LABELS, fetchMediaAssets, fetchPlaylistItems, fetchPlaylists, fetchPlayoutSchedules,
-  formatDuration, playlistDuration, resolveNowPlaying,
+  formatDuration, playlistDuration, publishScheduleToGuide, resolveNowPlaying,
   type MediaAsset, type NowPlaying, type Playlist, type PlaylistItem, type PlayoutSchedule,
 } from "@/lib/playout";
 
