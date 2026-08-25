@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StudioRouteImport } from './routes/studio'
 import { Route as SeriesRouteImport } from './routes/series'
+import { Route as RadioRouteImport } from './routes/radio'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -53,6 +54,11 @@ const StudioRoute = StudioRouteImport.update({
 const SeriesRoute = SeriesRouteImport.update({
   id: '/series',
   path: '/series',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RadioRoute = RadioRouteImport.update({
+  id: '/radio',
+  path: '/radio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -210,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -240,6 +247,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profile'
+    | '/radio'
     | '/series'
     | '/studio'
     | '/terms'
@@ -336,6 +346,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profile'
+    | '/radio'
     | '/series'
     | '/studio'
     | '/terms'
@@ -367,6 +378,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profile'
+    | '/radio'
     | '/series'
     | '/studio'
     | '/terms'
@@ -400,6 +412,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
+  RadioRoute: typeof RadioRoute
   SeriesRoute: typeof SeriesRoute
   StudioRoute: typeof StudioRoute
   TermsRoute: typeof TermsRoute
@@ -431,6 +444,13 @@ declare module '@tanstack/react-router' {
       path: '/series'
       fullPath: '/series'
       preLoaderRoute: typeof SeriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/radio': {
+      id: '/radio'
+      path: '/radio'
+      fullPath: '/radio'
+      preLoaderRoute: typeof RadioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -682,6 +702,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
+  RadioRoute: RadioRoute,
   SeriesRoute: SeriesRoute,
   StudioRoute: StudioRoute,
   TermsRoute: TermsRoute,
