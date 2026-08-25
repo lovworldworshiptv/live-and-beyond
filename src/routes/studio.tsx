@@ -247,6 +247,8 @@ function StudioPage() {
               ["overview", "Overview"],
               ["channel", "Channel"],
               ["services", "Services"],
+              ["content", "Content"],
+              ["playout", "Automated TV"],
               ["broadcast", "Broadcast"],
             ] as [Tab, string][]).map(([k, label]) => (
               <button
