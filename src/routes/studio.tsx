@@ -17,6 +17,9 @@ import { ChannelSetupWizard } from "@/components/studio/channel-setup-wizard";
 import { BroadcastPanel } from "@/components/studio/broadcast-panel";
 import { MediaLibraryPanel } from "@/components/studio/media-library-panel";
 import { PlayoutPanel } from "@/components/studio/playout-panel";
+import { RadioPanel } from "@/components/studio/radio-panel";
+import { AnalyticsPanel } from "@/components/studio/analytics-panel";
+import { TeamPanel } from "@/components/studio/team-panel";
 import {
   SERVICE_CATALOG, fetchChannelServices, saveChannelServices, type ServiceKey,
 } from "@/lib/channel-services";
@@ -51,7 +54,9 @@ const watchData = Array.from({ length: 14 }, (_, i) => ({
   hours: 1200 + Math.round(Math.sin(i / 2) * 400 + Math.random() * 300),
 }));
 
-type Tab = "overview" | "channel" | "services" | "content" | "playout" | "broadcast";
+type Tab =
+  | "overview" | "channel" | "services" | "content"
+  | "playout" | "broadcast" | "radio" | "analytics" | "team";
 
 function StudioPage() {
   const { user, isAdmin, isCreator, loading } = useAuth();
@@ -250,6 +255,9 @@ function StudioPage() {
               ["content", "Content"],
               ["playout", "Automated TV"],
               ["broadcast", "Broadcast"],
+              ["radio", "Radio"],
+              ["analytics", "Analytics"],
+              ["team", "Team"],
             ] as [Tab, string][]).map(([k, label]) => (
               <button
                 key={k}
@@ -431,6 +439,12 @@ function StudioPage() {
           />
         )}
 
+
+        {tab === "radio" && channel?.id && <RadioPanel channelId={channel.id} />}
+
+        {tab === "analytics" && channel?.id && <AnalyticsPanel channelId={channel.id} />}
+
+        {tab === "team" && channel?.id && <TeamPanel channelId={channel.id} />}
 
         {tab === "broadcast" && channel?.id && (
           <BroadcastPanel
