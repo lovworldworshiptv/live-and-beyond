@@ -337,6 +337,7 @@ function ScheduleSection({
   const [duration, setDuration] = useState(60);
   const [recurrence, setRecurrence] = useState<"none" | "daily" | "weekly">("daily");
   const [days, setDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [publishing, setPublishing] = useState(false);
 
   async function create() {
     if (!name.trim() || !playlistId || !startsAt) {
