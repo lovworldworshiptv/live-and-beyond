@@ -166,13 +166,13 @@ function ChannelPage() {
   // Anonymous playback signals feed creator analytics.
   useEffect(() => {
     if (!playing || !dbChannelId) return;
-    const service = isRadio ? "radio" : "tv";
+    const service = channel?.streamKind === "radio" ? "radio" : "tv";
     recordPlaybackEvent({ channelId: dbChannelId, service, event: "start" });
     const t = setInterval(() => {
       recordPlaybackEvent({ channelId: dbChannelId, service, event: "heartbeat", seconds: 30 });
     }, 30_000);
     return () => clearInterval(t);
-  }, [playing, dbChannelId, isRadio]);
+  }, [playing, dbChannelId, channel?.streamKind]);
 
   // Join automated playout mid-programme, exactly like a real TV feed.
   useEffect(() => {
