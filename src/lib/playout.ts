@@ -187,3 +187,60 @@ export function formatDuration(seconds: number) {
   const s = Math.floor(seconds % 60);
   return h ? `${h}h ${m}m` : m ? `${m}m ${s}s` : `${s}s`;
 }
+
+/**
+ * Project active playout blocks onto the public programme guide (cms_schedule)
+ * for the next `days` days, replacing previously generated future entries.
+ */
+export async function publishScheduleToGuide(channelId: string, days = 7) {
+  const schedules = (await fetchPlayoutSchedules(channelId)).filter((s) => s.is_active);
+  const now = new Date();
+  const rows: {
+    channel_id: string;
+    program_title: string;
+    description: string | null;
+    category: string | null;
+    starts_at: string;
+    ends_at: string;
+    is_published: boolean;
+  }[] = [];
+
+  for (let d = 0; d < days; d++) {
+    const day = new Date(now);
+    day.setDate(day.getDate() + d);
+    for (const s of schedules) {
+      const base = new Date(s.starts_at);
+      let start: Date | null = null;
+      if (s.recurrence === "none") {
+        if (base.toDateString() === day.toDateString()) start = base;
+      } else {
+        const cand = new Date(day);
+        cand.setHours(base.getHours(), base.getMinutes(), 0, 0);
+        if (cand.getTime() < base.getTime()) continue;
+        if (s.recurrence === "weekly" && s.days_of_week.length && !s.days_of_week.includes(cand.getDay())) continue;
+        start = cand;
+      }
+      if (!start || start.getTime() + s.duration_minutes * 60_000 < now.getTime()) continue;
+      rows.push({
+        channel_id: channelId,
+        program_title: s.name,
+        description: null,
+        category: s.service === "radio" ? "Radio" : null,
+        starts_at: start.toISOString(),
+        ends_at: new Date(start.getTime() + s.duration_minutes * 60_000).toISOString(),
+        is_published: true,
+      });
+    }
+  }
+
+  await supabase
+    .from("cms_schedule")
+    .delete()
+    .eq("channel_id", channelId)
+    .gte("starts_at", now.toISOString());
+  if (rows.length) {
+    const { error } = await supabase.from("cms_schedule").insert(rows as never);
+    if (error) throw error;
+  }
+  return rows.length;
+}
