@@ -31,6 +31,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MoviesIndexRouteImport } from './routes/movies.index'
 import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
+import { Route as StudioPreviewRouteImport } from './routes/studio.preview'
 import { Route as MoviesTitleIdRouteImport } from './routes/movies.$titleId'
 import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
 import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
@@ -151,6 +152,11 @@ const ChannelsIndexRoute = ChannelsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ChannelsRoute,
 } as any)
+const StudioPreviewRoute = StudioPreviewRouteImport.update({
+  id: '/preview',
+  path: '/preview',
+  getParentRoute: () => StudioRoute,
+} as any)
 const MoviesTitleIdRoute = MoviesTitleIdRouteImport.update({
   id: '/$titleId',
   path: '/$titleId',
@@ -218,11 +224,12 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
-  '/studio': typeof StudioRoute
+  '/studio': typeof StudioRouteWithChildren
   '/terms': typeof TermsRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
+  '/studio/preview': typeof StudioPreviewRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
@@ -249,10 +256,11 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
-  '/studio': typeof StudioRoute
+  '/studio': typeof StudioRouteWithChildren
   '/terms': typeof TermsRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
+  '/studio/preview': typeof StudioPreviewRoute
   '/channels': typeof ChannelsIndexRoute
   '/movies': typeof MoviesIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
@@ -282,11 +290,12 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
-  '/studio': typeof StudioRoute
+  '/studio': typeof StudioRouteWithChildren
   '/terms': typeof TermsRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
+  '/studio/preview': typeof StudioPreviewRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
@@ -322,6 +331,7 @@ export interface FileRouteTypes {
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/movies/$titleId'
+    | '/studio/preview'
     | '/channels/'
     | '/movies/'
     | '/channels/$channelId/library'
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/collections/$collectionId'
     | '/movies/$titleId'
+    | '/studio/preview'
     | '/channels'
     | '/movies'
     | '/channels/$channelId/library'
@@ -385,6 +396,7 @@ export interface FileRouteTypes {
     | '/channels/$channelId'
     | '/collections/$collectionId'
     | '/movies/$titleId'
+    | '/studio/preview'
     | '/channels/'
     | '/movies/'
     | '/channels/$channelId/library'
@@ -414,7 +426,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RadioRoute: typeof RadioRoute
   SeriesRoute: typeof SeriesRoute
-  StudioRoute: typeof StudioRoute
+  StudioRoute: typeof StudioRouteWithChildren
   TermsRoute: typeof TermsRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
@@ -579,6 +591,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChannelsIndexRouteImport
       parentRoute: typeof ChannelsRoute
     }
+    '/studio/preview': {
+      id: '/studio/preview'
+      path: '/preview'
+      fullPath: '/studio/preview'
+      preLoaderRoute: typeof StudioPreviewRouteImport
+      parentRoute: typeof StudioRoute
+    }
     '/movies/$titleId': {
       id: '/movies/$titleId'
       path: '/$titleId'
@@ -685,6 +704,17 @@ const MoviesRouteChildren: MoviesRouteChildren = {
 const MoviesRouteWithChildren =
   MoviesRoute._addFileChildren(MoviesRouteChildren)
 
+interface StudioRouteChildren {
+  StudioPreviewRoute: typeof StudioPreviewRoute
+}
+
+const StudioRouteChildren: StudioRouteChildren = {
+  StudioPreviewRoute: StudioPreviewRoute,
+}
+
+const StudioRouteWithChildren =
+  StudioRoute._addFileChildren(StudioRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
@@ -704,7 +734,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RadioRoute: RadioRoute,
   SeriesRoute: SeriesRoute,
-  StudioRoute: StudioRoute,
+  StudioRoute: StudioRouteWithChildren,
   TermsRoute: TermsRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
