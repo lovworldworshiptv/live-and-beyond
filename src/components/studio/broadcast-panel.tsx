@@ -113,7 +113,6 @@ export function BroadcastPanel({
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [externalUrl, setExternalUrl] = useState(channelStreamUrl ?? "");
-  const [newTitle, setNewTitle] = useState("");
   const [live, setLive] = useState(isLive);
 
   const provision = useServerFn(provisionLiveInput);
@@ -245,7 +244,7 @@ export function BroadcastPanel({
         await supabase.from("live_sessions").insert({
           channel_id: channelId,
           live_input_id: input?.id ?? null,
-          title: newTitle.trim() || "Live broadcast",
+          title: "Live broadcast",
           status: "live",
           started_at: new Date().toISOString(),
           playback_hls_url: url,
