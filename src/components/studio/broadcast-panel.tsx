@@ -143,6 +143,20 @@ export function BroadcastPanel({
   const showPlayout = isTv && source === "playout";
   const encoderConnected = input?.status === "live" || input?.status === "connected";
 
+  // Poll ingest status so Go live unlocks as soon as the encoder connects.
+  useEffect(() => {
+    if (!showIngest || !input?.id || encoderConnected) return;
+    const id = setInterval(async () => {
+      try {
+        const row = await refresh({ data: { channelId, service } });
+        if (row) setInput(row as unknown as LiveInput);
+      } catch { /* transient */ }
+    }, 15000);
+    return () => clearInterval(id);
+  }, [showIngest, input?.id, encoderConnected, refresh, channelId, service]);
+
+
+
   async function notifyGoingLive(title?: string) {
     try {
       const res = await notifyLive({ data: { channelId, title: title ?? "We're live now" } });
