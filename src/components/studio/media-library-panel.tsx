@@ -1,28 +1,63 @@
 import { useCallback, useEffect, useState } from "react";
-import { Film, Music, Loader2, Plus, Trash2, Upload, CheckCircle2, X } from "lucide-react";
+import { Film, Music, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MediaPicker } from "@/components/media-picker";
+import { Field, inputClass, textareaClass } from "@/routes/admin";
 import { fetchMediaAssets, formatDuration, type MediaAsset } from "@/lib/playout";
 import { slugify } from "@/lib/channel-services";
 
+type Kind = "movie" | "series" | "podcast" | "documentary";
+
 type Draft = {
   id?: string;
+  title_id?: string | null;
+  slug: string;
   title: string;
   description: string;
   media_type: "video" | "audio";
   source_url: string | null;
   poster_url: string | null;
+  backdrop_url: string | null;
+  trailer_url: string | null;
   duration_seconds: number;
+  // On-demand catalogue metadata (mirrors the admin Titles editor)
+  kind: Kind;
+  genre: string;
+  year: number | null;
+  rating: string;
+  duration_label: string;
+  seasons: number | null;
+  episodes: number | null;
+  cast_list: string[];
+  display_order: number;
+  is_published: boolean;
+  is_featured: boolean;
+  publish_to_catalog: boolean;
 };
 
 const EMPTY: Draft = {
+  slug: "",
   title: "",
   description: "",
   media_type: "video",
   source_url: null,
   poster_url: null,
+  backdrop_url: null,
+  trailer_url: null,
   duration_seconds: 0,
+  kind: "movie",
+  genre: "",
+  year: null,
+  rating: "",
+  duration_label: "",
+  seasons: null,
+  episodes: null,
+  cast_list: [],
+  display_order: 0,
+  is_published: true,
+  is_featured: false,
+  publish_to_catalog: true,
 };
 
 /** Read duration from a media URL in the browser — our lightweight "processing" step. */
@@ -36,7 +71,7 @@ function probeDuration(url: string, type: "video" | "audio"): Promise<number> {
   });
 }
 
-function AssetEditor({
+function ContentEditor({
   value,
   channelId,
   onClose,
@@ -50,6 +85,37 @@ function AssetEditor({
   const [draft, setDraft] = useState<Draft>(value);
   const [saving, setSaving] = useState(false);
   const [probing, setProbing] = useState(false);
+  const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setDraft((d) => ({ ...d, [k]: v }));
+
+  // Pull the linked on-demand title so edits round-trip both records.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      if (!value.title_id) return;
+      const { data } = await supabase.from("cms_titles").select("*").eq("id", value.title_id).maybeSingle();
+      if (!data || !alive) return;
+      const t = data as Record<string, unknown>;
+      setDraft((d) => ({
+        ...d,
+        slug: (t.slug as string) ?? d.slug,
+        kind: ((t.kind as Kind) ?? d.kind),
+        genre: (t.genre as string) ?? "",
+        year: (t.year as number) ?? null,
+        rating: (t.rating as string) ?? "",
+        duration_label: (t.duration_label as string) ?? "",
+        seasons: (t.seasons as number) ?? null,
+        episodes: (t.episodes as number) ?? null,
+        cast_list: (t.cast_list as string[]) ?? [],
+        display_order: (t.display_order as number) ?? 0,
+        backdrop_url: (t.backdrop_url as string) ?? d.backdrop_url,
+        trailer_url: (t.trailer_url as string) ?? d.trailer_url,
+        is_published: Boolean(t.is_published),
+        is_featured: Boolean(t.is_featured),
+        publish_to_catalog: true,
+      }));
+    })();
+    return () => { alive = false; };
+  }, [value.title_id]);
 
   async function setSource(url: string | null) {
     setDraft((d) => ({ ...d, source_url: url }));
@@ -61,10 +127,11 @@ function AssetEditor({
   }
 
   async function save() {
-    if (!draft.title.trim()) { toast.error("Give the media a title"); return; }
+    if (!draft.title.trim()) { toast.error("Give the content a title"); return; }
     if (!draft.source_url) { toast.error("Upload or paste a media file URL"); return; }
     setSaving(true);
-    const payload = {
+
+    const assetPayload = {
       channel_id: channelId,
       title: draft.title.trim(),
       description: draft.description || null,
@@ -74,91 +141,178 @@ function AssetEditor({
       duration_seconds: draft.duration_seconds,
       status: draft.duration_seconds > 0 ? "ready" : "processing",
     };
-    const { error } = draft.id
-      ? await supabase.from("media_assets").update(payload as never).eq("id", draft.id)
-      : await supabase.from("media_assets").insert(payload as never);
+
+    let assetId = draft.id ?? null;
+    if (assetId) {
+      const { error } = await supabase.from("media_assets").update(assetPayload as never).eq("id", assetId);
+      if (error) { setSaving(false); toast.error(error.message); return; }
+    } else {
+      const { data, error } = await supabase.from("media_assets").insert(assetPayload as never).select("id").single();
+      if (error || !data) { setSaving(false); toast.error(error?.message ?? "Could not save media"); return; }
+      assetId = (data as { id: string }).id;
+    }
+
+    if (draft.publish_to_catalog) {
+      const slug =
+        draft.slug.trim() || `${slugify(draft.title)}-${(assetId ?? "").slice(0, 6)}`;
+      const titlePayload = {
+        channel_id: channelId,
+        slug,
+        title: draft.title.trim(),
+        synopsis: draft.description || null,
+        kind: draft.kind,
+        genre: draft.genre || null,
+        year: draft.year,
+        rating: draft.rating || null,
+        duration_minutes: Math.round(draft.duration_seconds / 60) || null,
+        duration_label: draft.duration_label || formatDuration(draft.duration_seconds),
+        seasons: draft.seasons,
+        episodes: draft.episodes,
+        cast_list: draft.cast_list,
+        poster_url: draft.poster_url,
+        backdrop_url: draft.backdrop_url ?? draft.poster_url,
+        stream_url: draft.source_url,
+        trailer_url: draft.trailer_url,
+        display_order: draft.display_order,
+        is_published: draft.is_published,
+        is_featured: draft.is_featured,
+      };
+
+      if (draft.title_id) {
+        const { error } = await supabase.from("cms_titles").update(titlePayload as never).eq("id", draft.title_id);
+        if (error) { setSaving(false); toast.error(error.message); return; }
+      } else {
+        const { data, error } = await supabase.from("cms_titles").insert(titlePayload as never).select("id").single();
+        if (error || !data) { setSaving(false); toast.error(error?.message ?? "Could not publish title"); return; }
+        await supabase
+          .from("media_assets")
+          .update({ title_id: (data as { id: string }).id } as never)
+          .eq("id", assetId!);
+      }
+    }
+
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success(draft.id ? "Media updated" : "Media added to library");
+    toast.success(draft.id ? "Content updated" : "Content added");
     onSaved();
   }
 
   return (
     <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm grid place-items-center p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl rounded-2xl border border-border bg-background p-6 my-8">
+      <div className="w-full max-w-3xl rounded-2xl border border-border bg-background p-6 my-8">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold">{draft.id ? "Edit media" : "Add media"}</h3>
+          <h3 className="text-lg font-bold">{draft.id ? "Edit content" : "New content"}</h3>
           <button onClick={onClose} aria-label="Close" className="size-9 grid place-items-center rounded-md hover:bg-elevated">
             <X className="size-4" />
           </button>
         </div>
 
-        <div className="mt-5 space-y-4">
-          <div>
-            <label className="text-xs uppercase tracking-wider text-[color:var(--muted-foreground)]">Title</label>
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <Field label="Title">
+            <input className={inputClass} value={draft.title} onChange={(e) => set("title", e.target.value)} />
+          </Field>
+          <Field label="Slug (leave blank to generate)">
+            <input className={inputClass} value={draft.slug} onChange={(e) => set("slug", e.target.value)} />
+          </Field>
+          <Field label="Kind">
+            <select className={inputClass} value={draft.kind} onChange={(e) => set("kind", e.target.value as Kind)}>
+              <option value="movie">Movie → /movies</option>
+              <option value="series">Series → /series</option>
+              <option value="podcast">Podcast → /podcasts</option>
+              <option value="documentary">Documentary → /documentaries</option>
+            </select>
+          </Field>
+          <Field label="Media type">
+            <select
+              className={inputClass}
+              value={draft.media_type}
+              onChange={(e) => set("media_type", e.target.value as "video" | "audio")}
+            >
+              <option value="video">Video</option>
+              <option value="audio">Audio</option>
+            </select>
+          </Field>
+          <Field label="Genre">
+            <input className={inputClass} value={draft.genre} onChange={(e) => set("genre", e.target.value)} />
+          </Field>
+          <Field label="Year">
+            <input type="number" className={inputClass} value={draft.year ?? ""} onChange={(e) => set("year", e.target.value ? Number(e.target.value) : null)} />
+          </Field>
+          <Field label="Rating">
+            <input className={inputClass} value={draft.rating} onChange={(e) => set("rating", e.target.value)} placeholder="TV-PG" />
+          </Field>
+          <Field label="Duration label">
+            <input className={inputClass} value={draft.duration_label} onChange={(e) => set("duration_label", e.target.value)} placeholder="2h 14m" />
+          </Field>
+          <Field label="Seasons">
+            <input type="number" className={inputClass} value={draft.seasons ?? ""} onChange={(e) => set("seasons", e.target.value ? Number(e.target.value) : null)} />
+          </Field>
+          <Field label="Episodes">
+            <input type="number" className={inputClass} value={draft.episodes ?? ""} onChange={(e) => set("episodes", e.target.value ? Number(e.target.value) : null)} />
+          </Field>
+          <Field label="Display order (lower = first)">
+            <input type="number" className={inputClass} value={draft.display_order} onChange={(e) => set("display_order", Number(e.target.value))} />
+          </Field>
+          <Field label={`Duration (seconds)${probing ? " — reading…" : ""}`}>
             <input
-              value={draft.title}
-              onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-              className="mt-1 w-full h-11 rounded-md border border-border bg-elevated px-3 text-sm outline-none"
+              type="number"
+              className={inputClass}
+              value={draft.duration_seconds}
+              onChange={(e) => set("duration_seconds", Number(e.target.value))}
             />
-          </div>
-          <div>
-            <label className="text-xs uppercase tracking-wider text-[color:var(--muted-foreground)]">Description</label>
-            <textarea
-              value={draft.description}
-              onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-              rows={3}
-              className="mt-1 w-full rounded-md border border-border bg-elevated p-3 text-sm outline-none"
-            />
-          </div>
-          <div className="flex gap-2">
-            {(["video", "audio"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setDraft({ ...draft, media_type: t })}
-                className={`h-10 px-4 rounded-md text-sm font-medium capitalize ${
-                  draft.media_type === t ? "bg-primary text-primary-foreground" : "border border-border bg-elevated"
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-          <div>
-            <label className="text-xs uppercase tracking-wider text-[color:var(--muted-foreground)]">Media file</label>
+          </Field>
+        </div>
+
+        <div className="grid gap-4 mt-4 md:grid-cols-2">
+          <Field label="Poster">
+            <MediaPicker value={draft.poster_url} onChange={(u) => set("poster_url", u)} folder="titles/posters" />
+          </Field>
+          <Field label="Backdrop">
+            <MediaPicker value={draft.backdrop_url} onChange={(u) => set("backdrop_url", u)} folder="titles/backdrops" />
+          </Field>
+          <Field label="Video / audio file">
             <MediaPicker
               value={draft.source_url}
               onChange={setSource}
-              kind={draft.media_type === "audio" ? "video" : "video"}
+              kind="video"
               accept={draft.media_type === "audio" ? "audio/*" : "video/*"}
               folder="media-library"
               label="Upload or paste a media URL"
             />
-          </div>
-          <div>
-            <label className="text-xs uppercase tracking-wider text-[color:var(--muted-foreground)]">Poster</label>
-            <MediaPicker
-              value={draft.poster_url}
-              onChange={(u) => setDraft({ ...draft, poster_url: u })}
-              folder="media-posters"
-              label="Upload or paste a poster URL"
-            />
-          </div>
-          <div>
-            <label className="text-xs uppercase tracking-wider text-[color:var(--muted-foreground)]">
-              Duration (seconds){probing && " — reading…"}
-            </label>
-            <input
-              type="number"
-              value={draft.duration_seconds}
-              onChange={(e) => setDraft({ ...draft, duration_seconds: Number(e.target.value) })}
-              className="mt-1 w-full h-11 rounded-md border border-border bg-elevated px-3 text-sm outline-none"
-            />
-            <p className="mt-1 text-xs text-[color:var(--muted-foreground)]">
-              Duration drives automated playout timing and the programme guide.
-            </p>
-          </div>
+          </Field>
+          <Field label="Trailer">
+            <MediaPicker value={draft.trailer_url} onChange={(u) => set("trailer_url", u)} folder="titles/trailers" kind="video" />
+          </Field>
         </div>
+
+        <div className="mt-4 grid gap-4">
+          <Field label="Cast (comma-separated)">
+            <input
+              className={inputClass}
+              value={draft.cast_list.join(", ")}
+              onChange={(e) => set("cast_list", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))}
+            />
+          </Field>
+          <Field label="Synopsis / description">
+            <textarea className={textareaClass} value={draft.description} onChange={(e) => set("description", e.target.value)} />
+          </Field>
+        </div>
+
+        <div className="flex gap-6 mt-4 flex-wrap">
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={draft.publish_to_catalog} onChange={(e) => set("publish_to_catalog", e.target.checked)} />
+            List on-demand (feeds movies / series / podcasts / documentaries)
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={draft.is_published} onChange={(e) => set("is_published", e.target.checked)} /> Published
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={draft.is_featured} onChange={(e) => set("is_featured", e.target.checked)} /> Featured
+          </label>
+        </div>
+        <p className="mt-2 text-xs text-[color:var(--muted-foreground)]">
+          Content published here is owned by this channel and appears on its page as well as the
+          matching platform section. Duration also drives automated playout timing and the guide.
+        </p>
 
         <div className="mt-6 flex justify-end gap-2">
           <button onClick={onClose} className="h-11 px-5 rounded-md border border-border bg-elevated text-sm font-medium">
@@ -177,94 +331,10 @@ function AssetEditor({
   );
 }
 
-function PublishDialog({
-  asset,
-  onClose,
-  onDone,
-}: {
-  asset: MediaAsset;
-  onClose: () => void;
-  onDone: () => void;
-}) {
-  const [kind, setKind] = useState<"movie" | "series" | "podcast" | "documentary">("movie");
-  const [genre, setGenre] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  async function publish() {
-    setBusy(true);
-    const slug = `${slugify(asset.title)}-${asset.id.slice(0, 6)}`;
-    const { data, error } = await supabase
-      .from("cms_titles")
-      .insert({
-        slug,
-        title: asset.title,
-        synopsis: asset.description,
-        kind,
-        genre: genre || null,
-        poster_url: asset.poster_url,
-        backdrop_url: asset.poster_url,
-        stream_url: asset.source_url,
-        duration_minutes: Math.round(asset.duration_seconds / 60) || null,
-        duration_label: formatDuration(asset.duration_seconds),
-        is_published: true,
-      } as never)
-      .select("id")
-      .single();
-    if (error) { setBusy(false); toast.error(error.message); return; }
-    await supabase.from("media_assets").update({ title_id: (data as { id: string }).id } as never).eq("id", asset.id);
-    setBusy(false);
-    toast.success("Published to on-demand");
-    onDone();
-  }
-
-  return (
-    <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm grid place-items-center p-4">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-background p-6">
-        <h3 className="text-lg font-bold">Publish to on-demand</h3>
-        <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
-          “{asset.title}” becomes a viewable title on Lettflix.
-        </p>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          {(["movie", "series", "podcast", "documentary"] as const).map((k) => (
-            <button
-              key={k}
-              onClick={() => setKind(k)}
-              className={`h-10 rounded-md text-sm font-medium capitalize ${
-                kind === k ? "bg-primary text-primary-foreground" : "border border-border bg-elevated"
-              }`}
-            >
-              {k}
-            </button>
-          ))}
-        </div>
-        <input
-          value={genre}
-          onChange={(e) => setGenre(e.target.value)}
-          placeholder="Genre (optional)"
-          className="mt-3 w-full h-11 rounded-md border border-border bg-elevated px-3 text-sm outline-none"
-        />
-        <div className="mt-5 flex justify-end gap-2">
-          <button onClick={onClose} className="h-11 px-5 rounded-md border border-border bg-elevated text-sm font-medium">
-            Cancel
-          </button>
-          <button
-            onClick={publish}
-            disabled={busy}
-            className="h-11 px-6 rounded-md bg-primary text-primary-foreground font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50"
-          >
-            {busy ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />} Publish
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function MediaLibraryPanel({ channelId }: { channelId: string }) {
   const [assets, setAssets] = useState<MediaAsset[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Draft | null>(null);
-  const [publishing, setPublishing] = useState<MediaAsset | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -285,16 +355,17 @@ export function MediaLibraryPanel({ channelId }: { channelId: string }) {
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h3 className="text-lg font-bold">Media library</h3>
+          <h3 className="text-lg font-bold">Content library</h3>
           <p className="text-sm text-[color:var(--muted-foreground)]">
-            Upload videos and audio once, then reuse them in playlists, automated playout and on-demand.
+            Upload once, then reuse in playlists and automated playout — and publish straight to
+            movies, series, podcasts or documentaries under your channel.
           </p>
         </div>
         <button
           onClick={() => setEditing(EMPTY)}
           className="h-11 px-5 rounded-md bg-primary text-primary-foreground font-semibold text-sm inline-flex items-center gap-2"
         >
-          <Plus className="size-4" /> Add media
+          <Plus className="size-4" /> New content
         </button>
       </div>
 
@@ -306,7 +377,7 @@ export function MediaLibraryPanel({ channelId }: { channelId: string }) {
         <div className="rounded-2xl border border-dashed border-border p-10 text-center">
           <Film className="size-8 mx-auto text-[color:var(--muted-foreground)]" />
           <p className="mt-3 text-sm text-[color:var(--muted-foreground)]">
-            Your library is empty. Add your first video or audio file to start building playlists.
+            Your library is empty. Add your first video or audio file to start building your channel.
           </p>
         </div>
       ) : (
@@ -332,27 +403,22 @@ export function MediaLibraryPanel({ channelId }: { channelId: string }) {
                   <button
                     onClick={() =>
                       setEditing({
+                        ...EMPTY,
                         id: a.id,
+                        title_id: a.title_id ?? null,
                         title: a.title,
                         description: a.description ?? "",
                         media_type: a.media_type,
                         source_url: a.source_url,
                         poster_url: a.poster_url,
                         duration_seconds: a.duration_seconds,
+                        publish_to_catalog: Boolean(a.title_id),
                       })
                     }
                     className="h-9 px-3 rounded-md border border-border bg-surface text-xs font-medium"
                   >
                     Edit
                   </button>
-                  {!a.title_id && (
-                    <button
-                      onClick={() => setPublishing(a)}
-                      className="h-9 px-3 rounded-md bg-primary text-primary-foreground text-xs font-semibold"
-                    >
-                      Publish to on-demand
-                    </button>
-                  )}
                   <button
                     onClick={() => remove(a.id)}
                     aria-label={`Delete ${a.title}`}
@@ -368,18 +434,11 @@ export function MediaLibraryPanel({ channelId }: { channelId: string }) {
       )}
 
       {editing && (
-        <AssetEditor
+        <ContentEditor
           value={editing}
           channelId={channelId}
           onClose={() => setEditing(null)}
           onSaved={() => { setEditing(null); load(); }}
-        />
-      )}
-      {publishing && (
-        <PublishDialog
-          asset={publishing}
-          onClose={() => setPublishing(null)}
-          onDone={() => { setPublishing(null); load(); }}
         />
       )}
     </div>
