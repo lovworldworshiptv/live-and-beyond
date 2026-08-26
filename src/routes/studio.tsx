@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { ChannelEditor, type Channel } from "@/routes/admin";
 import { ChannelSetupWizard } from "@/components/studio/channel-setup-wizard";
-import { BroadcastPanel } from "@/components/studio/broadcast-panel";
+import { BroadcastPanel, type TvSource } from "@/components/studio/broadcast-panel";
 import { MediaLibraryPanel } from "@/components/studio/media-library-panel";
 import { PlayoutPanel } from "@/components/studio/playout-panel";
 import { RadioPanel } from "@/components/studio/radio-panel";
@@ -56,7 +56,7 @@ const watchData = Array.from({ length: 14 }, (_, i) => ({
 
 type Tab =
   | "overview" | "channel" | "services" | "content"
-  | "playout" | "broadcast" | "radio" | "analytics" | "team";
+  | "broadcast" | "radio" | "analytics" | "team";
 
 function StudioPage() {
   const { user, isAdmin, isCreator, loading } = useAuth();
@@ -253,7 +253,6 @@ function StudioPage() {
               ["channel", "Channel"],
               ["services", "Services"],
               ["content", "Content"],
-              ["playout", "Automated TV"],
               ["broadcast", "Broadcast"],
               ["radio", "Radio"],
               ["analytics", "Analytics"],
@@ -430,14 +429,6 @@ function StudioPage() {
 
         {tab === "content" && channel?.id && <MediaLibraryPanel channelId={channel.id} />}
 
-        {tab === "playout" && channel?.id && (
-          <PlayoutPanel
-            channelId={channel.id}
-            playoutEnabled={(channel as { playout_enabled?: boolean }).playout_enabled}
-            fallbackPlaylistId={(channel as { fallback_playlist_id?: string | null }).fallback_playlist_id ?? null}
-            onChannelUpdated={load}
-          />
-        )}
 
 
         {tab === "radio" && channel?.id && <RadioPanel channelId={channel.id} />}
@@ -450,7 +441,17 @@ function StudioPage() {
           <BroadcastPanel
             channelId={channel.id}
             channelStreamUrl={channel.stream_url ?? null}
+            tvSource={((channel as { tv_source?: TvSource }).tv_source ?? "none")}
+            isLive={Boolean(channel.is_live)}
             onChannelUpdated={load}
+            playoutPanel={
+              <PlayoutPanel
+                channelId={channel.id}
+                playoutEnabled={(channel as { playout_enabled?: boolean }).playout_enabled}
+                fallbackPlaylistId={(channel as { fallback_playlist_id?: string | null }).fallback_playlist_id ?? null}
+                onChannelUpdated={load}
+              />
+            }
           />
         )}
 

@@ -195,6 +195,7 @@ export type Database = {
           social_links: Json
           stream_url: string | null
           tagline: string | null
+          tv_source: string
           updated_at: string
           updated_by: string | null
           video_library: string[]
@@ -234,6 +235,7 @@ export type Database = {
           social_links?: Json
           stream_url?: string | null
           tagline?: string | null
+          tv_source?: string
           updated_at?: string
           updated_by?: string | null
           video_library?: string[]
@@ -273,6 +275,7 @@ export type Database = {
           social_links?: Json
           stream_url?: string | null
           tagline?: string | null
+          tv_source?: string
           updated_at?: string
           updated_by?: string | null
           video_library?: string[]
@@ -561,6 +564,7 @@ export type Database = {
         Row: {
           backdrop_url: string | null
           cast_list: string[]
+          channel_id: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
@@ -589,6 +593,7 @@ export type Database = {
         Insert: {
           backdrop_url?: string | null
           cast_list?: string[]
+          channel_id?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -617,6 +622,7 @@ export type Database = {
         Update: {
           backdrop_url?: string | null
           cast_list?: string[]
+          channel_id?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -642,7 +648,15 @@ export type Database = {
           updated_by?: string | null
           year?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cms_titles_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       creator_applications: {
         Row: {
