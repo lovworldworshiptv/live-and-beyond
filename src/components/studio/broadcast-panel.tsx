@@ -113,7 +113,6 @@ export function BroadcastPanel({
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [externalUrl, setExternalUrl] = useState(channelStreamUrl ?? "");
-  const [newTitle, setNewTitle] = useState("");
   const [live, setLive] = useState(isLive);
 
   const provision = useServerFn(provisionLiveInput);
@@ -142,6 +141,21 @@ export function BroadcastPanel({
   const showIngest = !isTv || source === "ingest";
   const showExternal = !isTv || source === "external";
   const showPlayout = isTv && source === "playout";
+  const encoderConnected = input?.status === "live" || input?.status === "connected";
+
+  // Poll ingest status so Go live unlocks as soon as the encoder connects.
+  useEffect(() => {
+    if (!showIngest || !input?.id || encoderConnected) return;
+    const id = setInterval(async () => {
+      try {
+        const row = await refresh({ data: { channelId, service } });
+        if (row) setInput(row as unknown as LiveInput);
+      } catch { /* transient */ }
+    }, 15000);
+    return () => clearInterval(id);
+  }, [showIngest, input?.id, encoderConnected, refresh, channelId, service]);
+
+
 
   async function notifyGoingLive(title?: string) {
     try {
@@ -226,38 +240,48 @@ export function BroadcastPanel({
     onChannelUpdated?.();
   }
 
-  async function createSession() {
-    const title = newTitle.trim() || "Live broadcast";
-    const { error } = await supabase.from("live_sessions").insert({
-      channel_id: channelId,
-      live_input_id: input?.id ?? null,
-      title,
-      status: "scheduled",
-      playback_hls_url: input?.playback_hls_url ?? (externalUrl || null),
-    } as never);
-    if (error) { toast.error(error.message); return; }
-    setNewTitle("");
-    toast.success("Broadcast scheduled");
-    load();
+  /** Push the ingest playback URL to the channel and take it on air. */
+  async function goLiveFromIngest(next: boolean) {
+    if (next && !encoderConnected) {
+      toast.error("Your encoder isn't connected yet");
+      return;
+    }
+    setBusy(true);
+    try {
+      if (next) {
+        const url = input?.playback_hls_url ?? null;
+        const { error } = await supabase
+          .from("cms_channels")
+          .update({ is_live: true, stream_url: url } as never)
+          .eq("id", channelId);
+        if (error) { toast.error(error.message); return; }
+        await supabase.from("live_sessions").insert({
+          channel_id: channelId,
+          live_input_id: input?.id ?? null,
+          title: "Live broadcast",
+          status: "live",
+          started_at: new Date().toISOString(),
+          playback_hls_url: url,
+        } as never);
+        setLive(true);
+        await notifyGoingLive();
+        toast.success("You are live");
+      } else {
+        const { error } = await supabase.from("cms_channels").update({ is_live: false } as never).eq("id", channelId);
+        if (error) { toast.error(error.message); return; }
+        await supabase
+          .from("live_sessions")
+          .update({ status: "ended", ended_at: new Date().toISOString() } as never)
+          .eq("channel_id", channelId)
+          .eq("status", "live");
+        setLive(false);
+        toast.success("Broadcast ended");
+      }
+      onChannelUpdated?.();
+      load();
+    } finally { setBusy(false); }
   }
 
-  async function setSessionState(id: string, next: "live" | "ended") {
-    const patch =
-      next === "live"
-        ? { status: "live", started_at: new Date().toISOString() }
-        : { status: "ended", ended_at: new Date().toISOString() };
-    const { error } = await supabase.from("live_sessions").update(patch as never).eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    await supabase.from("cms_channels").update({ is_live: next === "live" } as never).eq("id", channelId);
-    setLive(next === "live");
-    if (next === "live") {
-      const session = sessions.find((s) => s.id === id);
-      await notifyGoingLive(session?.title ? `Live now: ${session.title}` : undefined);
-    }
-    toast.success(next === "live" ? "You are live" : "Broadcast ended");
-    onChannelUpdated?.();
-    load();
-  }
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -363,7 +387,41 @@ export function BroadcastPanel({
               <Field label="RTMPS server" value={input.rtmps_url} />
               <Field label="Stream key" value={input.rtmps_stream_key} secret />
               <Field label="SRT URL" value={input.srt_url} secret />
-              <Field label="Playback (HLS)" value={input.playback_hls_url} />
+              <div className="flex items-end gap-2 flex-wrap">
+                <div className="flex-1 min-w-[240px]">
+                  <Field label="Playback (HLS)" value={input.playback_hls_url} />
+                </div>
+                {isTv && source === "ingest" && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => goLiveFromIngest(!live)}
+                      disabled={busy || (!live && !encoderConnected)}
+                      title={!live && !encoderConnected ? "Connect and start your encoder first" : undefined}
+                      className={`h-10 px-5 rounded-md font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                        live ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
+                      }`}
+                    >
+                      {live ? <><Square className="size-3.5" /> Go off air</> : <><Circle className="size-3 fill-current" /> Go live</>}
+                    </button>
+                    <a
+                      href={`/studio/preview?url=${encodeURIComponent(input.playback_hls_url ?? "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`h-10 px-5 rounded-md border border-border bg-surface text-sm font-medium inline-flex items-center gap-2 hover:bg-elevated ${
+                        input.playback_hls_url ? "" : "pointer-events-none opacity-50"
+                      }`}
+                    >
+                      <Eye className="size-4" /> Preview
+                    </a>
+                  </div>
+                )}
+              </div>
+              {isTv && source === "ingest" && !encoderConnected && !live && (
+                <p className="text-xs text-[color:var(--muted-foreground)]">
+                  Go live unlocks once your encoder connects. Start streaming, then hit Status to refresh.
+                </p>
+              )}
               <p className="text-xs text-[color:var(--muted-foreground)]">
                 Never share your stream key. Recording is {input.recording_enabled ? "on" : "off"} — finished
                 broadcasts can be published to your on-demand library.
@@ -441,52 +499,6 @@ export function BroadcastPanel({
         </section>
       )}
 
-      {/* Broadcasts */}
-      {showIngest && (
-        <section className="rounded-2xl border border-border bg-elevated/40 p-6">
-          <h3 className="text-lg font-bold">Broadcasts</h3>
-          <div className="mt-4 flex gap-2 flex-wrap">
-            <input
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Broadcast title"
-              aria-label="Broadcast title"
-              className="flex-1 min-w-[240px] h-11 rounded-md border border-border bg-surface px-3 text-sm outline-none"
-            />
-            <button onClick={createSession} className="h-11 px-5 rounded-md bg-primary text-primary-foreground font-semibold text-sm inline-flex items-center gap-2">
-              <Plus className="size-4" /> Schedule
-            </button>
-          </div>
-
-          <div className="mt-5 space-y-2">
-            {sessions.length === 0 && (
-              <p className="text-sm text-[color:var(--muted-foreground)]">No broadcasts yet.</p>
-            )}
-            {sessions.map((s) => (
-              <div key={s.id} className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 flex-wrap">
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold truncate">{s.title}</div>
-                  <div className="text-xs text-[color:var(--muted-foreground)] capitalize">
-                    {s.status}
-                    {s.started_at && ` · started ${new Date(s.started_at).toLocaleString()}`}
-                  </div>
-                </div>
-                {s.status !== "ended" && s.status !== "cancelled" && (
-                  s.status === "live" ? (
-                    <button onClick={() => setSessionState(s.id, "ended")} className="h-9 px-4 rounded-md border border-border bg-elevated text-sm font-medium inline-flex items-center gap-2">
-                      <Square className="size-3.5" /> End
-                    </button>
-                  ) : (
-                    <button onClick={() => setSessionState(s.id, "live")} className="h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center gap-2">
-                      <Circle className="size-3 fill-current" /> Go live
-                    </button>
-                  )
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 }
