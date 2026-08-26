@@ -441,52 +441,6 @@ export function BroadcastPanel({
         </section>
       )}
 
-      {/* Broadcasts */}
-      {showIngest && (
-        <section className="rounded-2xl border border-border bg-elevated/40 p-6">
-          <h3 className="text-lg font-bold">Broadcasts</h3>
-          <div className="mt-4 flex gap-2 flex-wrap">
-            <input
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Broadcast title"
-              aria-label="Broadcast title"
-              className="flex-1 min-w-[240px] h-11 rounded-md border border-border bg-surface px-3 text-sm outline-none"
-            />
-            <button onClick={createSession} className="h-11 px-5 rounded-md bg-primary text-primary-foreground font-semibold text-sm inline-flex items-center gap-2">
-              <Plus className="size-4" /> Schedule
-            </button>
-          </div>
-
-          <div className="mt-5 space-y-2">
-            {sessions.length === 0 && (
-              <p className="text-sm text-[color:var(--muted-foreground)]">No broadcasts yet.</p>
-            )}
-            {sessions.map((s) => (
-              <div key={s.id} className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 flex-wrap">
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold truncate">{s.title}</div>
-                  <div className="text-xs text-[color:var(--muted-foreground)] capitalize">
-                    {s.status}
-                    {s.started_at && ` · started ${new Date(s.started_at).toLocaleString()}`}
-                  </div>
-                </div>
-                {s.status !== "ended" && s.status !== "cancelled" && (
-                  s.status === "live" ? (
-                    <button onClick={() => setSessionState(s.id, "ended")} className="h-9 px-4 rounded-md border border-border bg-elevated text-sm font-medium inline-flex items-center gap-2">
-                      <Square className="size-3.5" /> End
-                    </button>
-                  ) : (
-                    <button onClick={() => setSessionState(s.id, "live")} className="h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center gap-2">
-                      <Circle className="size-3 fill-current" /> Go live
-                    </button>
-                  )
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 }
