@@ -131,10 +131,21 @@ function ChannelPage() {
     const slug = channelId;
     (async () => {
       const { data: ch } = await supabase
-        .from("cms_channels").select("id, playout_enabled").eq("slug", slug).maybeSingle();
-      const row = ch as { id?: string; playout_enabled?: boolean } | null;
+        .from("cms_channels").select("id, playout_enabled, tv_source").eq("slug", slug).maybeSingle();
+      const row = ch as { id?: string; playout_enabled?: boolean; tv_source?: string } | null;
       const chId = row?.id;
       if (!chId || cancelled) return;
+
+      // A channel broadcasts from exactly one source.
+      const src = row?.tv_source ?? (row?.playout_enabled ? "playout" : "external");
+
+      if (src === "playout") {
+        const np = await resolveNowPlaying(chId);
+        if (!cancelled) setPlayout(np);
+        return;
+      }
+      if (src === "external") return; // the channel's configured stream URL is used
+
       const { data } = await supabase
         .from("live_sessions")
         .select("playback_hls_url")
@@ -144,12 +155,7 @@ function ChannelPage() {
         .limit(1)
         .maybeSingle();
       const url = (data as { playback_hls_url?: string | null } | null)?.playback_hls_url ?? null;
-      if (cancelled) return;
-      if (url) { setLiveUrl(url); return; }
-      if (row?.playout_enabled) {
-        const np = await resolveNowPlaying(chId);
-        if (!cancelled) setPlayout(np);
-      }
+      if (!cancelled && url) setLiveUrl(url);
     })();
     return () => { cancelled = true; };
   }, [channelId]);
@@ -158,8 +164,8 @@ function ChannelPage() {
 
   const streamSrc =
     liveUrl ||
-    channel?.streamUrl ||
     playout?.asset.source_url ||
+    channel?.streamUrl ||
     "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
   useHlsAttach(mediaRef, streamSrc, playing);
 
@@ -176,13 +182,13 @@ function ChannelPage() {
 
   // Join automated playout mid-programme, exactly like a real TV feed.
   useEffect(() => {
-    if (!playing || !playout || liveUrl || channel?.streamUrl) return;
+    if (!playing || !playout || liveUrl) return;
     const m = mediaRef.current;
     if (!m) return;
     const seek = () => { try { m.currentTime = playout.offsetSeconds; } catch { /* not seekable yet */ } };
     if (m.readyState >= 1) seek();
     else m.addEventListener("loadedmetadata", seek, { once: true });
-  }, [playing, playout, liveUrl, channel?.streamUrl]);
+  }, [playing, playout, liveUrl]);
 
 
 
