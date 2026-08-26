@@ -226,38 +226,48 @@ export function BroadcastPanel({
     onChannelUpdated?.();
   }
 
-  async function createSession() {
-    const title = newTitle.trim() || "Live broadcast";
-    const { error } = await supabase.from("live_sessions").insert({
-      channel_id: channelId,
-      live_input_id: input?.id ?? null,
-      title,
-      status: "scheduled",
-      playback_hls_url: input?.playback_hls_url ?? (externalUrl || null),
-    } as never);
-    if (error) { toast.error(error.message); return; }
-    setNewTitle("");
-    toast.success("Broadcast scheduled");
-    load();
+  /** Push the ingest playback URL to the channel and take it on air. */
+  async function goLiveFromIngest(next: boolean) {
+    if (next && !encoderConnected) {
+      toast.error("Your encoder isn't connected yet");
+      return;
+    }
+    setBusy(true);
+    try {
+      if (next) {
+        const url = input?.playback_hls_url ?? null;
+        const { error } = await supabase
+          .from("cms_channels")
+          .update({ is_live: true, stream_url: url } as never)
+          .eq("id", channelId);
+        if (error) { toast.error(error.message); return; }
+        await supabase.from("live_sessions").insert({
+          channel_id: channelId,
+          live_input_id: input?.id ?? null,
+          title: newTitle.trim() || "Live broadcast",
+          status: "live",
+          started_at: new Date().toISOString(),
+          playback_hls_url: url,
+        } as never);
+        setLive(true);
+        await notifyGoingLive();
+        toast.success("You are live");
+      } else {
+        const { error } = await supabase.from("cms_channels").update({ is_live: false } as never).eq("id", channelId);
+        if (error) { toast.error(error.message); return; }
+        await supabase
+          .from("live_sessions")
+          .update({ status: "ended", ended_at: new Date().toISOString() } as never)
+          .eq("channel_id", channelId)
+          .eq("status", "live");
+        setLive(false);
+        toast.success("Broadcast ended");
+      }
+      onChannelUpdated?.();
+      load();
+    } finally { setBusy(false); }
   }
 
-  async function setSessionState(id: string, next: "live" | "ended") {
-    const patch =
-      next === "live"
-        ? { status: "live", started_at: new Date().toISOString() }
-        : { status: "ended", ended_at: new Date().toISOString() };
-    const { error } = await supabase.from("live_sessions").update(patch as never).eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    await supabase.from("cms_channels").update({ is_live: next === "live" } as never).eq("id", channelId);
-    setLive(next === "live");
-    if (next === "live") {
-      const session = sessions.find((s) => s.id === id);
-      await notifyGoingLive(session?.title ? `Live now: ${session.title}` : undefined);
-    }
-    toast.success(next === "live" ? "You are live" : "Broadcast ended");
-    onChannelUpdated?.();
-    load();
-  }
 
   return (
     <div className="space-y-6 max-w-4xl">
