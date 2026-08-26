@@ -142,6 +142,7 @@ export function BroadcastPanel({
   const showIngest = !isTv || source === "ingest";
   const showExternal = !isTv || source === "external";
   const showPlayout = isTv && source === "playout";
+  const encoderConnected = input?.status === "live" || input?.status === "connected";
 
   async function notifyGoingLive(title?: string) {
     try {
