@@ -363,7 +363,41 @@ export function BroadcastPanel({
               <Field label="RTMPS server" value={input.rtmps_url} />
               <Field label="Stream key" value={input.rtmps_stream_key} secret />
               <Field label="SRT URL" value={input.srt_url} secret />
-              <Field label="Playback (HLS)" value={input.playback_hls_url} />
+              <div className="flex items-end gap-2 flex-wrap">
+                <div className="flex-1 min-w-[240px]">
+                  <Field label="Playback (HLS)" value={input.playback_hls_url} />
+                </div>
+                {isTv && source === "ingest" && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => goLiveFromIngest(!live)}
+                      disabled={busy || (!live && !encoderConnected)}
+                      title={!live && !encoderConnected ? "Connect and start your encoder first" : undefined}
+                      className={`h-10 px-5 rounded-md font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                        live ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
+                      }`}
+                    >
+                      {live ? <><Square className="size-3.5" /> Go off air</> : <><Circle className="size-3 fill-current" /> Go live</>}
+                    </button>
+                    <a
+                      href={`/studio/preview?url=${encodeURIComponent(input.playback_hls_url ?? "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`h-10 px-5 rounded-md border border-border bg-surface text-sm font-medium inline-flex items-center gap-2 hover:bg-elevated ${
+                        input.playback_hls_url ? "" : "pointer-events-none opacity-50"
+                      }`}
+                    >
+                      <Eye className="size-4" /> Preview
+                    </a>
+                  </div>
+                )}
+              </div>
+              {isTv && source === "ingest" && !encoderConnected && !live && (
+                <p className="text-xs text-[color:var(--muted-foreground)]">
+                  Go live unlocks once your encoder connects. Start streaming, then hit Status to refresh.
+                </p>
+              )}
               <p className="text-xs text-[color:var(--muted-foreground)]">
                 Never share your stream key. Recording is {input.recording_enabled ? "on" : "off"} — finished
                 broadcasts can be published to your on-demand library.
