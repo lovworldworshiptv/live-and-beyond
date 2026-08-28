@@ -279,6 +279,56 @@ export function PlayoutPanel({
                 <div>
                   <div className="text-sm font-semibold">Library</div>
                   <div className="text-xs text-[color:var(--muted-foreground)]">Click to append to the playlist.</div>
+
+                  <div className="mt-3 rounded-xl border border-border bg-surface p-3 space-y-2">
+                    <div className="text-xs font-semibold">Add media by URL</div>
+                    <input
+                      value={urlTitle}
+                      onChange={(e) => setUrlTitle(e.target.value)}
+                      placeholder="Title"
+                      aria-label="Media title"
+                      className="w-full h-10 rounded-md border border-border bg-elevated px-3 text-sm outline-none"
+                    />
+                    <input
+                      value={urlSrc}
+                      onChange={(e) => setUrlSrc(e.target.value)}
+                      placeholder="https://… (MP4, MP3 or HLS)"
+                      aria-label="Media URL"
+                      className="w-full h-10 rounded-md border border-border bg-elevated px-3 text-sm outline-none"
+                    />
+                    <div className="flex gap-2">
+                      <select
+                        value={urlType}
+                        onChange={(e) => setUrlType(e.target.value as "video" | "audio")}
+                        aria-label="Media type"
+                        className="h-10 rounded-md border border-border bg-elevated px-2 text-sm outline-none"
+                      >
+                        <option value="video">Video</option>
+                        <option value="audio">Audio</option>
+                      </select>
+                      <input
+                        type="number"
+                        min={0}
+                        value={urlDuration}
+                        onChange={(e) => setUrlDuration(Number(e.target.value))}
+                        placeholder="Seconds"
+                        aria-label="Duration in seconds"
+                        className="w-28 h-10 rounded-md border border-border bg-elevated px-3 text-sm outline-none"
+                      />
+                      <button
+                        onClick={() => addUrlMedia(activePlaylist.id)}
+                        disabled={addingUrl}
+                        className="flex-1 h-10 rounded-md bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60"
+                      >
+                        {addingUrl ? <Loader2 className="size-4 animate-spin" /> : <LinkIcon className="size-4" />}
+                        Add to playlist
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-[color:var(--muted-foreground)]">
+                      Duration is detected automatically for direct files; enter it manually for live/HLS URLs.
+                    </p>
+                  </div>
+
                   <div className="mt-3 space-y-2 max-h-[380px] overflow-y-auto pr-1">
                     {assets.length === 0 && (
                       <p className="text-sm text-[color:var(--muted-foreground)]">
