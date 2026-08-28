@@ -164,7 +164,15 @@ function ChannelPage() {
       if (!cancelled && url) setLiveUrl(url);
     })();
     return () => { cancelled = true; };
-  }, [channelId]);
+  }, [channelId, playoutTick]);
+
+  // When the current automated programme ends, roll on to the next one.
+  useEffect(() => {
+    if (!playout) return;
+    const ms = Math.max(1000, playout.endsAt.getTime() - Date.now());
+    const t = setTimeout(() => setPlayoutTick((n) => n + 1), ms);
+    return () => clearTimeout(t);
+  }, [playout]);
 
   const isFollowing = dbChannelId ? followingDb : isFollowingLocal(channel?.id ?? "");
 
@@ -194,6 +202,12 @@ function ChannelPage() {
     const seek = () => { try { m.currentTime = playout.offsetSeconds; } catch { /* not seekable yet */ } };
     if (m.readyState >= 1) seek();
     else m.addEventListener("loadedmetadata", seek, { once: true });
+    const advance = () => setPlayoutTick((n) => n + 1);
+    m.addEventListener("ended", advance);
+    return () => {
+      m.removeEventListener("loadedmetadata", seek);
+      m.removeEventListener("ended", advance);
+    };
   }, [playing, playout, liveUrl]);
 
 
