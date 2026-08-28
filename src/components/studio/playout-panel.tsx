@@ -34,6 +34,11 @@ export function PlayoutPanel({
   const [enabled, setEnabled] = useState(Boolean(playoutEnabled));
   const [fallback, setFallback] = useState<string | null>(fallbackPlaylistId ?? null);
   const [now, setNow] = useState<NowPlaying | null>(null);
+  const [urlTitle, setUrlTitle] = useState("");
+  const [urlSrc, setUrlSrc] = useState("");
+  const [urlType, setUrlType] = useState<"video" | "audio">("video");
+  const [urlDuration, setUrlDuration] = useState(0);
+  const [addingUrl, setAddingUrl] = useState(false);
 
   const assetMap = useMemo(() => new Map(assets.map((a) => [a.id, a])), [assets]);
 
