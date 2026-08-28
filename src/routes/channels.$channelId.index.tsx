@@ -124,6 +124,7 @@ function ChannelPage() {
   // which in turn takes precedence over automated playout.
   const [liveUrl, setLiveUrl] = useState<string | null>(null);
   const [playout, setPlayout] = useState<NowPlaying | null>(null);
+  const [playoutTick, setPlayoutTick] = useState(0);
   useEffect(() => {
     let cancelled = false;
     setLiveUrl(null);
@@ -131,8 +132,13 @@ function ChannelPage() {
     const slug = channelId;
     (async () => {
       const { data: ch } = await supabase
-        .from("cms_channels").select("id, playout_enabled, tv_source").eq("slug", slug).maybeSingle();
-      const row = ch as { id?: string; playout_enabled?: boolean; tv_source?: string } | null;
+        .from("cms_channels")
+        .select("id, playout_enabled, tv_source, fallback_playlist_id")
+        .eq("slug", slug)
+        .maybeSingle();
+      const row = ch as {
+        id?: string; playout_enabled?: boolean; tv_source?: string; fallback_playlist_id?: string | null;
+      } | null;
       const chId = row?.id;
       if (!chId || cancelled) return;
 
@@ -140,7 +146,7 @@ function ChannelPage() {
       const src = row?.tv_source ?? (row?.playout_enabled ? "playout" : "external");
 
       if (src === "playout") {
-        const np = await resolveNowPlaying(chId);
+        const np = await resolveChannelPlayout(chId, row?.fallback_playlist_id ?? null);
         if (!cancelled) setPlayout(np);
         return;
       }
