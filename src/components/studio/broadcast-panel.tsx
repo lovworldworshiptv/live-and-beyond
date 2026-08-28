@@ -502,14 +502,23 @@ export function BroadcastPanel({
             </button>
           </div>
           {isTv && source === "external" && (
-            <button
-              onClick={() => setChannelLive(!live)}
-              className={`mt-4 h-11 px-6 rounded-md font-semibold text-sm inline-flex items-center gap-2 ${
-                live ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
-              }`}
+            <span
+              onMouseEnter={() => { if (blockedBy("external")) warnBlocked(); }}
+              className="mt-4 inline-block"
             >
-              {live ? <><Square className="size-3.5" /> Go off air</> : <><Circle className="size-3 fill-current" /> Go live</>}
-            </button>
+              <button
+                onClick={() => setChannelLive(!live)}
+                disabled={Boolean(blockedBy("external"))}
+                title={blockedBy("external") ? "Already broadcasting via another broadcast source." : undefined}
+                className={`h-11 px-6 rounded-md font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  live && !blockedBy("external") ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
+                }`}
+              >
+                {live && !blockedBy("external")
+                  ? <><Square className="size-3.5" /> Go off air</>
+                  : <><Circle className="size-3 fill-current" /> Go live</>}
+              </button>
+            </span>
           )}
         </section>
       )}
