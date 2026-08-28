@@ -534,14 +534,20 @@ export function BroadcastPanel({
                 continuously and joins viewers mid-programme.
               </p>
             </div>
-            <button
-              onClick={() => setChannelLive(!live)}
-              className={`h-11 px-6 rounded-md font-semibold text-sm inline-flex items-center gap-2 ${
-                live ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
-              }`}
-            >
-              {live ? <><Square className="size-3.5" /> Go off air</> : <><Circle className="size-3 fill-current" /> Go live</>}
-            </button>
+            <span onMouseEnter={() => { if (blockedBy("playout")) warnBlocked(); }}>
+              <button
+                onClick={() => setChannelLive(!live)}
+                disabled={Boolean(blockedBy("playout"))}
+                title={blockedBy("playout") ? "Already broadcasting via another broadcast source." : undefined}
+                className={`h-11 px-6 rounded-md font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  live && !blockedBy("playout") ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
+                }`}
+              >
+                {live && !blockedBy("playout")
+                  ? <><Square className="size-3.5" /> Go off air</>
+                  : <><Circle className="size-3 fill-current" /> Go live</>}
+              </button>
+            </span>
           </div>
           <div className="mt-6">{playoutPanel}</div>
         </section>
