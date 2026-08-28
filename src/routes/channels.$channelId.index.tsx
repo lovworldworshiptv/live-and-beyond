@@ -13,7 +13,7 @@ import { useHlsAttach } from "@/hooks/use-hls";
 import { useFollowing, useSettings } from "@/lib/personal";
 import { useChannelFollow } from "@/lib/follows";
 import { recordPlaybackEvent } from "@/lib/analytics";
-import { resolveNowPlaying, type NowPlaying } from "@/lib/playout";
+import { resolveChannelPlayout, type NowPlaying } from "@/lib/playout";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/channels/$channelId/")({
