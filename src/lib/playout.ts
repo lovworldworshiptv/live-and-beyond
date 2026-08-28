@@ -180,6 +180,72 @@ export async function resolveNowPlaying(
   return null;
 }
 
+/**
+ * Loop a playlist continuously from a fixed epoch (midnight today), so every
+ * viewer joining the automated channel lands at the same point in the loop.
+ */
+export async function resolveFallbackNowPlaying(
+  channelId: string,
+  playlistId: string,
+  at: Date = new Date(),
+): Promise<NowPlaying | null> {
+  const [items, assets] = await Promise.all([fetchPlaylistItems(playlistId), fetchMediaAssets(channelId)]);
+  const assetMap = new Map(assets.map((a) => [a.id, a]));
+  const playable = items.filter((i) => {
+    const a = assetMap.get(i.media_asset_id);
+    return a && a.status === "ready" && a.source_url && a.duration_seconds > 0;
+  });
+  if (!playable.length) return null;
+  const total = playlistDuration(playable, assetMap);
+  if (total <= 0) return null;
+
+  const epoch = new Date(at);
+  epoch.setHours(0, 0, 0, 0);
+  let elapsed = Math.floor((at.getTime() - epoch.getTime()) / 1000) % total;
+
+  for (const item of playable) {
+    const asset = assetMap.get(item.media_asset_id)!;
+    if (elapsed < asset.duration_seconds) {
+      return {
+        schedule: {
+          id: `fallback:${playlistId}`,
+          channel_id: channelId,
+          playlist_id: playlistId,
+          name: "Fallback programming",
+          service: "tv",
+          starts_at: epoch.toISOString(),
+          duration_minutes: Math.round(total / 60),
+          recurrence: "daily",
+          days_of_week: [],
+          priority: -1,
+          is_active: true,
+        },
+        asset,
+        offsetSeconds: elapsed,
+        endsAt: new Date(at.getTime() + (asset.duration_seconds - elapsed) * 1000),
+      };
+    }
+    elapsed -= asset.duration_seconds;
+  }
+  return null;
+}
+
+/**
+ * What the automated channel should be showing right now: the scheduled block
+ * if one is on air, otherwise the channel's looping fallback playlist.
+ */
+export async function resolveChannelPlayout(
+  channelId: string,
+  fallbackPlaylistId?: string | null,
+  service: "tv" | "radio" = "tv",
+  at: Date = new Date(),
+): Promise<NowPlaying | null> {
+  const scheduled = await resolveNowPlaying(channelId, service, at);
+  if (scheduled) return scheduled;
+  if (fallbackPlaylistId) return resolveFallbackNowPlaying(channelId, fallbackPlaylistId, at);
+  return null;
+}
+
 export function formatDuration(seconds: number) {
   if (!seconds) return "—";
   const h = Math.floor(seconds / 3600);
