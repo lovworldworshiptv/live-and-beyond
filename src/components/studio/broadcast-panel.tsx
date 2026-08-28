@@ -419,17 +419,30 @@ export function BroadcastPanel({
                 </div>
                 {isTv && source === "ingest" && (
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => goLiveFromIngest(!live)}
-                      disabled={busy || (!live && !encoderConnected)}
-                      title={!live && !encoderConnected ? "Connect and start your encoder first" : undefined}
-                      className={`h-10 px-5 rounded-md font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                        live ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
-                      }`}
+                    <span
+                      onMouseEnter={() => { if (blockedBy("ingest")) warnBlocked(); }}
+                      className={blockedBy("ingest") ? "cursor-not-allowed" : undefined}
                     >
-                      {live ? <><Square className="size-3.5" /> Go off air</> : <><Circle className="size-3 fill-current" /> Go live</>}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => goLiveFromIngest(!live)}
+                        disabled={busy || Boolean(blockedBy("ingest")) || (!live && !encoderConnected)}
+                        title={
+                          blockedBy("ingest")
+                            ? "Already broadcasting via another broadcast source."
+                            : !live && !encoderConnected
+                              ? "Connect and start your encoder first"
+                              : undefined
+                        }
+                        className={`h-10 px-5 rounded-md font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          live && !blockedBy("ingest") ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
+                        }`}
+                      >
+                        {live && !blockedBy("ingest")
+                          ? <><Square className="size-3.5" /> Go off air</>
+                          : <><Circle className="size-3 fill-current" /> Go live</>}
+                      </button>
+                    </span>
                     <a
                       href={`/studio/preview?url=${encodeURIComponent(input.playback_hls_url ?? "")}`}
                       target="_blank"
