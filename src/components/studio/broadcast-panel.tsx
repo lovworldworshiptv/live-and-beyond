@@ -188,7 +188,7 @@ export function BroadcastPanel({
   async function handleProvision() {
     setBusy(true);
     try {
-      const row = await provision({ data: { channelId, service, recording: true } });
+      const row = await provision({ data: { channelId, service, recording: false } });
       setInput(row as unknown as LiveInput);
       toast.success("Ingest endpoint ready");
     } catch (e) {
