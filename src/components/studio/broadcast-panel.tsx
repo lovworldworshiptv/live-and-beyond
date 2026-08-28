@@ -58,6 +58,10 @@ const SOURCE_OPTIONS: { key: Exclude<TvSource, "none">; label: string; blurb: st
   },
 ];
 
+function sourceLabel(key: TvSource | null) {
+  return SOURCE_OPTIONS.find((o) => o.key === key)?.label ?? "another source";
+}
+
 function Field({ label, value, secret }: { label: string; value: string | null; secret?: boolean }) {
   const [shown, setShown] = useState(!secret);
   if (!value) return null;
