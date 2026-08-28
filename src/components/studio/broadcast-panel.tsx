@@ -58,6 +58,10 @@ const SOURCE_OPTIONS: { key: Exclude<TvSource, "none">; label: string; blurb: st
   },
 ];
 
+function sourceLabel(key: TvSource | null) {
+  return SOURCE_OPTIONS.find((o) => o.key === key)?.label ?? "another source";
+}
+
 function Field({ label, value, secret }: { label: string; value: string | null; secret?: boolean }) {
   const [shown, setShown] = useState(!secret);
   if (!value) return null;
@@ -114,6 +118,8 @@ export function BroadcastPanel({
   const [loading, setLoading] = useState(true);
   const [externalUrl, setExternalUrl] = useState(channelStreamUrl ?? "");
   const [live, setLive] = useState(isLive);
+  /** The source that currently holds the channel on air (persisted as cms_channels.tv_source). */
+  const [liveSource, setLiveSource] = useState<TvSource | null>(isLive ? tvSource : null);
 
   const provision = useServerFn(provisionLiveInput);
   const refresh = useServerFn(refreshLiveInput);
@@ -133,8 +139,12 @@ export function BroadcastPanel({
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { setExternalUrl(channelStreamUrl ?? ""); }, [channelStreamUrl]);
-  useEffect(() => { setSource(tvSource); }, [tvSource]);
-  useEffect(() => { setLive(isLive); }, [isLive]);
+  // While on air, keep showing whatever source tab the creator opened.
+  useEffect(() => { if (!live) setSource(tvSource); }, [tvSource, live]);
+  useEffect(() => {
+    setLive(isLive);
+    setLiveSource(isLive ? tvSource : null);
+  }, [isLive, tvSource]);
 
   const liveSession = useMemo(() => sessions.find((s) => s.status === "live") ?? null, [sessions]);
   const isTv = service === "tv";
@@ -166,29 +176,42 @@ export function BroadcastPanel({
     }
   }
 
-  /** A channel broadcasts from exactly one source — switching one off switches the others off. */
+  /**
+   * A channel broadcasts from exactly one source. While on air, switching tabs only
+   * previews another source's settings — the live source keeps broadcasting until
+   * the creator explicitly goes off air.
+   */
   async function chooseSource(next: Exclude<TvSource, "none">) {
     const prev = source;
+    if (live && liveSource) {
+      setSource(next);
+      if (next !== liveSource) {
+        toast.info(`Still broadcasting via ${sourceLabel(liveSource)} — go off air to switch.`);
+      }
+      return;
+    }
     setSource(next);
     const { error } = await supabase
       .from("cms_channels")
-      .update({
-        tv_source: next,
-        playout_enabled: next === "playout",
-        // Leaving a source takes the channel off air until the new source goes live.
-        ...(next !== prev ? { is_live: false } : {}),
-      } as never)
+      .update({ tv_source: next, playout_enabled: next === "playout" } as never)
       .eq("id", channelId);
     if (error) { setSource(prev); toast.error(error.message); return; }
-    if (next !== prev) setLive(false);
-    toast.success(`Broadcast source set to ${SOURCE_OPTIONS.find((o) => o.key === next)?.label}`);
+    toast.success(`Broadcast source set to ${sourceLabel(next)}`);
     onChannelUpdated?.();
+  }
+
+  /** Guard shown when a different source already holds the channel on air. */
+  function blockedBy(current: TvSource) {
+    return live && liveSource && liveSource !== current ? liveSource : null;
+  }
+  function warnBlocked() {
+    toast.warning("Already broadcasting via another broadcast source.");
   }
 
   async function handleProvision() {
     setBusy(true);
     try {
-      const row = await provision({ data: { channelId, service, recording: true } });
+      const row = await provision({ data: { channelId, service, recording: false } });
       setInput(row as unknown as LiveInput);
       toast.success("Ingest endpoint ready");
     } catch (e) {
@@ -235,6 +258,7 @@ export function BroadcastPanel({
     const { error } = await supabase.from("cms_channels").update({ is_live: next } as never).eq("id", channelId);
     if (error) { toast.error(error.message); return; }
     setLive(next);
+    setLiveSource(next ? source : null);
     if (next) await notifyGoingLive();
     toast.success(next === true ? "Your channel is live" : "Channel is off air");
     onChannelUpdated?.();
@@ -264,6 +288,7 @@ export function BroadcastPanel({
           playback_hls_url: url,
         } as never);
         setLive(true);
+        setLiveSource("ingest");
         await notifyGoingLive();
         toast.success("You are live");
       } else {
@@ -275,6 +300,7 @@ export function BroadcastPanel({
           .eq("channel_id", channelId)
           .eq("status", "live");
         setLive(false);
+        setLiveSource(null);
         toast.success("Broadcast ended");
       }
       onChannelUpdated?.();
@@ -393,17 +419,30 @@ export function BroadcastPanel({
                 </div>
                 {isTv && source === "ingest" && (
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => goLiveFromIngest(!live)}
-                      disabled={busy || (!live && !encoderConnected)}
-                      title={!live && !encoderConnected ? "Connect and start your encoder first" : undefined}
-                      className={`h-10 px-5 rounded-md font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                        live ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
-                      }`}
+                    <span
+                      onMouseEnter={() => { if (blockedBy("ingest")) warnBlocked(); }}
+                      className={blockedBy("ingest") ? "cursor-not-allowed" : undefined}
                     >
-                      {live ? <><Square className="size-3.5" /> Go off air</> : <><Circle className="size-3 fill-current" /> Go live</>}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => goLiveFromIngest(!live)}
+                        disabled={busy || Boolean(blockedBy("ingest")) || (!live && !encoderConnected)}
+                        title={
+                          blockedBy("ingest")
+                            ? "Already broadcasting via another broadcast source."
+                            : !live && !encoderConnected
+                              ? "Connect and start your encoder first"
+                              : undefined
+                        }
+                        className={`h-10 px-5 rounded-md font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          live && !blockedBy("ingest") ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
+                        }`}
+                      >
+                        {live && !blockedBy("ingest")
+                          ? <><Square className="size-3.5" /> Go off air</>
+                          : <><Circle className="size-3 fill-current" /> Go live</>}
+                      </button>
+                    </span>
                     <a
                       href={`/studio/preview?url=${encodeURIComponent(input.playback_hls_url ?? "")}`}
                       target="_blank"
@@ -423,8 +462,8 @@ export function BroadcastPanel({
                 </p>
               )}
               <p className="text-xs text-[color:var(--muted-foreground)]">
-                Never share your stream key. Recording is {input.recording_enabled ? "on" : "off"} — finished
-                broadcasts can be published to your on-demand library.
+                Never share your stream key. Recording is disabled — live broadcasts are not saved to
+                your media library.
               </p>
             </div>
           ) : (
@@ -463,14 +502,23 @@ export function BroadcastPanel({
             </button>
           </div>
           {isTv && source === "external" && (
-            <button
-              onClick={() => setChannelLive(!live)}
-              className={`mt-4 h-11 px-6 rounded-md font-semibold text-sm inline-flex items-center gap-2 ${
-                live ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
-              }`}
+            <span
+              onMouseEnter={() => { if (blockedBy("external")) warnBlocked(); }}
+              className="mt-4 inline-block"
             >
-              {live ? <><Square className="size-3.5" /> Go off air</> : <><Circle className="size-3 fill-current" /> Go live</>}
-            </button>
+              <button
+                onClick={() => setChannelLive(!live)}
+                disabled={Boolean(blockedBy("external"))}
+                title={blockedBy("external") ? "Already broadcasting via another broadcast source." : undefined}
+                className={`h-11 px-6 rounded-md font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  live && !blockedBy("external") ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
+                }`}
+              >
+                {live && !blockedBy("external")
+                  ? <><Square className="size-3.5" /> Go off air</>
+                  : <><Circle className="size-3 fill-current" /> Go live</>}
+              </button>
+            </span>
           )}
         </section>
       )}
@@ -486,14 +534,20 @@ export function BroadcastPanel({
                 continuously and joins viewers mid-programme.
               </p>
             </div>
-            <button
-              onClick={() => setChannelLive(!live)}
-              className={`h-11 px-6 rounded-md font-semibold text-sm inline-flex items-center gap-2 ${
-                live ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
-              }`}
-            >
-              {live ? <><Square className="size-3.5" /> Go off air</> : <><Circle className="size-3 fill-current" /> Go live</>}
-            </button>
+            <span onMouseEnter={() => { if (blockedBy("playout")) warnBlocked(); }}>
+              <button
+                onClick={() => setChannelLive(!live)}
+                disabled={Boolean(blockedBy("playout"))}
+                title={blockedBy("playout") ? "Already broadcasting via another broadcast source." : undefined}
+                className={`h-11 px-6 rounded-md font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  live && !blockedBy("playout") ? "border border-border bg-elevated" : "bg-primary text-primary-foreground"
+                }`}
+              >
+                {live && !blockedBy("playout")
+                  ? <><Square className="size-3.5" /> Go off air</>
+                  : <><Circle className="size-3 fill-current" /> Go live</>}
+              </button>
+            </span>
           </div>
           <div className="mt-6">{playoutPanel}</div>
         </section>
