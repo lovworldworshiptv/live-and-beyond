@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ListVideo, Plus, Trash2, Loader2, Clock, ArrowUp, ArrowDown, Play, CalendarClock, Power,
+  Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
