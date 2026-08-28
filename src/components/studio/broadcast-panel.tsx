@@ -166,23 +166,36 @@ export function BroadcastPanel({
     }
   }
 
-  /** A channel broadcasts from exactly one source — switching one off switches the others off. */
+  /**
+   * A channel broadcasts from exactly one source. While on air, switching tabs only
+   * previews another source's settings — the live source keeps broadcasting until
+   * the creator explicitly goes off air.
+   */
   async function chooseSource(next: Exclude<TvSource, "none">) {
     const prev = source;
+    if (live && liveSource) {
+      setSource(next);
+      if (next !== liveSource) {
+        toast.info(`Still broadcasting via ${sourceLabel(liveSource)} — go off air to switch.`);
+      }
+      return;
+    }
     setSource(next);
     const { error } = await supabase
       .from("cms_channels")
-      .update({
-        tv_source: next,
-        playout_enabled: next === "playout",
-        // Leaving a source takes the channel off air until the new source goes live.
-        ...(next !== prev ? { is_live: false } : {}),
-      } as never)
+      .update({ tv_source: next, playout_enabled: next === "playout" } as never)
       .eq("id", channelId);
     if (error) { setSource(prev); toast.error(error.message); return; }
-    if (next !== prev) setLive(false);
-    toast.success(`Broadcast source set to ${SOURCE_OPTIONS.find((o) => o.key === next)?.label}`);
+    toast.success(`Broadcast source set to ${sourceLabel(next)}`);
     onChannelUpdated?.();
+  }
+
+  /** Guard shown when a different source already holds the channel on air. */
+  function blockedBy(current: TvSource) {
+    return live && liveSource && liveSource !== current ? liveSource : null;
+  }
+  function warnBlocked() {
+    toast.warning("Already broadcasting via another broadcast source.");
   }
 
   async function handleProvision() {
