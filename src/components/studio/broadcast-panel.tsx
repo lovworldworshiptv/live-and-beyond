@@ -139,8 +139,12 @@ export function BroadcastPanel({
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { setExternalUrl(channelStreamUrl ?? ""); }, [channelStreamUrl]);
-  useEffect(() => { setSource(tvSource); }, [tvSource]);
-  useEffect(() => { setLive(isLive); }, [isLive]);
+  // While on air, keep showing whatever source tab the creator opened.
+  useEffect(() => { if (!live) setSource(tvSource); }, [tvSource, live]);
+  useEffect(() => {
+    setLive(isLive);
+    setLiveSource(isLive ? tvSource : null);
+  }, [isLive, tvSource]);
 
   const liveSession = useMemo(() => sessions.find((s) => s.status === "live") ?? null, [sessions]);
   const isTv = service === "tv";
