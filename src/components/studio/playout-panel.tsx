@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ListVideo, Plus, Trash2, Loader2, Clock, ArrowUp, ArrowDown, Play, CalendarClock, Power,
+  Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +34,11 @@ export function PlayoutPanel({
   const [enabled, setEnabled] = useState(Boolean(playoutEnabled));
   const [fallback, setFallback] = useState<string | null>(fallbackPlaylistId ?? null);
   const [now, setNow] = useState<NowPlaying | null>(null);
+  const [urlTitle, setUrlTitle] = useState("");
+  const [urlSrc, setUrlSrc] = useState("");
+  const [urlType, setUrlType] = useState<"video" | "audio">("video");
+  const [urlDuration, setUrlDuration] = useState(0);
+  const [addingUrl, setAddingUrl] = useState(false);
 
   const assetMap = useMemo(() => new Map(assets.map((a) => [a.id, a])), [assets]);
 
@@ -104,6 +110,55 @@ export function PlayoutPanel({
       .insert({ playlist_id: playlistId, media_asset_id: assetId, position: list.length } as never);
     if (error) { toast.error(error.message); return; }
     load();
+  }
+
+  /** Read duration from a media URL in the browser so playout can time it. */
+  function probeDuration(url: string, type: "video" | "audio") {
+    return new Promise<number>((resolve) => {
+      const el = document.createElement(type === "audio" ? "audio" : "video");
+      el.preload = "metadata";
+      el.onloadedmetadata = () => resolve(Number.isFinite(el.duration) ? Math.round(el.duration) : 0);
+      el.onerror = () => resolve(0);
+      el.src = url;
+      setTimeout(() => resolve(0), 12_000);
+    });
+  }
+
+  /** Register an external media URL as a channel asset and append it to the playlist. */
+  async function addUrlMedia(playlistId: string) {
+    const url = urlSrc.trim();
+    const title = urlTitle.trim() || url.split("/").pop() || "Untitled";
+    if (!url) { toast.error("Paste a media URL first"); return; }
+    setAddingUrl(true);
+    try {
+      let secs = urlDuration;
+      if (!secs) secs = await probeDuration(url, urlType);
+      if (!secs) {
+        toast.error("Could not read the duration — enter it in seconds so playout can time it.");
+        return;
+      }
+      const { data, error } = await supabase
+        .from("media_assets")
+        .insert({
+          channel_id: channelId,
+          title,
+          media_type: urlType,
+          source_url: url,
+          duration_seconds: secs,
+          status: "ready",
+        } as never)
+        .select("id")
+        .single();
+      if (error) { toast.error(error.message); return; }
+      const list = items[playlistId] ?? [];
+      const { error: itemErr } = await supabase
+        .from("playlist_items")
+        .insert({ playlist_id: playlistId, media_asset_id: (data as { id: string }).id, position: list.length } as never);
+      if (itemErr) { toast.error(itemErr.message); return; }
+      setUrlTitle(""); setUrlSrc(""); setUrlDuration(0);
+      toast.success("Added to playlist");
+      load();
+    } finally { setAddingUrl(false); }
   }
 
   async function removeItem(id: string) {
@@ -279,6 +334,56 @@ export function PlayoutPanel({
                 <div>
                   <div className="text-sm font-semibold">Library</div>
                   <div className="text-xs text-[color:var(--muted-foreground)]">Click to append to the playlist.</div>
+
+                  <div className="mt-3 rounded-xl border border-border bg-surface p-3 space-y-2">
+                    <div className="text-xs font-semibold">Add media by URL</div>
+                    <input
+                      value={urlTitle}
+                      onChange={(e) => setUrlTitle(e.target.value)}
+                      placeholder="Title"
+                      aria-label="Media title"
+                      className="w-full h-10 rounded-md border border-border bg-elevated px-3 text-sm outline-none"
+                    />
+                    <input
+                      value={urlSrc}
+                      onChange={(e) => setUrlSrc(e.target.value)}
+                      placeholder="https://… (MP4, MP3 or HLS)"
+                      aria-label="Media URL"
+                      className="w-full h-10 rounded-md border border-border bg-elevated px-3 text-sm outline-none"
+                    />
+                    <div className="flex gap-2">
+                      <select
+                        value={urlType}
+                        onChange={(e) => setUrlType(e.target.value as "video" | "audio")}
+                        aria-label="Media type"
+                        className="h-10 rounded-md border border-border bg-elevated px-2 text-sm outline-none"
+                      >
+                        <option value="video">Video</option>
+                        <option value="audio">Audio</option>
+                      </select>
+                      <input
+                        type="number"
+                        min={0}
+                        value={urlDuration}
+                        onChange={(e) => setUrlDuration(Number(e.target.value))}
+                        placeholder="Seconds"
+                        aria-label="Duration in seconds"
+                        className="w-28 h-10 rounded-md border border-border bg-elevated px-3 text-sm outline-none"
+                      />
+                      <button
+                        onClick={() => addUrlMedia(activePlaylist.id)}
+                        disabled={addingUrl}
+                        className="flex-1 h-10 rounded-md bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60"
+                      >
+                        {addingUrl ? <Loader2 className="size-4 animate-spin" /> : <LinkIcon className="size-4" />}
+                        Add to playlist
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-[color:var(--muted-foreground)]">
+                      Duration is detected automatically for direct files; enter it manually for live/HLS URLs.
+                    </p>
+                  </div>
+
                   <div className="mt-3 space-y-2 max-h-[380px] overflow-y-auto pr-1">
                     {assets.length === 0 && (
                       <p className="text-sm text-[color:var(--muted-foreground)]">

@@ -13,7 +13,7 @@ import { useHlsAttach } from "@/hooks/use-hls";
 import { useFollowing, useSettings } from "@/lib/personal";
 import { useChannelFollow } from "@/lib/follows";
 import { recordPlaybackEvent } from "@/lib/analytics";
-import { resolveNowPlaying, type NowPlaying } from "@/lib/playout";
+import { resolveChannelPlayout, type NowPlaying } from "@/lib/playout";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/channels/$channelId/")({
@@ -124,6 +124,7 @@ function ChannelPage() {
   // which in turn takes precedence over automated playout.
   const [liveUrl, setLiveUrl] = useState<string | null>(null);
   const [playout, setPlayout] = useState<NowPlaying | null>(null);
+  const [playoutTick, setPlayoutTick] = useState(0);
   useEffect(() => {
     let cancelled = false;
     setLiveUrl(null);
@@ -131,8 +132,13 @@ function ChannelPage() {
     const slug = channelId;
     (async () => {
       const { data: ch } = await supabase
-        .from("cms_channels").select("id, playout_enabled, tv_source").eq("slug", slug).maybeSingle();
-      const row = ch as { id?: string; playout_enabled?: boolean; tv_source?: string } | null;
+        .from("cms_channels")
+        .select("id, playout_enabled, tv_source, fallback_playlist_id")
+        .eq("slug", slug)
+        .maybeSingle();
+      const row = ch as {
+        id?: string; playout_enabled?: boolean; tv_source?: string; fallback_playlist_id?: string | null;
+      } | null;
       const chId = row?.id;
       if (!chId || cancelled) return;
 
@@ -140,7 +146,7 @@ function ChannelPage() {
       const src = row?.tv_source ?? (row?.playout_enabled ? "playout" : "external");
 
       if (src === "playout") {
-        const np = await resolveNowPlaying(chId);
+        const np = await resolveChannelPlayout(chId, row?.fallback_playlist_id ?? null);
         if (!cancelled) setPlayout(np);
         return;
       }
@@ -158,7 +164,15 @@ function ChannelPage() {
       if (!cancelled && url) setLiveUrl(url);
     })();
     return () => { cancelled = true; };
-  }, [channelId]);
+  }, [channelId, playoutTick]);
+
+  // When the current automated programme ends, roll on to the next one.
+  useEffect(() => {
+    if (!playout) return;
+    const ms = Math.max(1000, playout.endsAt.getTime() - Date.now());
+    const t = setTimeout(() => setPlayoutTick((n) => n + 1), ms);
+    return () => clearTimeout(t);
+  }, [playout]);
 
   const isFollowing = dbChannelId ? followingDb : isFollowingLocal(channel?.id ?? "");
 
@@ -188,6 +202,12 @@ function ChannelPage() {
     const seek = () => { try { m.currentTime = playout.offsetSeconds; } catch { /* not seekable yet */ } };
     if (m.readyState >= 1) seek();
     else m.addEventListener("loadedmetadata", seek, { once: true });
+    const advance = () => setPlayoutTick((n) => n + 1);
+    m.addEventListener("ended", advance);
+    return () => {
+      m.removeEventListener("loadedmetadata", seek);
+      m.removeEventListener("ended", advance);
+    };
   }, [playing, playout, liveUrl]);
 
 
