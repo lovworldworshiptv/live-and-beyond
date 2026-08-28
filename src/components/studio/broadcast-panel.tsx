@@ -462,8 +462,8 @@ export function BroadcastPanel({
                 </p>
               )}
               <p className="text-xs text-[color:var(--muted-foreground)]">
-                Never share your stream key. Recording is {input.recording_enabled ? "on" : "off"} — finished
-                broadcasts can be published to your on-demand library.
+                Never share your stream key. Recording is disabled — live broadcasts are not saved to
+                your media library.
               </p>
             </div>
           ) : (
