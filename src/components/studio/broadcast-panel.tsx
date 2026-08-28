@@ -258,6 +258,7 @@ export function BroadcastPanel({
     const { error } = await supabase.from("cms_channels").update({ is_live: next } as never).eq("id", channelId);
     if (error) { toast.error(error.message); return; }
     setLive(next);
+    setLiveSource(next ? source : null);
     if (next) await notifyGoingLive();
     toast.success(next === true ? "Your channel is live" : "Channel is off air");
     onChannelUpdated?.();
