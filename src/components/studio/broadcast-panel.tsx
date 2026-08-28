@@ -288,6 +288,7 @@ export function BroadcastPanel({
           playback_hls_url: url,
         } as never);
         setLive(true);
+        setLiveSource("ingest");
         await notifyGoingLive();
         toast.success("You are live");
       } else {
