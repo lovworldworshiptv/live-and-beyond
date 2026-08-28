@@ -112,6 +112,55 @@ export function PlayoutPanel({
     load();
   }
 
+  /** Read duration from a media URL in the browser so playout can time it. */
+  function probeDuration(url: string, type: "video" | "audio") {
+    return new Promise<number>((resolve) => {
+      const el = document.createElement(type === "audio" ? "audio" : "video");
+      el.preload = "metadata";
+      el.onloadedmetadata = () => resolve(Number.isFinite(el.duration) ? Math.round(el.duration) : 0);
+      el.onerror = () => resolve(0);
+      el.src = url;
+      setTimeout(() => resolve(0), 12_000);
+    });
+  }
+
+  /** Register an external media URL as a channel asset and append it to the playlist. */
+  async function addUrlMedia(playlistId: string) {
+    const url = urlSrc.trim();
+    const title = urlTitle.trim() || url.split("/").pop() || "Untitled";
+    if (!url) { toast.error("Paste a media URL first"); return; }
+    setAddingUrl(true);
+    try {
+      let secs = urlDuration;
+      if (!secs) secs = await probeDuration(url, urlType);
+      if (!secs) {
+        toast.error("Could not read the duration — enter it in seconds so playout can time it.");
+        return;
+      }
+      const { data, error } = await supabase
+        .from("media_assets")
+        .insert({
+          channel_id: channelId,
+          title,
+          media_type: urlType,
+          source_url: url,
+          duration_seconds: secs,
+          status: "ready",
+        } as never)
+        .select("id")
+        .single();
+      if (error) { toast.error(error.message); return; }
+      const list = items[playlistId] ?? [];
+      const { error: itemErr } = await supabase
+        .from("playlist_items")
+        .insert({ playlist_id: playlistId, media_asset_id: (data as { id: string }).id, position: list.length } as never);
+      if (itemErr) { toast.error(itemErr.message); return; }
+      setUrlTitle(""); setUrlSrc(""); setUrlDuration(0);
+      toast.success("Added to playlist");
+      load();
+    } finally { setAddingUrl(false); }
+  }
+
   async function removeItem(id: string) {
     const { error } = await supabase.from("playlist_items").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
