@@ -114,6 +114,8 @@ export function BroadcastPanel({
   const [loading, setLoading] = useState(true);
   const [externalUrl, setExternalUrl] = useState(channelStreamUrl ?? "");
   const [live, setLive] = useState(isLive);
+  /** The source that currently holds the channel on air (persisted as cms_channels.tv_source). */
+  const [liveSource, setLiveSource] = useState<TvSource | null>(isLive ? tvSource : null);
 
   const provision = useServerFn(provisionLiveInput);
   const refresh = useServerFn(refreshLiveInput);
