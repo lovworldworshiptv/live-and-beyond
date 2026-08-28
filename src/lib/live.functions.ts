@@ -5,7 +5,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const provisionSchema = z.object({
   channelId: z.string().uuid(),
   service: z.enum(["tv", "radio"]).default("tv"),
-  recording: z.boolean().default(true),
+  // Live stream recording is disabled platform-wide — broadcasts are never saved.
+  recording: z.literal(false).default(false),
 });
 
 const inputSchema = z.object({
