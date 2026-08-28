@@ -300,6 +300,7 @@ export function BroadcastPanel({
           .eq("channel_id", channelId)
           .eq("status", "live");
         setLive(false);
+        setLiveSource(null);
         toast.success("Broadcast ended");
       }
       onChannelUpdated?.();
