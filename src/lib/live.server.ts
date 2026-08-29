@@ -85,7 +85,9 @@ class CloudflareStreamProvider implements LiveProvider {
       body: JSON.stringify({
         // Cloudflare default: automatic recording keeps live playback manifests working.
         recording: { mode: "automatic" },
-        meta: { name, lettflixRecording: recording },
+        // Cloudflare only accepts string values in meta — booleans fail with
+        // "Failed to decode body".
+        meta: { name, lettflixRecording: String(recording) },
       }),
     });
     const pb = this.playback(r.uid);
