@@ -86,6 +86,14 @@ export const refreshLiveInput = createServerFn({ method: "POST" })
     const provider = getLiveProvider();
     if (!row.provider_input_id || provider.name === "manual") return row;
 
+    // Self-heal inputs created while recording was disabled: Cloudflare only emits
+    // live playback manifests when recording mode is "automatic".
+    try {
+      await provider.ensurePlayback(row.provider_input_id);
+    } catch {
+      /* non-fatal */
+    }
+
     try {
       const status = await provider.getStatus(row.provider_input_id);
       const { data: updated } = await supabase
@@ -130,4 +138,29 @@ export const deleteLiveInput = createServerFn({ method: "POST" })
     const { error } = await supabase.from("live_inputs").delete().eq("id", row.id);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+/** Delete any recordings Cloudflare saved for this input (broadcasts are never kept). */
+export const purgeLiveRecordings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => inputSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { getLiveProvider } = await import("@/lib/live.server");
+
+    const { data: row } = await supabase
+      .from("live_inputs")
+      .select("id, provider_input_id")
+      .eq("channel_id", data.channelId)
+      .eq("service", data.service)
+      .maybeSingle();
+    if (!row?.provider_input_id) return { removed: 0 };
+
+    const provider = getLiveProvider();
+    if (provider.name === "manual") return { removed: 0 };
+    try {
+      return { removed: await provider.purgeRecordings(row.provider_input_id) };
+    } catch {
+      return { removed: 0 };
+    }
   });

@@ -29,6 +29,10 @@ export interface LiveProvider {
   createInput(opts: { name: string; recording: boolean }): Promise<ProviderInput>;
   deleteInput(providerInputId: string): Promise<void>;
   getStatus(providerInputId: string): Promise<ProviderStatus>;
+  /** Ensure the input is configured so live playback manifests are generated. */
+  ensurePlayback(providerInputId: string): Promise<void>;
+  /** Delete any recorded/DVR videos produced by this input. */
+  purgeRecordings(providerInputId: string): Promise<number>;
 }
 
 const CF_API = "https://api.cloudflare.com/client/v4";
@@ -79,8 +83,11 @@ class CloudflareStreamProvider implements LiveProvider {
     const r = await this.call<Result>("/stream/live_inputs", {
       method: "POST",
       body: JSON.stringify({
-        meta: { name },
-        recording: { mode: recording ? "automatic" : "off" },
+        // Cloudflare only generates live HLS/DASH manifests when recording mode is
+        // "automatic" — with "off" the input can only simulcast and playback is empty.
+        // We keep playback on and purge the resulting recordings when a broadcast ends.
+        recording: { mode: "automatic", requireSignedURLs: false, timeoutSeconds: 10 },
+        meta: { name, lettflixRecording: recording },
       }),
     });
     const pb = this.playback(r.uid);
@@ -98,6 +105,34 @@ class CloudflareStreamProvider implements LiveProvider {
 
   async deleteInput(providerInputId: string) {
     await this.call(`/stream/live_inputs/${providerInputId}`, { method: "DELETE" });
+  }
+
+  async ensurePlayback(providerInputId: string) {
+    type Result = { recording?: { mode?: string } };
+    const current = await this.call<Result>(`/stream/live_inputs/${providerInputId}`);
+    if (current.recording?.mode === "automatic") return;
+    await this.call(`/stream/live_inputs/${providerInputId}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        recording: { mode: "automatic", requireSignedURLs: false, timeoutSeconds: 10 },
+      }),
+    });
+  }
+
+  async purgeRecordings(providerInputId: string) {
+    type Video = { uid: string; liveInput?: string; status?: { state?: string } };
+    const videos = await this.call<Video[]>(`/stream/live_inputs/${providerInputId}/videos`);
+    let removed = 0;
+    for (const v of videos ?? []) {
+      if (v.status?.state === "live-inprogress") continue; // never touch the running stream
+      try {
+        await this.call(`/stream/${v.uid}`, { method: "DELETE" });
+        removed += 1;
+      } catch {
+        /* best effort */
+      }
+    }
+    return removed;
   }
 
   async getStatus(providerInputId: string): Promise<ProviderStatus> {
@@ -129,6 +164,10 @@ class ManualProvider implements LiveProvider {
     };
   }
   async deleteInput() {}
+  async ensurePlayback() {}
+  async purgeRecordings() {
+    return 0;
+  }
   async getStatus(): Promise<ProviderStatus> {
     return { status: "idle", lastConnectedAt: null };
   }
