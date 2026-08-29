@@ -7,7 +7,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  provisionLiveInput, refreshLiveInput, deleteLiveInput,
+  provisionLiveInput, refreshLiveInput, deleteLiveInput, purgeLiveRecordings,
 } from "@/lib/live.functions";
 import { notifyFollowersLive } from "@/lib/notify.functions";
 
@@ -124,6 +124,7 @@ export function BroadcastPanel({
   const provision = useServerFn(provisionLiveInput);
   const refresh = useServerFn(refreshLiveInput);
   const remove = useServerFn(deleteLiveInput);
+  const purgeRecordings = useServerFn(purgeLiveRecordings);
   const notifyLive = useServerFn(notifyFollowersLive);
 
   const load = useCallback(async () => {
@@ -301,6 +302,8 @@ export function BroadcastPanel({
           .eq("status", "live");
         setLive(false);
         setLiveSource(null);
+        // Broadcasts are never kept — drop anything Cloudflare captured for playback.
+        try { await purgeRecordings({ data: { channelId, service } }); } catch { /* best effort */ }
         toast.success("Broadcast ended");
       }
       onChannelUpdated?.();
@@ -462,8 +465,8 @@ export function BroadcastPanel({
                 </p>
               )}
               <p className="text-xs text-[color:var(--muted-foreground)]">
-                Never share your stream key. Recording is disabled — live broadcasts are not saved to
-                your media library.
+                Never share your stream key. Live broadcasts are not saved — any temporary
+                recording is deleted automatically when you go off air.
               </p>
             </div>
           ) : (
