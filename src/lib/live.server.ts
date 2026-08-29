@@ -83,10 +83,8 @@ class CloudflareStreamProvider implements LiveProvider {
     const r = await this.call<Result>("/stream/live_inputs", {
       method: "POST",
       body: JSON.stringify({
-        // Cloudflare only generates live HLS/DASH manifests when recording mode is
-        // "automatic" — with "off" the input can only simulcast and playback is empty.
-        // We keep playback on and purge the resulting recordings when a broadcast ends.
-        recording: { mode: "automatic", requireSignedURLs: false, timeoutSeconds: 10 },
+        // Cloudflare default: automatic recording keeps live playback manifests working.
+        recording: { mode: "automatic" },
         meta: { name, lettflixRecording: recording },
       }),
     });
@@ -114,7 +112,7 @@ class CloudflareStreamProvider implements LiveProvider {
     await this.call(`/stream/live_inputs/${providerInputId}`, {
       method: "PUT",
       body: JSON.stringify({
-        recording: { mode: "automatic", requireSignedURLs: false, timeoutSeconds: 10 },
+        recording: { mode: "automatic" },
       }),
     });
   }
