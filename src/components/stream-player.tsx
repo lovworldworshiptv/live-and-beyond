@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import Hls from "hls.js";
+import { useRef, useState } from "react";
 import { Play, Volume2, VolumeX, Mic } from "lucide-react";
+import { useHlsAttach } from "@/hooks/use-hls";
+import { QualityMenu } from "@/components/quality-menu";
 
 type Props = {
   src?: string | null;
@@ -12,10 +13,6 @@ type Props = {
   ariaPlayLabel?: string;
 };
 
-function isHls(src: string) {
-  return /\.m3u8(\?|$)/i.test(src);
-}
-
 export function StreamPlayer({
   src,
   poster,
@@ -25,65 +22,36 @@ export function StreamPlayer({
   posterOverlayLabel,
   ariaPlayLabel = "Play",
 }: Props) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(autoPlay);
   const [muted, setMuted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!playing || !src) return;
-    const media = kind === "audio" ? audioRef.current : videoRef.current;
-    if (!media) return;
-
-    let hls: Hls | null = null;
-    setError(null);
-
-    const startPlay = () => {
-      media.muted = false;
-      media.play().catch(() => {
-        media.muted = true;
-        setMuted(true);
-        media.play().catch(() => setError("Playback blocked. Tap play in the controls."));
-      });
-    };
-
-    if (isHls(src) && kind === "video" && !media.canPlayType("application/vnd.apple.mpegurl")) {
-      if (Hls.isSupported()) {
-        hls = new Hls({ enableWorker: true });
-        hls.loadSource(src);
-        hls.attachMedia(media as HTMLVideoElement);
-        hls.on(Hls.Events.MANIFEST_PARSED, startPlay);
-        hls.on(Hls.Events.ERROR, (_e, data) => {
-          if (data.fatal) setError("Stream unavailable.");
-        });
-      } else {
-        setError("HLS streams are not supported in this browser.");
-      }
-    } else {
-      media.src = src;
-      media.load();
-      startPlay();
-    }
-
-    return () => {
-      if (hls) hls.destroy();
-      media.pause();
-      media.removeAttribute("src");
-      media.load();
-    };
-  }, [playing, src, kind]);
+  // Adaptive bitrate: hls.js consumes the master playlist and switches renditions
+  // in place; Safari/iOS falls back to native HLS with the same source.
+  const hls = useHlsAttach(mediaRef, playing ? src : null, playing);
 
   const start = () => {
     if (!src) {
       setError("No stream source configured.");
       return;
     }
+    setError(null);
     setPlaying(true);
+    requestAnimationFrame(() => {
+      const media = mediaRef.current;
+      if (!media) return;
+      media.muted = false;
+      media.play().catch(() => {
+        media.muted = true;
+        setMuted(true);
+        media.play().catch(() => setError("Playback blocked. Tap play in the controls."));
+      });
+    });
   };
 
   const toggleMute = () => {
-    const m = kind === "audio" ? audioRef.current : videoRef.current;
+    const m = mediaRef.current;
     if (!m) return;
     m.muted = !m.muted;
     setMuted(m.muted);
@@ -103,15 +71,23 @@ export function StreamPlayer({
       {!playing && <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />}
 
       {playing && kind === "video" && (
-        <video
-          ref={videoRef}
-          playsInline
-          controls
-          className="absolute inset-0 size-full object-contain bg-black"
-        />
+        <>
+          <video
+            ref={(el) => { mediaRef.current = el; }}
+            playsInline
+            controls
+            autoPlay
+            controlsList="nodownload noplaybackrate"
+            onContextMenu={(e) => e.preventDefault()}
+            className="absolute inset-0 size-full object-contain bg-black"
+          />
+          <div className="absolute bottom-16 right-4 z-10">
+            <QualityMenu controller={hls} />
+          </div>
+        </>
       )}
       {playing && kind === "audio" && (
-        <audio ref={audioRef} className="hidden" />
+        <audio ref={(el) => { mediaRef.current = el; }} autoPlay className="hidden" />
       )}
 
       {!playing && (
