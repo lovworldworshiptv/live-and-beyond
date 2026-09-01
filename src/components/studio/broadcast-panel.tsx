@@ -447,7 +447,7 @@ export function BroadcastPanel({
                       </button>
                     </span>
                     <a
-                      href={`/studio/preview?url=${encodeURIComponent(input.playback_hls_url ?? "")}`}
+                      href={input.playback_hls_url ?? "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`h-10 px-5 rounded-md border border-border bg-surface text-sm font-medium inline-flex items-center gap-2 hover:bg-elevated ${
