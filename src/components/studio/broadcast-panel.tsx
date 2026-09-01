@@ -7,7 +7,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  provisionLiveInput, refreshLiveInput, deleteLiveInput, purgeLiveRecordings,
+  provisionLiveInput, refreshLiveInput, deleteLiveInput, purgeLiveRecordings, getLiveRenditions,
 } from "@/lib/live.functions";
 import { notifyFollowersLive } from "@/lib/notify.functions";
 
@@ -153,6 +153,24 @@ export function BroadcastPanel({
   const showExternal = !isTv || source === "external";
   const showPlayout = isTv && source === "playout";
   const encoderConnected = input?.status === "live" || input?.status === "connected";
+
+  // Cloudflare transcodes one ingest into several renditions — show what it is
+  // actually producing right now.
+  const readRenditions = useServerFn(getLiveRenditions);
+  const [renditions, setRenditions] = useState<{ label: string; bandwidthKbps: number; codecs: string | null }[]>([]);
+  useEffect(() => {
+    if (!showIngest || !input?.playback_hls_url) { setRenditions([]); return; }
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await readRenditions({ data: { channelId, service } });
+        if (!cancelled) setRenditions(res.renditions ?? []);
+      } catch { /* transient */ }
+    };
+    load();
+    const id = setInterval(load, 30000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [showIngest, input?.playback_hls_url, readRenditions, channelId, service]);
 
   // Poll ingest status so Go live unlocks as soon as the encoder connects.
   useEffect(() => {
@@ -458,6 +476,28 @@ export function BroadcastPanel({
                     </a>
                   </div>
                 )}
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-[color:var(--muted-foreground)]">
+                  Adaptive renditions (Cloudflare)
+                </div>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {renditions.length ? (
+                    renditions.map((r) => (
+                      <span
+                        key={`${r.label}-${r.bandwidthKbps}`}
+                        className="px-2 py-1 rounded-md border border-border bg-surface text-[11px] font-medium"
+                        title={r.codecs ?? undefined}
+                      >
+                        {r.label}{r.bandwidthKbps ? ` · ${r.bandwidthKbps} kbps` : ""}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-[color:var(--muted-foreground)]">
+                      Renditions appear once your encoder is streaming — viewers always start on Auto.
+                    </span>
+                  )}
+                </div>
               </div>
               {isTv && source === "ingest" && !encoderConnected && !live && (
                 <p className="text-xs text-[color:var(--muted-foreground)]">
