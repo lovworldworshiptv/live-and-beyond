@@ -94,6 +94,16 @@ export const refreshLiveInput = createServerFn({ method: "POST" })
       /* non-fatal */
     }
 
+    // Storage hygiene: Cloudflare needs recording mode "automatic" to emit live
+    // manifests, so we continuously delete every finished recording it produces.
+    // The in-progress broadcast is never touched.
+    try {
+      await provider.purgeRecordings(row.provider_input_id);
+    } catch {
+      /* non-fatal */
+    }
+
+
     try {
       const status = await provider.getStatus(row.provider_input_id);
       const { data: updated } = await supabase
