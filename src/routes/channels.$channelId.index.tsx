@@ -309,10 +309,11 @@ function ChannelPage() {
           
 
           {playing && !isRadio && (
-            <div className="absolute bottom-16 right-4 z-10">
+            <div className="absolute bottom-14 right-3 z-20">
               <QualityMenu controller={hls} />
             </div>
           )}
+
 
           <div className="absolute top-4 left-4 flex items-center gap-2 pointer-events-none">
             {channel.isLive && (
@@ -327,7 +328,7 @@ function ChannelPage() {
               <Signal className="size-3" />{" "}
               {isRadio
                 ? "Audio · 320kbps"
-                : (hls.levels.find((l) => l.index === hls.active)?.label ?? "Adaptive") + " · Auto"}
+                : (hls.levels.find((l) => l.index === hls.active)?.label ?? "Auto") + " · Auto"}
             </span>
           </div>
 
