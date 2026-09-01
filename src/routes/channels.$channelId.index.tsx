@@ -328,7 +328,7 @@ function ChannelPage() {
               <Signal className="size-3" />{" "}
               {isRadio
                 ? "Audio · 320kbps"
-                : (hls.levels.find((l) => l.index === hls.active)?.label ?? "Adaptive") + " · Auto"}
+                : (hls.levels.find((l) => l.index === hls.active)?.label ?? "Auto") + " · Auto"}
             </span>
           </div>
 
