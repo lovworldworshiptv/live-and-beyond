@@ -10,6 +10,8 @@ import { channels, getChannel, getTitle, type Channel } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
 import { useHlsAttach } from "@/hooks/use-hls";
+import { QualityMenu } from "@/components/quality-menu";
+import { protectedChannelSrc } from "@/lib/stream-src";
 import { useFollowing, useSettings } from "@/lib/personal";
 import { useChannelFollow } from "@/lib/follows";
 import { recordPlaybackEvent } from "@/lib/analytics";
@@ -181,7 +183,10 @@ function ChannelPage() {
     playout?.asset.source_url ||
     channel?.streamUrl ||
     "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
-  useHlsAttach(mediaRef, streamSrc, playing);
+  // Live/HLS sources are played through the same-origin manifest proxy so the
+  // Cloudflare playback URL is never exposed in the DOM.
+  const playbackSrc = protectedChannelSrc(channelId, streamSrc) ?? streamSrc;
+  const hls = useHlsAttach(mediaRef, playbackSrc, playing);
 
   // Anonymous playback signals feed creator analytics.
   useEffect(() => {
@@ -295,11 +300,19 @@ function ChannelPage() {
                 autoPlay
                 playsInline
                 controls
+                controlsList="nodownload noplaybackrate"
+                onContextMenu={(e) => e.preventDefault()}
                 className="absolute inset-0 size-full object-contain bg-black"
               />
             )
           )}
           
+
+          {playing && !isRadio && (
+            <div className="absolute bottom-16 right-4 z-10">
+              <QualityMenu controller={hls} />
+            </div>
+          )}
 
           <div className="absolute top-4 left-4 flex items-center gap-2 pointer-events-none">
             {channel.isLive && (
