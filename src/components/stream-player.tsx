@@ -81,9 +81,10 @@ export function StreamPlayer({
             onContextMenu={(e) => e.preventDefault()}
             className="absolute inset-0 size-full object-contain bg-black"
           />
-          <div className="absolute bottom-16 right-4 z-10">
+          <div className="absolute bottom-14 right-3 z-20">
             <QualityMenu controller={hls} />
           </div>
+
         </>
       )}
       {playing && kind === "audio" && (
