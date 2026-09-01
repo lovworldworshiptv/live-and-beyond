@@ -21,25 +21,33 @@ export function QualityMenu({ controller, className }: { controller: HlsControll
   }, [open]);
 
   if (native) return null; // Safari/iOS handles ABR natively — no rendition list is exposed.
-  if (levels.length < 2) return null;
+  if (levels.length < 1) return null;
 
   const activeLabel = levels.find((l) => l.index === active)?.label;
-  const current =
-    selected === -1 ? (activeLabel ? `Auto · ${activeLabel}` : "Auto") : levels.find((l) => l.index === selected)?.label ?? "Auto";
+  const selectedLabel = selected === -1 ? null : levels.find((l) => l.index === selected)?.label;
+  const current = selectedLabel ?? (activeLabel ? `Auto · ${activeLabel}` : "Auto");
 
   return (
     <div ref={ref} className={`relative ${className ?? ""}`}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="h-8 px-3 rounded-md bg-black/70 backdrop-blur text-white text-[11px] font-semibold inline-flex items-center gap-1.5 hover:bg-black/85"
-        aria-label="Video quality"
+        className="h-9 px-3 rounded-md bg-black/75 backdrop-blur text-white text-[12px] font-semibold inline-flex items-center gap-1.5 hover:bg-black/90 border border-white/15"
+        aria-label="Quality"
+        title="Quality"
       >
-        <Settings2 className="size-3.5" /> {current}
+        <Settings2 className="size-4" />
+        <span className="hidden sm:inline">Quality</span>
+        <span className="text-white/60 font-medium">{current}</span>
       </button>
       {open && (
-        <div className="absolute right-0 bottom-10 min-w-[150px] rounded-lg border border-white/15 bg-black/90 backdrop-blur p-1 shadow-xl">
-          <MenuItem label="Auto" checked={selected === -1} onClick={() => { setLevel(-1); setOpen(false); }} />
+        <div className="absolute right-0 bottom-11 min-w-[170px] rounded-lg border border-white/15 bg-black/95 backdrop-blur p-1 shadow-xl z-30">
+          <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-white/45">Quality</div>
+          <MenuItem
+            label={activeLabel ? `Auto (${activeLabel})` : "Auto"}
+            checked={selected === -1}
+            onClick={() => { setLevel(-1); setOpen(false); }}
+          />
           {levels.map((l) => (
             <MenuItem
               key={l.index}
@@ -53,6 +61,7 @@ export function QualityMenu({ controller, className }: { controller: HlsControll
     </div>
   );
 }
+
 
 function MenuItem({ label, checked, onClick }: { label: string; checked: boolean; onClick: () => void }) {
   return (
