@@ -324,7 +324,10 @@ function ChannelPage() {
               <Users className="size-3" /> {channel.viewers} {isRadio ? "listening" : "watching"}
             </span>
             <span className="text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur inline-flex items-center gap-1 text-white/80">
-              <Signal className="size-3" /> {isRadio ? "Audio · 320kbps" : "1080p · HDR"}
+              <Signal className="size-3" />{" "}
+              {isRadio
+                ? "Audio · 320kbps"
+                : (hls.levels.find((l) => l.index === hls.active)?.label ?? "Adaptive") + " · Auto"}
             </span>
           </div>
 
