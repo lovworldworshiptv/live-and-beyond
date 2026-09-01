@@ -174,3 +174,49 @@ export const purgeLiveRecordings = createServerFn({ method: "POST" })
       return { removed: 0 };
     }
   });
+
+/**
+ * Read the renditions Cloudflare is currently producing for a live input by
+ * parsing its HLS master playlist. Runs server-side so the playback URL and the
+ * Cloudflare credentials never reach the browser.
+ */
+export const getLiveRenditions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => inputSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: row } = await supabase
+      .from("live_inputs")
+      .select("playback_hls_url, status")
+      .eq("channel_id", data.channelId)
+      .eq("service", data.service)
+      .maybeSingle();
+    const url = (row as { playback_hls_url?: string | null } | null)?.playback_hls_url;
+    if (!url) return { renditions: [] as { label: string; bandwidthKbps: number; codecs: string | null }[] };
+
+    try {
+      const res = await fetch(url, { headers: { accept: "application/vnd.apple.mpegurl,*/*" } });
+      if (!res.ok) return { renditions: [] };
+      const text = await res.text();
+      const renditions: { label: string; bandwidthKbps: number; codecs: string | null }[] = [];
+      for (const line of text.split("\n")) {
+        if (!line.startsWith("#EXT-X-STREAM-INF")) continue;
+        const res_ = /RESOLUTION=(\d+)x(\d+)/.exec(line);
+        const bw = /BANDWIDTH=(\d+)/.exec(line);
+        const codecs = /CODECS="([^"]+)"/.exec(line);
+        renditions.push({
+          label: res_ ? `${res_[2]}p` : "audio",
+          bandwidthKbps: bw ? Math.round(Number(bw[1]) / 1000) : 0,
+          codecs: codecs ? codecs[1]! : null,
+        });
+      }
+      const seen = new Set<string>();
+      return {
+        renditions: renditions
+          .sort((a, b) => b.bandwidthKbps - a.bandwidthKbps)
+          .filter((r) => (seen.has(r.label) ? false : (seen.add(r.label), true))),
+      };
+    } catch {
+      return { renditions: [] };
+    }
+  });
