@@ -97,9 +97,9 @@ export function useHlsAttach(
     setSelected(index);
     const hls = hlsRef.current;
     if (!hls) return;
-    // -1 restores Auto; switching this way never restarts playback.
+    // nextLevel switches on the next fragment boundary, so playback never restarts.
+    if (index < 0) hls.currentLevel = -1;
     hls.nextLevel = index;
-    hls.currentLevel = index;
   }, []);
 
   return { levels, selected, active, setLevel, native };
