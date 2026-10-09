@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Play, Plus, Check, ThumbsUp, Download, ChevronRight, Star, Clock, Calendar } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/movies/$titleId")({
       { name: "description", content: "Stream on-demand premium content on Lettflix." },
     ],
   }),
+  codeSplitGroupings: [["component", "notFoundComponent", "errorComponent"]],
   notFoundComponent: TitleNotFound,
   errorComponent: TitleError,
   component: TitleDetail,
@@ -37,7 +38,7 @@ function TitleNotFound() {
   );
 }
 
-function TitleError({ error, reset }: { error: Error; reset: () => void }) {
+function TitleError({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
   return (
     <div className="min-h-screen bg-background text-foreground">

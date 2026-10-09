@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRight, ArrowLeft, Search, Filter, LibraryBig } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/channels/$channelId/library")({
       { name: "description", content: "Browse every on-demand title uploaded to this Lettflix channel." },
     ],
   }),
+  codeSplitGroupings: [["component", "notFoundComponent", "errorComponent"]],
   notFoundComponent: NotFound,
   errorComponent: ErrorView,
   component: ChannelLibraryPage,
@@ -33,7 +34,7 @@ function NotFound() {
   );
 }
 
-function ErrorView({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorView({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
   return (
     <div className="min-h-screen bg-background text-foreground">
