@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Play, Plus, Check, ThumbsUp, Download, ChevronRight, Star, Clock, Calendar } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/movies/$titleId")({
       { name: "description", content: "Stream on-demand premium content on Lettflix." },
     ],
   }),
+  codeSplitGroupings: [["component", "notFoundComponent", "errorComponent"]],
   notFoundComponent: TitleNotFound,
   errorComponent: TitleError,
   component: TitleDetail,
@@ -37,14 +38,14 @@ function TitleNotFound() {
   );
 }
 
-function TitleError({ error, reset }: { error: Error; reset: () => void }) {
+function TitleError({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <div className="mx-auto max-w-[900px] px-6 py-24 text-center">
         <h1 className="text-2xl font-bold">Something went wrong</h1>
-        <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">{error.message}</p>
+        <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">{error instanceof Error ? error.message : String(error)}</p>
         <button onClick={() => { router.invalidate(); reset(); }} className="mt-6 px-5 h-11 rounded-md bg-primary text-primary-foreground font-semibold">
           Try again
         </button>
