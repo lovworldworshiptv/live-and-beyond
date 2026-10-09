@@ -24,7 +24,7 @@ export const Route = createFileRoute("/collections/$collectionId")({
   }),
   errorComponent: ({ error }) => (
     <div className="min-h-screen grid place-items-center bg-background text-foreground p-8">
-      <p className="text-sm text-[color:var(--muted-foreground)]">{error.message}</p>
+      <p className="text-sm text-[color:var(--muted-foreground)]">{error instanceof Error ? error.message : String(error)}</p>
     </div>
   ),
   notFoundComponent: () => (

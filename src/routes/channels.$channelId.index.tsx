@@ -51,7 +51,7 @@ function ChannelError({ error, reset }: ErrorComponentProps) {
       <SiteHeader />
       <div className="mx-auto max-w-[900px] px-6 py-24 text-center">
         <h1 className="text-2xl font-bold">Something went wrong</h1>
-        <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">{error.message}</p>
+        <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">{error instanceof Error ? error.message : String(error)}</p>
         <button
           onClick={() => { router.invalidate(); reset(); }}
           className="mt-6 px-5 h-11 rounded-md bg-primary text-primary-foreground font-semibold"
