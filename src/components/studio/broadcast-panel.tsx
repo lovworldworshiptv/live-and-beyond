@@ -102,6 +102,7 @@ export function BroadcastPanel({
   isLive = false,
   playoutPanel,
   onChannelUpdated,
+  onStartingChange,
 }: {
   channelId: string;
   channelStreamUrl?: string | null;
@@ -109,6 +110,7 @@ export function BroadcastPanel({
   isLive?: boolean;
   playoutPanel?: ReactNode;
   onChannelUpdated?: () => void;
+  onStartingChange?: (starting: boolean) => void;
 }) {
   const [service, setService] = useState<Service>("tv");
   const [source, setSource] = useState<TvSource>(tvSource);
@@ -274,7 +276,9 @@ export function BroadcastPanel({
       toast.error("Add and save your stream URL first");
       return;
     }
+    onStartingChange?.(next);
     const { error } = await supabase.from("cms_channels").update({ is_live: next } as never).eq("id", channelId);
+    onStartingChange?.(false);
     if (error) { toast.error(error.message); return; }
     setLive(next);
     setLiveSource(next ? source : null);
@@ -290,6 +294,7 @@ export function BroadcastPanel({
       return;
     }
     setBusy(true);
+    onStartingChange?.(next);
     try {
       if (next) {
         const url = input?.playback_hls_url ?? null;
@@ -326,7 +331,7 @@ export function BroadcastPanel({
       }
       onChannelUpdated?.();
       load();
-    } finally { setBusy(false); }
+    } finally { setBusy(false); onStartingChange?.(false); }
   }
 
 
@@ -428,14 +433,14 @@ export function BroadcastPanel({
                 <span className={`px-2 py-0.5 rounded-full font-semibold ${
                   input.status === "live" ? "bg-primary/20 text-primary" : "bg-surface border border-border text-[color:var(--muted-foreground)]"
                 }`}>
-                  {input.status === "live" ? "Encoder connected" : "Waiting for encoder"}
+                  {input.status === "live" ? "Encoder connected" : encoderConnected ? "Encoder connected" : "Waiting for encoder"}
                 </span>
               </div>
               <Field label="RTMPS server" value={input.rtmps_url} />
               <Field label="Stream key" value={input.rtmps_stream_key} secret />
               <Field label="SRT URL" value={input.srt_url} secret />
               <div className="flex items-end gap-2 flex-wrap">
-                <div className="flex-1 min-w-[240px]">
+                <div className="flex-1 min-w-0 w-full sm:w-auto">
                   <Field label="Playback (HLS)" value={input.playback_hls_url} />
                 </div>
                 {isTv && source === "ingest" && (
@@ -530,14 +535,14 @@ export function BroadcastPanel({
             Already broadcasting elsewhere? Point Lettflix at your HLS (.m3u8) or DASH URL.
           </p>
           <div className="mt-4 flex gap-2 flex-wrap">
-            <div className="flex-1 min-w-[260px] flex items-center gap-2 rounded-md border border-border bg-surface px-3">
+            <div className="flex-1 min-w-0 w-full sm:w-auto flex items-center gap-2 rounded-md border border-border bg-surface px-3">
               <Link2 className="size-4 text-[color:var(--muted-foreground)]" />
               <input
                 value={externalUrl}
                 onChange={(e) => setExternalUrl(e.target.value)}
                 placeholder="https://example.com/live/stream.m3u8"
                 aria-label="Existing stream URL"
-                className="flex-1 h-11 bg-transparent text-sm outline-none"
+                className="flex-1 min-w-0 h-11 bg-transparent text-sm outline-none"
               />
             </div>
             <button onClick={saveExternal} className="h-11 px-5 rounded-md bg-elevated border border-border font-medium text-sm hover:bg-elevated/70">

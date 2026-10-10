@@ -1,12 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  BarChart3, DollarSign, Users, Play, TrendingUp, Radio, Tv, Mic2, Film, Video,
-  Loader2, ShieldOff, Pencil, Sparkles, ExternalLink, Settings, Check,
+  Radio, Tv, Mic2, Film, Video,
+  Loader2, ShieldOff, Pencil, Sparkles, ExternalLink, Settings, Check, ArrowRight, RefreshCw,
 } from "lucide-react";
-import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
-} from "recharts";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site-header";
@@ -63,6 +60,42 @@ function StudioPage() {
   const [wizard, setWizard] = useState(false);
   const [advanced, setAdvanced] = useState<Partial<Channel> | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
+  const [starting, setStarting] = useState(false);
+  const [setup, setSetup] = useState<{ content: number; input: boolean; encoder: string | null; checked: Date | null; error: boolean }>({ content: 0, input: false, encoder: null, checked: null, error: false });
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshWorkspace = useCallback(async () => {
+    if (!channel?.id) return;
+    setRefreshing(true);
+    const [state, inputs, content] = await Promise.all([
+      supabase.from("cms_channels").select("is_live, tv_source, stream_url, playout_enabled, fallback_playlist_id").eq("id", channel.id).single(),
+      supabase.from("live_inputs").select("id, status, updated_at").eq("channel_id", channel.id).eq("service", "tv").maybeSingle(),
+      supabase.from("cms_titles").select("id", { count: "exact", head: true }).eq("channel_id", channel.id),
+    ]);
+    if (!state.error && state.data) setChannel(prev => prev ? { ...prev, ...state.data } : prev);
+    setSetup({ content: content.count ?? 0, input: Boolean(inputs.data), encoder: inputs.data?.status ?? null, checked: new Date(), error: Boolean(state.error || inputs.error || content.error) });
+    setRefreshing(false);
+  }, [channel?.id]);
+  useEffect(() => {
+    void refreshWorkspace();
+    const timer = setInterval(() => void refreshWorkspace(), 15000);
+    return () => clearInterval(timer);
+  }, [refreshWorkspace]);
+  const groups: { label: string; items: [Tab, string][] }[] = [
+    { label: "Workspace", items: [["overview", "Overview"]] },
+    { label: "Channel", items: [["channel", "Branding"], ["services", "Services"]] },
+    { label: "Content", items: [["content", "Library"]] },
+    { label: "Broadcast", items: [["broadcast", "Live TV"], ["radio", "Radio"]] },
+    { label: "Audience & analytics", items: [["analytics", "Analytics"], ["team", "Team"]] },
+  ];
+  const source = (channel as { tv_source?: TvSource } | null)?.tv_source;
+  const sourceName = source === "ingest" ? "Lettflix Live ingest" : source === "external" ? "Existing stream" : source === "playout" ? "Automated TV" : "No source selected";
+  const checklist = [
+    { label: "Channel branding", done: Boolean(channel?.logo_url && channel?.banner_url && channel?.description), tab: "channel" as Tab },
+    { label: "Activate services", done: services.length > 0, tab: "services" as Tab },
+    { label: "Add your first content", done: setup.content > 0, tab: "content" as Tab },
+    { label: "Set up broadcasting", done: source === "ingest" ? setup.input : source === "external" ? Boolean(channel?.stream_url) : source === "playout" ? Boolean((channel as { fallback_playlist_id?: string | null } | null)?.fallback_playlist_id) : false, tab: "broadcast" as Tab },
+  ];
+  const completed = checklist.filter(item => item.done).length;
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -162,7 +195,7 @@ function StudioPage() {
       <div className="min-h-screen flex flex-col bg-background text-foreground">
         <SiteHeader />
         <main className="flex-1 grid place-items-center px-6">
-          <div className="max-w-xl text-center py-24">
+          <div className="max-w-xl text-center py-12">
             <div className="mx-auto size-16 rounded-2xl bg-primary/15 grid place-items-center mb-6">
               <Sparkles className="size-8 text-primary" />
             </div>
@@ -173,6 +206,10 @@ function StudioPage() {
               Let's set up your channel and bring your content to your audience. TV, radio,
               podcasts, movies and videos — all under one channel identity.
             </p>
+            <ol className="mt-6 grid grid-cols-2 gap-3 text-left text-sm text-muted-foreground">
+              {["Channel branding", "Activate services", "Add your first content", "Set up broadcasting"].map((item, index) => <li key={item} className="border-t border-border pt-3"><span className="text-accent mr-2">{index + 1}</span>{item}</li>)}
+            </ol>
+            <p className="mt-4 text-xs text-muted-foreground">0 of 4 complete</p>
             <Button variant="ghost"
               onClick={() => setWizard(true)}
               className="mt-8 h-12 px-7 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition"
@@ -201,13 +238,13 @@ function StudioPage() {
 
       {/* Channel identity header */}
       <section className="border-b border-border">
-        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-10 pb-6">
-          <div className="flex items-start justify-between gap-6 flex-wrap">
+        <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 pt-6 pb-6">
+          <div className="grid gap-5 sm:flex sm:items-start sm:justify-between">
             <div className="flex items-center gap-4 min-w-0">
               {channel?.logo_url ? (
-                <img src={channel.logo_url} alt={`${channel?.name ?? "Channel"} logo`} className="size-16 rounded-xl object-cover border border-border" />
+                <img src={channel.logo_url} alt={`${channel?.name ?? "Channel"} logo`} className="size-16 shrink-0 rounded-lg object-cover border border-border" />
               ) : (
-                <div className="size-16 rounded-xl bg-elevated border border-border grid place-items-center">
+                <div className="size-16 shrink-0 rounded-lg bg-elevated border border-border grid place-items-center">
                   <Tv className="size-6 text-[color:var(--muted-foreground)]" />
                 </div>
               )}
@@ -243,42 +280,32 @@ function StudioPage() {
             </div>
           </div>
 
-          <div role="status" className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-y border-border py-3">
-            <div className="min-w-0 text-sm"><span className={channel?.is_live ? "text-primary font-semibold" : "text-muted-foreground"}>{channel?.is_live ? "● Live" : "Off air"}</span><span className="ml-3 text-muted-foreground">{channel?.is_live ? "Check broadcast controls for source status" : "Ready to broadcast"}</span></div>
-            <Button variant="outline" className="h-11" onClick={() => setTab("broadcast")}><Radio className="size-4" />Broadcast</Button>
-          </div>
-          <nav aria-label="Creator Studio" className="mt-6 flex gap-1 overflow-x-auto scrollbar-none">
-            {([
-              ["overview", "Overview"],
-              ["channel", "Channel"],
-              ["services", "Services"],
-              ["content", "Content"],
-              ["broadcast", "Broadcast"],
-              ["radio", "Radio"],
-              ["analytics", "Analytics"],
-              ["team", "Team"],
-            ] as [Tab, string][]).map(([k, label]) => (
-              <Button variant="ghost"
-                key={k}
-                onClick={() => setTab(k)}
-                aria-pressed={tab === k}
-                className={`h-11 shrink-0 px-4 rounded-md text-sm font-medium whitespace-nowrap transition ${
-                  tab === k ? "bg-primary text-primary-foreground" : "hover:bg-elevated text-[color:var(--muted-foreground)]"
-                }`}
-              >
-                {label}
-              </Button>
-            ))}
-          </nav>
         </div>
       </section>
 
-      <main className="mx-auto max-w-[1480px] px-6 lg:px-10 py-8 space-y-6">
+      <section aria-label="Broadcast status" className="sticky top-16 z-30 border-b border-border bg-background/95 backdrop-blur-xl">
+        <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 py-3 grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-center">
+          <div className="min-w-0" role="status"><div className="flex items-center gap-2"><span className={`size-2.5 shrink-0 rounded-full ${starting ? "bg-warning" : channel?.is_live ? "bg-live" : "bg-muted-foreground"}`} /><span className="font-semibold">{starting ? "Starting" : channel?.is_live ? "Live" : "Off air"}</span><span className="text-xs text-muted-foreground truncate">{sourceName}</span></div><p className="mt-1 text-xs text-muted-foreground">{setup.error ? "Status refresh unavailable" : source === "ingest" ? `Encoder: ${setup.encoder === "live" || setup.encoder === "connected" ? "connected" : setup.input ? "waiting for connection" : "not configured"}` : "Playback health available in broadcast controls"}{setup.checked && ` · Checked ${setup.checked.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}</p></div>
+          <div className="flex items-center gap-1"><Button variant="ghost" size="icon" className="size-11" aria-label="Refresh workspace status" disabled={refreshing} onClick={() => void refreshWorkspace()}><RefreshCw className={refreshing ? "animate-spin" : ""} /></Button><Button className="h-11 px-3" disabled={starting} onClick={() => setTab("broadcast")}>{channel?.is_live ? "Manage broadcast" : "Set up / Go live"}</Button></div>
+        </div>
+      </section>
+      <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 py-6 grid gap-6 lg:grid-cols-[210px_minmax(0,1fr)]">
+        <aside className="min-w-0 lg:sticky lg:top-40 h-max">
+          <nav aria-label="Creator Studio" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-3">
+            {groups.map(group => <div key={group.label} className="min-w-0"><p className="text-xs text-muted-foreground mb-1 px-2">{group.label}</p><div className="grid gap-1">{group.items.map(([key, label]) => <Button key={key} variant={tab === key ? "secondary" : "ghost"} aria-pressed={tab === key} aria-controls="studio-workspace" className={`h-11 justify-start px-3 ${tab === key ? "text-accent border-l-2 border-accent" : "text-muted-foreground"}`} onClick={() => setTab(key)}>{label}</Button>)}</div></div>)}
+          </nav>
+        </aside>
+        <main id="studio-workspace" className="min-w-0 space-y-6 pb-10">
         {tab === "overview" && (
           <>
+            <section aria-labelledby="setup-heading" className="border-b border-border pb-6">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><div><h2 id="setup-heading" className="text-xl font-semibold">{completed === 4 ? "Your workspace is ready" : "Complete your channel setup"}</h2><p className="mt-1 text-sm text-muted-foreground">{completed} of 4 complete{setup.error ? " · Some setup details could not be checked" : ""}</p></div><span className="text-accent font-semibold">{completed}/4</span></div>
+              <progress aria-label="Channel setup progress" value={completed} max={4} className="w-full h-1.5 mt-4 accent-accent" />
+              <div className="grid sm:grid-cols-2 gap-2 mt-4">{checklist.map(item => <Button variant="ghost" key={item.label} className="h-12 justify-start border border-border whitespace-normal text-left" onClick={() => setTab(item.tab)}>{item.done ? <Check className="text-success" /> : <span className="size-4 rounded-full border border-muted-foreground shrink-0" />}<span className="flex-1">{item.label}</span><ArrowRight /></Button>)}</div>
+            </section>
             {channel?.id && <AnalyticsPanel channelId={channel.id} />}
             <div className="grid gap-4">
-              <div className="rounded-2xl border border-border bg-elevated/40 p-5">
+              <div className="border-t border-border py-5">
                 <div className="text-sm font-semibold mb-4">Active services</div>
                 <div className="grid gap-2">
                   {SERVICE_CATALOG.filter((s) => services.includes(s.key)).map((s) => {
@@ -333,7 +360,7 @@ function StudioPage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-border bg-elevated/40 p-5">
+            <div className="border-t border-border py-5">
               <div className="text-sm font-semibold mb-3">Channel tools</div>
               <Button variant="ghost"
                 onClick={() => setWizard(true)}
@@ -400,7 +427,8 @@ function StudioPage() {
             channelStreamUrl={channel.stream_url ?? null}
             tvSource={((channel as { tv_source?: TvSource }).tv_source ?? "none")}
             isLive={Boolean(channel.is_live)}
-            onChannelUpdated={load}
+            onChannelUpdated={() => { void load(); void refreshWorkspace(); }}
+            onStartingChange={setStarting}
             playoutPanel={
               <PlayoutPanel
                 channelId={channel.id}
@@ -412,8 +440,8 @@ function StudioPage() {
           />
         )}
 
-      </main>
-
+        </main>
+      </div>
       <SiteFooter />
 
       {wizard && (
