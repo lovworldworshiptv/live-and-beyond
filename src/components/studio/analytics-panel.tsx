@@ -52,6 +52,7 @@ export function AnalyticsPanel({ channelId }: { channelId: string }) {
         {[7, 14, 30].map((d) => (
           <Button variant="ghost"
             key={d}
+             aria-pressed={range === d}
             onClick={() => setRange(d)}
             className={`h-11 px-4 rounded-md text-sm font-medium transition ${
               range === d ? "bg-primary text-primary-foreground" : "bg-elevated border border-border hover:bg-elevated/70"
