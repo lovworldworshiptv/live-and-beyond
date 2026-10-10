@@ -1,427 +1,97 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import {
-  Bookmark, Clock, Bell, Heart, Trash2, Radio, Mic, Users, Plus, Check, Sparkles, Mail,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bookmark, Clock, Bell, Heart, Trash2, Users, Pencil, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TitleCard } from "@/components/title-card";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  useProfile, useProgress, useMyList, useReminders, useFollowing,
-} from "@/lib/personal";
-import { getTitle, getChannel, titles, channels, genres, channelLanguages } from "@/lib/catalog";
+import { useProfile, useProgress, useMyList, useReminders, useFollowing } from "@/lib/personal";
+import { useCmsChannels, useCmsTitles } from "@/lib/cms-catalog";
 
 export const Route = createFileRoute("/profile")({
-  head: () => ({
-    meta: [
-      { property: "og:title", content: "Your Dashboard \u2014 Lettflix" },
-      { property: "og:description", content: "Personalized dashboard, family profiles, interests, watchlists, viewing history and reminders on Lettflix." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { title: "Your Dashboard — Lettflix" },
-      { name: "description", content: "Personalized dashboard, family profiles, interests, watchlists, viewing history and reminders on Lettflix." },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "Your Profile — Lettflix" },
+    { name: "description", content: "Return to your viewing, saved titles, followed channels and reminders on Lettflix." },
+    { property: "og:title", content: "Your Profile — Lettflix" },
+    { property: "og:description", content: "Your saved activity and viewing history, all in one place." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: ProfilePage,
 });
-
-const FAMILY_PROFILES = [
-  { id: "alex", name: "Alex", role: "Primary", color: "from-primary to-accent" },
-  { id: "sam", name: "Sam", role: "Adult", color: "from-accent to-success" },
-  { id: "kids", name: "Kids", role: "Kids · 3-11", color: "from-warning to-primary" },
-] as const;
-
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good Morning";
-  if (h < 17) return "Good Afternoon";
-  return "Good Evening";
-}
-
+type Activity = "list" | "following" | "reminders" | "history";
 function ProfilePage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { profile } = useProfile();
-  const { items: progress, clear: clearProgress } = useProgress();
+  const { items: progress, clear } = useProgress();
   const { ids: myList, toggle: toggleList } = useMyList();
   const { items: reminders, toggle: toggleReminder } = useReminders();
   const { ids: following, toggle: toggleFollow } = useFollowing();
-
+  const { titles, loading: titlesLoading } = useCmsTitles();
+  const { channels, loading: channelsLoading } = useCmsChannels();
   const [account, setAccount] = useState<{ display_name: string | null; handle: string | null } | null>(null);
+  const [greeting, setGreeting] = useState("Welcome back");
+  const [active, setActive] = useState<Activity>("list");
   useEffect(() => {
-    if (!user) return;
-    supabase.from("profiles").select("display_name, handle").eq("id", user.id).maybeSingle()
-      .then(({ data }) => setAccount(data ?? null));
+    const hour = new Date().getHours();
+    setGreeting(hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening");
+    setAccount(null);
+    if (user) void supabase.from("profiles").select("display_name, handle").eq("id", user.id).maybeSingle().then(({ data }) => setAccount(data));
   }, [user]);
-
-  const displayName = account?.display_name || user?.user_metadata?.display_name || profile.displayName;
-  const email = user?.email ?? "";
-
-  const progressTitles = progress
-    .map((p) => ({ p, t: getTitle(p.titleId) }))
-    .filter((x): x is { p: (typeof progress)[number]; t: NonNullable<ReturnType<typeof getTitle>> } => !!x.t);
-  const listTitles = myList.map(getTitle).filter(Boolean);
-  const followed = following.map(getChannel).filter(Boolean);
-
-  const favouriteChannels = followed.length > 0 ? followed : channels.slice(0, 4);
-  const recentRadio = channels.filter((c) => c.streamKind === "radio").slice(0, 3);
-  const recentPodcasts = titles.filter((t) => t.kind === "Podcast").slice(0, 4);
-  const recommendations = titles.slice(0, 6);
-
-  return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      <SiteHeader />
-
-      {/* Greeting */}
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 pt-12 pb-8 flex items-center gap-6 flex-wrap">
-          <div className="size-20 rounded-full bg-[image:var(--gradient-accent)] grid place-items-center text-3xl font-bold shadow-[var(--shadow-glow)]">
-            {displayName.charAt(0).toUpperCase()}
+  const metadataName = typeof user?.user_metadata?.display_name === "string" ? user.user_metadata.display_name : "";
+  const name = account?.display_name || metadataName || profile.displayName || "there";
+  const history = progress.flatMap(p => { const t = titles.find(t => t.id === p.titleId); return t ? [{ p, t }] : []; });
+  const continuing = history.filter(({ p }) => p.positionPct > 0 && p.positionPct < 95);
+  const saved = titles.filter(t => myList.includes(t.id));
+  const followed = channels.filter(c => following.includes(c.id));
+  const sections = [
+    { key: "list" as const, label: "My List", count: myList.length, icon: Bookmark },
+    { key: "following" as const, label: "Following", count: following.length, icon: Heart },
+    { key: "reminders" as const, label: "Reminders", count: reminders.length, icon: Bell },
+    { key: "history" as const, label: "History", count: progress.length, icon: Clock },
+  ];
+  const busy = authLoading || titlesLoading || channelsLoading;
+  return <div className="min-h-screen bg-background text-foreground">
+    <SiteHeader />
+    <main className="mx-auto max-w-[1480px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10 space-y-8 pb-16">
+      <header className="grid gap-5 border-b border-border pb-6">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-center">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <div className="size-12 sm:size-16 shrink-0 rounded-full bg-accent/15 text-accent grid place-items-center text-xl font-semibold">{name === "there" ? <Users /> : name.charAt(0).toUpperCase()}</div>
+            <div className="min-w-0"><p className="text-xs text-muted-foreground mb-1">Your profile</p><h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold break-words">{greeting}{name !== "there" ? `, ${name}` : ""}</h1><p className="text-sm text-muted-foreground truncate mt-1">{user?.email || "Your saved activity on this device"}</p></div>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs uppercase tracking-widest text-accent font-semibold">
-              {greeting()} · {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
-            </div>
-            <h1 className="mt-1 text-3xl lg:text-5xl font-extrabold tracking-tight">
-              {greeting()}, Esteemed {displayName}
-            </h1>
-            <div className="mt-1.5 text-sm text-[color:var(--muted-foreground)] max-w-xl flex items-center gap-2">
-              <Mail className="size-3.5" /> {email || profile.bio}
-            </div>
-          </div>
-          <div className="flex items-center gap-6">
-            <Stat label="Watched" value={String(progress.length)} />
-            <Stat label="My List" value={String(myList.length)} />
-            <Stat label="Reminders" value={String(reminders.length)} />
-            <Stat label="Following" value={String(following.length)} />
-          </div>
-          <Link
-            to="/account"
-            className="h-10 px-4 rounded-md bg-elevated border border-border text-sm font-medium hover:bg-elevated/70 transition"
-          >
-            Edit profile
-          </Link>
+          <Button asChild variant="outline" className="h-11 px-3"><Link to="/account"><Pencil /><span className="hidden sm:inline">Edit profile</span><span className="sr-only sm:hidden">Edit profile</span></Link></Button>
+        </div>
+        <p className="text-xs text-muted-foreground">Saved activity is stored on this device.</p>
+      </header>
+      {busy ? <div role="status" className="py-8 flex gap-2 items-center text-muted-foreground"><Loader2 className="size-4 animate-spin" />Loading your activity…</div> : continuing.length ? <section aria-labelledby="continue-heading">
+        <div className="flex justify-between items-center gap-3 mb-4"><h2 id="continue-heading" className="text-xl font-semibold">Continue watching</h2><span className="text-sm text-muted-foreground">{continuing.length} titles</span></div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">{continuing.map(({ p, t }) => <div key={t.id}><TitleCard t={t} portrait={false} preview={false} /><progress aria-label={`${t.title} viewing progress`} value={p.positionPct} max={100} className="mt-2 w-full h-1.5 accent-accent" /><p className="text-xs text-muted-foreground mt-1">{Math.round(p.positionPct)}% watched</p></div>)}</div>
+      </section> : <section className="border-b border-border pb-7">
+        <p className="text-xs text-accent mb-2">Your next watch</p><h2 className="text-2xl font-semibold">{myList.length ? "Find your next watch" : "Build your watchlist"}</h2>
+        <p className="text-sm text-muted-foreground mt-2">{myList.length ? "Choose a saved title below, or discover something new." : "Save a title for later or follow a channel you love."}</p>
+        <div className="flex gap-3 flex-wrap mt-4"><Button asChild className="h-11"><Link to="/movies">Browse movies<ArrowRight /></Link></Button><Button asChild variant="outline" className="h-11"><Link to="/channels">Follow a channel</Link></Button></div>
+      </section>}
+      <section aria-label="Saved activity" className="space-y-5">
+        <nav aria-label="Profile activity" className="grid grid-cols-2 sm:grid-cols-4 gap-2 sticky top-16 z-20 bg-background/95 backdrop-blur-xl py-2">
+          {sections.map(s => <Button key={s.key} variant={active === s.key ? "secondary" : "ghost"} onClick={() => setActive(s.key)} aria-pressed={active === s.key} aria-controls="profile-activity" className={`h-12 px-3 justify-start min-w-0 ${active === s.key ? "border border-accent text-accent" : "border border-transparent text-muted-foreground"}`}><s.icon /><span>{s.label}</span><span className="ml-auto text-xs">{s.count}</span></Button>)}
+        </nav>
+        <div id="profile-activity" aria-live="polite">
+          <h2 className="text-xl font-semibold mb-4">{sections.find(s => s.key === active)?.label}</h2>
+          {busy ? <p className="text-muted-foreground">Loading saved activity…</p> : <>
+          {active === "list" && (saved.length ? <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">{saved.map(t => <div key={t.id}><TitleCard t={t} /><Button variant="ghost" className="h-11 w-full text-muted-foreground" onClick={() => { toggleList(t.id); toast.success("Removed from My List"); }} aria-label={`Remove ${t.title} from My List`}><Trash2 />Remove</Button></div>)}</div> : <Empty title={myList.length ? "Saved titles are currently unavailable" : "Nothing saved yet"} description="Browse published titles and save something for your next watch." destination="/movies" action="Browse movies" />)}
+          {active === "following" && (followed.length ? <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">{followed.map(c => <article key={c.id} className="rounded-lg border border-border overflow-hidden"><Link to="/channels/$channelId" params={{ channelId: c.id }}><img src={c.banner} alt={c.name} className="aspect-video w-full object-cover" /><h3 className="font-semibold px-4 pt-3">{c.name}</h3></Link><Button variant="ghost" className="m-1 h-11 text-muted-foreground" onClick={() => { toggleFollow(c.id); toast.success(`Unfollowed ${c.name}`); }}>Unfollow</Button></article>)}</div> : <Empty title={following.length ? "Followed channels are currently unavailable" : "Follow your first channel"} description="Keep the channels you enjoy together here." destination="/channels" action="Browse channels" />)}
+          {active === "reminders" && (reminders.length ? <div className="divide-y divide-border">{reminders.map(r => <div key={r.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-center py-4"><div className="min-w-0"><h3 className="text-sm font-semibold break-words">{r.title}</h3><p className="text-sm text-muted-foreground mt-1">{channels.find(c => c.id === r.channelId)?.name || "Channel unavailable"} · {r.time}</p><p className="text-xs text-muted-foreground mt-1">Saved on this device</p></div><Button variant="ghost" size="icon" className="size-11" aria-label={`Remove reminder for ${r.title}`} onClick={() => { toggleReminder(r); toast.success("Reminder removed"); }}><Trash2 /></Button></div>)}</div> : <Empty title="No reminders yet" description="Save a programme reminder from a channel’s schedule." destination="/guide" action="Browse the guide" />)}
+          {active === "history" && (history.length ? <div className="divide-y divide-border">{history.map(({ p, t }) => <div key={t.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-center py-3"><Link to="/movies/$titleId" params={{ titleId: t.id }} className="flex gap-3 min-w-0 items-center"><img src={t.cover} alt="" className="w-20 aspect-video object-cover rounded-md shrink-0" /><div className="min-w-0"><p className="text-sm font-medium truncate">{t.title}</p><p className="text-xs text-muted-foreground mt-1">{Math.round(p.positionPct)}% watched · {new Date(p.updatedAt).toLocaleDateString()}</p></div></Link><Button variant="ghost" size="icon" className="size-11" aria-label={`Remove ${t.title} from history`} onClick={() => { clear(t.id); toast.success("Removed from history"); }}><Trash2 /></Button></div>)}</div> : <Empty title="Your viewing history starts here" description="Titles appear after you play them—not just open their pages." destination="/movies" action="Find something to watch" />)}
+          </>}
         </div>
       </section>
-
-
-
-      {/* Family Profiles */}
-      <Section icon={<Users className="size-4 text-accent" />} title="Who's Watching" subtitle="Up to 5 profiles with individual history and preferences.">
-        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-          {FAMILY_PROFILES.map((p) => (
-            <button
-              key={p.id}
-              className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-elevated/40 p-4 hover:border-accent/60 transition"
-            >
-              <div className={`size-20 rounded-2xl bg-gradient-to-br ${p.color} grid place-items-center text-2xl font-bold shadow-[var(--shadow-card)] group-hover:scale-105 transition`}>
-                {p.name.charAt(0)}
-              </div>
-              <div className="text-sm font-semibold mt-1">{p.name}</div>
-              <div className="text-[11px] uppercase tracking-widest text-[color:var(--muted-foreground)]">{p.role}</div>
-            </button>
-          ))}
-          <button className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-elevated/20 p-4 hover:border-accent/40 transition text-[color:var(--muted-foreground)] hover:text-foreground">
-            <div className="size-20 rounded-2xl border border-dashed border-border grid place-items-center">
-              <Plus className="size-6" />
-            </div>
-            <div className="text-sm font-medium">Add Profile</div>
-            <div className="text-[11px]">{5 - FAMILY_PROFILES.length} slots left</div>
-          </button>
-        </div>
-      </Section>
-
-      {/* Interest Onboarding */}
-      <InterestOnboarding />
-
-      {/* Continue watching */}
-      <Section
-        icon={<Clock className="size-4 text-accent" />}
-        title="Continue Watching"
-        subtitle="Pick up where you left off."
-        action={
-          progressTitles.length > 0 && (
-            <button
-              onClick={() => progressTitles.forEach(({ t }) => clearProgress(t.id))}
-              className="text-xs text-[color:var(--muted-foreground)] hover:text-primary transition inline-flex items-center gap-1"
-            >
-              <Trash2 className="size-3" /> Clear
-            </button>
-          )
-        }
-      >
-        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {(progressTitles.length > 0 ? progressTitles.map(({ t }) => t) : titles.slice(0, 5)).map((t) => (
-            <TitleCard key={t.id} t={t} portrait={false} preview={false} />
-          ))}
-        </div>
-      </Section>
-
-      {/* Favourite Channels */}
-      <Section icon={<Heart className="size-4 text-accent" />} title="Favourite Channels" subtitle="Latest from the channels you subscribe to.">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {favouriteChannels.map((c) => c && (
-            <div key={c.id} className="rounded-xl border border-border bg-elevated/40 overflow-hidden flex">
-              <img src={c.banner} alt="" className="w-28 h-24 object-cover shrink-0" />
-              <div className="p-3 flex-1 min-w-0">
-                <div className="text-[10px] text-accent font-semibold uppercase tracking-wider">{c.category}</div>
-                <div className="font-semibold truncate">{c.name}</div>
-                <div className="mt-1.5 flex gap-2">
-                  <Link
-                    to="/channels/$channelId"
-                    params={{ channelId: c.id }}
-                    className="text-xs px-2 h-7 rounded-md bg-primary text-primary-foreground font-medium inline-flex items-center"
-                  >
-                    Watch
-                  </Link>
-                  {following.includes(c.id) && (
-                    <button
-                      onClick={() => toggleFollow(c.id)}
-                      className="text-xs px-2 h-7 rounded-md bg-surface border border-border font-medium hover:bg-elevated transition"
-                    >
-                      Unfollow
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      {/* Recent Radio */}
-      <Section icon={<Radio className="size-4 text-accent" />} title="Recent Radio" subtitle="Stations you've tuned into.">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {recentRadio.map((c) => (
-            <Link
-              key={c.id}
-              to="/channels/$channelId"
-              params={{ channelId: c.id }}
-              className="group flex gap-3 p-3 rounded-xl border border-border bg-elevated/40 hover:border-accent/40 transition"
-            >
-              <div className="size-16 shrink-0 rounded-md overflow-hidden">
-                <img src={c.banner} alt="" className="size-full object-cover" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-[10px] text-accent font-semibold uppercase tracking-wider">ON AIR</div>
-                <div className="font-semibold truncate">{c.name}</div>
-                <div className="text-xs text-[color:var(--muted-foreground)] truncate">Now: {c.nowPlaying.title}</div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </Section>
-
-      {/* Recent Podcasts */}
-      <Section icon={<Mic className="size-4 text-accent" />} title="Recent Podcasts" subtitle="Episodes you've been listening to.">
-        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-          {recentPodcasts.map((t) => (
-            <TitleCard key={t.id} t={t} portrait={false} />
-          ))}
-        </div>
-      </Section>
-
-      {/* My List (Watchlists) */}
-      <Section icon={<Bookmark className="size-4 text-accent" />} title="Watchlists" subtitle="Everything you saved for later.">
-        {listTitles.length === 0 ? (
-          <Empty label="Your list is empty. Tap the bookmark on any title to save it." />
-        ) : (
-          <div className="grid gap-5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-            {listTitles.map((t) => t && (
-              <div key={t.id} className="relative">
-                <TitleCard t={t} />
-                <button
-                  onClick={() => toggleList(t.id)}
-                  className="absolute -top-2 -right-2 size-7 rounded-full bg-black/70 grid place-items-center hover:bg-primary transition z-10"
-                  aria-label="Remove"
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </Section>
-
-      {/* Viewing History */}
-      <Section icon={<Clock className="size-4 text-accent" />} title="Viewing History" subtitle="Everything you've watched recently.">
-        {progressTitles.length === 0 ? (
-          <Empty label="Your viewing history will appear here." />
-        ) : (
-          <div className="rounded-xl border border-border bg-elevated/30 divide-y divide-border">
-            {progressTitles.map(({ p, t }) => (
-              <Link
-                key={t.id}
-                to="/movies/$titleId"
-                params={{ titleId: t.id }}
-                className="flex items-center gap-4 p-3 hover:bg-elevated/50 transition"
-              >
-                <img src={t.cover} alt="" className="w-24 h-14 object-cover rounded-md shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">{t.title}</div>
-                  <div className="mt-1 h-1 bg-white/10 rounded overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: `${Math.max(4, p.positionPct)}%` }} />
-                  </div>
-                </div>
-                <div className="text-xs text-[color:var(--muted-foreground)] shrink-0">{Math.round(p.positionPct)}%</div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </Section>
-
-      {/* Reminders */}
-      <Section icon={<Bell className="size-4 text-accent" />} title="Reminders" subtitle="We'll ping you when these start.">
-        {reminders.length === 0 ? (
-          <Empty label="No reminders yet. Use the bell on any program to set one." />
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {reminders.map((r) => {
-              const ch = getChannel(r.channelId);
-              return (
-                <div key={r.id} className="rounded-xl border border-border bg-elevated/40 p-4 flex items-center gap-3">
-                  {ch && <img src={ch.logoImg} alt="" className="size-12 rounded-md object-cover shrink-0" />}
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold truncate">{r.title}</div>
-                    <div className="text-xs text-[color:var(--muted-foreground)]">{ch?.name ?? r.channelId} · {r.time}</div>
-                  </div>
-                  <button onClick={() => toggleReminder(r)} className="size-8 grid place-items-center rounded-full hover:bg-primary/20 transition" aria-label="Remove">
-                    <Trash2 className="size-3.5 text-[color:var(--muted-foreground)]" />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </Section>
-
-      {/* Recommendations */}
-      <Section icon={<Sparkles className="size-4 text-accent" />} title="Recommendations" subtitle="Personalized picks based on your interests.">
-        <div className="grid gap-5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-          {recommendations.map((t) => (
-            <TitleCard key={t.id} t={t} />
-          ))}
-        </div>
-      </Section>
-
-      <div className="pb-16" />
-      <SiteFooter />
-    </div>
-  );
+      <section className="border-t border-border pt-6" aria-labelledby="profiles-heading"><div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><div className="min-w-0"><h2 id="profiles-heading" className="text-lg font-semibold">Watching profile</h2><p className="text-sm text-muted-foreground mt-1">{user ? `${name === "there" ? "Your account" : name} · Current profile` : "Sign in to manage your account profile."}</p></div><Button asChild variant="outline" className="h-11"><Link to={user ? "/account" : "/auth"}>{user ? "Manage profile" : "Sign in"}</Link></Button></div></section>
+    </main><SiteFooter />
+  </div>;
 }
-
-function InterestOnboarding() {
-  const [cats, setCats] = useState<string[]>(["Music", "LoveWorld", "Sports"]);
-  const [langs, setLangs] = useState<string[]>(["English"]);
-  const [followedCh, setFollowedCh] = useState<string[]>(["loveworld-plus", "worship-live"]);
-
-  const toggle = (arr: string[], setArr: (v: string[]) => void, v: string) =>
-    setArr(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
-
-  const creators = useMemo(
-    () => ["Sinach", "Frank Edwards", "Ada Ehi", "Pastor Chris", "DJ Solo", "Miss B"],
-    []
-  );
-  const [followedCreators, setFollowedCreators] = useState<string[]>(["Sinach", "Pastor Chris"]);
-
-  return (
-    <Section
-      icon={<Sparkles className="size-4 text-accent" />}
-      title="Your Interests"
-      subtitle="Tell Lettflix what you love — we'll tune your rows."
-    >
-      <div className="rounded-2xl border border-border bg-elevated/40 p-5 lg:p-6 space-y-6">
-        <InterestGroup label="Categories" values={cats}>
-          {genres.filter((g) => g !== "All").map((g) => (
-            <Chip key={g} active={cats.includes(g)} onClick={() => toggle(cats, setCats, g)}>{g}</Chip>
-          ))}
-        </InterestGroup>
-        <InterestGroup label="Languages" values={langs}>
-          {channelLanguages.filter((l) => l !== "All").map((l) => (
-            <Chip key={l} active={langs.includes(l)} onClick={() => toggle(langs, setLangs, l)}>{l}</Chip>
-          ))}
-        </InterestGroup>
-        <InterestGroup label="Channels" values={followedCh}>
-          {channels.slice(0, 8).map((c) => (
-            <Chip key={c.id} active={followedCh.includes(c.id)} onClick={() => toggle(followedCh, setFollowedCh, c.id)}>{c.name}</Chip>
-          ))}
-        </InterestGroup>
-        <InterestGroup label="Creators" values={followedCreators}>
-          {creators.map((c) => (
-            <Chip key={c} active={followedCreators.includes(c)} onClick={() => toggle(followedCreators, setFollowedCreators, c)}>{c}</Chip>
-          ))}
-        </InterestGroup>
-      </div>
-    </Section>
-  );
+function Empty({ title, description, destination, action }: { title: string; description: string; destination: "/movies" | "/channels" | "/guide"; action: string }) {
+  return <div className="py-8 sm:py-12 border-y border-border"><h3 className="text-lg font-medium">{title}</h3><p className="text-sm text-muted-foreground mt-2 mb-4">{description}</p><Button asChild variant="outline" className="h-11"><Link to={destination}>{action}<ArrowRight /></Link></Button></div>;
 }
-
-function InterestGroup({ label, values, children }: { label: string; values: string[]; children: React.ReactNode }) {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">{label}</div>
-        <div className="text-[11px] text-accent">{values.length} selected</div>
-      </div>
-      <div className="flex flex-wrap gap-2">{children}</div>
-    </div>
-  );
-}
-
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`h-8 px-3 rounded-full text-sm border transition inline-flex items-center gap-1.5 ${
-        active
-          ? "bg-accent/20 border-accent/60 text-accent"
-          : "bg-elevated border-border text-[color:var(--secondary-foreground)] hover:text-foreground"
-      }`}
-    >
-      {active && <Check className="size-3" />}
-      {children}
-    </button>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="text-center">
-      <div className="text-2xl font-bold tracking-tight">{value}</div>
-      <div className="text-[11px] uppercase tracking-widest text-[color:var(--muted-foreground)]">{label}</div>
-    </div>
-  );
-}
-
-function Section({
-  icon, title, subtitle, action, children,
-}: {
-  icon: React.ReactNode; title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode;
-}) {
-  return (
-    <section className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 mt-10">
-      <div className="flex items-end justify-between mb-4 gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">
-            {icon} {title}
-          </div>
-          <h2 className="mt-1 text-2xl font-semibold tracking-tight">{title}</h2>
-          {subtitle && <p className="text-sm text-[color:var(--muted-foreground)] mt-1">{subtitle}</p>}
-        </div>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function Empty({ label }: { label: string }) {
-  return (
-    <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-[color:var(--muted-foreground)]">
-      {label}
-    </div>
-  );
-}
-
