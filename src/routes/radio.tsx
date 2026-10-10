@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useRadio } from "@/components/radio-player";
 import { fetchRadioStations, type RadioStation } from "@/lib/radio";
+import { Button } from "@/components/ui/button";
 import { recordPlaybackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/radio")({
@@ -89,7 +90,7 @@ function RadioPage() {
             </div>
             <div className="flex gap-2 overflow-x-auto">
               {categories.map((c) => (
-                <button
+                <Button variant="ghost"
                   key={c}
                   onClick={() => setCategory(c)}
                   className={`h-11 px-4 rounded-md text-sm font-medium whitespace-nowrap transition ${
@@ -97,7 +98,7 @@ function RadioPage() {
                   }`}
                 >
                   {c}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -108,9 +109,10 @@ function RadioPage() {
         {loading ? (
           <div className="py-24 grid place-items-center"><Loader2 className="size-6 animate-spin text-primary" /></div>
         ) : !filtered.length ? (
-          <p className="py-24 text-center text-sm text-[color:var(--muted-foreground)]">
-            No radio stations are live right now. Check back soon.
-          </p>
+          <div className="py-24 text-center text-sm text-muted-foreground">
+            <p>{q || category !== "All" ? "No stations match your filters." : "No radio stations available right now."}</p>
+            {(q || category !== "All") && <Button variant="outline" className="mt-4 h-11" onClick={() => { setQ(""); setCategory("All"); }}>Clear filters</Button>}
+          </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((s) => {
@@ -136,14 +138,14 @@ function RadioPage() {
                         {s.tagline || s.stationMessage || `${s.bitrate} kbps`}
                       </p>
                     </div>
-                    <button
+                    <Button variant="ghost"
                       onClick={() => onPlay(s)}
                       disabled={!s.streamUrl}
                       aria-label={isCurrent && playing ? `Pause ${s.name}` : `Play ${s.name}`}
                       className="size-11 shrink-0 grid place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_0_28px_-6px_var(--primary)] disabled:opacity-40"
                     >
                       {isCurrent && playing ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current" />}
-                    </button>
+                    </Button>
                   </div>
 
                   {(s.nowPlayingTitle || s.category) && (
@@ -157,7 +159,7 @@ function RadioPage() {
                   <Link
                     to="/channels/$channelId"
                     params={{ channelId: s.slug }}
-                    className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-md border border-border bg-surface text-xs font-medium hover:bg-elevated transition"
+                    className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-md border border-border bg-surface text-xs font-medium hover:bg-elevated transition"
                   >
                     Visit channel
                   </Link>

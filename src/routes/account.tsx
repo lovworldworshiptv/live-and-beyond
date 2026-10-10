@@ -9,11 +9,16 @@ import { useProfile, useSettings, type SettingsData } from "@/lib/personal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 
 export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Account Settings \u2014 Lettflix" },
+      { property: "og:description", content: "Manage your Lettflix profile, notifications, playback quality, security and billing." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Account Settings — Lettflix" },
       { name: "description", content: "Manage your Lettflix profile, notifications, playback quality, security and billing." },
     ],
@@ -32,6 +37,7 @@ const sections = [
 ] as const;
 
 function AccountPage() {
+  const { signOut } = useAuth();
   const { profile, setProfile } = useProfile();
   const { settings, setSettings } = useSettings();
   const [active, setActive] = useState<(typeof sections)[number]["id"]>("profile");
@@ -56,7 +62,7 @@ function AccountPage() {
             Account settings
           </h1>
           <p className="mt-2 text-[color:var(--secondary-foreground)]">
-            Personalise your Lettflix experience across devices.
+            Manage your account and preferences for this device.
           </p>
         </div>
       </section>
@@ -64,27 +70,28 @@ function AccountPage() {
       <div className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-8 mb-16 grid gap-6 lg:grid-cols-[240px_1fr]">
         {/* Sidebar */}
         <aside className="lg:sticky lg:top-24 h-max">
-          <nav className="rounded-2xl border border-border bg-elevated/40 p-2 flex lg:flex-col overflow-x-auto">
+          <nav aria-label="Account settings" className="grid grid-cols-2 gap-1 lg:flex lg:flex-col">
             {sections.map((s) => {
               const isActive = active === s.id;
               return (
-                <button
+                <Button variant="ghost"
+                  aria-pressed={isActive}
                   key={s.id}
                   onClick={() => setActive(s.id)}
-                  className={`flex items-center gap-3 h-10 px-3 rounded-md text-sm whitespace-nowrap transition ${
+                  className={`flex justify-start items-center gap-2 h-auto min-h-12 px-3 py-3 rounded-md text-sm whitespace-normal text-left transition ${
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "hover:bg-surface text-[color:var(--secondary-foreground)]"
                   }`}
                 >
-                  <s.icon className="size-4" /> {s.label}
-                </button>
+                  <s.icon className="size-4 shrink-0" /> {s.label}
+                </Button>
               );
             })}
             <div className="h-px bg-border my-2 hidden lg:block" />
-            <button className="hidden lg:flex items-center gap-3 h-10 px-3 rounded-md text-sm text-[color:var(--muted-foreground)] hover:text-primary transition">
+            <Button variant="ghost" onClick={() => void signOut()} className="justify-start min-h-12 gap-3">
               <LogOut className="size-4" /> Sign out
-            </button>
+            </Button>
           </nav>
         </aside>
 

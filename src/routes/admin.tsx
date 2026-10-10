@@ -13,6 +13,10 @@ import { defaultNav, defaultHero, defaultFooter, defaultBottomNav, bottomNavIcon
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "CMS Admin \u2014 Lettflix" },
+      { property: "og:description", content: "Manage channels, on-demand titles, collections, and user roles." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "CMS Admin — Lettflix" },
       { name: "description", content: "Manage channels, on-demand titles, collections, and user roles." },
       { name: "robots", content: "noindex, nofollow" },

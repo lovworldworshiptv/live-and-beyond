@@ -2,13 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { Play, Plus, Check, Info, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useMyList, useProgress } from "@/lib/personal";
+import { useMyList, useProgress, useSettings } from "@/lib/personal";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { ShareMenu } from "./share-menu";
 import type { Title } from "@/lib/catalog";
-
-const PREVIEW_VIDEO =
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
 
 const PREVIEW_WIDTH = 340;
 
@@ -33,7 +30,8 @@ export function TitleCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { has, toggle } = useMyList();
-  const { items, setProgress } = useProgress();
+  const { items } = useProgress();
+  const { settings } = useSettings();
   const progress = items.find((i) => i.titleId === t.id);
   const inList = has(t.id);
 
@@ -42,6 +40,7 @@ export function TitleCard({
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
   };
   const openSoon = () => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     clearTimers();
     openTimer.current = window.setTimeout(() => setOpen(true), 320);
   };
@@ -60,7 +59,9 @@ export function TitleCard({
   useLayoutEffect(() => {
     if (!open || !cardRef.current) return;
     const compute = () => {
-      const rect = cardRef.current!.getBoundingClientRect();
+      const card = cardRef.current;
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
       const vw = window.innerWidth;
       const gutter = 12;
       let left = rect.left + rect.width / 2 - PREVIEW_WIDTH / 2;
@@ -84,7 +85,7 @@ export function TitleCard({
     };
   }, [open]);
 
-  const previewSrc = t.streamUrl || PREVIEW_VIDEO;
+  const previewSrc = settings.autoplayPreviews ? t.streamUrl : undefined;
   useHlsAttach(videoRef as React.MutableRefObject<HTMLVideoElement | HTMLAudioElement | null>, previewSrc, open);
 
   useEffect(() => {
@@ -99,6 +100,11 @@ export function TitleCard({
     }
   }, [open, muted]);
 
+  useEffect(() => () => {
+    if (openTimer.current) window.clearTimeout(openTimer.current);
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+  }, []);
+
   const widthClass = !portrait ? (size === "lg" ? "w-[85vw] sm:w-[340px]" : "w-[62vw] sm:w-[260px]") : "";
 
   return (
@@ -111,7 +117,6 @@ export function TitleCard({
       <Link
         to="/movies/$titleId"
         params={{ titleId: t.id }}
-        onClick={() => setProgress(t.id, Math.max(progress?.positionPct ?? 0, 8))}
         className="block"
       >
         <div
@@ -127,16 +132,16 @@ export function TitleCard({
           />
           <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
           {rank && (
-            <span className="absolute top-3 left-3 text-[11px] font-bold px-2 py-1 rounded bg-black/60 backdrop-blur">
+            <span className="absolute top-3 left-3 text-[11px] font-bold px-2 py-1 rounded bg-background/60 backdrop-blur">
               #{rank}
             </span>
           )}
-          <span className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-black/60 backdrop-blur text-white/90">
+          <span className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-background/60 backdrop-blur text-foreground/90">
             {t.kind}
           </span>
           {progress && progress.positionPct < 98 && (
             <div className="absolute inset-x-3 bottom-3">
-              <div className="h-1 bg-white/20 rounded overflow-hidden">
+              <div className="h-1 bg-foreground/20 rounded overflow-hidden">
                 <div className="h-full bg-primary" style={{ width: `${Math.max(4, progress.positionPct)}%` }} />
               </div>
             </div>
@@ -161,13 +166,13 @@ export function TitleCard({
             <div className="rounded-xl overflow-hidden border border-border bg-elevated shadow-[var(--shadow-card)] animate-in fade-in zoom-in-95 duration-150">
               <div className="relative aspect-video">
                 <img src={t.hero} alt="" className="size-full object-cover" />
-                <video
+                {previewSrc && <video
                   ref={videoRef}
                   loop
                   playsInline
                   muted
                   className="absolute inset-0 size-full object-cover"
-                />
+                />}
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{ background: "linear-gradient(180deg, transparent 20%, oklch(0 0 0 / 0.85) 100%)" }}
@@ -179,7 +184,7 @@ export function TitleCard({
                     e.stopPropagation();
                     setMuted((m) => !m);
                   }}
-                  className="absolute top-3 right-3 size-8 grid place-items-center rounded-full bg-black/70 backdrop-blur border border-white/10 hover:bg-black/90 transition"
+                  className="absolute top-3 right-3 size-8 grid place-items-center rounded-full bg-background/70 backdrop-blur border border-foreground/10 hover:bg-background/90 transition"
                 >
                   {muted ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
                 </button>
@@ -188,8 +193,7 @@ export function TitleCard({
                     <Link
                       to="/movies/$titleId"
                       params={{ titleId: t.id }}
-                      onClick={() => setProgress(t.id, Math.max(progress?.positionPct ?? 0, 12))}
-                      className="size-11 grid place-items-center rounded-full bg-white text-background hover:bg-white/90 transition"
+                      className="size-11 grid place-items-center rounded-full bg-foreground text-background hover:bg-foreground/90 transition"
                       style={{
                         boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.3), 0 0 20px oklch(0.55 0.22 25 / 0.4), 0 0 45px oklch(0.55 0.22 25 / 0.18)",
                       }}
@@ -204,7 +208,7 @@ export function TitleCard({
                         toggle(t.id);
                       }}
                       className={`size-9 grid place-items-center rounded-full border transition ${
-                        inList ? "bg-primary/90 border-primary" : "bg-black/60 border-white/20 hover:bg-black/80"
+                        inList ? "bg-primary/90 border-primary" : "bg-background/60 border-foreground/20 hover:bg-background/80"
                       }`}
                       aria-label={inList ? "Remove from My List" : "Add to My List"}
                     >
@@ -215,7 +219,7 @@ export function TitleCard({
                   <Link
                     to="/movies/$titleId"
                     params={{ titleId: t.id }}
-                    className="size-9 grid place-items-center rounded-full bg-black/60 border border-white/20 hover:bg-black/80 transition"
+                    className="size-9 grid place-items-center rounded-full bg-background/60 border border-foreground/20 hover:bg-background/80 transition"
                     aria-label="More info"
                   >
                     <Info className="size-4" />

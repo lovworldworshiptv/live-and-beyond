@@ -25,12 +25,9 @@ import {
 import { RemindButton } from "./remind-button";
 import { ShareMenu } from "./share-menu";
 import { useHlsAttach } from "@/hooks/use-hls";
-import { useFollowing, useReminders } from "@/lib/personal";
+import { useFollowing, useReminders, useSettings } from "@/lib/personal";
 import { toast } from "sonner";
 import type { Channel } from "@/lib/catalog";
-
-const PREVIEW_VIDEO =
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
 
 export function ChannelCard({ c }: { c: Channel }) {
   const [hovering, setHovering] = useState(false);
@@ -44,7 +41,8 @@ export function ChannelCard({ c }: { c: Channel }) {
   const reminders = useReminders();
   const reminderId = `${c.id}::${c.nowPlaying.startsAt}::${c.nowPlaying.title}`;
   const reminderActive = reminders.has(reminderId);
-  const canPreview = c.streamKind === "video" && c.isLive;
+  const { settings } = useSettings();
+  const canPreview = c.streamKind === "video" && c.isLive && !!c.streamUrl && settings.autoplayPreviews;
 
   const stop = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -52,6 +50,7 @@ export function ChannelCard({ c }: { c: Channel }) {
   };
 
   const confirmReminder = () => {
+    if (!c.nowPlaying.startsAt) { toast("No programme time available", { description: "Check the channel schedule for upcoming programmes." }); setReminderOpen(false); return; }
     reminders.toggle({
       id: reminderId,
       channelId: c.id,
@@ -60,7 +59,7 @@ export function ChannelCard({ c }: { c: Channel }) {
     });
     if (!reminderActive) {
       toast.success("Reminder set", {
-        description: `${c.nowPlaying.title} · ${c.nowPlaying.startsAt}`,
+        description: `Saved on this device · ${c.nowPlaying.title}`,
       });
     } else {
       toast("Reminder removed", { description: c.nowPlaying.title });
@@ -69,6 +68,7 @@ export function ChannelCard({ c }: { c: Channel }) {
   };
 
   const onEnter = () => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
     hoverTimer.current = window.setTimeout(() => setHovering(true), 350);
   };
@@ -78,7 +78,7 @@ export function ChannelCard({ c }: { c: Channel }) {
     setMuted(true);
   };
 
-  const previewSrc = c.streamUrl || PREVIEW_VIDEO;
+  const previewSrc = c.streamUrl;
   useHlsAttach(videoRef as React.MutableRefObject<HTMLVideoElement | HTMLAudioElement | null>, previewSrc, hovering && canPreview);
 
   useEffect(() => {
@@ -178,7 +178,7 @@ export function ChannelCard({ c }: { c: Channel }) {
           </div>
           <div className="mt-auto pt-4 flex items-center justify-between gap-2 text-sm">
             <div className="min-w-0 truncate text-[color:var(--secondary-foreground)]">
-              <span className="text-foreground font-medium">Now:</span> {c.nowPlaying.title}
+              <span className="text-foreground font-medium">{c.isLive ? "Now:" : "Programme:"}</span> {c.nowPlaying.title}
             </div>
             <button
               onClick={(e) => {
@@ -186,7 +186,7 @@ export function ChannelCard({ c }: { c: Channel }) {
                 e.stopPropagation();
                 toggle(c.id);
               }}
-              className={`shrink-0 text-[11px] px-2 h-6 rounded-full border transition ${
+              className={`shrink-0 text-[11px] px-3 h-11 rounded-full border transition ${
                 following
                   ? "bg-accent/20 border-accent/40 text-accent"
                   : "bg-elevated border-border text-[color:var(--secondary-foreground)] hover:text-foreground"
@@ -203,7 +203,7 @@ export function ChannelCard({ c }: { c: Channel }) {
         to="/channels/$channelId"
         params={{ channelId: c.id }}
         hash="watch"
-        className="mt-2 flex items-center justify-center gap-2 h-10 sm:h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm transition hover:brightness-110"
+        className="mt-2 flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm transition hover:brightness-110"
         style={{
           boxShadow: "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
         }}
@@ -222,7 +222,7 @@ export function ChannelCard({ c }: { c: Channel }) {
                   stop(e);
                   setReminderOpen(true);
                 }}
-                className="inline-flex items-center justify-center h-10 sm:h-11 rounded-xl bg-elevated/70 border border-border text-foreground font-semibold backdrop-blur transition hover:bg-elevated hover:border-primary/50 hover:scale-[1.03] active:scale-95"
+                className="inline-flex items-center justify-center h-11 rounded-xl bg-elevated/70 border border-border text-foreground font-semibold backdrop-blur transition hover:bg-elevated hover:border-primary/50 hover:scale-[1.03] active:scale-95"
                 style={{
                   boxShadow:
                     "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
@@ -241,7 +241,7 @@ export function ChannelCard({ c }: { c: Channel }) {
                   stop(e);
                   setScheduleOpen(true);
                 }}
-                className="inline-flex items-center justify-center h-10 sm:h-11 rounded-xl bg-elevated/70 border border-border text-foreground font-semibold backdrop-blur transition hover:bg-elevated hover:border-primary/50 hover:scale-[1.03] active:scale-95"
+                className="inline-flex items-center justify-center h-11 rounded-xl bg-elevated/70 border border-border text-foreground font-semibold backdrop-blur transition hover:bg-elevated hover:border-primary/50 hover:scale-[1.03] active:scale-95"
                 style={{
                   boxShadow:
                     "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",

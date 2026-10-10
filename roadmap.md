@@ -9,12 +9,19 @@
 - [x] Netflix-style landing page, legal pages
 - [x] Landing page hover effects and entrance/scroll animations
 
-## UI/UX polish (from design audit)
-- [ ] Touch devices: tap-to-open cards instead of hover previews
-- [ ] Bottom spacing on all pages so mobile nav never covers content
-- [ ] Swipe-snap rows with edge fades on homepage and catalogs
-- [ ] Sticky player on mobile channel watch page
-- [ ] Mobile-friendly Guide (Now / Next view)
-- [ ] Radio lock-screen controls and floating mini-player
-- [ ] Studio mobile quick status view (live, viewers, off-air)
-- [ ] Account settings list-style navigation on mobile
+## UI/UX polish
+- [x] Landing account/plans buttons, truthful supporting copy, and next-section arrow
+- [x] Touch cards navigate directly; hover previews limited to fine pointers and real streams
+- [x] Mobile bottom spacing and feedback placement above navigation
+- [x] Swipe-snap rows with edge fades
+- [x] Sticky mobile channel player during playback
+- [x] Published programme Guide with Now / Next / Schedule views
+- [x] Radio lock-screen controls and mini-player positioned above mobile/tablet navigation
+- [x] Studio quick live/off-air status and real analytics; broadcast controls remain unchanged
+- [x] Mobile account section navigation and working sign-out
+- [x] Clear filter recovery across channels, movies, catalogue hubs and radio
+- [x] Reminder feedback accurately says it is saved on this device
+- [x] Viewing history uses playback events; removed sample previews, episodes, ratings and catalogue counts
+- [x] Desktop and phone checks: landing links/arrow, filter reset, Guide views, account sections, Studio broadcast controls; no runtime errors or horizontal overflow
+- [ ] Verify successful published movie playback and Continue Watching readback — blocked by current movie source failing playback (media error 4)
+- [ ] Verify live radio playback and device lock-screen controls — blocked by no published radio stations

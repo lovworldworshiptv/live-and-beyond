@@ -63,13 +63,13 @@ export function SearchDialog({
   }
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
+    <CommandDialog shouldFilter={false} open={open} onOpenChange={onOpenChange}>
       <CommandInput
         value={query}
         onValueChange={setQuery}
         placeholder="Search titles, channels, podcasts…"
       />
-      <CommandList className="max-h-[60vh]">
+      <CommandList className="max-h-[min(60dvh,480px)]">
         <CommandEmpty>No results found.</CommandEmpty>
 
         {channelResults.length > 0 && (
@@ -77,6 +77,7 @@ export function SearchDialog({
             {channelResults.map((c) => (
               <CommandItem
                 key={c.id}
+                className="min-h-11"
                 value={`channel ${c.name} ${c.category}`}
                 onSelect={() => go(`/channels/${c.id}`)}
               >
@@ -99,6 +100,7 @@ export function SearchDialog({
             {titleResults.map((t) => (
               <CommandItem
                 key={t.id}
+                className="min-h-11"
                 value={`title ${t.title} ${t.kind}`}
                 onSelect={() => go(`/movies/${t.id}`)}
               >

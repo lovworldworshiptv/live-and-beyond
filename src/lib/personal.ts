@@ -45,11 +45,11 @@ export type SettingsData = {
 };
 
 const DEFAULT_PROFILE: ProfileData = {
-  displayName: "Alex Rivera",
-  handle: "@alex.rivera",
-  avatarSeed: "alex",
-  bio: "Loves live worship, football matchdays and long-form podcasts.",
-  location: "Lagos, Nigeria",
+  displayName: "",
+  handle: "",
+  avatarSeed: "profile",
+  bio: "",
+  location: "",
 };
 
 const DEFAULT_SETTINGS: SettingsData = {

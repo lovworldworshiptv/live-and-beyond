@@ -8,6 +8,7 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@/hooks/use-auth";
@@ -48,11 +49,6 @@ export const Route = createFileRoute("/studio")({
 const SERVICE_ICON: Record<ServiceKey, typeof Tv> = {
   tv: Tv, radio: Radio, podcasts: Mic2, movies: Film, videos: Video,
 };
-
-const watchData = Array.from({ length: 14 }, (_, i) => ({
-  day: `D${i + 1}`,
-  hours: 1200 + Math.round(Math.sin(i / 2) * 400 + Math.random() * 300),
-}));
 
 type Tab =
   | "overview" | "channel" | "services" | "content"
@@ -177,12 +173,12 @@ function StudioPage() {
               Let's set up your channel and bring your content to your audience. TV, radio,
               podcasts, movies and videos — all under one channel identity.
             </p>
-            <button
+            <Button variant="ghost"
               onClick={() => setWizard(true)}
               className="mt-8 h-12 px-7 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition"
             >
               Set Up My Channel
-            </button>
+            </Button>
           </div>
         </main>
         <SiteFooter />
@@ -229,12 +225,12 @@ function StudioPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <button
+              <Button variant="ghost"
                 onClick={() => setWizard(true)}
                 className="h-11 px-5 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition inline-flex items-center gap-2"
               >
                 <Pencil className="size-4" /> Edit channel
-              </button>
+              </Button>
               {channel?.slug && (
                 <Link
                   to="/channels/$channelId"
@@ -247,7 +243,11 @@ function StudioPage() {
             </div>
           </div>
 
-          <nav className="mt-6 flex gap-1 overflow-x-auto">
+          <div role="status" className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-y border-border py-3">
+            <div className="min-w-0 text-sm"><span className={channel?.is_live ? "text-primary font-semibold" : "text-muted-foreground"}>{channel?.is_live ? "● Live" : "Off air"}</span><span className="ml-3 text-muted-foreground">{channel?.is_live ? "Check broadcast controls for source status" : "Ready to broadcast"}</span></div>
+            <Button variant="outline" className="h-11" onClick={() => setTab("broadcast")}><Radio className="size-4" />Broadcast</Button>
+          </div>
+          <nav aria-label="Creator Studio" className="mt-6 flex gap-1 overflow-x-auto scrollbar-none">
             {([
               ["overview", "Overview"],
               ["channel", "Channel"],
@@ -258,15 +258,16 @@ function StudioPage() {
               ["analytics", "Analytics"],
               ["team", "Team"],
             ] as [Tab, string][]).map(([k, label]) => (
-              <button
+              <Button variant="ghost"
                 key={k}
                 onClick={() => setTab(k)}
-                className={`h-9 px-4 rounded-md text-sm font-medium whitespace-nowrap transition ${
+                aria-pressed={tab === k}
+                className={`h-11 shrink-0 px-4 rounded-md text-sm font-medium whitespace-nowrap transition ${
                   tab === k ? "bg-primary text-primary-foreground" : "hover:bg-elevated text-[color:var(--muted-foreground)]"
                 }`}
               >
                 {label}
-              </button>
+              </Button>
             ))}
           </nav>
         </div>
@@ -275,52 +276,8 @@ function StudioPage() {
       <main className="mx-auto max-w-[1480px] px-6 lg:px-10 py-8 space-y-6">
         {tab === "overview" && (
           <>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { label: "Watch hours (7d)", value: "48,213", delta: "+12.4%", icon: Play },
-                { label: "Unique viewers", value: "128.9K", delta: "+8.1%", icon: Users },
-                { label: "Revenue (MTD)", value: "$14,532", delta: "+18.7%", icon: DollarSign },
-                { label: "Engagement", value: "72%", delta: "+3.2%", icon: TrendingUp },
-              ].map((k) => (
-                <div key={k.label} className="rounded-2xl border border-border bg-elevated/40 p-5">
-                  <div className="flex items-center justify-between text-[color:var(--muted-foreground)]">
-                    <span className="text-xs uppercase tracking-wider">{k.label}</span>
-                    <k.icon className="size-4" />
-                  </div>
-                  <div className="mt-2 text-3xl font-bold tracking-tight">{k.value}</div>
-                  <div className="mt-1 text-xs text-emerald-400 font-medium">{k.delta} vs last period</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid gap-4 lg:grid-cols-3">
-              <div className="rounded-2xl border border-border bg-elevated/40 p-5 lg:col-span-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-semibold">Watch hours</div>
-                    <div className="text-xs text-[color:var(--muted-foreground)]">Last 14 days</div>
-                  </div>
-                  <BarChart3 className="size-4 text-[color:var(--muted-foreground)]" />
-                </div>
-                <div className="mt-4 h-64">
-                  <ResponsiveContainer>
-                    <AreaChart data={watchData}>
-                      <defs>
-                        <linearGradient id="wh" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#1E5EFF" stopOpacity={0.6} />
-                          <stop offset="100%" stopColor="#1E5EFF" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid stroke="#1f2226" vertical={false} />
-                      <XAxis dataKey="day" stroke="#6b7280" fontSize={11} />
-                      <YAxis stroke="#6b7280" fontSize={11} />
-                      <Tooltip contentStyle={{ background: "#111315", border: "1px solid #1f2226", borderRadius: 8, fontSize: 12 }} />
-                      <Area type="monotone" dataKey="hours" stroke="#1E5EFF" strokeWidth={2} fill="url(#wh)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
+            {channel?.id && <AnalyticsPanel channelId={channel.id} />}
+            <div className="grid gap-4">
               <div className="rounded-2xl border border-border bg-elevated/40 p-5">
                 <div className="text-sm font-semibold mb-4">Active services</div>
                 <div className="grid gap-2">
@@ -338,12 +295,12 @@ function StudioPage() {
                     </p>
                   )}
                 </div>
-                <button
+                <Button variant="ghost"
                   onClick={() => setTab("services")}
                   className="mt-4 w-full h-10 rounded-md border border-border bg-elevated hover:bg-elevated/70 text-sm font-medium inline-flex items-center justify-center gap-2"
                 >
                   <Settings className="size-4" /> Manage services
-                </button>
+                </Button>
               </div>
             </div>
           </>
@@ -378,18 +335,18 @@ function StudioPage() {
             </div>
             <div className="rounded-2xl border border-border bg-elevated/40 p-5">
               <div className="text-sm font-semibold mb-3">Channel tools</div>
-              <button
+              <Button variant="ghost"
                 onClick={() => setWizard(true)}
                 className="w-full h-11 rounded-md bg-primary text-primary-foreground font-semibold text-sm mb-2"
               >
                 Edit with setup wizard
-              </button>
-              <button
+              </Button>
+              <Button variant="ghost"
                 onClick={() => setAdvanced(channel)}
                 className="w-full h-11 rounded-md border border-border bg-surface hover:bg-elevated text-sm font-medium"
               >
                 Advanced settings
-              </button>
+              </Button>
               <p className="mt-3 text-xs text-[color:var(--muted-foreground)]">
                 Advanced settings expose stream source, programming metadata and library ordering.
               </p>
@@ -406,7 +363,7 @@ function StudioPage() {
               const Icon = SERVICE_ICON[s.key];
               const on = services.includes(s.key);
               return (
-                <button
+                <Button variant="ghost"
                   key={s.key}
                   onClick={() => toggleService(s.key)}
                   className={`flex items-start gap-3 text-left rounded-xl border p-4 transition ${
@@ -421,7 +378,7 @@ function StudioPage() {
                   <span className={`size-5 rounded-md grid place-items-center border ${on ? "bg-primary border-primary" : "border-border"}`}>
                     {on && <Check className="size-3.5 text-primary-foreground" />}
                   </span>
-                </button>
+                </Button>
               );
             })}
           </div>

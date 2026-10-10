@@ -14,6 +14,10 @@ import { SiteFooter } from "@/components/site-footer";
 export const Route = createFileRoute("/community")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Community \u2014 Lettflix" },
+      { property: "og:description", content: "Watch parties, live chat, fan clubs and creator meet-ups. Lettflix Community brings the audience together." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Community — Lettflix" },
       {
         name: "description",

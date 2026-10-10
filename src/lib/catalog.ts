@@ -30,7 +30,7 @@ export type Channel = {
   podcastLibrary?: string[]; // title ids
   featuredContent?: string[]; // title ids
   nowPlaying: { title: string; startsAt: string; endsAt: string; description: string };
-  schedule: { time: string; title: string; kind: string; live?: boolean }[];
+  schedule: { time: string; endsAt?: string; title: string; kind: string; live?: boolean }[];
 };
 
 export const channels: Channel[] = [

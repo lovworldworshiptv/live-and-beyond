@@ -10,10 +10,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { mapTitleRow, useCmsTitles } from "@/lib/cms-catalog";
 import { useMyList } from "@/lib/personal";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/movies/$titleId")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Watch on Lettflix" },
+      { property: "og:description", content: "Stream on-demand premium content on Lettflix." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Watch on Lettflix" },
       { name: "description", content: "Stream on-demand premium content on Lettflix." },
     ],
@@ -46,9 +51,9 @@ function TitleError({ error, reset }: ErrorComponentProps) {
       <div className="mx-auto max-w-[900px] px-6 py-24 text-center">
         <h1 className="text-2xl font-bold">Something went wrong</h1>
         <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">{error instanceof Error ? error.message : String(error)}</p>
-        <button onClick={() => { router.invalidate(); reset(); }} className="mt-6 px-5 h-11 rounded-md bg-primary text-primary-foreground font-semibold">
+        <Button variant="ghost" onClick={() => { router.invalidate(); reset(); }} className="mt-6 px-5 h-11 rounded-md bg-primary text-primary-foreground font-semibold">
           Try again
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -56,7 +61,7 @@ function TitleError({ error, reset }: ErrorComponentProps) {
 
 function TitleDetail() {
   const { titleId } = Route.useParams();
-  const [title, setTitle] = useState<Title | null>(() => getTitle(titleId) ?? null);
+  const [title, setTitle] = useState<Title | null>(null);
   const [notFoundState, setNotFoundState] = useState(false);
   const [rated, setRated] = useState(false);
   const { has: hasInList, toggle: toggleList } = useMyList();
@@ -65,8 +70,7 @@ function TitleDetail() {
   useEffect(() => {
     let cancelled = false;
     setNotFoundState(false);
-    const staticT = getTitle(titleId) ?? null;
-    setTitle(staticT);
+    setTitle(null);
     (async () => {
       const { data } = await supabase
         .from("cms_titles")
@@ -76,7 +80,7 @@ function TitleDetail() {
         .maybeSingle();
       if (cancelled) return;
       if (data) setTitle(mapTitleRow(data as never));
-      else if (!staticT) setNotFoundState(true);
+      else setNotFoundState(true);
     })();
     return () => { cancelled = true; };
   }, [titleId]);
@@ -95,13 +99,6 @@ function TitleDetail() {
   const related = allTitles.filter((t) => t.id !== title.id && t.category === title.category);
   const alsoLike = allTitles.filter((t) => t.id !== title.id).slice(0, 6);
 
-  const episodes = Array.from({ length: title.episodes ? Math.min(title.episodes, 6) : 6 }, (_, i) => ({
-    number: i + 1,
-    title: `Episode ${i + 1} · ${["The Opening", "Foundations", "Breakthrough", "The Turning Point", "Momentum", "Legacy"][i]}`,
-    duration: `${38 + i * 2}m`,
-    synopsis:
-      "Drawn into a new chapter, the story deepens as unseen forces converge and the world shifts under the weight of one decision.",
-  }));
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -122,8 +119,9 @@ function TitleDetail() {
             <span className="text-foreground">{title.title}</span>
           </div>
 
-          <div className="mt-6 max-w-5xl">
+          <div id="title-player" className="mt-6 max-w-5xl">
             <StreamPlayer
+              titleId={title.id}
               src={title.streamUrl}
               poster={title.hero || title.cover}
               kind={audioKind ? "audio" : "video"}
@@ -133,7 +131,7 @@ function TitleDetail() {
             />
             {!title.streamUrl && (
               <p className="mt-2 text-xs text-[color:var(--muted-foreground)]">
-                No stream configured for this title yet. Add one from the admin CMS to enable playback.
+                This title is not available to play yet.
               </p>
             )}
           </div>
@@ -150,21 +148,19 @@ function TitleDetail() {
             <span className="px-2 py-0.5 rounded border border-border">{title.rating}</span>
             <span className="inline-flex items-center gap-1"><Calendar className="size-3.5" /> {title.year}</span>
             <span className="inline-flex items-center gap-1"><Clock className="size-3.5" /> {title.duration}</span>
-            <span className="inline-flex items-center gap-1 text-warning"><Star className="size-3.5 fill-current" /> 4.8</span>
-            <span className="text-success font-semibold">98% Match</span>
           </div>
 
           <p className="mt-5 text-[color:var(--secondary-foreground)] max-w-2xl">{title.synopsis}</p>
 
           <div className="mt-7 flex flex-wrap gap-3">
             <a
-              href="#top"
-              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-              className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition"
+              href="#title-player"
+              onClick={(e) => { e.preventDefault(); const player = document.getElementById("title-player"); player?.scrollIntoView({ behavior: "smooth", block: "center" }); player?.querySelector<HTMLButtonElement>(`button[aria-label="${audioKind ? "Listen" : "Play"}"]`)?.click(); }}
+              className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-foreground text-background font-semibold hover:bg-foreground/90 transition"
             >
               <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Play
             </a>
-            <button
+            <Button variant="ghost"
               onClick={() => {
                 const wasIn = hasInList(title.id);
                 toggleList(title.id);
@@ -178,8 +174,8 @@ function TitleDetail() {
             >
               {hasInList(title.id) ? <Check className="size-4" /> : <Plus className="size-4" />}
               {hasInList(title.id) ? "In My List" : "My List"}
-            </button>
-            <button
+            </Button>
+            <Button variant="ghost"
               onClick={() => {
                 setRated((r) => !r);
                 toast.success(rated ? "Rating removed" : "Thanks for rating!", { description: title.title });
@@ -191,48 +187,20 @@ function TitleDetail() {
               }`}
             >
               <ThumbsUp className={`size-4 ${rated ? "fill-current" : ""}`} /> {rated ? "Rated" : "Rate"}
-            </button>
-            <button
-              onClick={() => toast("Download unavailable", { description: "Downloads are available on the Lettflix mobile app." })}
+            </Button>
+            <Button variant="ghost"
+              onClick={() => toast("Download unavailable", { description: "Offline downloads are not currently available." })}
               className="inline-flex items-center gap-2 px-5 h-12 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium"
             >
               <Download className="size-4" /> Download
-            </button>
+            </Button>
             <div className="h-12 w-32">
               <ShareMenu title={title.title} path={`/movies/${title.id}`} variant="chip" />
             </div>
           </div>
 
 
-          {(title.kind === "Series" || title.kind === "Podcast") && (
-            <div className="mt-12">
-              <div className="flex items-end justify-between mb-4">
-                <h2 className="text-xl font-semibold">{title.kind === "Series" ? "Episodes" : "Latest Episodes"}</h2>
-                {title.seasons && (
-                  <div className="text-sm text-[color:var(--muted-foreground)]">Season 1 of {title.seasons}</div>
-                )}
-              </div>
-              <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
-                {episodes.map((ep) => (
-                  <div key={ep.number} className="p-4 flex gap-4 items-start hover:bg-elevated/40 transition">
-                    <div className="relative w-40 shrink-0 rounded-md overflow-hidden aspect-video">
-                      <img src={title.cover} alt="" className="size-full object-cover" />
-                      <div className="absolute inset-0 bg-black/30 grid place-items-center opacity-0 hover:opacity-100 transition">
-                        <Play className="size-[22px] fill-current" strokeWidth={2.5} />
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="font-semibold truncate">{ep.title}</div>
-                        <div className="text-xs text-[color:var(--muted-foreground)] shrink-0">{ep.duration}</div>
-                      </div>
-                      <p className="mt-1.5 text-sm text-[color:var(--secondary-foreground)] line-clamp-2">{ep.synopsis}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {(title.kind === "Series" || title.kind === "Podcast") && <p className="mt-8 text-sm text-muted-foreground">Episode listings have not been published for this title.</p>}
 
           <div className="mt-12">
             <h2 className="text-xl font-semibold mb-4">More Like This</h2>
@@ -279,11 +247,8 @@ function TitleDetail() {
           <div className="rounded-xl border border-border bg-gradient-to-br from-primary/20 via-transparent to-accent/20 p-5">
             <div className="text-sm font-semibold">Watch offline</div>
             <p className="mt-1.5 text-xs text-[color:var(--secondary-foreground)]">
-              Download this title on the Lettflix app and watch anywhere, no internet required.
+              Offline downloads are not currently available.
             </p>
-            <button className="mt-4 w-full inline-flex justify-center items-center gap-2 px-4 h-10 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition text-sm">
-              <Download className="size-4" /> Get the App
-            </button>
           </div>
         </aside>
       </section>

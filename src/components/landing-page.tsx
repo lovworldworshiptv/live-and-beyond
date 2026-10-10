@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, Play, Tv, Radio, Download, Users, ArrowRight } from "lucide-react";
 import logoIcon from "@/assets/lettflix-icon.png.asset.json";
 import heroBg from "@/assets/landing-hero.png.asset.json";
+import { Button } from "@/components/ui/button";
 
 const FEATURES = [
   {
@@ -12,18 +13,18 @@ const FEATURES = [
   },
   {
     icon: Play,
-    title: "Movies, series & originals",
-    body: "Stream premium on-demand titles, documentaries and Lettflix Originals in crisp quality on any screen.",
+    title: "Movies, series & documentaries",
+    body: "Discover movies, series and documentaries alongside live channels in the Lettflix catalogue.",
   },
   {
     icon: Radio,
     title: "Radio & podcasts",
-    body: "Audio channels and shows that keep going when the screen goes off — in the car, at work, on the move.",
+    body: "Listen to live radio and discover podcasts from broadcasters and creators.",
   },
   {
     icon: Users,
-    title: "Profiles for everyone",
-    body: "Family profiles, personalised rows and a watchlist that follows you across every device you own.",
+    title: "Make it your own",
+    body: "Save titles to your watchlist and return to content you have started watching.",
   },
 ];
 
@@ -38,15 +39,15 @@ const FAQS = [
   },
   {
     q: "Where can I watch?",
-    a: "Anywhere. Watch in your browser on desktop, tablet and mobile — live channels and on-demand content stream instantly.",
+    a: "Watch in your browser on desktop, tablet and mobile. Content availability depends on the channel and your plan.",
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes. There are no long-term contracts. Manage or cancel your plan from your account settings in two clicks.",
+    a: "Review the pricing page and terms for your plan’s billing and cancellation details.",
   },
   {
     q: "Is there content for kids?",
-    a: "Yes. Create a kids profile and get a curated, family-safe catalogue of shows, movies and educational programming.",
+    a: "Check individual title information before choosing content for children. Content availability varies by channel.",
   },
 ];
 
@@ -75,17 +76,19 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
   );
 }
 
-function StartHereCta({ label = "Start Here" }: { label?: string }) {
+function StartHereCta({ label = "Create your account" }: { label?: string }) {
   return (
+    <Button asChild className="relative overflow-hidden landing-glow mx-auto mt-7 flex h-12 w-fit px-6 text-base font-semibold transition-transform hover:scale-[1.03]">
     <Link
       to="/auth"
       search={{ mode: "signup" as const }}
-      className="group relative mx-auto mt-7 flex w-fit items-center justify-center gap-2 overflow-hidden rounded-md bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground landing-glow transition-all duration-300 hover:scale-[1.04] hover:brightness-110 active:scale-[0.97]"
+      className="group relative"
     >
       <span aria-hidden className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-primary-foreground/25 blur-sm transition-all duration-700 group-hover:left-[120%]" />
       <span className="relative">{label}</span>
       <ArrowRight className="relative size-4 transition-transform duration-300 group-hover:translate-x-1" />
     </Link>
+    </Button>
   );
 }
 
@@ -101,7 +104,7 @@ export function LandingPage() {
           alt="A mosaic of Lettflix film and series posters"
           className="absolute inset-0 size-full object-cover landing-kenburns"
         />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.55),rgba(0,0,0,0.88))]" />
+        <div className="absolute inset-0 landing-overlay" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
 
         <div className="relative mx-auto flex max-w-[1480px] flex-col px-4 sm:px-8">
@@ -121,29 +124,34 @@ export function LandingPage() {
             </Link>
           </header>
 
-          <div className="mx-auto max-w-3xl py-20 text-center sm:py-32 lg:py-40">
+          <div className="mx-auto max-w-3xl pb-8 pt-16 text-center sm:pt-24 lg:pt-28">
             <span style={{ animationDelay: "100ms" }} className="landing-fade-up inline-flex items-center gap-2 rounded-full border border-foreground/20 bg-foreground/5 px-3 py-1 transition-colors duration-300 hover:border-primary/60 hover:bg-primary/10 text-[11px] font-medium uppercase tracking-[0.18em] backdrop-blur">
               <span className="size-1.5 rounded-full bg-primary live-pulse" />
               Live TV · Radio · Podcasts · On-Demand
             </span>
             <h1 style={{ animationDelay: "250ms" }} className="landing-fade-up mt-5 font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              One subscription.
+              Lettflix
               <br />
-              <span className="landing-shimmer-text">The whole broadcast world.</span>
+              <span className="text-2xl sm:text-4xl">Live TV and on-demand, together.</span>
             </h1>
             <p style={{ animationDelay: "400ms" }} className="landing-fade-up mx-auto mt-4 max-w-xl text-sm text-[color:var(--muted-foreground)] sm:text-base">
-              Live channels, radio, podcasts, events and premium films — streaming together on Lettflix.
-              Ready to watch? Get started in seconds.
+              Watch live channels, discover movies and series, or listen to radio and podcasts — all in one place.
             </p>
-            <div style={{ animationDelay: "550ms" }} className="landing-fade-up">
+            <div style={{ animationDelay: "550ms" }} className="landing-fade-up flex flex-wrap items-center justify-center gap-x-3">
               <StartHereCta />
+              <Button asChild variant="outline" className="mt-7 h-12 bg-background/50 px-6 text-base">
+                <Link to="/pricing">Explore plans</Link>
+              </Button>
             </div>
+            <Button variant="ghost" size="icon" aria-label="Explore more about Lettflix" className="mx-auto mt-10 size-11 rounded-full border border-foreground/20 hover:bg-foreground/10 hover:text-foreground" onClick={() => document.getElementById("landing-discover")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" })}>
+              <ChevronDown aria-hidden className="size-5" />
+            </Button>
           </div>
         </div>
       </section>
 
       {/* FEATURES */}
-      <section className="mx-auto max-w-[1480px] px-4 py-14 sm:px-8 sm:py-20">
+      <section id="landing-discover" className="mx-auto max-w-[1480px] scroll-mt-4 px-4 py-14 sm:px-8 sm:py-20">
         <Reveal>
           <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
             More than streaming — a broadcast ecosystem
@@ -173,8 +181,7 @@ export function LandingPage() {
               Watch everywhere. Pick up where you left off.
             </h2>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-[color:var(--muted-foreground)] sm:text-base">
-              Start a film on your laptop and finish it on your phone. Your watchlist, progress and reminders
-              stay in sync across every device on your account.
+               Browse Lettflix on your laptop, tablet or phone. Save titles to your watchlist and return to your recently watched content.
             </p>
             <div className="mt-6 flex flex-wrap gap-2 text-xs text-[color:var(--muted-foreground)]">
               {["Desktop", "Tablet", "Mobile", "Smart TV browser"].map((d) => (
@@ -196,7 +203,7 @@ export function LandingPage() {
               </div>
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-sm font-medium">
                 <Download className="size-4 text-primary" />
-                Thousands of hours, one place
+                Live and on-demand, one place
               </div>
             </div>
           </Reveal>
@@ -214,7 +221,7 @@ export function LandingPage() {
           {FAQS.map((f, i) => (
             <Reveal key={f.q} delay={i * 70}>
             <div className={`overflow-hidden rounded-xl border bg-surface/70 transition-all duration-300 hover:border-foreground/20 hover:bg-surface ${open === i ? "border-primary/50" : "border-border"}`}>
-              <button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setOpen(open === i ? null : i)}
                 aria-expanded={open === i}
@@ -222,7 +229,7 @@ export function LandingPage() {
               >
                 {f.q}
                 <ChevronDown className={`size-5 shrink-0 transition-transform duration-300 ${open === i ? "rotate-180 text-primary" : ""}`} />
-              </button>
+              </Button>
               <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${open === i ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
                 <div className="overflow-hidden">
                   <p className="border-t border-border px-5 py-4 text-sm leading-relaxed text-[color:var(--muted-foreground)]">
