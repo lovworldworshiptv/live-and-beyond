@@ -56,7 +56,7 @@ function TitleError({ error, reset }: ErrorComponentProps) {
 
 function TitleDetail() {
   const { titleId } = Route.useParams();
-  const [title, setTitle] = useState<Title | null>(() => getTitle(titleId) ?? null);
+  const [title, setTitle] = useState<Title | null>(null);
   const [notFoundState, setNotFoundState] = useState(false);
   const [rated, setRated] = useState(false);
   const { has: hasInList, toggle: toggleList } = useMyList();
@@ -65,8 +65,7 @@ function TitleDetail() {
   useEffect(() => {
     let cancelled = false;
     setNotFoundState(false);
-    const staticT = getTitle(titleId) ?? null;
-    setTitle(staticT);
+    setTitle(null);
     (async () => {
       const { data } = await supabase
         .from("cms_titles")
@@ -76,7 +75,7 @@ function TitleDetail() {
         .maybeSingle();
       if (cancelled) return;
       if (data) setTitle(mapTitleRow(data as never));
-      else if (!staticT) setNotFoundState(true);
+      else setNotFoundState(true);
     })();
     return () => { cancelled = true; };
   }, [titleId]);
@@ -95,13 +94,6 @@ function TitleDetail() {
   const related = allTitles.filter((t) => t.id !== title.id && t.category === title.category);
   const alsoLike = allTitles.filter((t) => t.id !== title.id).slice(0, 6);
 
-  const episodes = Array.from({ length: title.episodes ? Math.min(title.episodes, 6) : 6 }, (_, i) => ({
-    number: i + 1,
-    title: `Episode ${i + 1} · ${["The Opening", "Foundations", "Breakthrough", "The Turning Point", "Momentum", "Legacy"][i]}`,
-    duration: `${38 + i * 2}m`,
-    synopsis:
-      "Drawn into a new chapter, the story deepens as unseen forces converge and the world shifts under the weight of one decision.",
-  }));
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -124,6 +116,7 @@ function TitleDetail() {
 
           <div className="mt-6 max-w-5xl">
             <StreamPlayer
+              titleId={title.id}
               src={title.streamUrl}
               poster={title.hero || title.cover}
               kind={audioKind ? "audio" : "video"}
@@ -133,7 +126,7 @@ function TitleDetail() {
             />
             {!title.streamUrl && (
               <p className="mt-2 text-xs text-[color:var(--muted-foreground)]">
-                No stream configured for this title yet. Add one from the admin CMS to enable playback.
+                This title is not available to play yet.
               </p>
             )}
           </div>
@@ -204,35 +197,7 @@ function TitleDetail() {
           </div>
 
 
-          {(title.kind === "Series" || title.kind === "Podcast") && (
-            <div className="mt-12">
-              <div className="flex items-end justify-between mb-4">
-                <h2 className="text-xl font-semibold">{title.kind === "Series" ? "Episodes" : "Latest Episodes"}</h2>
-                {title.seasons && (
-                  <div className="text-sm text-[color:var(--muted-foreground)]">Season 1 of {title.seasons}</div>
-                )}
-              </div>
-              <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
-                {episodes.map((ep) => (
-                  <div key={ep.number} className="p-4 flex gap-4 items-start hover:bg-elevated/40 transition">
-                    <div className="relative w-40 shrink-0 rounded-md overflow-hidden aspect-video">
-                      <img src={title.cover} alt="" className="size-full object-cover" />
-                      <div className="absolute inset-0 bg-black/30 grid place-items-center opacity-0 hover:opacity-100 transition">
-                        <Play className="size-[22px] fill-current" strokeWidth={2.5} />
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="font-semibold truncate">{ep.title}</div>
-                        <div className="text-xs text-[color:var(--muted-foreground)] shrink-0">{ep.duration}</div>
-                      </div>
-                      <p className="mt-1.5 text-sm text-[color:var(--secondary-foreground)] line-clamp-2">{ep.synopsis}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {(title.kind === "Series" || title.kind === "Podcast") && <p className="mt-8 text-sm text-muted-foreground">Episode listings have not been published for this title.</p>}
 
           <div className="mt-12">
             <h2 className="text-xl font-semibold mb-4">More Like This</h2>

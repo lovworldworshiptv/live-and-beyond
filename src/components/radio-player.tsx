@@ -4,6 +4,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import { Pause, Play, Radio as RadioIcon, Volume2, VolumeX, X } from "lucide-react";
 import Hls from "hls.js";
+import { Button } from "@/components/ui/button";
 import type { RadioStation } from "@/lib/radio";
 import { getRadioNowPlaying } from "@/lib/radio.functions";
 
@@ -12,6 +13,7 @@ type NowPlaying = { title: string | null; artist: string | null };
 type RadioCtx = {
   station: RadioStation | null;
   playing: boolean;
+  error: string | null;
   nowPlaying: NowPlaying;
   play: (station: RadioStation) => void;
   toggle: (station: RadioStation) => void;
@@ -31,6 +33,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const hlsRef = useRef<Hls | null>(null);
   const [station, setStation] = useState<RadioStation | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
   const [nowPlaying, setNowPlaying] = useState<NowPlaying>({ title: null, artist: null });
 
@@ -38,6 +41,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !station?.streamUrl) return;
+    setError(null);
     const src = station.streamUrl;
     hlsRef.current?.destroy();
     hlsRef.current = null;
@@ -47,12 +51,13 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       const hls = new Hls({ enableWorker: true });
       hls.loadSource(src);
       hls.attachMedia(audio);
+      hls.on(Hls.Events.ERROR, (_event, data) => { if (data.fatal) { setPlaying(false); setError("Station unavailable. Try playing again."); } });
       hlsRef.current = hls;
     } else if (audio.src !== src) {
       audio.src = src;
       audio.load();
     }
-    audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    audio.play().then(() => setPlaying(true)).catch(() => { setPlaying(false); setError("Playback could not start. Tap play to retry."); });
 
     return () => {
       hlsRef.current?.destroy();
@@ -86,7 +91,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const toggle = useCallback((next: RadioStation) => {
     const audio = audioRef.current;
     if (station?.channelId === next.channelId && audio) {
-      if (audio.paused) audio.play().then(() => setPlaying(true)).catch(() => undefined);
+      if (audio.paused) { setError(null); audio.play().then(() => setPlaying(true)).catch(() => setError("Station unavailable. Try again shortly.")); }
       else { audio.pause(); setPlaying(false); }
       return;
     }
@@ -101,24 +106,35 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     setStation(null);
   }, []);
 
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) return;
+    if (!station) { navigator.mediaSession.metadata = null; navigator.mediaSession.playbackState = "none"; return; }
+    navigator.mediaSession.metadata = new MediaMetadata({ title: nowPlaying.title || station.name, artist: nowPlaying.artist || station.name, album: "Lettflix Radio", artwork: station.logoUrl ? [{ src: station.logoUrl }] : [] });
+    navigator.mediaSession.playbackState = playing ? "playing" : "paused";
+    navigator.mediaSession.setActionHandler("play", () => { audioRef.current?.play().catch(() => setError("Playback unavailable.")); });
+    navigator.mediaSession.setActionHandler("pause", () => audioRef.current?.pause());
+    navigator.mediaSession.setActionHandler("stop", stop);
+    return () => { for (const action of ["play", "pause", "stop"] as const) navigator.mediaSession.setActionHandler(action, null); };
+  }, [station, playing, nowPlaying, stop]);
+
   const value = useMemo(
-    () => ({ station, playing, nowPlaying, play, toggle, stop }),
-    [station, playing, nowPlaying, play, toggle, stop],
+    () => ({ station, playing, error, nowPlaying, play, toggle, stop }),
+    [station, playing, error, nowPlaying, play, toggle, stop],
   );
 
   return (
     <Ctx.Provider value={value}>
       {children}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-      <audio ref={audioRef} muted={muted} className="hidden" />
+      <audio ref={audioRef} muted={muted} className="hidden" onPlaying={() => { setPlaying(true); setError(null); }} onPause={() => setPlaying(false)} onError={() => { setPlaying(false); setError("Station unavailable. Try again shortly."); }} />
       {station && (
-        <div className="fixed inset-x-0 bottom-0 z-50 pb-[max(env(safe-area-inset-bottom),0px)] md:pb-0">
-          <div className="mx-auto max-w-[1480px] px-3 pb-16 md:pb-3">
-            <div className="flex items-center gap-3 rounded-2xl border border-border bg-background/85 backdrop-blur-xl px-3 py-2 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]">
+        <div data-radio-player className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom,0px))] z-50 lg:bottom-0">
+          <div className="mx-auto max-w-[1480px] px-3 pb-3">
+            <div className="flex items-center gap-2 sm:gap-3 rounded-lg border border-border bg-background/85 backdrop-blur-xl px-3 py-2 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]">
               {station.logoUrl ? (
-                <img src={station.logoUrl} alt="" className="size-11 rounded-lg object-cover border border-border" />
+                <img src={station.logoUrl} alt="" className="size-11 shrink-0 rounded-lg object-cover border border-border" />
               ) : (
-                <div className="size-11 rounded-lg bg-elevated grid place-items-center border border-border">
+                <div className="size-11 shrink-0 rounded-lg bg-elevated grid place-items-center border border-border">
                   <RadioIcon className="size-5 text-primary" />
                 </div>
               )}
@@ -130,33 +146,33 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
                 >
                   {station.name}
                 </Link>
-                <div className="truncate text-xs text-[color:var(--muted-foreground)]">
-                  {nowPlaying.title
+                <div role="status" className="truncate text-xs text-[color:var(--muted-foreground)]">
+                  {error ? error : nowPlaying.title
                     ? `${nowPlaying.artist ? `${nowPlaying.artist} — ` : ""}${nowPlaying.title}`
                     : station.stationMessage || "Live radio"}
                 </div>
               </div>
-              <button
+              <Button variant="ghost"
                 onClick={() => toggle(station)}
                 aria-label={playing ? "Pause radio" : "Play radio"}
-                className="size-10 grid place-items-center rounded-full bg-primary text-primary-foreground"
+                className="size-11 shrink-0 grid place-items-center rounded-full bg-primary text-primary-foreground"
               >
                 {playing ? <Pause className="size-4 fill-current" /> : <Play className="size-4 fill-current" />}
-              </button>
-              <button
+              </Button>
+              <Button variant="ghost"
                 onClick={() => setMuted((m) => !m)}
                 aria-label={muted ? "Unmute radio" : "Mute radio"}
-                className="size-10 grid place-items-center rounded-full border border-border bg-elevated"
+                className="size-11 shrink-0 grid place-items-center rounded-full border border-border bg-elevated"
               >
                 {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
-              </button>
-              <button
+              </Button>
+              <Button variant="ghost"
                 onClick={stop}
                 aria-label="Close radio player"
-                className="size-10 grid place-items-center rounded-full border border-border bg-elevated"
+                className="size-11 shrink-0 grid place-items-center rounded-full border border-border bg-elevated"
               >
                 <X className="size-4" />
-              </button>
+              </Button>
             </div>
           </div>
         </div>

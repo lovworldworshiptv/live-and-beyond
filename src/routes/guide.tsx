@@ -1,232 +1,67 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Filter, Radio, Signal, Bell } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { useState } from "react";
+import { Radio, CalendarDays } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { RemindButton } from "@/components/remind-button";
-import { channels, genres } from "@/lib/catalog";
+import { Button } from "@/components/ui/button";
+import { useCmsChannels } from "@/lib/cms-catalog";
 
 export const Route = createFileRoute("/guide")({
-  head: () => ({
-    meta: [
-      { title: "Live Program Guide — Lettflix" },
-      {
-        name: "description",
-        content:
-          "The Lettflix Electronic Program Guide. See what's on across every channel — live and upcoming — and set reminders in one place.",
-      },
-      { property: "og:title", content: "Live Program Guide — Lettflix" },
-      {
-        property: "og:description",
-        content:
-          "See what's on across every Lettflix channel, right now and later today.",
-      },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "Programme Guide — Lettflix" },
+    { name: "description", content: "Browse published programmes by channel, see what is on now and save upcoming programmes." },
+    { property: "og:title", content: "Programme Guide — Lettflix" },
+    { property: "og:description", content: "Current and upcoming programmes from Lettflix channels." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: GuidePage,
 });
 
-const timeSlots = Array.from({ length: 12 }, (_, i) => {
-  const h = 9 + i;
-  return `${String(h).padStart(2, "0")}:00`;
-});
-
 function GuidePage() {
-  const [genre, setGenre] = useState("All");
-  const [liveOnly, setLiveOnly] = useState(false);
+  const { channels, loading } = useCmsChannels();
   const [query, setQuery] = useState("");
-
-  const filtered = useMemo(
-    () =>
-      channels.filter(
-        (c) =>
-          (genre === "All" || c.category === genre) &&
-          (!liveOnly || c.isLive) &&
-          (query === "" || c.name.toLowerCase().includes(query.toLowerCase()))
-      ),
-    [genre, liveOnly, query]
-  );
-
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader />
-
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-12 pb-8">
-          <div className="flex items-end justify-between flex-wrap gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevated/70 border border-border text-xs font-medium">
-                <Signal className="size-3.5 text-primary" /> Electronic Program Guide
-              </div>
-              <h1 className="mt-5 text-4xl lg:text-5xl font-extrabold tracking-tight">
-                What's on <span className="text-primary">right now</span>
-              </h1>
-              <p className="mt-3 text-[color:var(--secondary-foreground)] max-w-2xl">
-                Every channel. Every slot. Set a reminder and we'll ping you when it starts.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Filter channels…"
-                className="h-10 px-4 rounded-md bg-surface border border-border flex-1 sm:w-56 min-w-0 text-sm outline-none focus:border-accent transition"
-              />
-              <button
-                onClick={() => setLiveOnly((v) => !v)}
-                className={`h-10 px-4 rounded-md text-sm font-medium border transition inline-flex items-center gap-2 shrink-0 whitespace-nowrap ${
-                  liveOnly
-                    ? "bg-primary border-primary text-primary-foreground"
-                    : "bg-surface border-border text-[color:var(--secondary-foreground)] hover:text-foreground"
-                }`}
-              >
-                <Radio className="size-3.5" /> Live only
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-none">
-            <Filter className="size-4 text-[color:var(--muted-foreground)] shrink-0" />
-            {genres.map((g) => (
-              <button
-                key={g}
-                onClick={() => setGenre(g)}
-                className={`shrink-0 px-3 h-8 rounded-full text-sm border transition ${
-                  genre === g
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-elevated/50 border-border text-[color:var(--secondary-foreground)] hover:text-foreground"
-                }`}
-              >
-                {g}
-              </button>
-            ))}
-          </div>
+  const [category, setCategory] = useState("All");
+  const [view, setView] = useState<"now" | "next" | "all">("now");
+  const filtered = channels.filter((c) => (category === "All" || c.category === category) && c.name.toLowerCase().includes(query.trim().toLowerCase()));
+  const now = Date.now();
+  return <div className="min-h-screen bg-background text-foreground">
+    <SiteHeader />
+    <main className="mx-auto max-w-[1480px] px-4 py-10 sm:px-6 lg:px-10">
+      <h1 className="text-3xl font-bold lg:text-4xl">Programme guide</h1>
+      <div className="mt-6 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <input aria-label="Filter channels" placeholder="Search channels…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-11 w-full min-w-0 rounded-md border border-border bg-surface px-4 text-sm" />
+        <div className="flex gap-1" aria-label="Programme view">
+          {([["now", "Now"], ["next", "Next"], ["all", "Schedule"]] as const).map(([id, label]) => <Button key={id} variant={view === id ? "default" : "outline"} aria-pressed={view === id} className="h-11 flex-1" onClick={() => setView(id)}>{id === "now" ? <Radio className="size-4" /> : <CalendarDays className="size-4" />}{label}</Button>)}
         </div>
-      </section>
-
-      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-8 mb-16">
-        <div className="rounded-2xl border border-border overflow-hidden bg-elevated/40">
-          <div className="overflow-x-auto">
-            <div
-              className="grid min-w-[1400px]"
-              style={{
-                gridTemplateColumns: `240px repeat(${timeSlots.length}, minmax(110px, 1fr))`,
-              }}
-            >
-              {/* Header row */}
-              <div className="sticky left-0 z-20 bg-surface/95 backdrop-blur px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[color:var(--muted-foreground)] border-b border-r border-border">
-                Channel
-              </div>
-              {timeSlots.map((t) => (
-                <div
-                  key={t}
-                  className="px-3 py-3 text-xs font-medium text-[color:var(--muted-foreground)] border-b border-l border-border bg-surface/60"
-                >
-                  {t}
-                </div>
-              ))}
-
-              {/* Channel rows */}
-              {filtered.map((c) => (
-                <FragmentRow key={c.id} channel={c} />
-              ))}
+      </div>
+      <div className="mt-3 flex gap-2 overflow-x-auto scrollbar-none">
+        {["All", ...new Set(channels.map((c) => c.category).filter(Boolean))].map((g) => <Button key={g} variant={category === g ? "default" : "outline"} aria-pressed={category === g} className="h-11 shrink-0" onClick={() => setCategory(g)}>{g}</Button>)}
+      </div>
+      <p className="mt-4 text-xs text-muted-foreground">Programme times shown in your local time.</p>
+      {loading && <p role="status" className="py-12 text-muted-foreground">Loading programmes…</p>}
+      {!loading && !filtered.length && <div className="py-16 text-center"><p>No channels match your filters.</p><Button className="mt-4" variant="outline" onClick={() => { setQuery(""); setCategory("All"); }}>Clear filters</Button></div>}
+      <div className="mt-6 divide-y divide-border">
+        {filtered.map((c) => {
+          const upcoming = c.schedule.filter((s) => new Date(s.time).getTime() > now);
+          const slots = view === "now" ? c.schedule.filter((s) => new Date(s.time).getTime() <= now && !!s.endsAt && new Date(s.endsAt).getTime() > now) : view === "next" ? upcoming.slice(0, 1) : c.schedule.filter((s) => !!s.endsAt && new Date(s.endsAt).getTime() > now);
+          return <section key={c.id} className="grid gap-4 py-6 md:grid-cols-[240px_minmax(0,1fr)]">
+            <Link to="/channels/$channelId" params={{ channelId: c.id }} className="flex min-w-0 items-center gap-3 self-start">
+              {c.logoImg && <img src={c.logoImg} alt="" className="size-11 shrink-0 rounded-md object-cover" />}
+              <div className="min-w-0"><h2 className="truncate font-semibold">{c.name}</h2><p className="text-xs text-muted-foreground">{c.isLive ? "● Live" : "Off air"} · {c.category}</p></div>
+            </Link>
+            <div className="min-w-0 space-y-3">
+              {!slots.length && <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-muted-foreground">{view === "now" ? "No current programme published." : "No upcoming programmes published."}</p><Button asChild variant="outline" className="h-11"><Link to="/channels/$channelId" params={{ channelId: c.id }}>Open channel</Link></Button></div>}
+              {slots.map((s) => <div key={`${s.time}-${s.title}`} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-l-2 border-primary pl-4">
+                <div className="min-w-0"><h3 className="break-words text-sm font-semibold">{s.title}</h3><p className="mt-1 text-xs text-muted-foreground">{new Date(s.time).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}{s.endsAt ? ` – ${new Date(s.endsAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}` : ""} · {s.kind}</p></div>
+                {new Date(s.time).getTime() > now ? <RemindButton channelId={c.id} time={s.time} title={s.title} variant="icon" /> : <Button asChild className="h-11"><Link to="/channels/$channelId" params={{ channelId: c.id }}>Watch</Link></Button>}
+              </div>)}
             </div>
-          </div>
-          {filtered.length === 0 && (
-            <div className="text-center py-16 text-[color:var(--muted-foreground)]">
-              No channels match your filters.
-            </div>
-          )}
-        </div>
-      </section>
-
-      <SiteFooter />
-    </div>
-  );
+          </section>;
+        })}
+      </div>
+    </main>
+    <SiteFooter />
+  </div>;
 }
-
-function FragmentRow({ channel }: { channel: (typeof channels)[number] }) {
-  return (
-    <>
-      <Link
-        to="/channels/$channelId"
-        params={{ channelId: channel.id }}
-        className="sticky left-0 z-10 bg-elevated/90 backdrop-blur px-4 py-3 flex items-center gap-3 border-b border-r border-border hover:bg-elevated transition"
-      >
-        <div className="size-10 rounded-md overflow-hidden shrink-0">
-          <img src={channel.logoImg} alt="" className="size-full object-cover" />
-        </div>
-        <div className="min-w-0">
-          <div className="text-sm font-semibold truncate flex items-center gap-1.5">
-            {channel.isLive && (
-              <span className="size-1.5 rounded-full bg-primary animate-pulse" />
-            )}
-            {channel.name}
-          </div>
-          <div className="text-[11px] text-[color:var(--muted-foreground)] truncate">
-            {channel.category}
-          </div>
-        </div>
-      </Link>
-      {timeSlots.map((_, i) => {
-        const slot = channel.schedule[i % channel.schedule.length];
-        return (
-          <Popover key={i}>
-            <PopoverTrigger asChild>
-              <button
-                className={`text-left px-3 py-3 border-b border-l border-border h-full text-xs transition ${
-                  slot.live
-                    ? "bg-primary/15 hover:bg-primary/25 text-foreground"
-                    : "hover:bg-elevated/60 text-[color:var(--secondary-foreground)]"
-                }`}
-              >
-                <div className="font-medium truncate">{slot.title}</div>
-                <div className="text-[10px] text-[color:var(--muted-foreground)] mt-0.5 truncate">
-                  {slot.kind}
-                </div>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-72 p-4">
-              <div className="text-[11px] uppercase tracking-widest text-[color:var(--muted-foreground)]">
-                {channel.name}
-              </div>
-              <div className="mt-1 font-semibold">{slot.title}</div>
-              <div className="mt-1 text-xs text-[color:var(--muted-foreground)]">
-                {slot.time} · {slot.kind}
-              </div>
-              <p className="mt-2 text-sm text-[color:var(--secondary-foreground)]">
-                {slot.live
-                  ? "Airing live right now."
-                  : "Scheduled for later. Set a reminder and we'll notify you."}
-              </p>
-              <div className="mt-3 flex gap-2">
-                <Link
-                  to="/channels/$channelId"
-                  params={{ channelId: channel.id }}
-                  className="flex-1 inline-flex items-center justify-center gap-2 h-9 px-3 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition"
-                >
-                  {slot.live ? "Watch Live" : "Open Channel"}
-                </Link>
-                {!slot.live && (
-                  <RemindButton
-                    channelId={channel.id}
-                    time={slot.time}
-                    title={slot.title}
-                    variant="icon"
-                  />
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
-        );
-      })}
-    </>
-  );
-}
-
-void Bell;

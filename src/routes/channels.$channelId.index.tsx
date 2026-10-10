@@ -100,6 +100,7 @@ function ChannelPage() {
   const [muted, setMuted] = useState(false);
 
   const startPlayback = () => {
+    if (!streamSrc) { toast("This channel is not available to play yet."); return; }
     setPlaying(true);
     setMuted(false);
     playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -182,8 +183,7 @@ function ChannelPage() {
   const streamSrc =
     liveUrl ||
     playout?.asset.source_url ||
-    channel?.streamUrl ||
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+    channel?.streamUrl || "";
   // Live/HLS sources are played through the same-origin manifest proxy so the
   // Cloudflare playback URL is never exposed in the DOM.
   const playbackSrc = protectedChannelSrc(channelId, streamSrc) ?? streamSrc;
@@ -277,7 +277,7 @@ function ChannelPage() {
 
 
       {/* PLAYER — Live Stream / Radio Stream */}
-      <section ref={playerRef} className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-8 scroll-mt-24">
+      <section ref={playerRef} className={`mx-auto max-w-[1480px] px-4 lg:px-10 pt-4 lg:pt-8 scroll-mt-24 ${playing ? "sticky top-16 z-30 bg-background lg:static" : ""}`}>
         <div className={`relative rounded-2xl overflow-hidden border border-border bg-black ${isRadio ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}`}>
           {/* Poster / backdrop */}
           <img src={channel.banner} alt="" className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${playing ? "opacity-0" : isRadio ? "opacity-40 blur-sm scale-110" : "opacity-60"}`} />
