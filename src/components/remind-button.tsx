@@ -1,6 +1,7 @@
 import { Bell, BellRing } from "lucide-react";
 import { useReminders } from "@/lib/personal";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export function RemindButton({
   channelId,
@@ -22,7 +23,7 @@ export function RemindButton({
     e.stopPropagation();
     toggle({ id, channelId, time, title });
     if (!active) {
-      toast.success("Reminder set", { description: `${title} · ${time}` });
+      toast.success("Reminder saved", { description: `Saved on this device · ${title}` });
     } else {
       toast("Reminder removed", { description: title });
     }
@@ -31,43 +32,43 @@ export function RemindButton({
   const Icon = active ? BellRing : Bell;
   if (variant === "icon") {
     return (
-      <button
+      <Button variant="ghost"
         aria-label={active ? "Remove reminder" : "Set reminder"}
         onClick={onClick}
-        className={`size-8 grid place-items-center rounded-full backdrop-blur border transition ${
+        className={`size-11 grid place-items-center rounded-full backdrop-blur border transition ${
           active
             ? "bg-primary/90 border-primary text-primary-foreground"
-            : "bg-black/60 border-white/10 hover:bg-black/80"
+            : "bg-background/60 border-foreground/10 hover:bg-background/80"
         }`}
       >
         <Icon className="size-3.5" />
-      </button>
+      </Button>
     );
   }
   if (variant === "chip") {
     return (
-      <button
+      <Button variant="ghost"
         onClick={onClick}
-        className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-full backdrop-blur border transition text-xs font-medium ${
+        className={`inline-flex items-center gap-1.5 h-11 px-3 rounded-full backdrop-blur border transition text-xs font-medium ${
           active
             ? "bg-primary/90 border-primary text-primary-foreground"
-            : "bg-black/60 border-white/10 hover:bg-black/80"
+            : "bg-background/60 border-foreground/10 hover:bg-background/80"
         }`}
       >
         <Icon className="size-3.5" /> {active ? "Reminder set" : "Remind me"}
-      </button>
+      </Button>
     );
   }
   return (
-    <button
+    <Button variant="ghost"
       onClick={onClick}
-      className={`inline-flex items-center gap-2 h-10 px-4 rounded-md border transition text-sm font-medium ${
+      className={`inline-flex items-center gap-2 h-11 px-4 rounded-md border transition text-sm font-medium ${
         active
           ? "bg-primary text-primary-foreground border-primary"
           : "bg-elevated border-border hover:bg-elevated/80"
       }`}
     >
       <Icon className="size-4" /> {active ? "Reminder set" : "Remind me"}
-    </button>
+    </Button>
   );
 }

@@ -125,7 +125,9 @@
 }
 
 @media (max-width: 1023.98px) {
-  body { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+  body { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+  body:has([data-radio-player]) { padding-bottom: calc(176px + env(safe-area-inset-bottom, 0px)); }
+  html { scroll-padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ===== Landing page motion ===== */
@@ -176,3 +178,6 @@
   .landing-kenburns, .landing-glow, .landing-shimmer-text { animation: none; }
   .landing-fade-up, .landing-reveal { animation: none; opacity: 1; transform: none; transition: none; }
 }
+
+.media-rail { mask-image: linear-gradient(to right, transparent, var(--foreground) 20px, var(--foreground) calc(100% - 20px), transparent); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }

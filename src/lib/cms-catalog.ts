@@ -74,8 +74,8 @@ export function mapChannelRow(r: ChannelRow): Channel {
     language: r.language ?? fallback?.language ?? "English",
     country: r.country ?? fallback?.country ?? "",
     region: r.region ?? fallback?.region ?? "Global",
-    viewers: r.viewers ?? fallback?.viewers ?? "—",
-    popularity: r.popularity ?? fallback?.popularity ?? 0,
+    viewers: r.viewers ?? "—",
+    popularity: r.popularity ?? 0,
     trending: r.is_trending ?? fallback?.trending,
     addedAt: r.created_at.slice(0, 10),
     streamKind: r.kind === "radio" ? "radio" : "video",
@@ -87,12 +87,12 @@ export function mapChannelRow(r: ChannelRow): Channel {
     podcastLibrary: r.podcast_library ?? fallback?.podcastLibrary,
     featuredContent: r.featured_content ?? fallback?.featuredContent,
     nowPlaying: {
-      title: np.title ?? fallback?.nowPlaying.title ?? "",
-      startsAt: np.startsAt ?? fallback?.nowPlaying.startsAt ?? "",
-      endsAt: np.endsAt ?? fallback?.nowPlaying.endsAt ?? "",
+      title: np.title ?? "Programme information unavailable",
+      startsAt: np.startsAt ?? "",
+      endsAt: np.endsAt ?? "",
       description: np.description ?? fallback?.nowPlaying.description ?? "",
     },
-    schedule: fallback?.schedule ?? [],
+    schedule: [],
   };
 }
 
@@ -119,7 +119,7 @@ export function mapTitleRow(r: TitleRow): Title {
 }
 
 export function useCmsChannels() {
-  const [channels, setChannels] = useState<Channel[]>(staticChannels);
+  const [channels, setChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     supabase
@@ -129,7 +129,13 @@ export function useCmsChannels() {
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        if (data && data.length) setChannels((data as ChannelRow[]).map(mapChannelRow));
+        setChannels((data ?? []).map((r) => mapChannelRow(r as ChannelRow)));
+        if (data?.length) {
+          void supabase.from("cms_schedule").select("*").eq("is_published", true).is("deleted_at", null).order("starts_at", { ascending: true }).then(({ data: schedules }) => {
+            if (!schedules) return;
+            setChannels(data.map((r) => ({ ...mapChannelRow(r as ChannelRow), schedule: schedules.filter((slot) => slot.channel_id === r.id).map((slot) => ({ time: slot.starts_at, endsAt: slot.ends_at, title: slot.program_title, kind: slot.category ?? "Programme", live: new Date(slot.starts_at).getTime() <= Date.now() && new Date(slot.ends_at).getTime() > Date.now() })) })));
+          });
+        }
         setLoading(false);
       });
   }, []);
@@ -137,7 +143,7 @@ export function useCmsChannels() {
 }
 
 export function useCmsTitles() {
-  const [titles, setTitles] = useState<Title[]>(staticTitles);
+  const [titles, setTitles] = useState<Title[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     supabase
@@ -147,7 +153,7 @@ export function useCmsTitles() {
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        if (data && data.length) setTitles((data as TitleRow[]).map(mapTitleRow));
+        setTitles((data ?? []).map((r) => mapTitleRow(r as TitleRow)));
         setLoading(false);
       });
   }, []);
