@@ -58,7 +58,7 @@ export function StreamPlayer({
       media.play().catch(() => {
         media.muted = true;
         setMuted(true);
-        media.play().catch(() => setError("Playback blocked. Tap play in the controls."));
+        media.play().catch((cause: unknown) => setError(cause instanceof Error && cause.name === "NotSupportedError" ? "Playback unavailable. Please try again shortly." : "Tap play in the controls to start playback."));
       });
     });
   };
@@ -146,7 +146,7 @@ export function StreamPlayer({
       )}
 
       {error && (
-        <div role="alert" className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded bg-background/80 text-xs text-foreground">
+        <div role="alert" className="absolute bottom-3 inset-x-3 text-center px-3 py-2 rounded bg-background/80 text-xs text-foreground">
           {error}
         </div>
       )}

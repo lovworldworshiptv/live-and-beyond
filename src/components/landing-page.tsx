@@ -13,7 +13,7 @@ const FEATURES = [
   },
   {
     icon: Play,
-    title: "Movies, series & originals",
+    title: "Movies, series & documentaries",
     body: "Discover movies, series and documentaries alongside live channels in the Lettflix catalogue.",
   },
   {
@@ -23,8 +23,8 @@ const FEATURES = [
   },
   {
     icon: Users,
-    title: "Profiles for everyone",
-    body: "Family profiles, personalised rows and a watchlist that follows you across every device you own.",
+    title: "Make it your own",
+    body: "Save titles to your watchlist and return to content you have started watching.",
   },
 ];
 
@@ -47,7 +47,7 @@ const FAQS = [
   },
   {
     q: "Is there content for kids?",
-    a: "You can create family profiles, including kids profiles. Check individual title information before choosing content for children.",
+    a: "Check individual title information before choosing content for children. Content availability varies by channel.",
   },
 ];
 
@@ -78,11 +78,11 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
 
 function StartHereCta({ label = "Create your account" }: { label?: string }) {
   return (
-    <Button asChild className="landing-glow mx-auto mt-7 flex h-12 w-fit px-6 text-base font-semibold transition-transform hover:scale-[1.03]">
+    <Button asChild className="relative overflow-hidden landing-glow mx-auto mt-7 flex h-12 w-fit px-6 text-base font-semibold transition-transform hover:scale-[1.03]">
     <Link
       to="/auth"
       search={{ mode: "signup" as const }}
-      className="group"
+      className="group relative"
     >
       <span aria-hidden className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-primary-foreground/25 blur-sm transition-all duration-700 group-hover:left-[120%]" />
       <span className="relative">{label}</span>
@@ -221,7 +221,7 @@ export function LandingPage() {
           {FAQS.map((f, i) => (
             <Reveal key={f.q} delay={i * 70}>
             <div className={`overflow-hidden rounded-xl border bg-surface/70 transition-all duration-300 hover:border-foreground/20 hover:bg-surface ${open === i ? "border-primary/50" : "border-border"}`}>
-              <button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setOpen(open === i ? null : i)}
                 aria-expanded={open === i}
@@ -229,7 +229,7 @@ export function LandingPage() {
               >
                 {f.q}
                 <ChevronDown className={`size-5 shrink-0 transition-transform duration-300 ${open === i ? "rotate-180 text-primary" : ""}`} />
-              </button>
+              </Button>
               <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${open === i ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
                 <div className="overflow-hidden">
                   <p className="border-t border-border px-5 py-4 text-sm leading-relaxed text-[color:var(--muted-foreground)]">

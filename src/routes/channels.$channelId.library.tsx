@@ -57,7 +57,7 @@ const KINDS = ["All", "Film", "Series", "Podcast", "Documentary", "Concert", "Ev
 
 function ChannelLibraryPage() {
   const { channelId } = Route.useParams();
-  const [channel, setChannel] = useState<Channel | null>(() => getChannel(channelId) ?? null);
+  const [channel, setChannel] = useState<Channel | null>(null);
   const [notFoundState, setNotFoundState] = useState(false);
   const [titles, setTitles] = useState<Title[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,14 +69,14 @@ function ChannelLibraryPage() {
     let cancelled = false;
     setLoading(true);
     (async () => {
-      const staticCh = getChannel(channelId) ?? null;
+
       const { data: chRow } = await supabase
         .from("cms_channels")
         .select("*")
         .eq("slug", channelId)
         .eq("is_published", true)
         .maybeSingle();
-      const merged: Channel | null = chRow ? mapChannelRow(chRow as never) : staticCh;
+      const merged: Channel | null = chRow ? mapChannelRow(chRow as never) : null;
       if (cancelled) return;
       if (!merged) { setNotFoundState(true); setLoading(false); return; }
       setChannel(merged);
@@ -100,11 +100,6 @@ function ChannelLibraryPage() {
         for (const r of rows ?? []) {
           const t = mapTitleRow(r as never);
           if (!seen.has(t.id)) { seen.add(t.id); collected.push(t); }
-        }
-        for (const slug of slugSet) {
-          if (seen.has(slug)) continue;
-          const t = getTitle(slug);
-          if (t) { seen.add(t.id); collected.push(t); }
         }
       }
 

@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { mapTitleRow, useCmsTitles } from "@/lib/cms-catalog";
 import { useMyList } from "@/lib/personal";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/movies/$titleId")({
   head: () => ({
@@ -50,9 +51,9 @@ function TitleError({ error, reset }: ErrorComponentProps) {
       <div className="mx-auto max-w-[900px] px-6 py-24 text-center">
         <h1 className="text-2xl font-bold">Something went wrong</h1>
         <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">{error instanceof Error ? error.message : String(error)}</p>
-        <button onClick={() => { router.invalidate(); reset(); }} className="mt-6 px-5 h-11 rounded-md bg-primary text-primary-foreground font-semibold">
+        <Button variant="ghost" onClick={() => { router.invalidate(); reset(); }} className="mt-6 px-5 h-11 rounded-md bg-primary text-primary-foreground font-semibold">
           Try again
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -118,7 +119,7 @@ function TitleDetail() {
             <span className="text-foreground">{title.title}</span>
           </div>
 
-          <div className="mt-6 max-w-5xl">
+          <div id="title-player" className="mt-6 max-w-5xl">
             <StreamPlayer
               titleId={title.id}
               src={title.streamUrl}
@@ -147,21 +148,19 @@ function TitleDetail() {
             <span className="px-2 py-0.5 rounded border border-border">{title.rating}</span>
             <span className="inline-flex items-center gap-1"><Calendar className="size-3.5" /> {title.year}</span>
             <span className="inline-flex items-center gap-1"><Clock className="size-3.5" /> {title.duration}</span>
-            <span className="inline-flex items-center gap-1 text-warning"><Star className="size-3.5 fill-current" /> 4.8</span>
-            <span className="text-success font-semibold">98% Match</span>
           </div>
 
           <p className="mt-5 text-[color:var(--secondary-foreground)] max-w-2xl">{title.synopsis}</p>
 
           <div className="mt-7 flex flex-wrap gap-3">
             <a
-              href="#top"
-              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-              className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition"
+              href="#title-player"
+              onClick={(e) => { e.preventDefault(); const player = document.getElementById("title-player"); player?.scrollIntoView({ behavior: "smooth", block: "center" }); player?.querySelector<HTMLButtonElement>(`button[aria-label="${audioKind ? "Listen" : "Play"}"]`)?.click(); }}
+              className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-foreground text-background font-semibold hover:bg-foreground/90 transition"
             >
               <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Play
             </a>
-            <button
+            <Button variant="ghost"
               onClick={() => {
                 const wasIn = hasInList(title.id);
                 toggleList(title.id);
@@ -175,8 +174,8 @@ function TitleDetail() {
             >
               {hasInList(title.id) ? <Check className="size-4" /> : <Plus className="size-4" />}
               {hasInList(title.id) ? "In My List" : "My List"}
-            </button>
-            <button
+            </Button>
+            <Button variant="ghost"
               onClick={() => {
                 setRated((r) => !r);
                 toast.success(rated ? "Rating removed" : "Thanks for rating!", { description: title.title });
@@ -188,13 +187,13 @@ function TitleDetail() {
               }`}
             >
               <ThumbsUp className={`size-4 ${rated ? "fill-current" : ""}`} /> {rated ? "Rated" : "Rate"}
-            </button>
-            <button
-              onClick={() => toast("Download unavailable", { description: "Downloads are available on the Lettflix mobile app." })}
+            </Button>
+            <Button variant="ghost"
+              onClick={() => toast("Download unavailable", { description: "Offline downloads are not currently available." })}
               className="inline-flex items-center gap-2 px-5 h-12 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium"
             >
               <Download className="size-4" /> Download
-            </button>
+            </Button>
             <div className="h-12 w-32">
               <ShareMenu title={title.title} path={`/movies/${title.id}`} variant="chip" />
             </div>
@@ -248,11 +247,8 @@ function TitleDetail() {
           <div className="rounded-xl border border-border bg-gradient-to-br from-primary/20 via-transparent to-accent/20 p-5">
             <div className="text-sm font-semibold">Watch offline</div>
             <p className="mt-1.5 text-xs text-[color:var(--secondary-foreground)]">
-              Download this title on the Lettflix app and watch anywhere, no internet required.
+              Offline downloads are not currently available.
             </p>
-            <button className="mt-4 w-full inline-flex justify-center items-center gap-2 px-4 h-10 rounded-md bg-white text-background font-semibold hover:bg-white/90 transition text-sm">
-              <Download className="size-4" /> Get the App
-            </button>
           </div>
         </aside>
       </section>
