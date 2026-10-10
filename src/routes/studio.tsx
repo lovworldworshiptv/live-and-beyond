@@ -291,7 +291,11 @@ function StudioPage() {
       </section>
       <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 py-6 grid gap-6 lg:grid-cols-[210px_minmax(0,1fr)]">
         <aside className="min-w-0 lg:sticky lg:top-40 h-max">
-          <nav aria-label="Creator Studio" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-3">
+          <label className="block lg:hidden text-xs text-muted-foreground" htmlFor="studio-section">Studio section</label>
+          <select id="studio-section" aria-label="Studio section" value={tab} onChange={event => setTab(event.target.value as Tab)} className="mt-2 lg:hidden w-full h-12 rounded-md border border-border bg-surface text-foreground px-3 text-sm">
+            {groups.map(group => <optgroup key={group.label} label={group.label}>{group.items.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</optgroup>)}
+          </select>
+          <nav aria-label="Creator Studio" className="hidden lg:grid grid-cols-1 gap-3">
             {groups.map(group => <div key={group.label} className="min-w-0"><p className="text-xs text-muted-foreground mb-1 px-2">{group.label}</p><div className="grid gap-1">{group.items.map(([key, label]) => <Button key={key} variant={tab === key ? "secondary" : "ghost"} aria-pressed={tab === key} aria-controls="studio-workspace" className={`h-11 justify-start px-3 ${tab === key ? "text-accent border-l-2 border-accent" : "text-muted-foreground"}`} onClick={() => setTab(key)}>{label}</Button>)}</div></div>)}
           </nav>
         </aside>
@@ -393,16 +397,16 @@ function StudioPage() {
                 <Button variant="ghost"
                   key={s.key}
                   onClick={() => toggleService(s.key)}
-                  className={`flex items-start gap-3 text-left rounded-xl border p-4 transition ${
+                  className={`h-auto min-h-20 whitespace-normal flex items-start gap-3 text-left rounded-lg border p-4 transition ${
                     on ? "border-primary bg-primary/10" : "border-border bg-elevated/40 hover:bg-elevated/70"
                   }`}
                 >
                   <Icon className={`mt-0.5 size-5 ${on ? "text-primary" : "text-[color:var(--muted-foreground)]"}`} />
-                  <span className="flex-1">
+                  <span className="flex-1 min-w-0">
                     <span className="block text-sm font-semibold">{s.label}</span>
                     <span className="block text-xs text-[color:var(--muted-foreground)]">{s.blurb}</span>
                   </span>
-                  <span className={`size-5 rounded-md grid place-items-center border ${on ? "bg-primary border-primary" : "border-border"}`}>
+                  <span className={`size-5 shrink-0 rounded-md grid place-items-center border ${on ? "bg-primary border-primary" : "border-border"}`}>
                     {on && <Check className="size-3.5 text-primary-foreground" />}
                   </span>
                 </Button>
