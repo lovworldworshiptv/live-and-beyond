@@ -18,6 +18,8 @@ import { useCmsChannels } from "@/lib/cms-catalog";
 export const Route = createFileRoute("/channels/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Live Channels — Lettflix" },
       { name: "description", content: "Browse every live channel on Lettflix — faith, news, sports, music, podcasts and radio. Tune in from anywhere, 24/7." },
       { property: "og:title", content: "Live Channels — Lettflix" },

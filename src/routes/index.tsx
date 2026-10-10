@@ -32,6 +32,8 @@ import ch1 from "@/assets/channel-1.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Lettflix — Live TV, Radio, Podcasts & On-Demand" },
       { name: "description", content: "One subscription. Live channels, radio, podcasts, events and premium on-demand entertainment — all in one broadcast-grade ecosystem." },
       { property: "og:title", content: "Lettflix — Live TV, Radio, Podcasts & On-Demand" },
@@ -41,18 +43,9 @@ export const Route = createFileRoute("/")({
   component: HomeRoute,
 });
 
-function hasStoredSession() {
-  if (typeof window === "undefined") return false;
-  try {
-    return Object.keys(window.localStorage).some((k) => k.startsWith("sb-") && k.endsWith("-auth-token"));
-  } catch {
-    return false;
-  }
-}
-
 function HomeRoute() {
   const { user, loading } = useAuth();
-  if (loading) return hasStoredSession() ? <div className="min-h-screen bg-background" /> : <LandingPage />;
+  if (loading) return <LandingPage />;
   if (!user) return <LandingPage />;
   return <Index />;
 }

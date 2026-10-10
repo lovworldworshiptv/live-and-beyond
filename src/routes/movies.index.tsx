@@ -15,6 +15,8 @@ import { useProgress } from "@/lib/personal";
 export const Route = createFileRoute("/movies/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Movies — Lettflix" },
       {
         name: "description",

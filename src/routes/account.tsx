@@ -15,6 +15,10 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Account Settings \u2014 Lettflix" },
+      { property: "og:description", content: "Manage your Lettflix profile, notifications, playback quality, security and billing." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Account Settings — Lettflix" },
       { name: "description", content: "Manage your Lettflix profile, notifications, playback quality, security and billing." },
     ],

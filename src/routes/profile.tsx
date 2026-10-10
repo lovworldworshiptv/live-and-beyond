@@ -17,6 +17,10 @@ import { getTitle, getChannel, titles, channels, genres, channelLanguages } from
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Your Dashboard \u2014 Lettflix" },
+      { property: "og:description", content: "Personalized dashboard, family profiles, interests, watchlists, viewing history and reminders on Lettflix." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Your Dashboard — Lettflix" },
       { name: "description", content: "Personalized dashboard, family profiles, interests, watchlists, viewing history and reminders on Lettflix." },
     ],

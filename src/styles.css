@@ -181,3 +181,5 @@
 
 .media-rail { mask-image: linear-gradient(to right, transparent, var(--foreground) 20px, var(--foreground) calc(100% - 20px), transparent); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+
+@media (max-width: 1023.98px) { .feedback-toaster { bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important; } body:has([data-radio-player]) .feedback-toaster { bottom: calc(176px + env(safe-area-inset-bottom, 0px)) !important; } }

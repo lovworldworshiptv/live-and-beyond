@@ -130,7 +130,7 @@ function RootComponent() {
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <CreatorApprovalWatcher />
-          <Toaster position="bottom-right" theme="dark" richColors />
+          <Toaster position="bottom-right" theme="dark" richColors className="feedback-toaster" />
         </RadioPlayerProvider>
       </AuthProvider>
     </QueryClientProvider>

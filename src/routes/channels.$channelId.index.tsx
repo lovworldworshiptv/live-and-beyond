@@ -21,6 +21,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/channels/$channelId/")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Channel \u2014 Lettflix" },
+      { property: "og:description", content: "Watch live channels on Lettflix." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Channel — Lettflix" },
       { name: "description", content: "Watch live channels on Lettflix." },
     ],
@@ -65,7 +69,7 @@ function ChannelError({ error, reset }: ErrorComponentProps) {
 
 function ChannelPage() {
   const { channelId } = Route.useParams();
-  const [channel, setChannel] = useState<Channel | null>(() => getChannel(channelId) ?? null);
+  const [channel, setChannel] = useState<Channel | null>(null);
   const [notFoundState, setNotFoundState] = useState(false);
   const { has: isFollowingLocal, toggle: toggleFollowLocal } = useFollowing();
   const [dbChannelId, setDbChannelId] = useState<string | null>(null);
@@ -75,8 +79,7 @@ function ChannelPage() {
   useEffect(() => {
     let cancelled = false;
     setNotFoundState(false);
-    const staticCh = getChannel(channelId) ?? null;
-    setChannel(staticCh);
+    setChannel(null);
     (async () => {
       const { data } = await supabase
         .from("cms_channels")
@@ -89,7 +92,7 @@ function ChannelPage() {
         setChannel(mapChannelRow(data as never));
         setDbChannelId((data as { id: string }).id);
       }
-      else if (!staticCh) setNotFoundState(true);
+      else setNotFoundState(true);
     })();
     return () => { cancelled = true; };
   }, [channelId]);

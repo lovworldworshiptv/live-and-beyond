@@ -19,6 +19,10 @@ export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
+      { property: "og:title", content: "Sign in \u2014 Lettflix" },
+      { property: "og:description", content: "Sign in or create your Lettflix account." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Sign in — Lettflix" },
       { name: "description", content: "Sign in or create your Lettflix account." },
     ],

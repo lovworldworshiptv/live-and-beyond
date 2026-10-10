@@ -15,6 +15,10 @@ import { SiteFooter } from "@/components/site-footer";
 export const Route = createFileRoute("/enterprise")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Enterprise Services \u2014 Lettflix" },
+      { property: "og:description", content: "White-label OTT, hotel & hospitality streaming, church campuses, universities and broadcaster partnerships on Lettflix infrastructure." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Enterprise Services — Lettflix" },
       {
         name: "description",

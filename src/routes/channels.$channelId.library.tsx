@@ -12,6 +12,10 @@ import { mapChannelRow, mapTitleRow } from "@/lib/cms-catalog";
 export const Route = createFileRoute("/channels/$channelId/library")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Channel Library \u2014 Lettflix" },
+      { property: "og:description", content: "Browse every on-demand title uploaded to this Lettflix channel." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Channel Library — Lettflix" },
       { name: "description", content: "Browse every on-demand title uploaded to this Lettflix channel." },
     ],

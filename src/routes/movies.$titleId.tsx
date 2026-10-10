@@ -14,6 +14,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/movies/$titleId")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Watch on Lettflix" },
+      { property: "og:description", content: "Stream on-demand premium content on Lettflix." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Watch on Lettflix" },
       { name: "description", content: "Stream on-demand premium content on Lettflix." },
     ],
