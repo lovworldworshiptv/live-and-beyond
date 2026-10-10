@@ -8,6 +8,7 @@ import { TitleCard } from "@/components/title-card";
 import { Pagination } from "@/components/pagination";
 import { SponsorBanner } from "@/components/sponsor-banner";
 import { useCmsTitles } from "@/lib/cms-catalog";
+import { Button } from "@/components/ui/button";
 import type { Title } from "@/lib/catalog";
 
 const PAGE_SIZE = 12;
@@ -67,8 +68,8 @@ export function CatalogBrowse({
   const currentPage = Math.min(page, totalPages);
   const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  const trending = titles.slice(0, 8);
-  const newest = [...titles].reverse().slice(0, 8);
+  const trending = titles.filter((t) => t.featured).slice(0, 8);
+  const newest = titles.slice(0, 8);
 
   const gridClass =
     shape === "square"
@@ -121,7 +122,7 @@ export function CatalogBrowse({
                   <Link
                     to="/movies/$titleId"
                     params={{ titleId: featured.id }}
-                    className="inline-flex shrink-0 items-center gap-2 px-4 sm:px-6 h-9 sm:h-10 rounded-md bg-white text-background text-sm font-semibold hover:bg-white/90 transition"
+                    className="inline-flex shrink-0 items-center gap-2 px-4 sm:px-6 h-9 sm:h-10 rounded-md bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 transition"
                   >
                     <Play className="size-4 fill-current" strokeWidth={2.5} /> Watch Now
                   </Link>
@@ -140,11 +141,11 @@ export function CatalogBrowse({
             {featuredList.length > 1 && (
               <div className="mt-6 flex gap-1.5">
                 {featuredList.map((_, i) => (
-                  <button
+                  <Button variant="ghost"
                     key={i}
                     aria-label={`Featured slide ${i + 1}`}
                     onClick={() => setFeatIdx(i)}
-                    className={`h-1.5 rounded-full transition-all ${i === featIdx ? "w-6 bg-white" : "w-1.5 bg-white/40"}`}
+                    className={`h-1.5 rounded-full transition-all ${i === featIdx ? "w-6 bg-foreground" : "w-1.5 bg-foreground/40"}`}
                   />
                 ))}
               </div>
@@ -155,7 +156,7 @@ export function CatalogBrowse({
 
 
       {trending.length > 0 && (
-        <Row title={`Trending ${heading}`} subtitle="Most watched across the network this week.">
+        <Row title={`Featured ${heading}`}>
           {trending.map((t, i) => (
             <TitleCard key={t.id} t={t} rank={i + 1} portrait={false} />
           ))}
@@ -165,7 +166,7 @@ export function CatalogBrowse({
       <SponsorBanner placement={placement} />
 
       {newest.length > 0 && (
-        <Row title="New & Recently Added" subtitle="Fresh drops, straight from our creators.">
+        <Row title="Discover more">
           {newest.map((t) => (
             <TitleCard key={t.id} t={t} portrait={false} />
           ))}
@@ -182,7 +183,7 @@ export function CatalogBrowse({
               {totalPages > 1 && ` · Page ${currentPage} of ${totalPages}`}
             </p>
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)]" />
             <input
               value={query}
@@ -190,6 +191,7 @@ export function CatalogBrowse({
                 setQuery(e.target.value);
                 setPage(1);
               }}
+              aria-label={`Search ${heading.toLowerCase()}`}
               placeholder={`Search ${heading.toLowerCase()}…`}
               className="h-10 pl-9 pr-4 rounded-md bg-surface border border-border w-full sm:w-64 text-sm outline-none focus:border-accent transition"
             />
@@ -199,20 +201,20 @@ export function CatalogBrowse({
         {genreList.length > 1 && (
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
             {genreList.map((g) => (
-              <button
+              <Button variant="ghost"
                 key={g}
                 onClick={() => {
                   setGenre(g);
                   setPage(1);
                 }}
-                className={`shrink-0 px-3 h-8 rounded-full text-sm border transition ${
+                className={`shrink-0 px-3 h-11 rounded-full text-sm border transition ${
                   genre === g
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-elevated/50 border-border text-[color:var(--secondary-foreground)] hover:text-foreground"
                 }`}
               >
                 {g}
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -225,7 +227,8 @@ export function CatalogBrowse({
 
         {filtered.length === 0 && (
           <div className="text-center py-24 text-[color:var(--muted-foreground)]">
-            Nothing here yet — check back soon.
+            <p>{query || genre !== "All" ? "No titles match your filters." : "No published titles in this category yet."}</p>
+            {(query || genre !== "All") && <Button variant="outline" className="mt-4 h-11" onClick={() => { setQuery(""); setGenre("All"); setPage(1); }}>Clear filters</Button>}
           </div>
         )}
 

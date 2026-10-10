@@ -8,6 +8,7 @@ import { TitleCard } from "@/components/title-card";
 import { Pagination } from "@/components/pagination";
 import { genres } from "@/lib/catalog";
 import { useCmsTitles } from "@/lib/cms-catalog";
+import { Button } from "@/components/ui/button";
 import { useProgress } from "@/lib/personal";
 
 
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/movies/")({
       {
         name: "description",
         content:
-          "Watch premium on-demand series, films, concerts, documentaries and podcasts on Lettflix. 12,000+ titles, one subscription.",
+          "Discover and watch the published movie catalogue on Lettflix.",
       },
       { property: "og:title", content: "Movies — Lettflix" },
       {
@@ -70,14 +71,14 @@ function OnDemand() {
     currentPage * PAGE_SIZE
   );
 
-  const trending = titles.slice(0, 8);
+  const trending = titles.filter((t) => t.featured).slice(0, 8);
   const newReleases = [...titles].sort((a, b) => (b.year ?? 0) - (a.year ?? 0)).slice(0, 8);
   const titleById = new Map(titles.map((t) => [t.id, t] as const));
   const continueWatching = progress
     .map((p) => ({ p, t: titleById.get(p.titleId) }))
-    .filter((x): x is { p: (typeof progress)[number]; t: NonNullable<ReturnType<typeof titleById.get>> } => !!x.t);
+    .filter((x): x is { p: (typeof progress)[number]; t: NonNullable<ReturnType<typeof titleById.get>> } => !!x.t && x.p.positionPct > 0 && x.p.positionPct < 98);
 
-  if (!featured) return null;
+  if (!featured) return <div className="min-h-screen bg-background"><SiteHeader /><main className="mx-auto max-w-[1480px] px-6 py-20"><h1 className="text-3xl font-bold">Movies</h1><p className="mt-4 text-muted-foreground">No published movies available yet.</p></main><SiteFooter /></div>;
 
 
   const resetPage = <T,>(fn: (v: T) => void) => (v: T) => {
@@ -127,7 +128,7 @@ function OnDemand() {
               <Link
                 to="/movies/$titleId"
                 params={{ titleId: featured.id }}
-                className="inline-flex shrink-0 items-center gap-2 px-4 sm:px-6 h-9 sm:h-10 rounded-md bg-white text-background text-sm font-semibold hover:bg-white/90 transition"
+                className="inline-flex shrink-0 items-center gap-2 px-4 sm:px-6 h-9 sm:h-10 rounded-md bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 transition"
               >
                 <Play className="size-4 fill-current" strokeWidth={2.5} /> Watch Now
               </Link>
@@ -143,11 +144,11 @@ function OnDemand() {
             {featuredList.length > 1 && (
               <div className="mt-8 flex gap-1.5">
                 {featuredList.map((_, i) => (
-                  <button
+                  <Button variant="ghost"
                     key={i}
                     aria-label={`Featured slide ${i + 1}`}
                     onClick={() => setFeatIdx(i)}
-                    className={`h-1.5 rounded-full transition-all ${i === featIdx ? "w-6 bg-white" : "w-1.5 bg-white/40"}`}
+                    className={`h-1.5 rounded-full transition-all ${i === featIdx ? "w-6 bg-foreground" : "w-1.5 bg-foreground/40"}`}
                   />
                 ))}
               </div>
@@ -156,31 +157,18 @@ function OnDemand() {
         </div>
       </section>
 
-      {/* CONTINUE WATCHING — always shown, falls back to popular picks */}
-      <Row
-        title="Continue Watching"
-        subtitle={
-          continueWatching.length > 0
-            ? "Pick up where you left off."
-            : "Start a title to build your history — here are some popular picks."
-        }
-      >
-        {(continueWatching.length > 0
-          ? continueWatching.map(({ t }) => t)
-          : titles.slice(0, 6)
-        ).map((t) => (
-          <TitleCard key={t.id} t={t} portrait={false} preview={false} />
-        ))}
-      </Row>
+      {continueWatching.length > 0 && <Row title="Continue Watching" subtitle="Pick up where you left off.">
+        {continueWatching.map(({ t }) => <TitleCard key={t.id} t={t} portrait={false} preview={false} />)}
+      </Row>}
 
       {/* ROWS */}
-      <Row title="Trending Movies" subtitle="What Lettflix is watching this week.">
+      <Row title="Featured Movies">
         {trending.map((t, i) => (
           <TitleCard key={t.id} t={t} rank={i + 1} portrait={false} />
         ))}
       </Row>
 
-      <Row title="New Releases" subtitle="Fresh drops across every genre.">
+      <Row title="Movies by release year">
 
         {newReleases.map((t) => (
           <TitleCard key={t.id} t={t} portrait={false} />
@@ -197,7 +185,7 @@ function OnDemand() {
               {totalPages > 1 && ` · Page ${currentPage} of ${totalPages}`}
             </p>
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)]" />
             <input
               value={query}
@@ -205,8 +193,9 @@ function OnDemand() {
                 setQuery(e.target.value);
                 setPage(1);
               }}
+              aria-label="Search movies"
               placeholder="Search titles…"
-              className="h-10 pl-9 pr-4 rounded-md bg-surface border border-border w-64 text-sm outline-none focus:border-accent transition"
+              className="h-10 pl-9 pr-4 rounded-md bg-surface border border-border w-full sm:w-64 text-sm outline-none focus:border-accent transition"
             />
           </div>
         </div>
@@ -214,18 +203,18 @@ function OnDemand() {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
             <Filter className="size-4 text-[color:var(--muted-foreground)] shrink-0" />
-            {genres.map((g) => (
-              <button
+            {["All", ...new Set(titles.map((t) => t.category).filter(Boolean))].map((g) => (
+              <Button variant="ghost"
                 key={g}
                 onClick={() => resetPage(setGenre)(g)}
-                className={`shrink-0 px-3 h-8 rounded-full text-sm border transition ${
+                className={`shrink-0 px-3 h-11 rounded-full text-sm border transition ${
                   genre === g
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-elevated/50 border-border text-[color:var(--secondary-foreground)] hover:text-foreground"
                 }`}
               >
                 {g}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -238,7 +227,8 @@ function OnDemand() {
 
         {filtered.length === 0 && (
           <div className="text-center py-24 text-[color:var(--muted-foreground)]">
-            Nothing matches those filters yet.
+            <p>No movies match your filters.</p>
+            <Button variant="outline" className="mt-4 h-11" onClick={() => { setQuery(""); setGenre("All"); setPage(1); }}>Clear filters</Button>
           </div>
         )}
 
