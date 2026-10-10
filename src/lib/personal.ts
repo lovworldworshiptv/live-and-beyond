@@ -1,6 +1,6 @@
 // Client-side personalization store — localStorage-backed hooks for progress,
 // my list, reminders and following. Simple, synchronous, SSR-safe.
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const KEYS = {
   progress: "lettflix.progress",
@@ -86,10 +86,14 @@ function write<T>(key: string, value: T) {
 
 function useStore<T>(key: string, fallback: T) {
   const [value, setValue] = useState<T>(fallback);
+  const current = useRef(value);
 
   useEffect(() => {
-    setValue(read(key, fallback));
-    const handler = () => setValue(read(key, fallback));
+    const handler = () => {
+      current.current = read(key, fallback);
+      setValue(current.current);
+    };
+    handler();
     window.addEventListener(`lettflix:${key}`, handler);
     window.addEventListener("storage", handler);
     return () => {
@@ -101,11 +105,10 @@ function useStore<T>(key: string, fallback: T) {
 
   const setAndPersist = useCallback(
     (next: T | ((prev: T) => T)) => {
-      setValue((prev) => {
-        const resolved = typeof next === "function" ? (next as (p: T) => T)(prev) : next;
-        write(key, resolved);
-        return resolved;
-      });
+      const resolved = typeof next === "function" ? (next as (p: T) => T)(current.current) : next;
+      current.current = resolved;
+      write(key, resolved);
+      setValue(resolved);
     },
     [key]
   );

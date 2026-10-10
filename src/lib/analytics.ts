@@ -47,13 +47,15 @@ export type AnalyticsSummary = {
 
 export async function fetchChannelAnalytics(channelId: string, days = 14): Promise<AnalyticsSummary> {
   const since = new Date(Date.now() - days * 86_400_000);
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("playback_events")
     .select("service, event, seconds, session_id, created_at")
     .eq("channel_id", channelId)
     .gte("created_at", since.toISOString())
     .order("created_at", { ascending: true })
     .limit(10_000);
+
+  if (error) throw error;
 
   const rows = (data ?? []) as Array<{
     service: string; event: string; seconds: number; session_id: string | null; created_at: string;

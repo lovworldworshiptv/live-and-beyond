@@ -10,6 +10,9 @@
 - [x] Landing page hover effects and entrance/scroll animations
 
 ## UI/UX polish
+- [x] Profile: natural greeting, saved activity navigation, honest account profiles, mobile layout
+- [x] Studio: persistent real broadcast status, task groups, dated metrics, guided setup, mobile controls
+- [x] Authenticated desktop/mobile checks: activity tabs, real movie save/remove readback, Edit profile, Studio sections, setup wizard, checklist navigation, status refresh, analytics periods; no overflow
 - [x] Landing account/plans buttons, truthful supporting copy, and next-section arrow
 - [x] Touch cards navigate directly; hover previews limited to fine pointers and real streams
 - [x] Mobile bottom spacing and feedback placement above navigation

@@ -19,6 +19,8 @@ export const Route = createFileRoute("/collections/$collectionId")({
           { name: "description", content: loaderData.collection.tagline },
           { property: "og:title", content: `${loaderData.collection.name} — Lettflix` },
           { property: "og:description", content: loaderData.collection.tagline },
+          { property: "og:type", content: "website" },
+          { name: "twitter:card", content: "summary_large_image" },
         ]
       : [],
   }),
