@@ -10,6 +10,7 @@
 - [x] Landing page hover effects and entrance/scroll animations
 
 ## UI/UX polish (from design audit)
+- [ ] Implement landing CTAs and next-section arrow, clearer discovery, filters and empty states, mobile Guide/cards/radio/account/Studio, playback and reminder feedback, and truthful catalog data; verify affected interactions.
 - [ ] Touch devices: tap-to-open cards instead of hover previews
 - [ ] Bottom spacing on all pages so mobile nav never covers content
 - [ ] Swipe-snap rows with edge fades on homepage and catalogs
