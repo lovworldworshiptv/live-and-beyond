@@ -251,12 +251,12 @@ function ChannelPage() {
 
       {/* BRANDING BANNER */}
       <section className="relative border-b border-border">
-        <div className="relative h-[280px] lg:h-[360px] overflow-hidden">
+        <div className="relative h-[210px] lg:h-[270px] overflow-hidden">
           <img src={channel.banner} alt="" className="absolute inset-0 size-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/20" />
           <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-background/30 to-transparent" />
         </div>
-        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 -mt-24 relative">
+        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 -mt-18 relative">
           <div className="text-xs text-[color:var(--muted-foreground)] flex items-center gap-1.5 mb-4">
             <Link to="/channels" className="hover:text-foreground">Channels</Link>
             <ChevronRight className="size-3" />
