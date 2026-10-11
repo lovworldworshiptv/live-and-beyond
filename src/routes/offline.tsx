@@ -27,7 +27,7 @@ function OfflinePage() {
           <p className="mt-2 text-sm text-muted-foreground">You have no downloads on this device. Offline downloads are not currently available.</p>
         </section>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Button className="h-11" onClick={() => window.location.reload()}><RefreshCw />Try again</Button>
+          <Button className="h-11" onClick={() => { if (navigator.onLine) window.dispatchEvent(new Event("online")); }}><RefreshCw />Try again</Button>
           <Button asChild variant="outline" className="h-11"><Link to="/">Go home</Link></Button>
         </div>
       </div>
