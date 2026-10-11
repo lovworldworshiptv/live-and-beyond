@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TitleCard } from "@/components/title-card";
+import { PlaybackPreferences } from "@/components/playback-preferences";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile, useProgress, useMyList, useReminders, useFollowing } from "@/lib/personal";
@@ -88,6 +89,7 @@ function ProfilePage() {
           </>}
         </div>
       </section>
+      <PlaybackPreferences />
       <section className="border-t border-border pt-6" aria-labelledby="profiles-heading"><div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><div className="min-w-0"><h2 id="profiles-heading" className="text-lg font-semibold">Watching profile</h2><p className="text-sm text-muted-foreground mt-1">{user ? `${name === "there" ? "Your account" : name} · Current profile` : "Sign in to manage your account profile."}</p></div><Button asChild variant="outline" className="h-11"><Link to={user ? "/account" : "/auth"}>{user ? "Manage profile" : "Sign in"}</Link></Button></div></section>
     </main><SiteFooter />
   </div>;

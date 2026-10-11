@@ -30,7 +30,10 @@ export function useHlsAttach(
   mediaRef: React.MutableRefObject<HTMLVideoElement | HTMLAudioElement | null>,
   src: string | undefined | null,
   playing: boolean,
+  prefs?: { captions: boolean; captionLanguage: string; audioLanguage: string },
 ): HlsController {
+  const prefsRef = useRef(prefs);
+  prefsRef.current = prefs;
   const hlsRef = useRef<Hls | null>(null);
   const [levels, setLevels] = useState<QualityLevel[]>([]);
   const [selected, setSelected] = useState(-1);
@@ -77,10 +80,35 @@ export function useHlsAttach(
         );
       };
       hls.on(Hls.Events.MANIFEST_PARSED, publish);
+      // Viewer preferences: preferred audio language and captions, when the stream offers them.
+      const matches = (lang: string | undefined, want: string) => !!lang && lang.toLowerCase().startsWith(want);
+      hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_e, data) => {
+        const p = prefsRef.current; if (!p || !hls) return;
+        const i = data.audioTracks.findIndex((t) => matches(t.lang, p.audioLanguage));
+        if (i >= 0 && hls.audioTrack !== i) hls.audioTrack = i;
+      });
+      hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, (_e, data) => {
+        const p = prefsRef.current; if (!p || !hls) return;
+        if (!p.captions) { hls.subtitleTrack = -1; return; }
+        const i = data.subtitleTracks.findIndex((t) => matches(t.lang, p.captionLanguage));
+        hls.subtitleTrack = i >= 0 ? i : data.subtitleTracks.length ? 0 : -1;
+      });
       hls.on(Hls.Events.LEVEL_UPDATED, publish);
       hls.on(Hls.Events.LEVEL_SWITCHED, (_e, data) => setActive(data.level));
     } else {
       setNative(isHls && canNative);
+      const applyNative = () => {
+        const p = prefsRef.current; if (!p || !(media instanceof HTMLVideoElement)) return;
+        const tracks = Array.from(media.textTracks).filter((t) => t.kind === "subtitles" || t.kind === "captions");
+        const pick = tracks.find((t) => t.language?.toLowerCase().startsWith(p.captionLanguage)) ?? tracks[0];
+        tracks.forEach((t) => { t.mode = p.captions && t === pick ? "showing" : "disabled"; });
+        const audio = (media as HTMLVideoElement & { audioTracks?: ArrayLike<{ language: string; enabled: boolean }> }).audioTracks;
+        if (audio) {
+          const list = Array.from(audio); const want = list.find((t) => t.language?.toLowerCase().startsWith(p.audioLanguage));
+          if (want) list.forEach((t) => { t.enabled = t === want; });
+        }
+      };
+      media.addEventListener("loadedmetadata", applyNative, { once: true });
       if (media.src !== src) {
         media.src = src;
         media.load();
