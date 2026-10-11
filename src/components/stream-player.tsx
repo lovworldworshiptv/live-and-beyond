@@ -1,8 +1,8 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Play, Volume2, VolumeX, Mic } from "lucide-react";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { Button } from "@/components/ui/button";
-import { useProgress } from "@/lib/personal";
+import { useProgress, useSettings } from "@/lib/personal";
 import { QualityMenu } from "@/components/quality-menu";
 
 type Props = {
@@ -42,7 +42,16 @@ export function StreamPlayer({
 
   // Adaptive bitrate: hls.js consumes the master playlist and switches renditions
   // in place; Safari/iOS falls back to native HLS with the same source.
-  const hls = useHlsAttach(mediaRef, playing ? src : null, playing);
+  const { settings } = useSettings();
+  const hls = useHlsAttach(mediaRef, playing ? src : null, playing, settings);
+  // Autoplay preference: start once when the player opens with a playable source.
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (autoStarted.current || !settings.autoplayPlayback || !src || playing) return;
+    autoStarted.current = true;
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.autoplayPlayback, src]);
 
   const start = () => {
     if (!src) {

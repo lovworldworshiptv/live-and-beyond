@@ -38,6 +38,10 @@ export type SettingsData = {
   liveAlerts: boolean;
   newReleases: boolean;
   autoplayPreviews: boolean;
+  autoplayPlayback: boolean;
+  captions: boolean;
+  captionLanguage: string;
+  audioLanguage: string;
   playbackQuality: "auto" | "hd" | "4k";
   language: string;
   maturity: "all" | "teen" | "kids";
@@ -57,6 +61,10 @@ const DEFAULT_SETTINGS: SettingsData = {
   liveAlerts: true,
   newReleases: false,
   autoplayPreviews: true,
+  autoplayPlayback: false,
+  captions: false,
+  captionLanguage: "en",
+  audioLanguage: "en",
   playbackQuality: "auto",
   language: "English",
   maturity: "all",
@@ -184,6 +192,14 @@ export function useProfile() {
 
 // -------- Settings --------
 export function useSettings() {
-  const [settings, setSettings] = useStore<SettingsData>(KEYS.settings, DEFAULT_SETTINGS);
+  const [stored, setSettings] = useStore<SettingsData>(KEYS.settings, DEFAULT_SETTINGS);
+  // Merge defaults so settings saved before new preferences existed stay complete.
+  const settings = { ...DEFAULT_SETTINGS, ...stored };
   return { settings, setSettings };
 }
+
+export const PLAYBACK_LANGUAGES = [
+  { code: "en", label: "English" }, { code: "fr", label: "French" }, { code: "es", label: "Spanish" },
+  { code: "pt", label: "Portuguese" }, { code: "de", label: "German" }, { code: "yo", label: "Yoruba" },
+  { code: "ig", label: "Igbo" }, { code: "ha", label: "Hausa" }, { code: "sw", label: "Swahili" },
+] as const;
