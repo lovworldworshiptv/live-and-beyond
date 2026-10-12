@@ -76,9 +76,9 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
   );
 }
 
-function StartHereCta({ label = "Create your account", className = "mx-auto mt-7" }: { label?: string; className?: string }) {
+function StartHereCta({ label = "Create your account" }: { label?: string }) {
   return (
-    <Button asChild className={`relative overflow-hidden landing-glow flex h-12 w-fit px-6 text-base font-semibold transition-transform hover:scale-[1.03] ${className}`}>
+    <Button asChild className="relative overflow-hidden landing-glow mx-auto mt-7 flex h-12 w-fit px-6 text-base font-semibold transition-transform hover:scale-[1.03]">
     <Link
       to="/auth"
       search={{ mode: "signup" as const }}
@@ -137,9 +137,9 @@ export function LandingPage() {
             <p style={{ animationDelay: "400ms" }} className="landing-fade-up mx-auto mt-4 max-w-xl text-sm text-[color:var(--muted-foreground)] sm:text-base">
               Watch live channels, discover movies and series, or listen to radio and podcasts — all in one place.
             </p>
-            <div style={{ animationDelay: "550ms" }} className="landing-fade-up mt-7 flex flex-wrap items-center justify-center gap-3">
-              <StartHereCta className="" />
-              <Button asChild variant="outline" className="h-12 bg-background/50 px-6 text-base">
+            <div style={{ animationDelay: "550ms" }} className="landing-fade-up flex flex-wrap items-center justify-center gap-x-3">
+              <StartHereCta />
+              <Button asChild variant="outline" className="mt-7 h-12 bg-background/50 px-6 text-base">
                 <Link to="/pricing">Explore plans</Link>
               </Button>
             </div>
