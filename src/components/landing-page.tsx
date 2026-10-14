@@ -130,9 +130,11 @@ export function LandingPage() {
               Live TV · Radio · Podcasts · On-Demand
             </span>
             <h1 style={{ animationDelay: "250ms" }} className="landing-fade-up mt-5 font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              Lettflix
-              <br />
-              <span className="text-2xl sm:text-4xl">Live TV and on-demand, together.</span>
+              <span className="landing-shimmer-text block">
+                Lettflix
+                <br />
+                <span className="text-2xl sm:text-4xl">Live TV and on-demand, together.</span>
+              </span>
             </h1>
             <p style={{ animationDelay: "400ms" }} className="landing-fade-up mx-auto mt-4 max-w-xl text-sm text-[color:var(--muted-foreground)] sm:text-base">
               Watch live channels, discover movies and series, or listen to radio and podcasts — all in one place.
