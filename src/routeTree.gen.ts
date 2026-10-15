@@ -9,134 +9,44 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AccountRouteImport } from './routes/account'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ChannelsRouteImport } from './routes/channels'
-import { Route as CommunityRouteImport } from './routes/community'
-import { Route as CookiesRouteImport } from './routes/cookies'
-import { Route as DocumentariesRouteImport } from './routes/documentaries'
-import { Route as EnterpriseRouteImport } from './routes/enterprise'
-import { Route as GuideRouteImport } from './routes/guide'
-import { Route as MoviesRouteImport } from './routes/movies'
-import { Route as OfflineRouteImport } from './routes/offline'
-import { Route as PodcastsRouteImport } from './routes/podcasts'
-import { Route as PortalRouteImport } from './routes/portal'
-import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as RadioRouteImport } from './routes/radio'
-import { Route as SeriesRouteImport } from './routes/series'
-import { Route as StudioRouteImport } from './routes/studio'
 import { Route as TermsRouteImport } from './routes/terms'
-import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
-import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
-import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
+import { Route as StudioRouteImport } from './routes/studio'
+import { Route as SeriesRouteImport } from './routes/series'
+import { Route as RadioRouteImport } from './routes/radio'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PortalRouteImport } from './routes/portal'
+import { Route as PodcastsRouteImport } from './routes/podcasts'
+import { Route as OfflineRouteImport } from './routes/offline'
+import { Route as MoviesRouteImport } from './routes/movies'
+import { Route as GuideRouteImport } from './routes/guide'
+import { Route as EnterpriseRouteImport } from './routes/enterprise'
+import { Route as DocumentariesRouteImport } from './routes/documentaries'
+import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as CommunityRouteImport } from './routes/community'
+import { Route as ChannelsRouteImport } from './routes/channels'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as MoviesIndexRouteImport } from './routes/movies.index'
-import { Route as MoviesTitleIdRouteImport } from './routes/movies.$titleId'
+import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
 import { Route as StudioPreviewRouteImport } from './routes/studio.preview'
+import { Route as MoviesTitleIdRouteImport } from './routes/movies.$titleId'
+import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
+import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
 import { Route as ChannelsChannelIdIndexRouteImport } from './routes/channels.$channelId.index'
 import { Route as ChannelsChannelIdLibraryRouteImport } from './routes/channels.$channelId.library'
-import { Route as ApiPublicKingschatCallbackRouteImport } from './routes/api/public/kingschat/callback'
-import { Route as ApiPublicKingschatLoginRouteImport } from './routes/api/public/kingschat/login'
-import { Route as ApiPublicKingschatPollRouteImport } from './routes/api/public/kingschat/poll'
-import { Route as ApiPublicKingschatStartRouteImport } from './routes/api/public/kingschat/start'
 import { Route as ApiPublicStreamSlugRouteImport } from './routes/api/public/stream.$slug'
+import { Route as ApiPublicKingschatStartRouteImport } from './routes/api/public/kingschat/start'
+import { Route as ApiPublicKingschatPollRouteImport } from './routes/api/public/kingschat/poll'
+import { Route as ApiPublicKingschatLoginRouteImport } from './routes/api/public/kingschat/login'
+import { Route as ApiPublicKingschatCallbackRouteImport } from './routes/api/public/kingschat/callback'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccountRoute = AccountRouteImport.update({
-  id: '/account',
-  path: '/account',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChannelsRoute = ChannelsRouteImport.update({
-  id: '/channels',
-  path: '/channels',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CookiesRoute = CookiesRouteImport.update({
-  id: '/cookies',
-  path: '/cookies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocumentariesRoute = DocumentariesRouteImport.update({
-  id: '/documentaries',
-  path: '/documentaries',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnterpriseRoute = EnterpriseRouteImport.update({
-  id: '/enterprise',
-  path: '/enterprise',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GuideRoute = GuideRouteImport.update({
-  id: '/guide',
-  path: '/guide',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MoviesRoute = MoviesRouteImport.update({
-  id: '/movies',
-  path: '/movies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OfflineRoute = OfflineRouteImport.update({
-  id: '/offline',
-  path: '/offline',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PodcastsRoute = PodcastsRouteImport.update({
-  id: '/podcasts',
-  path: '/podcasts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PortalRoute = PortalRouteImport.update({
-  id: '/portal',
-  path: '/portal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RadioRoute = RadioRouteImport.update({
-  id: '/radio',
-  path: '/radio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SeriesRoute = SeriesRouteImport.update({
-  id: '/series',
-  path: '/series',
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudioRoute = StudioRouteImport.update({
@@ -144,24 +54,99 @@ const StudioRoute = StudioRouteImport.update({
   path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
+const SeriesRoute = SeriesRouteImport.update({
+  id: '/series',
+  path: '/series',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChannelsIndexRoute = ChannelsIndexRouteImport.update({
+const RadioRoute = RadioRouteImport.update({
+  id: '/radio',
+  path: '/radio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalRoute = PortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PodcastsRoute = PodcastsRouteImport.update({
+  id: '/podcasts',
+  path: '/podcasts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OfflineRoute = OfflineRouteImport.update({
+  id: '/offline',
+  path: '/offline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoviesRoute = MoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuideRoute = GuideRouteImport.update({
+  id: '/guide',
+  path: '/guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnterpriseRoute = EnterpriseRouteImport.update({
+  id: '/enterprise',
+  path: '/enterprise',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentariesRoute = DocumentariesRouteImport.update({
+  id: '/documentaries',
+  path: '/documentaries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChannelsRoute = ChannelsRouteImport.update({
+  id: '/channels',
+  path: '/channels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => ChannelsRoute,
-} as any)
-const ChannelsChannelIdRoute = ChannelsChannelIdRouteImport.update({
-  id: '/$channelId',
-  path: '/$channelId',
-  getParentRoute: () => ChannelsRoute,
-} as any)
-const CollectionsCollectionIdRoute = CollectionsCollectionIdRouteImport.update({
-  id: '/collections/$collectionId',
-  path: '/collections/$collectionId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MoviesIndexRoute = MoviesIndexRouteImport.update({
@@ -169,15 +154,30 @@ const MoviesIndexRoute = MoviesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MoviesRoute,
 } as any)
-const MoviesTitleIdRoute = MoviesTitleIdRouteImport.update({
-  id: '/$titleId',
-  path: '/$titleId',
-  getParentRoute: () => MoviesRoute,
+const ChannelsIndexRoute = ChannelsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ChannelsRoute,
 } as any)
 const StudioPreviewRoute = StudioPreviewRouteImport.update({
   id: '/preview',
   path: '/preview',
   getParentRoute: () => StudioRoute,
+} as any)
+const MoviesTitleIdRoute = MoviesTitleIdRouteImport.update({
+  id: '/$titleId',
+  path: '/$titleId',
+  getParentRoute: () => MoviesRoute,
+} as any)
+const CollectionsCollectionIdRoute = CollectionsCollectionIdRouteImport.update({
+  id: '/collections/$collectionId',
+  path: '/collections/$collectionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChannelsChannelIdRoute = ChannelsChannelIdRouteImport.update({
+  id: '/$channelId',
+  path: '/$channelId',
+  getParentRoute: () => ChannelsRoute,
 } as any)
 const ChannelsChannelIdIndexRoute = ChannelsChannelIdIndexRouteImport.update({
   id: '/',
@@ -190,20 +190,9 @@ const ChannelsChannelIdLibraryRoute =
     path: '/library',
     getParentRoute: () => ChannelsChannelIdRoute,
   } as any)
-const ApiPublicKingschatCallbackRoute =
-  ApiPublicKingschatCallbackRouteImport.update({
-    id: '/api/public/kingschat/callback',
-    path: '/api/public/kingschat/callback',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicKingschatLoginRoute = ApiPublicKingschatLoginRouteImport.update({
-  id: '/api/public/kingschat/login',
-  path: '/api/public/kingschat/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicKingschatPollRoute = ApiPublicKingschatPollRouteImport.update({
-  id: '/api/public/kingschat/poll',
-  path: '/api/public/kingschat/poll',
+const ApiPublicStreamSlugRoute = ApiPublicStreamSlugRouteImport.update({
+  id: '/api/public/stream/$slug',
+  path: '/api/public/stream/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicKingschatStartRoute = ApiPublicKingschatStartRouteImport.update({
@@ -211,11 +200,22 @@ const ApiPublicKingschatStartRoute = ApiPublicKingschatStartRouteImport.update({
   path: '/api/public/kingschat/start',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicStreamSlugRoute = ApiPublicStreamSlugRouteImport.update({
-  id: '/api/public/stream/$slug',
-  path: '/api/public/stream/$slug',
+const ApiPublicKingschatPollRoute = ApiPublicKingschatPollRouteImport.update({
+  id: '/api/public/kingschat/poll',
+  path: '/api/public/kingschat/poll',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicKingschatLoginRoute = ApiPublicKingschatLoginRouteImport.update({
+  id: '/api/public/kingschat/login',
+  path: '/api/public/kingschat/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicKingschatCallbackRoute =
+  ApiPublicKingschatCallbackRouteImport.update({
+    id: '/api/public/kingschat/callback',
+    path: '/api/public/kingschat/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -463,137 +463,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/account': {
-      id: '/account'
-      path: '/account'
-      fullPath: '/account'
-      preLoaderRoute: typeof AccountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/channels': {
-      id: '/channels'
-      path: '/channels'
-      fullPath: '/channels'
-      preLoaderRoute: typeof ChannelsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cookies': {
-      id: '/cookies'
-      path: '/cookies'
-      fullPath: '/cookies'
-      preLoaderRoute: typeof CookiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/documentaries': {
-      id: '/documentaries'
-      path: '/documentaries'
-      fullPath: '/documentaries'
-      preLoaderRoute: typeof DocumentariesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/enterprise': {
-      id: '/enterprise'
-      path: '/enterprise'
-      fullPath: '/enterprise'
-      preLoaderRoute: typeof EnterpriseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/guide': {
-      id: '/guide'
-      path: '/guide'
-      fullPath: '/guide'
-      preLoaderRoute: typeof GuideRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/movies': {
-      id: '/movies'
-      path: '/movies'
-      fullPath: '/movies'
-      preLoaderRoute: typeof MoviesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/offline': {
-      id: '/offline'
-      path: '/offline'
-      fullPath: '/offline'
-      preLoaderRoute: typeof OfflineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/podcasts': {
-      id: '/podcasts'
-      path: '/podcasts'
-      fullPath: '/podcasts'
-      preLoaderRoute: typeof PodcastsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/portal': {
-      id: '/portal'
-      path: '/portal'
-      fullPath: '/portal'
-      preLoaderRoute: typeof PortalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/radio': {
-      id: '/radio'
-      path: '/radio'
-      fullPath: '/radio'
-      preLoaderRoute: typeof RadioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/series': {
-      id: '/series'
-      path: '/series'
-      fullPath: '/series'
-      preLoaderRoute: typeof SeriesRouteImport
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/studio': {
@@ -603,32 +477,137 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
+    '/series': {
+      id: '/series'
+      path: '/series'
+      fullPath: '/series'
+      preLoaderRoute: typeof SeriesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/channels/': {
-      id: '/channels/'
+    '/radio': {
+      id: '/radio'
+      path: '/radio'
+      fullPath: '/radio'
+      preLoaderRoute: typeof RadioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal': {
+      id: '/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof PortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/podcasts': {
+      id: '/podcasts'
+      path: '/podcasts'
+      fullPath: '/podcasts'
+      preLoaderRoute: typeof PodcastsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offline': {
+      id: '/offline'
+      path: '/offline'
+      fullPath: '/offline'
+      preLoaderRoute: typeof OfflineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movies': {
+      id: '/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof MoviesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guide': {
+      id: '/guide'
+      path: '/guide'
+      fullPath: '/guide'
+      preLoaderRoute: typeof GuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enterprise': {
+      id: '/enterprise'
+      path: '/enterprise'
+      fullPath: '/enterprise'
+      preLoaderRoute: typeof EnterpriseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documentaries': {
+      id: '/documentaries'
+      path: '/documentaries'
+      fullPath: '/documentaries'
+      preLoaderRoute: typeof DocumentariesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/channels': {
+      id: '/channels'
+      path: '/channels'
+      fullPath: '/channels'
+      preLoaderRoute: typeof ChannelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
       path: '/'
-      fullPath: '/channels/'
-      preLoaderRoute: typeof ChannelsIndexRouteImport
-      parentRoute: typeof ChannelsRoute
-    }
-    '/channels/$channelId': {
-      id: '/channels/$channelId'
-      path: '/$channelId'
-      fullPath: '/channels/$channelId'
-      preLoaderRoute: typeof ChannelsChannelIdRouteImport
-      parentRoute: typeof ChannelsRoute
-    }
-    '/collections/$collectionId': {
-      id: '/collections/$collectionId'
-      path: '/collections/$collectionId'
-      fullPath: '/collections/$collectionId'
-      preLoaderRoute: typeof CollectionsCollectionIdRouteImport
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/movies/': {
@@ -638,12 +617,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MoviesIndexRouteImport
       parentRoute: typeof MoviesRoute
     }
-    '/movies/$titleId': {
-      id: '/movies/$titleId'
-      path: '/$titleId'
-      fullPath: '/movies/$titleId'
-      preLoaderRoute: typeof MoviesTitleIdRouteImport
-      parentRoute: typeof MoviesRoute
+    '/channels/': {
+      id: '/channels/'
+      path: '/'
+      fullPath: '/channels/'
+      preLoaderRoute: typeof ChannelsIndexRouteImport
+      parentRoute: typeof ChannelsRoute
     }
     '/studio/preview': {
       id: '/studio/preview'
@@ -651,6 +630,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/studio/preview'
       preLoaderRoute: typeof StudioPreviewRouteImport
       parentRoute: typeof StudioRoute
+    }
+    '/movies/$titleId': {
+      id: '/movies/$titleId'
+      path: '/$titleId'
+      fullPath: '/movies/$titleId'
+      preLoaderRoute: typeof MoviesTitleIdRouteImport
+      parentRoute: typeof MoviesRoute
+    }
+    '/collections/$collectionId': {
+      id: '/collections/$collectionId'
+      path: '/collections/$collectionId'
+      fullPath: '/collections/$collectionId'
+      preLoaderRoute: typeof CollectionsCollectionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/channels/$channelId': {
+      id: '/channels/$channelId'
+      path: '/$channelId'
+      fullPath: '/channels/$channelId'
+      preLoaderRoute: typeof ChannelsChannelIdRouteImport
+      parentRoute: typeof ChannelsRoute
     }
     '/channels/$channelId/': {
       id: '/channels/$channelId/'
@@ -666,25 +666,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChannelsChannelIdLibraryRouteImport
       parentRoute: typeof ChannelsChannelIdRoute
     }
-    '/api/public/kingschat/callback': {
-      id: '/api/public/kingschat/callback'
-      path: '/api/public/kingschat/callback'
-      fullPath: '/api/public/kingschat/callback'
-      preLoaderRoute: typeof ApiPublicKingschatCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/kingschat/login': {
-      id: '/api/public/kingschat/login'
-      path: '/api/public/kingschat/login'
-      fullPath: '/api/public/kingschat/login'
-      preLoaderRoute: typeof ApiPublicKingschatLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/kingschat/poll': {
-      id: '/api/public/kingschat/poll'
-      path: '/api/public/kingschat/poll'
-      fullPath: '/api/public/kingschat/poll'
-      preLoaderRoute: typeof ApiPublicKingschatPollRouteImport
+    '/api/public/stream/$slug': {
+      id: '/api/public/stream/$slug'
+      path: '/api/public/stream/$slug'
+      fullPath: '/api/public/stream/$slug'
+      preLoaderRoute: typeof ApiPublicStreamSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/kingschat/start': {
@@ -694,11 +680,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicKingschatStartRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/stream/$slug': {
-      id: '/api/public/stream/$slug'
-      path: '/api/public/stream/$slug'
-      fullPath: '/api/public/stream/$slug'
-      preLoaderRoute: typeof ApiPublicStreamSlugRouteImport
+    '/api/public/kingschat/poll': {
+      id: '/api/public/kingschat/poll'
+      path: '/api/public/kingschat/poll'
+      fullPath: '/api/public/kingschat/poll'
+      preLoaderRoute: typeof ApiPublicKingschatPollRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/kingschat/login': {
+      id: '/api/public/kingschat/login'
+      path: '/api/public/kingschat/login'
+      fullPath: '/api/public/kingschat/login'
+      preLoaderRoute: typeof ApiPublicKingschatLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/kingschat/callback': {
+      id: '/api/public/kingschat/callback'
+      path: '/api/public/kingschat/callback'
+      fullPath: '/api/public/kingschat/callback'
+      preLoaderRoute: typeof ApiPublicKingschatCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
