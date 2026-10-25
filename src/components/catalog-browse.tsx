@@ -174,7 +174,7 @@ export function CatalogBrowse({
       )}
 
       {/* LIBRARY */}
-      <section className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 mt-14 mb-16">
+      <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-14 mb-16">
         <div className="flex items-end justify-between mb-5 flex-wrap gap-4">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight">All {heading}</h2>

@@ -238,7 +238,7 @@ function StudioPage() {
 
       {/* Channel identity header */}
       <section className="border-b border-border">
-        <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 pt-6 pb-6">
+        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-6 pb-6">
           <div className="grid gap-5 sm:flex sm:items-start sm:justify-between">
             <div className="flex items-center gap-4 min-w-0">
               {channel?.logo_url ? (
@@ -284,12 +284,12 @@ function StudioPage() {
       </section>
 
       <section aria-label="Broadcast status" className="sticky top-16 z-30 border-b border-border bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 py-3 grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-center">
+        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 py-3 grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-center">
           <div className="min-w-0" role="status"><div className="flex items-center gap-2"><span className={`size-2.5 shrink-0 rounded-full ${starting ? "bg-warning" : channel?.is_live ? "bg-live" : "bg-muted-foreground"}`} /><span className="font-semibold">{starting ? "Starting" : channel?.is_live ? "Live" : "Off air"}</span><span className="text-xs text-muted-foreground truncate">{sourceName}</span></div><p className="mt-1 text-xs text-muted-foreground">{setup.error ? "Status refresh unavailable" : source === "ingest" ? `Encoder: ${setup.encoder === "live" || setup.encoder === "connected" ? "connected" : setup.input ? "waiting for connection" : "not configured"}` : "Playback health available in broadcast controls"}{setup.checked && ` · Checked ${setup.checked.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}</p></div>
           <div className="flex items-center gap-1"><Button variant="ghost" size="icon" className="size-11" aria-label="Refresh workspace status" disabled={refreshing} onClick={() => void refreshWorkspace()}><RefreshCw className={refreshing ? "animate-spin" : ""} /></Button><Button className="h-11 px-3" disabled={starting} onClick={() => setTab("broadcast")}>{channel?.is_live ? "Manage broadcast" : "Set up / Go live"}</Button></div>
         </div>
       </section>
-      <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 py-6 grid gap-6 lg:grid-cols-[210px_minmax(0,1fr)]">
+      <div className="mx-auto max-w-[1480px] px-6 lg:px-10 py-6 grid gap-6 lg:grid-cols-[210px_minmax(0,1fr)]">
         <aside className="min-w-0 lg:sticky lg:top-40 h-max">
           <label className="block lg:hidden text-xs text-muted-foreground" htmlFor="studio-section">Studio section</label>
           <select id="studio-section" aria-label="Studio section" value={tab} onChange={event => setTab(event.target.value as Tab)} className="mt-2 lg:hidden w-full h-12 rounded-md border border-border bg-surface text-foreground px-3 text-sm">
