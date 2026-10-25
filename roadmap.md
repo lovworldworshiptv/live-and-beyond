@@ -27,5 +27,7 @@
 - [x] Reminder feedback accurately says it is saved on this device
 - [x] Viewing history uses playback events; removed sample previews, episodes, ratings and catalogue counts
 - [x] Desktop and phone checks: landing links/arrow, filter reset, Guide views, account sections, Studio broadcast controls; no runtime errors or horizontal overflow
+- [x] Footer runs to the bottom of the screen on all pages; 2-up mobile footer, legal links, dead buttons/placeholder links hidden
+- [x] Legal pages styled with site header/footer; consistent 24px phone margins; Pricing stray divider removed
 - [ ] Verify successful published movie playback and Continue Watching readback — blocked by current movie source failing playback (media error 4)
 - [ ] Verify live radio playback and device lock-screen controls — blocked by no published radio stations

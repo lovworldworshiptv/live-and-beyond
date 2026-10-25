@@ -67,7 +67,7 @@ function RadioPage() {
       <SiteHeader />
 
       <section className="border-b border-border bg-[image:var(--gradient-live)]/10">
-        <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 py-10 lg:py-14">
+        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 py-10 lg:py-14">
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-elevated/70 border border-border text-[11px] font-medium">
             <RadioIcon className="size-3 text-primary" /> Lettflix Radio
           </div>
@@ -105,7 +105,7 @@ function RadioPage() {
         </div>
       </section>
 
-      <main className="flex-1 mx-auto w-full max-w-[1480px] px-4 sm:px-6 lg:px-10 py-8">
+      <main className="flex-1 mx-auto w-full max-w-[1480px] px-6 lg:px-10 py-8">
         {loading ? (
           <div className="py-24 grid place-items-center"><Loader2 className="size-6 animate-spin text-primary" /></div>
         ) : !filtered.length ? (

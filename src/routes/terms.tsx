@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { ArrowLeft, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/terms")({
@@ -19,8 +21,9 @@ export const Route = createFileRoute("/terms")({
 
 function TermsPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-[800px] px-6 py-16 lg:py-24">
+    <div className="min-h-screen bg-background text-foreground">
+      <SiteHeader />
+      <main className="mx-auto max-w-[800px] px-6 pt-10 pb-4 lg:pt-16">
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-sm text-[color:var(--muted-foreground)] hover:text-foreground transition mb-10"
@@ -40,7 +43,7 @@ function TermsPage() {
           Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
         </p>
 
-        <div className="prose prose-invert prose-sm max-w-none">
+        <div className="legal-prose">
           <p>
             Welcome to Lettflix. These Terms of Use ("Terms") govern your access to and use of the Lettflix platform, including live television, radio, podcasts, on-demand video, and related services (collectively, the "Services"). By creating an account, accessing, or using Lettflix, you agree to be bound by these Terms.
           </p>
@@ -102,10 +105,11 @@ function TermsPage() {
 
           <h2>11. Contact Us</h2>
           <p>
-            For questions about these Terms, please contact us at <a href="mailto:legal@lettflix.com" className="text-primary hover:underline">legal@lettflix.com</a>.
+            For questions about these Terms, please contact us at <a href="mailto:legal@lettflix.com">legal@lettflix.com</a>.
           </p>
         </div>
-      </div>
+      </main>
+      <SiteFooter />
     </div>
   );
 }

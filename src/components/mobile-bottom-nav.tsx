@@ -48,6 +48,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
+      data-bottom-nav
       aria-label="Primary"
       className="lg:hidden fixed bottom-0 left-0 right-0 z-50 w-full max-w-full"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}

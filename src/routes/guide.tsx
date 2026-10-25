@@ -28,7 +28,7 @@ function GuidePage() {
   const now = Date.now();
   return <div className="min-h-screen bg-background text-foreground">
     <SiteHeader />
-    <main className="mx-auto max-w-[1480px] px-4 py-10 sm:px-6 lg:px-10">
+    <main className="mx-auto max-w-[1480px] px-6 py-10 lg:px-10">
       <h1 className="text-3xl font-bold lg:text-4xl">Programme guide</h1>
       <div className="mt-6 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
         <input aria-label="Filter channels" placeholder="Search channels…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-11 w-full min-w-0 rounded-md border border-border bg-surface px-4 text-sm" />

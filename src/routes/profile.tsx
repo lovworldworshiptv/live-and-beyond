@@ -56,7 +56,7 @@ function ProfilePage() {
   const busy = authLoading || titlesLoading || channelsLoading;
   return <div className="min-h-screen bg-background text-foreground">
     <SiteHeader />
-    <main className="mx-auto max-w-[1480px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10 space-y-8 pb-16">
+    <main className="mx-auto max-w-[1480px] px-6 py-8 lg:px-10 lg:py-10 space-y-8 pb-16">
       <header className="grid gap-5 border-b border-border pb-6">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-center">
           <div className="flex min-w-0 items-center gap-3 sm:gap-4">
