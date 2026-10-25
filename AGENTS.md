@@ -15,3 +15,4 @@
 - Profile resolves device-saved IDs against published CMS content and shows only the authenticated account profile; this avoids invented personalization and family accounts.
 - Studio workspace status reads persisted channel/input state without changing broadcast lifecycle; transient Starting comes from the existing broadcast action.
 - Device personalization writes happen outside React state updater callbacks; synchronous store events must not trigger duplicate toggles during render replay.
+- Mobile bottom clearance is CSS-driven by `data-bottom-nav`, `data-radio-player` and `data-site-footer` in styles.css; the footer absorbs nav clearance so pages end flush with no strip below it.
