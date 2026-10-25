@@ -63,7 +63,7 @@ function ProfilePage() {
         <div aria-hidden className="profile-hero-glow absolute inset-0" />
         <div className="relative grid gap-6 p-5 sm:p-8 lg:p-10 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center">
           <div className="relative mx-auto md:mx-0 w-max">
-            <UserAvatar src={avatarSrc} name={name === "there" ? null : name} className="size-24 sm:size-28 lg:size-32 text-4xl ring-4 ring-background shadow-[var(--shadow-elegant)]" />
+            <UserAvatar src={avatarSrc} name={name === "there" ? null : name} className="size-24 sm:size-28 lg:size-32 text-4xl ring-4 ring-background shadow-[var(--shadow-card)]" />
             {user && <button type="button" onClick={() => setPickerOpen(true)} aria-label="Change avatar" className="absolute bottom-1 right-1 grid size-10 place-items-center rounded-full bg-accent text-accent-foreground ring-4 ring-background transition hover:scale-105 focus-visible:outline-none focus-visible:ring-accent/60"><Camera className="size-4" /></button>}
           </div>
           <div className="min-w-0 text-center md:text-left">
@@ -105,7 +105,7 @@ function ProfilePage() {
         </div>
       </section>
       <PlaybackPreferences />
-      <section className="border-t border-border pt-6" aria-labelledby="profiles-heading"><div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><div className="min-w-0"><h2 id="profiles-heading" className="text-lg font-semibold">Watching profile</h2><p className="text-sm text-muted-foreground mt-1">{user ? `${name === "there" ? "Your account" : name} · Current profile` : "Sign in to manage your account profile."}</p></div><Button asChild variant="outline" className="h-11"><Link to={user ? "/account" : "/auth"}>{user ? "Manage profile" : "Sign in"}</Link></Button></div></section>
+      <section className="border-t border-border pt-6" aria-labelledby="profiles-heading"><div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3"><UserAvatar src={avatarSrc} name={name === "there" ? null : name} className="size-12 text-lg" /><div className="min-w-0"><h2 id="profiles-heading" className="text-lg font-semibold">Watching profile</h2><p className="text-sm text-muted-foreground mt-1 truncate">{user ? `${name === "there" ? "Your account" : name} · Current profile` : "Sign in to manage your account profile."}</p></div><Button asChild variant="outline" className="h-11"><Link to={user ? "/account" : "/auth"}>{user ? "Manage" : "Sign in"}</Link></Button></div></section>
     </main><SiteFooter />
   </div>;
 }
