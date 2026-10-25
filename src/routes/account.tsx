@@ -646,6 +646,7 @@ function AccountPanel() {
     setBusy(false);
     if (error) return toast.error(error.message);
     setInitialName(name.trim());
+    window.dispatchEvent(new CustomEvent("lettflix:account-profile"));
     toast.success("Display name updated");
   }
 
