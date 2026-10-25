@@ -18,6 +18,8 @@ import { defaultNav, type NavConfig } from "@/lib/homepage-defaults";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { SearchDialog } from "@/components/search-dialog";
 import { NotificationBell } from "@/components/notification-bell";
+import { UserAvatar } from "@/components/user-avatar";
+import { useAccountProfile } from "@/lib/account-profile";
 
 
 export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
@@ -51,7 +53,8 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   }, []);
 
 
-  const displayName = user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? profile.displayName;
+  const { profile: account, avatarSrc } = useAccountProfile();
+  const displayName = account?.display_name || (user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? profile.displayName);
   const handle = user?.email ?? profile.handle;
   const initial = (displayName as string).charAt(0).toUpperCase();
 
@@ -160,10 +163,10 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="size-9 rounded-md bg-[image:var(--gradient-live)] grid place-items-center text-primary-foreground text-sm font-bold"
+                  className="size-9 rounded-full overflow-hidden ring-2 ring-border hover:ring-foreground/40 transition grid place-items-center text-primary-foreground text-sm font-bold"
                   aria-label="Profile"
                 >
-                  {initial}
+                  <UserAvatar src={avatarSrc} name={initial} className="size-full text-sm" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">

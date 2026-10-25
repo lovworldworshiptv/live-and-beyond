@@ -1,14 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Bookmark, Clock, Bell, Heart, Trash2, Users, Pencil, ArrowRight, Loader2 } from "lucide-react";
+import { Bookmark, Clock, Bell, Heart, Trash2, Pencil, ArrowRight, Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TitleCard } from "@/components/title-card";
 import { PlaybackPreferences } from "@/components/playback-preferences";
+import { UserAvatar } from "@/components/user-avatar";
+import { AvatarPickerDialog } from "@/components/avatar-picker";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { useAccountProfile } from "@/lib/account-profile";
 import { useProfile, useProgress, useMyList, useReminders, useFollowing } from "@/lib/personal";
 import { useCmsChannels, useCmsTitles } from "@/lib/cms-catalog";
 
@@ -32,17 +34,17 @@ function ProfilePage() {
   const { ids: following, toggle: toggleFollow } = useFollowing();
   const { titles, loading: titlesLoading } = useCmsTitles();
   const { channels, loading: channelsLoading } = useCmsChannels();
-  const [account, setAccount] = useState<{ display_name: string | null; handle: string | null } | null>(null);
+  const { profile: account, avatarSrc } = useAccountProfile();
   const [greeting, setGreeting] = useState("Welcome back");
   const [active, setActive] = useState<Activity>("list");
+  const [pickerOpen, setPickerOpen] = useState(false);
   useEffect(() => {
     const hour = new Date().getHours();
     setGreeting(hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening");
-    setAccount(null);
-    if (user) void supabase.from("profiles").select("display_name, handle").eq("id", user.id).maybeSingle().then(({ data }) => setAccount(data));
-  }, [user]);
+  }, []);
   const metadataName = typeof user?.user_metadata?.display_name === "string" ? user.user_metadata.display_name : "";
   const name = account?.display_name || metadataName || profile.displayName || "there";
+  const memberSince = account?.created_at ? new Date(account.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" }) : null;
   const history = progress.flatMap(p => { const t = titles.find(t => t.id === p.titleId); return t ? [{ p, t }] : []; });
   const continuing = history.filter(({ p }) => p.positionPct > 0 && p.positionPct < 95);
   const saved = titles.filter(t => myList.includes(t.id));
@@ -57,16 +59,29 @@ function ProfilePage() {
   return <div className="min-h-screen bg-background text-foreground">
     <SiteHeader />
     <main className="mx-auto max-w-[1480px] px-6 py-8 lg:px-10 lg:py-10 space-y-8 pb-16">
-      <header className="grid gap-5 border-b border-border pb-6">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-center">
-          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-            <div className="size-12 sm:size-16 shrink-0 rounded-full bg-accent/15 text-accent grid place-items-center text-xl font-semibold">{name === "there" ? <Users /> : name.charAt(0).toUpperCase()}</div>
-            <div className="min-w-0"><p className="text-xs text-muted-foreground mb-1">Your profile</p><h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold break-words">{greeting}{name !== "there" ? `, ${name}` : ""}</h1><p className="text-sm text-muted-foreground truncate mt-1">{user?.email || "Your saved activity on this device"}</p></div>
+      <header className="profile-hero relative overflow-hidden rounded-3xl border border-border">
+        <div aria-hidden className="profile-hero-glow absolute inset-0" />
+        <div className="relative grid gap-6 p-5 sm:p-8 lg:p-10 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center">
+          <div className="relative mx-auto md:mx-0 w-max">
+            <UserAvatar src={avatarSrc} name={name === "there" ? null : name} className="size-24 sm:size-28 lg:size-32 text-4xl ring-4 ring-background shadow-[var(--shadow-card)]" />
+            {user && <button type="button" onClick={() => setPickerOpen(true)} aria-label="Change avatar" className="absolute bottom-1 right-1 grid size-10 place-items-center rounded-full bg-accent text-accent-foreground ring-4 ring-background transition hover:scale-105 focus-visible:outline-none focus-visible:ring-accent/60"><Camera className="size-4" /></button>}
           </div>
-          <Button asChild variant="outline" className="h-11 px-3"><Link to="/account"><Pencil /><span className="hidden sm:inline">Edit profile</span><span className="sr-only sm:hidden">Edit profile</span></Link></Button>
+          <div className="min-w-0 text-center md:text-left">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">Your profile</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight break-words">{greeting}{name !== "there" ? `, ${name}` : ""}</h1>
+            <p className="text-sm text-muted-foreground truncate mt-1.5">{user?.email || "Your saved activity on this device"}{memberSince ? ` · Member since ${memberSince}` : ""}</p>
+            <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-2">
+              {sections.map(s => <button key={s.key} type="button" onClick={() => { setActive(s.key); document.getElementById("profile-activity")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/50 backdrop-blur px-3 h-9 text-xs text-muted-foreground transition hover:text-foreground hover:border-foreground/30"><s.icon className="size-3.5" /><span className="font-semibold text-foreground">{s.count}</span>{s.label}</button>)}
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row md:flex-col gap-2 justify-center">
+            {user && <Button variant="secondary" className="h-11" onClick={() => setPickerOpen(true)}><Camera />Change avatar</Button>}
+            <Button asChild variant="outline" className="h-11 bg-background/40"><Link to="/account"><Pencil />Edit profile</Link></Button>
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground">Saved activity is stored on this device.</p>
       </header>
+      <p className="-mt-4 text-xs text-muted-foreground text-center md:text-left">Saved activity is stored on this device.</p>
+      <AvatarPickerDialog open={pickerOpen} onOpenChange={setPickerOpen} />
       {busy ? <div role="status" className="py-8 flex gap-2 items-center text-muted-foreground"><Loader2 className="size-4 animate-spin" />Loading your activity…</div> : continuing.length ? <section aria-labelledby="continue-heading">
         <div className="flex justify-between items-center gap-3 mb-4"><h2 id="continue-heading" className="text-xl font-semibold">Continue watching</h2><span className="text-sm text-muted-foreground">{continuing.length} titles</span></div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">{continuing.map(({ p, t }) => <div key={t.id}><TitleCard t={t} portrait={false} preview={false} /><progress aria-label={`${t.title} viewing progress`} value={p.positionPct} max={100} className="mt-2 w-full h-1.5 accent-accent" /><p className="text-xs text-muted-foreground mt-1">{Math.round(p.positionPct)}% watched</p></div>)}</div>
@@ -90,7 +105,7 @@ function ProfilePage() {
         </div>
       </section>
       <PlaybackPreferences />
-      <section className="border-t border-border pt-6" aria-labelledby="profiles-heading"><div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><div className="min-w-0"><h2 id="profiles-heading" className="text-lg font-semibold">Watching profile</h2><p className="text-sm text-muted-foreground mt-1">{user ? `${name === "there" ? "Your account" : name} · Current profile` : "Sign in to manage your account profile."}</p></div><Button asChild variant="outline" className="h-11"><Link to={user ? "/account" : "/auth"}>{user ? "Manage profile" : "Sign in"}</Link></Button></div></section>
+      <section className="border-t border-border pt-6" aria-labelledby="profiles-heading"><div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3"><UserAvatar src={avatarSrc} name={name === "there" ? null : name} className="size-12 text-lg" /><div className="min-w-0"><h2 id="profiles-heading" className="text-lg font-semibold">Watching profile</h2><p className="text-sm text-muted-foreground mt-1 truncate">{user ? `${name === "there" ? "Your account" : name} · Current profile` : "Sign in to manage your account profile."}</p></div><Button asChild variant="outline" className="h-11"><Link to={user ? "/account" : "/auth"}>{user ? "Manage" : "Sign in"}</Link></Button></div></section>
     </main><SiteFooter />
   </div>;
 }
