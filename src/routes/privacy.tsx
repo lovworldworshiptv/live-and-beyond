@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { ArrowLeft, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/privacy")({
@@ -19,8 +21,9 @@ export const Route = createFileRoute("/privacy")({
 
 function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-[800px] px-6 py-16 lg:py-24">
+    <div className="min-h-screen bg-background text-foreground">
+      <SiteHeader />
+      <main className="mx-auto max-w-[800px] px-6 pt-10 pb-4 lg:pt-16">
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-sm text-[color:var(--muted-foreground)] hover:text-foreground transition mb-10"
@@ -40,7 +43,7 @@ function PrivacyPage() {
           Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
         </p>
 
-        <div className="prose prose-invert prose-sm max-w-none">
+        <div className="legal-prose">
           <p>
             Lettflix ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and safeguard your personal information when you use the Lettflix platform, including our website, applications, streaming services, and related features.
           </p>
@@ -72,7 +75,7 @@ function PrivacyPage() {
 
           <h2>4. Cookies and Tracking</h2>
           <p>
-            We use cookies and similar technologies to remember your preferences, analyze traffic, and improve our services. For more details, please see our <Link to="/cookies" className="text-primary hover:underline">Cookies Notice</Link>.
+            We use cookies and similar technologies to remember your preferences, analyze traffic, and improve our services. For more details, please see our <Link to="/cookies">Cookies Notice</Link>.
           </p>
 
           <h2>5. Your Rights and Choices</h2>
@@ -107,10 +110,11 @@ function PrivacyPage() {
 
           <h2>10. Contact Us</h2>
           <p>
-            If you have questions or concerns about this Privacy Policy or your data, please contact us at <a href="mailto:privacy@lettflix.com" className="text-primary hover:underline">privacy@lettflix.com</a>.
+            If you have questions or concerns about this Privacy Policy or your data, please contact us at <a href="mailto:privacy@lettflix.com">privacy@lettflix.com</a>.
           </p>
         </div>
-      </div>
+      </main>
+      <SiteFooter />
     </div>
   );
 }
