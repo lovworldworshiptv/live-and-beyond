@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { AvatarChooser } from "@/components/avatar-picker";
 
 
 export const Route = createFileRoute("/account")({
@@ -99,6 +100,13 @@ function AccountPage() {
         <div className="space-y-4">
           {active === "profile" && (
             <Card title="Profile" subtitle="How you appear across Lettflix.">
+              <div className="mb-6 rounded-xl border border-border bg-elevated/40 p-4 sm:p-5">
+                <div className="mb-4">
+                  <div className="text-sm font-semibold">Profile photo</div>
+                  <p className="text-xs text-[color:var(--muted-foreground)] mt-0.5">Choose a male or female avatar, or upload your own photo.</p>
+                </div>
+                <AvatarChooser />
+              </div>
               <AccountPanel />
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Display name">
@@ -119,21 +127,12 @@ function AccountPage() {
                     }
                   />
                 </Field>
-                <Field label="Location">
+                <Field label="Location" className="sm:col-span-2">
                   <input
                     className={inputClass}
                     value={profile.location}
                     onChange={(e) =>
                       setProfile({ ...profile, location: e.target.value })
-                    }
-                  />
-                </Field>
-                <Field label="Avatar seed">
-                  <input
-                    className={inputClass}
-                    value={profile.avatarSeed}
-                    onChange={(e) =>
-                      setProfile({ ...profile, avatarSeed: e.target.value })
                     }
                   />
                 </Field>
