@@ -6,6 +6,16 @@ import { defaultFooter, type FooterConfig } from "@/lib/homepage-defaults";
 /** Placeholder hrefs ("#", empty) lead nowhere, so they are not rendered. */
 const isRealHref = (href?: string) => !!href && href.trim() !== "" && href.trim() !== "#";
 
+/** The old /on-demand hub was replaced by per-kind catalogue pages; route saved links there. */
+function resolveHref(href: string, label: string) {
+  if (!href.startsWith("/on-demand")) return href;
+  const l = label.toLowerCase();
+  if (l.includes("podcast")) return "/podcasts";
+  if (l.includes("series")) return "/series";
+  if (l.includes("documentar")) return "/documentaries";
+  return "/movies";
+}
+
 const LEGAL_LINKS = [
   { label: "Privacy", to: "/privacy" },
   { label: "Terms", to: "/terms" },
