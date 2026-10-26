@@ -32,3 +32,21 @@
 - [x] Legal pages styled with site header/footer; consistent 24px phone margins; Pricing stray divider removed
 - [ ] Verify successful published movie playback and Continue Watching readback — blocked by current movie source failing playback (media error 4)
 - [ ] Verify live radio playback and device lock-screen controls — blocked by no published radio stations
+
+## Platform protection
+- [x] Block right-click, image/video dragging and save/print/view-source shortcuts
+- [x] Hide video when the window loses focus or a screenshot key is pressed
+- [ ] True screenshot/recording blocking needs DRM (Widevine/FairPlay) through the video provider — browsers cannot stop OS capture on their own
+
+## Lettflix Games and Earn (from uploaded brief)
+- [ ] Phase 1 Foundation: game colours/fonts, ticket stub, /games hub, earnings bar, nav entries
+- [ ] Phase 2 Quick plays: shared stage, Trivia Blitz, LettWord, Poster Flip, Reel Runner, Tune Drop, server scoring
+- [ ] Phase 3 Predict & Win: contests, slips, slip drawer, /admin/games with two-step settlement, audit log
+- [ ] Phase 4 Referrals & earnings: codes/links, attribution, payment webhook, 2% commission, refunds, /earn and /earn/referrals — needs Paystack or Flutterwave
+- [ ] Phase 5 Watch & earn, payouts: watch coins, tickets/draws, hold period, bank verification, withdrawals
+- [ ] Phase 6 Live & social: player overlay, party rooms, leaderboards, share cards
+- [ ] Phase 7 Safety: 18+ check, play limits, fraud panel, paid_entry_enabled flag (off) — needs legal sign-off
+
+## Assets
+- [x] Lettflix logo with transparent background (Files)
+- [ ] Netflix logo file — declined: it is Netflix's trademark
