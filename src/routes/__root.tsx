@@ -14,6 +14,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { CreatorApprovalWatcher } from "@/components/creator-approval-watcher";
 import { RadioPlayerProvider } from "@/components/radio-player";
 import { NetworkWatcher } from "@/components/network-watcher";
+import { ContentProtection } from "@/components/content-protection";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -132,6 +133,7 @@ function RootComponent() {
           <Outlet />
           <CreatorApprovalWatcher />
           <NetworkWatcher />
+          <ContentProtection />
           <Toaster position="bottom-right" theme="dark" richColors className="feedback-toaster" />
         </RadioPlayerProvider>
       </AuthProvider>
