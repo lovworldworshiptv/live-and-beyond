@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { QualityMenu } from "@/components/quality-menu";
+import { PlayerWatermark } from "@/components/player-watermark";
 import { protectedChannelSrc } from "@/lib/stream-src";
 import { useFollowing, useSettings } from "@/lib/personal";
 import { useChannelFollow } from "@/lib/follows";
@@ -281,7 +282,7 @@ function ChannelPage() {
 
       {/* PLAYER — Live Stream / Radio Stream */}
       <section ref={playerRef} className={`mx-auto max-w-[1480px] px-4 lg:px-10 pt-4 lg:pt-8 scroll-mt-24 ${playing ? "sticky top-16 z-30 bg-background lg:static" : ""}`}>
-        <div className={`relative rounded-2xl overflow-hidden border border-border bg-black ${isRadio ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}`}>
+        <div data-protected-player className={`relative rounded-2xl overflow-hidden border border-border bg-black ${isRadio ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}`}>
           {/* Poster / backdrop */}
           <img src={channel.banner} alt="" className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${playing ? "opacity-0" : isRadio ? "opacity-40 blur-sm scale-110" : "opacity-60"}`} />
           {!playing && <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />}
@@ -313,9 +314,12 @@ function ChannelPage() {
           
 
           {playing && !isRadio && (
-            <div className="absolute bottom-14 right-3 z-20">
-              <QualityMenu controller={hls} />
-            </div>
+            <>
+              <PlayerWatermark />
+              <div className="absolute bottom-14 right-3 z-20">
+                <QualityMenu controller={hls} />
+              </div>
+            </>
           )}
 
 
