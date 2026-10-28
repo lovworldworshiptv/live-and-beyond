@@ -2,7 +2,7 @@
 
 ## Done
 - [x] Homepage, channels, guide, movies/series/documentaries/podcasts, radio
-- [x] Auth (email, Google, Apple, KingsChat), profile, account settings, MFA
+- [x] Auth (email, KingsChat), profile, account settings, MFA
 - [x] Admin CMS (channels, titles, schedule, events, sponsors, homepage, nav)
 - [x] Creator Studio: live ingest, external source, automated TV, team, analytics
 - [x] Adaptive quality streaming with Quality menu and protected stream links
