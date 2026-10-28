@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useLocation } from "@tanstack/react-router";
+
+// Creator and admin workspaces keep normal copying for keys, IDs and messages.
+const COPY_ALLOWED = /^\/(studio|admin)(\/|$)/;
 
 /**
  * Browser-level content protection (Netflix-style deterrents):
@@ -9,10 +13,41 @@ import { toast } from "sonner";
  *   or the page is asked to share the screen; it stays black while sharing runs.
  * - Picture-in-picture and casting are disabled so video can't escape the shield.
  * - Native video fullscreen is moved onto the player frame so the account watermark stays visible.
+ * - Text and image copying (copy/cut, selection) is blocked outside form fields, [data-allow-copy]
+ *   elements and the Studio/Admin workspaces. Copy buttons using the Clipboard API keep working.
  * Hardware-level capture blocking (black screenshots at OS level) needs DRM from the video provider.
  */
 export function ContentProtection() {
   const [shielded, setShielded] = useState(false);
+  const { pathname } = useLocation();
+  const copyAllowed = COPY_ALLOWED.test(pathname);
+
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-copy-allowed", copyAllowed);
+    if (copyAllowed) return;
+    const canCopy = (t: EventTarget | null) => {
+      const el = t instanceof Element ? t : t instanceof Node ? t.parentElement : null;
+      return !!el?.closest("input, textarea, select, [contenteditable=''], [contenteditable='true'], [data-allow-copy]");
+    };
+    const onCopy = (e: ClipboardEvent) => {
+      const sel = document.getSelection();
+      const origin = document.activeElement && canCopy(document.activeElement) ? document.activeElement : sel?.anchorNode ?? e.target;
+      if (canCopy(origin)) return;
+      e.preventDefault();
+      e.clipboardData?.setData("text/plain", "");
+    };
+    const onSelectStart = (e: Event) => {
+      if (!canCopy(e.target)) e.preventDefault();
+    };
+    document.addEventListener("copy", onCopy, true);
+    document.addEventListener("cut", onCopy, true);
+    document.addEventListener("selectstart", onSelectStart, true);
+    return () => {
+      document.removeEventListener("copy", onCopy, true);
+      document.removeEventListener("cut", onCopy, true);
+      document.removeEventListener("selectstart", onSelectStart, true);
+    };
+  }, [copyAllowed]);
 
   useEffect(() => {
     let captureActive = false;
