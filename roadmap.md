@@ -38,6 +38,7 @@
 - [x] Hide video when the window loses focus or a screenshot key is pressed
 - [x] Stronger screenshot/recording blocking: black video on capture shortcuts (PrintScreen, Win+Shift+S, Cmd+Shift+3/4/5, Win+Alt+R) and in-page screen sharing, warning message, no picture-in-picture or casting, traceable account watermark on playing video (kept in fullscreen)
 - [x] Right-click and long-press menus blocked across the whole site (text fields excepted)
+- [x] Copy protection: page text and pictures can't be selected or copied (form fields, copy buttons, Studio and Admin excepted)
 - [ ] True screenshot/recording blocking needs DRM (Widevine/FairPlay) through the video provider — browsers cannot stop OS capture on their own
 
 ## Lettflix Games and Earn (from uploaded brief)

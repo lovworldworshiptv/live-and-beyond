@@ -17,3 +17,4 @@
 - Device personalization writes happen outside React state updater callbacks; synchronous store events must not trigger duplicate toggles during render replay.
 - Mobile bottom clearance is CSS-driven by `data-bottom-nav`, `data-radio-player` and `data-site-footer` in styles.css; the footer absorbs nav clearance so pages end flush with no strip below it.
 - Account avatars live in `profiles.avatar_url` as a preset key (`preset:male`/`preset:female`) or a signed URL to the private `avatars` bucket (`<user id>/` folder); resolve through `src/lib/account-profile.ts` so header, Profile and Account stay in sync.
+- Copy/selection blocking lives in ContentProtection; Studio/Admin routes, form fields and [data-allow-copy] are exempt so creators can copy keys and IDs, and in-app copy buttons use the Clipboard API so they keep working.
