@@ -2,12 +2,12 @@ import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-r
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
 import { useKingsChatLogin } from "@/hooks/use-kingschat-login";
 import logoIcon from "@/assets/lettflix-icon.png.asset.json";
+import kingschatLogo from "@/assets/kingschat-logo.svg.asset.json";
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
@@ -144,16 +144,6 @@ function AuthPage() {
     }
   }
 
-  async function onOAuth(provider: "google" | "apple") {
-    setBusy(true);
-    const result = await lovable.auth.signInWithOAuth(provider, {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      toast.error(result.error.message ?? `${provider} sign-in failed`);
-      setBusy(false);
-    }
-  }
 
   function onKingsChat() {
     const next = typeof redirect === "string" && redirect.startsWith("/") ? redirect : "/";
@@ -223,17 +213,6 @@ function AuthPage() {
           <div className="space-y-2">
             <button
               type="button"
-              onClick={() => onOAuth("apple")}
-              disabled={busy}
-              className="w-full h-11 rounded-md border border-border bg-white text-black hover:bg-white/90 transition flex items-center justify-center gap-2.5 text-sm font-medium disabled:opacity-50"
-            >
-              <svg viewBox="0 0 24 24" className="size-4" fill="currentColor">
-                <path d="M17.05 12.04c-.03-2.79 2.28-4.13 2.38-4.2-1.3-1.9-3.32-2.16-4.04-2.19-1.72-.17-3.36 1.01-4.23 1.01-.88 0-2.22-.99-3.65-.96-1.88.03-3.61 1.09-4.58 2.77-1.95 3.38-.5 8.38 1.4 11.13.93 1.34 2.03 2.85 3.47 2.8 1.4-.06 1.93-.9 3.62-.9 1.68 0 2.16.9 3.63.87 1.5-.03 2.45-1.37 3.36-2.72 1.06-1.56 1.5-3.07 1.52-3.15-.03-.01-2.91-1.12-2.94-4.46zM14.28 3.9c.77-.94 1.29-2.23 1.15-3.53-1.11.05-2.46.74-3.26 1.67-.71.83-1.34 2.16-1.17 3.42 1.24.1 2.51-.63 3.28-1.56z" />
-              </svg>
-              Continue with Apple
-            </button>
-            <button
-              type="button"
               onClick={onKingsChat}
               disabled={busy || kcLoading || kcWaiting}
               className="group relative w-full h-11 rounded-md border border-border bg-gradient-to-r from-[#0b3d91] to-[#1e5eff] text-white hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2.5 text-sm font-semibold disabled:opacity-50 disabled:hover:scale-100 overflow-hidden"
@@ -242,9 +221,9 @@ function AuthPage() {
               {kcLoading || kcWaiting ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
-                <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden>
-                  <path d="M4 4h3v6.5L13.2 4H17l-6.4 6.7L18 20h-3.7l-5.4-7.1L7 14.7V20H4z" />
-                </svg>
+                <span className="relative grid place-items-center size-7 rounded-full bg-white shadow-sm">
+                  <img src={kingschatLogo.url} alt="" aria-hidden className="size-5 object-contain" draggable={false} />
+                </span>
               )}
               <span className="relative">
                 {kcWaiting
