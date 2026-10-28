@@ -4,6 +4,7 @@ import { useHlsAttach } from "@/hooks/use-hls";
 import { Button } from "@/components/ui/button";
 import { useProgress, useSettings } from "@/lib/personal";
 import { QualityMenu } from "@/components/quality-menu";
+import { PlayerWatermark } from "@/components/player-watermark";
 
 type Props = {
   src?: string | null;
@@ -80,7 +81,7 @@ export function StreamPlayer({
   };
 
   return (
-    <div className={`relative rounded-2xl overflow-hidden border border-border bg-background ${className ?? "aspect-video"}`}>
+    <div data-protected-player className={`relative rounded-2xl overflow-hidden border border-border bg-background ${className ?? "aspect-video"}`}>
       {poster && (
         <img
           src={poster}
@@ -110,6 +111,7 @@ export function StreamPlayer({
           <div className="absolute bottom-14 right-3 z-20">
             <QualityMenu controller={hls} />
           </div>
+          <PlayerWatermark />
 
         </>
       )}
