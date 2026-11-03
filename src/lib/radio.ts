@@ -66,6 +66,15 @@ export async function saveRadioSettings(channelId: string, patch: Partial<RadioS
     .from("radio_settings")
     .upsert({ channel_id: channelId, ...patch } as never, { onConflict: "channel_id" });
   if (error) throw error;
+  // Keep the channel's Radio service in step so the station shows on the public channel.
+  if (patch.is_enabled !== undefined) {
+    await supabase
+      .from("channel_services")
+      .upsert(
+        { channel_id: channelId, service: "radio", enabled: Boolean(patch.is_enabled && patch.stream_url), display_order: 1 } as never,
+        { onConflict: "channel_id,service" },
+      );
+  }
 }
 
 /** All public radio stations (published channels with radio enabled). */

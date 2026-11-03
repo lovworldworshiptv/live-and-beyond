@@ -144,6 +144,15 @@ export function ChannelSetupWizard({ channel, creatorId, initialServices, onClos
                   placeholder="loveworld-expressions"
                 />
               </Field>
+              <Field label="Channel type">
+                <select className={inputClass} value={str("kind") || "tv"} onChange={(e) => {
+                  set("kind", e.target.value);
+                  if (e.target.value === "radio") setServices((cur) => cur.includes("radio") ? cur : [...cur, "radio"]);
+                }}>
+                  <option value="tv">TV channel (video)</option>
+                  <option value="radio">Radio station (audio)</option>
+                </select>
+              </Field>
               <Field label="Category">
                 <select className={inputClass} value={str("category")} onChange={(e) => set("category", e.target.value)}>
                   <option value="">—</option>

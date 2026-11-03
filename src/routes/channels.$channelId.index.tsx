@@ -18,6 +18,8 @@ import { useChannelFollow } from "@/lib/follows";
 import { recordPlaybackEvent } from "@/lib/analytics";
 import { resolveChannelPlayout, type NowPlaying } from "@/lib/playout";
 import { toast } from "sonner";
+import { fetchRadioSettings, type RadioSettings, type RadioFormat } from "@/lib/radio";
+import { useRadio } from "@/components/radio-player";
 
 export const Route = createFileRoute("/channels/$channelId/")({
   head: () => ({
@@ -76,6 +78,8 @@ function ChannelPage() {
   const [dbChannelId, setDbChannelId] = useState<string | null>(null);
   const { following: followingDb, toggle: toggleFollowDb } = useChannelFollow(dbChannelId);
   const { settings, setSettings } = useSettings();
+  const [radio, setRadio] = useState<RadioSettings | null>(null);
+  const radioPlayer = useRadio();
 
   useEffect(() => {
     let cancelled = false;
@@ -91,7 +95,9 @@ function ChannelPage() {
       if (cancelled) return;
       if (data) {
         setChannel(mapChannelRow(data as never));
-        setDbChannelId((data as { id: string }).id);
+        const id = (data as { id: string }).id;
+        setDbChannelId(id);
+        fetchRadioSettings(id).then((r) => { if (!cancelled) setRadio(r); }).catch(() => {});
       }
       else setNotFoundState(true);
     })();
@@ -187,7 +193,8 @@ function ChannelPage() {
   const streamSrc =
     liveUrl ||
     playout?.asset.source_url ||
-    channel?.streamUrl || "";
+    channel?.streamUrl ||
+    (channel?.streamKind === "radio" && radio?.is_enabled ? radio.stream_url ?? "" : "");
   // Live/HLS sources are played through the same-origin manifest proxy so the
   // Cloudflare playback URL is never exposed in the DOM.
   const playbackSrc = protectedChannelSrc(channelId, streamSrc) ?? streamSrc;
@@ -279,6 +286,27 @@ function ChannelPage() {
         </div>
       </section>
 
+
+      {radio?.is_enabled && radio.stream_url && (
+        <div className="mx-auto max-w-[1480px] px-4 lg:px-10 pt-4">
+          <button
+            onClick={() => {
+              radioPlayer.play({
+                channelId: dbChannelId ?? channel.id, slug: channelId, name: channel.name,
+                tagline: channel.tagline ?? null, logoUrl: channel.logoImg || null, bannerUrl: channel.banner || null,
+                category: channel.category ?? null, country: channel.country ?? null, language: channel.language ?? null,
+                streamUrl: radio.stream_url, format: (radio.format ?? "mp3") as RadioFormat, bitrate: radio.bitrate_kbps ?? 128,
+                nowPlayingTitle: radio.now_playing_title, nowPlayingArtist: radio.now_playing_artist,
+                nowPlayingArtwork: radio.now_playing_artwork_url, stationMessage: radio.station_message,
+              });
+              if (dbChannelId) recordPlaybackEvent({ channelId: dbChannelId, service: "radio", event: "start" });
+            }}
+            className="h-11 px-5 rounded-md bg-elevated border border-border text-sm font-semibold inline-flex items-center gap-2 hover:bg-elevated/70"
+          >
+            <Radio className="size-4 text-primary" /> Listen to {channel.name} Radio
+          </button>
+        </div>
+      )}
 
       {/* PLAYER — Live Stream / Radio Stream */}
       <section ref={playerRef} className={`mx-auto max-w-[1480px] px-4 lg:px-10 pt-4 lg:pt-8 scroll-mt-24 ${playing ? "sticky top-16 z-30 bg-background lg:static" : ""}`}>
