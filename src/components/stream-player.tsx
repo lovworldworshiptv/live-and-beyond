@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useProgress, useSettings } from "@/lib/personal";
 import { QualityMenu } from "@/components/quality-menu";
 import { PlayerWatermark } from "@/components/player-watermark";
-import { FullscreenButton, usePlayerFullscreen } from "@/components/player-fullscreen";
+import { usePlayerFullscreen } from "@/components/player-fullscreen";
 
 type Props = {
   src?: string | null;
@@ -107,14 +107,13 @@ export function StreamPlayer({
             onPause={saveProgress}
             onEnded={saveProgress}
             onError={() => setError("Playback unavailable. Please try again shortly.")}
-            controlsList="nodownload noplaybackrate nofullscreen"
+            controlsList="nodownload noplaybackrate"
             onContextMenu={(e) => e.preventDefault()}
             onDoubleClick={(e) => { e.preventDefault(); fs.toggle(); }}
             className="absolute inset-0 size-full object-contain bg-background"
           />
           <div className="player-overlay-controls absolute bottom-14 right-3 z-20 flex items-center gap-2">
             <QualityMenu controller={hls} />
-            <FullscreenButton isFullscreen={fs.isFullscreen} onToggle={fs.toggle} />
           </div>
           <PlayerWatermark />
 
