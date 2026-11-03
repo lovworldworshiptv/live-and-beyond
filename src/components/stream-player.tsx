@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useProgress, useSettings } from "@/lib/personal";
 import { QualityMenu } from "@/components/quality-menu";
 import { PlayerWatermark } from "@/components/player-watermark";
+import { FullscreenButton, usePlayerFullscreen } from "@/components/player-fullscreen";
 
 type Props = {
   src?: string | null;
@@ -45,6 +46,8 @@ export function StreamPlayer({
   // in place; Safari/iOS falls back to native HLS with the same source.
   const { settings } = useSettings();
   const hls = useHlsAttach(mediaRef, playing ? src : null, playing, settings);
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const fs = usePlayerFullscreen(frameRef, mediaRef, playing && kind === "video");
   // Autoplay preference: start once when the player opens with a playable source.
   const autoStarted = useRef(false);
   useEffect(() => {
@@ -81,7 +84,7 @@ export function StreamPlayer({
   };
 
   return (
-    <div data-protected-player className={`relative rounded-2xl overflow-hidden border border-border bg-background ${className ?? "aspect-video"}`}>
+    <div ref={frameRef} data-protected-player data-idle={fs.idle || undefined} className={`relative rounded-2xl overflow-hidden border border-border bg-background ${className ?? "aspect-video"}`}>
       {poster && (
         <img
           src={poster}
@@ -104,12 +107,14 @@ export function StreamPlayer({
             onPause={saveProgress}
             onEnded={saveProgress}
             onError={() => setError("Playback unavailable. Please try again shortly.")}
-            controlsList="nodownload noplaybackrate"
+            controlsList="nodownload noplaybackrate nofullscreen"
             onContextMenu={(e) => e.preventDefault()}
+            onDoubleClick={(e) => { e.preventDefault(); fs.toggle(); }}
             className="absolute inset-0 size-full object-contain bg-background"
           />
-          <div className="absolute bottom-14 right-3 z-20">
+          <div className="player-overlay-controls absolute bottom-14 right-3 z-20 flex items-center gap-2">
             <QualityMenu controller={hls} />
+            <FullscreenButton isFullscreen={fs.isFullscreen} onToggle={fs.toggle} />
           </div>
           <PlayerWatermark />
 

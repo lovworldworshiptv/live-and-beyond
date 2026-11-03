@@ -139,7 +139,9 @@ export function ContentProtection() {
     const lockVideo = (v: HTMLVideoElement) => {
       v.disablePictureInPicture = true;
       (v as HTMLVideoElement & { disableRemotePlayback: boolean }).disableRemotePlayback = true;
-      v.setAttribute("controlsList", "nodownload noplaybackrate noremoteplayback");
+      // Player videos use the frame's own fullscreen button, so the native one is hidden there.
+      const inPlayer = !!v.closest("[data-protected-player]");
+      v.setAttribute("controlsList", `nodownload noplaybackrate noremoteplayback${inPlayer ? " nofullscreen" : ""}`);
     };
     document.querySelectorAll("video").forEach(lockVideo);
     const observer = new MutationObserver((records) => {
@@ -157,7 +159,8 @@ export function ContentProtection() {
       if (!(el instanceof HTMLVideoElement)) return;
       const frame = el.closest<HTMLElement>("[data-protected-player]");
       if (!frame) return;
-      document.exitFullscreen().then(() => frame.requestFullscreen()).catch(() => {});
+      // Promote the frame on top of the video; if the browser refuses, the video simply stays fullscreen.
+      frame.requestFullscreen().catch(() => {});
     };
 
     const onFocusChange = () => refresh();
