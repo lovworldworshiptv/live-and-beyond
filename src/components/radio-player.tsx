@@ -2,7 +2,7 @@ import {
   createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode,
 } from "react";
 import { Link } from "@tanstack/react-router";
-import { Pause, Play, Radio as RadioIcon, Volume2, VolumeX, X } from "lucide-react";
+import { Pause, Play, Volume2, VolumeX, X } from "lucide-react";
 import Hls from "hls.js";
 import { Button } from "@/components/ui/button";
 import type { RadioStation } from "@/lib/radio";
