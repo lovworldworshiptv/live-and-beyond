@@ -201,7 +201,7 @@ function ChannelPage() {
   const playbackSrc = protectedChannelSrc(channelId, streamSrc) ?? streamSrc;
   const hls = useHlsAttach(mediaRef, playbackSrc, playing);
   const frameRef = useRef<HTMLDivElement | null>(null);
-  const fullscreen = usePlayerFullscreen(frameRef, mediaRef, playing && !isRadio);
+  const fullscreen = usePlayerFullscreen(frameRef, mediaRef, playing && channel?.streamKind !== "radio");
 
   // Anonymous playback signals feed creator analytics.
   useEffect(() => {
