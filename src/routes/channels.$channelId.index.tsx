@@ -12,7 +12,7 @@ import { mapChannelRow } from "@/lib/cms-catalog";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { QualityMenu } from "@/components/quality-menu";
 import { PlayerWatermark } from "@/components/player-watermark";
-import { FullscreenButton, usePlayerFullscreen } from "@/components/player-fullscreen";
+import { usePlayerFullscreen } from "@/components/player-fullscreen";
 import { protectedChannelSrc } from "@/lib/stream-src";
 import { useFollowing, useSettings } from "@/lib/personal";
 import { useChannelFollow } from "@/lib/follows";
@@ -336,7 +336,7 @@ function ChannelPage() {
                 autoPlay
                 playsInline
                 controls
-                controlsList="nodownload noplaybackrate nofullscreen"
+                controlsList="nodownload noplaybackrate"
                 onContextMenu={(e) => e.preventDefault()}
                 onDoubleClick={(e) => { e.preventDefault(); fullscreen.toggle(); }}
                 className="absolute inset-0 size-full object-contain bg-black"
@@ -350,7 +350,6 @@ function ChannelPage() {
               <PlayerWatermark />
               <div className="player-overlay-controls absolute bottom-14 right-3 z-20 flex items-center gap-2">
                 <QualityMenu controller={hls} />
-                <FullscreenButton isFullscreen={fullscreen.isFullscreen} onToggle={fullscreen.toggle} />
               </div>
             </>
           )}

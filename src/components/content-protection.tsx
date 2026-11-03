@@ -139,9 +139,7 @@ export function ContentProtection() {
     const lockVideo = (v: HTMLVideoElement) => {
       v.disablePictureInPicture = true;
       (v as HTMLVideoElement & { disableRemotePlayback: boolean }).disableRemotePlayback = true;
-      // Player videos use the frame's own fullscreen button, so the native one is hidden there.
-      const inPlayer = !!v.closest("[data-protected-player]");
-      v.setAttribute("controlsList", `nodownload noplaybackrate noremoteplayback${inPlayer ? " nofullscreen" : ""}`);
+      v.setAttribute("controlsList", `nodownload noplaybackrate noremoteplayback`);
     };
     document.querySelectorAll("video").forEach(lockVideo);
     const observer = new MutationObserver((records) => {
@@ -153,23 +151,12 @@ export function ContentProtection() {
     observer.observe(document.body, { childList: true, subtree: true });
     const onPip = () => { document.exitPictureInPicture?.().catch(() => {}); };
 
-    // Native video fullscreen would hide the watermark; move fullscreen onto the player frame.
-    const onFullscreen = () => {
-      const el = document.fullscreenElement;
-      if (!(el instanceof HTMLVideoElement)) return;
-      const frame = el.closest<HTMLElement>("[data-protected-player]");
-      if (!frame) return;
-      // Promote the frame on top of the video; if the browser refuses, the video simply stays fullscreen.
-      frame.requestFullscreen().catch(() => {});
-    };
-
     const onFocusChange = () => refresh();
 
     document.addEventListener("contextmenu", onContext, true);
     document.addEventListener("dragstart", onDrag, true);
     document.addEventListener("selectstart", onSelect, true);
     document.addEventListener("enterpictureinpicture", onPip, true);
-    document.addEventListener("fullscreenchange", onFullscreen);
     window.addEventListener("keydown", onKey, true);
     window.addEventListener("keyup", onKeyUp, true);
     window.addEventListener("blur", onFocusChange);
@@ -182,7 +169,6 @@ export function ContentProtection() {
       document.removeEventListener("dragstart", onDrag, true);
       document.removeEventListener("selectstart", onSelect, true);
       document.removeEventListener("enterpictureinpicture", onPip, true);
-      document.removeEventListener("fullscreenchange", onFullscreen);
       window.removeEventListener("keydown", onKey, true);
       window.removeEventListener("keyup", onKeyUp, true);
       window.removeEventListener("blur", onFocusChange);

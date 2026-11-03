@@ -230,6 +230,3 @@ input, textarea, select, [contenteditable] { -webkit-touch-callout: default; }
 html[data-shielded] .player-watermark { color: var(--foreground); opacity: 0.6; }
 html[data-shielded] video { filter: brightness(0) !important; }
 @media print { body { display: none !important; } }
-
-/* Players use their own full-screen button; hide the browser's built-in one (Safari/Chrome/Edge). */
-[data-protected-player] video::-webkit-media-controls-fullscreen-button { display: none !important; }
