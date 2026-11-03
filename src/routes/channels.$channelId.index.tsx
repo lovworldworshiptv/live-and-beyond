@@ -18,6 +18,8 @@ import { useChannelFollow } from "@/lib/follows";
 import { recordPlaybackEvent } from "@/lib/analytics";
 import { resolveChannelPlayout, type NowPlaying } from "@/lib/playout";
 import { toast } from "sonner";
+import { fetchRadioSettings, type RadioSettings, type RadioFormat } from "@/lib/radio";
+import { useRadio } from "@/components/radio-player";
 
 export const Route = createFileRoute("/channels/$channelId/")({
   head: () => ({
@@ -76,6 +78,8 @@ function ChannelPage() {
   const [dbChannelId, setDbChannelId] = useState<string | null>(null);
   const { following: followingDb, toggle: toggleFollowDb } = useChannelFollow(dbChannelId);
   const { settings, setSettings } = useSettings();
+  const [radio, setRadio] = useState<RadioSettings | null>(null);
+  const radioPlayer = useRadio();
 
   useEffect(() => {
     let cancelled = false;
@@ -91,7 +95,9 @@ function ChannelPage() {
       if (cancelled) return;
       if (data) {
         setChannel(mapChannelRow(data as never));
-        setDbChannelId((data as { id: string }).id);
+        const id = (data as { id: string }).id;
+        setDbChannelId(id);
+        fetchRadioSettings(id).then((r) => { if (!cancelled) setRadio(r); }).catch(() => {});
       }
       else setNotFoundState(true);
     })();
