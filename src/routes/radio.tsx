@@ -129,7 +129,7 @@ function RadioPage() {
                       <img src={s.logoUrl} alt={`${s.name} logo`} className="size-14 rounded-xl object-cover border border-border" />
                     ) : (
                       <div className="size-14 rounded-xl bg-surface border border-border grid place-items-center">
-                        <RadioIcon className="size-6 text-primary" />
+                        <img src="/icon-192.png" alt="" className="size-9 object-contain rounded-md" draggable={false} />
                       </div>
                     )}
                     <div className="min-w-0 flex-1">

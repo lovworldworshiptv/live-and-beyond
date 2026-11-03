@@ -2,7 +2,7 @@ import {
   createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode,
 } from "react";
 import { Link } from "@tanstack/react-router";
-import { Pause, Play, Radio as RadioIcon, Volume2, VolumeX, X } from "lucide-react";
+import { Pause, Play, Volume2, VolumeX, X } from "lucide-react";
 import Hls from "hls.js";
 import { Button } from "@/components/ui/button";
 import type { RadioStation } from "@/lib/radio";
@@ -135,7 +135,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
                 <img src={station.logoUrl} alt="" className="size-11 shrink-0 rounded-lg object-cover border border-border" />
               ) : (
                 <div className="size-11 shrink-0 rounded-lg bg-elevated grid place-items-center border border-border">
-                  <RadioIcon className="size-5 text-primary" />
+                  <img src="/favicon.png" alt="" className="size-7 object-contain" draggable={false} />
                 </div>
               )}
               <div className="min-w-0 flex-1">
