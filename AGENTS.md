@@ -28,3 +28,4 @@
 - Channel overview shelves and libraries share the published CMS library fetch, combining channel_id uploads with curated slug links and deduplicating titles, so creator-published movies appear without manual linking.
 - The VIDAA TV app in `public/tv/` is a self-contained static app: never edit, lint or bundle it; `src/server.ts` short-circuits `/tv` paths before any app route, and TV-only sign-in behaviour (short `/k/` links, phone result pages, CORS allow-list) is opt-in via `device: "tv"`, and KingsChat attempts with a `/tv/` return_path (the TV on-screen sign-in) return to that path after the callback, so web and Android flows stay unchanged.
 - Admins open any creator's Studio via /studio?channel=<id>; edits keep the channel's original creator_id so ownership never transfers to the admin.
+- Channel configuration saves await channel, service and radio writes before success; Studio editors reset on channel changes so drafts cannot cross workspaces.

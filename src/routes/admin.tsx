@@ -12,6 +12,8 @@ import { defaultNav, defaultHero, defaultFooter, defaultBottomNav } from "@/lib/
 import { bottomNavIconComponents, bottomNavIcons } from "@/lib/bottom-nav-icons";
 import { SERVICE_CATALOG, fetchChannelServices, saveChannelServices, type ServiceKey } from "@/lib/channel-services";
 import { fetchRadioSettings, saveRadioSettings } from "@/lib/radio";
+import { saveChannelConfiguration } from "@/lib/channel-configuration";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -231,7 +233,7 @@ export type Channel = {
 
 
 function ChannelsCms() {
-  const { rows, loading, save, remove } = useCrud<Channel>("cms_channels", [
+  const { rows, loading, refresh, remove } = useCrud<Channel>("cms_channels", [
     { col: "display_order", ascending: true },
     { col: "created_at", ascending: false },
   ]);
@@ -338,16 +340,20 @@ function ChannelsCms() {
           value={editing}
           onClose={() => setEditing(null)}
           onSave={async (v) => {
-            await save(v);
-            setEditing(null);
+            const result = v.id
+              ? await supabase.from("cms_channels").update(v as never).eq("id", v.id).select("id").single()
+              : await supabase.from("cms_channels").insert(v as never).select("id").single();
+            if (result.error) throw result.error;
+            return result.data.id;
           }}
+          onSaved={() => { setEditing(null); void refresh(); }}
         />
       )}
     </div>
   );
 }
 
-export function ChannelEditor({ value, onClose, onSave }: { value: Partial<Channel>; onClose: () => void; onSave: (v: Partial<Channel>) => void | Promise<void> }) {
+export function ChannelEditor({ value, onClose, onSave, onSaved }: { value: Partial<Channel>; onClose: () => void; onSave: (v: Partial<Channel>) => Promise<string>; onSaved: () => void }) {
   const [form, setForm] = useState<Partial<Channel>>(value);
   const set = <K extends keyof Channel>(k: K, v: Channel[K]) => setForm((f) => ({ ...f, [k]: v }));
   const np = form.now_playing ?? {};
@@ -355,45 +361,50 @@ export function ChannelEditor({ value, onClose, onSave }: { value: Partial<Chann
     setForm((f) => ({ ...f, now_playing: { ...(f.now_playing ?? {}), ...patch } }));
   const listToStr = (a?: string[] | null) => (a ?? []).join(", ");
   const strToList = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
-  const [services, setServices] = useState<ServiceKey[]>(["tv"]);
+  const [services, setServices] = useState<ServiceKey[]>(value.kind === "radio" ? ["radio"] : ["tv"]);
   const [radioUrl, setRadioUrl] = useState("");
+  const [servicesLoading, setServicesLoading] = useState(Boolean(value.id));
+  const [servicesError, setServicesError] = useState(false);
   useEffect(() => {
     if (!value.id) return;
-    void fetchChannelServices(value.id).then((rows) => setServices(rows.filter((r) => r.enabled).map((r) => r.service)));
-    void fetchRadioSettings(value.id).then((r) => setRadioUrl(r?.stream_url ?? ""));
-  }, [value.id]);
+    let active = true;
+    void Promise.all([fetchChannelServices(value.id), fetchRadioSettings(value.id)]).then(([rows, radio]) => {
+      if (!active) return;
+      setServices(rows.length ? rows.filter((r) => r.enabled).map((r) => r.service) : value.kind === "radio" ? ["radio"] : ["tv"]);
+      setRadioUrl(radio?.stream_url ?? (value.kind === "radio" ? value.stream_url ?? "" : ""));
+    }).catch(() => { if (active) { setServicesError(true); toast.error("Could not load channel services. Reopen the editor to try again."); } }).finally(() => { if (active) setServicesLoading(false); });
+    return () => { active = false; };
+  }, [value.id, value.kind, value.stream_url]);
   const toggleService = (k: ServiceKey) => setServices((s) => (s.includes(k) ? s.filter((x) => x !== k) : [...s, k]));
 
   async function saveAll() {
+    if (servicesLoading || servicesError) { toast.error("Channel services must finish loading before saving"); return; }
     const kind = services.includes("tv") || !services.includes("radio") ? "tv" : "radio";
-    await onSave({ ...form, kind });
-    let id = form.id;
-    if (!id && form.slug) {
-      const { data } = await supabase.from("cms_channels").select("id").eq("slug", form.slug).maybeSingle();
-      id = data?.id;
-    }
-    if (!id) return;
     try {
-      await saveChannelServices(id, services);
-      if (services.includes("radio") || radioUrl) {
-        await saveRadioSettings(id, { stream_url: radioUrl.trim() || null, is_enabled: services.includes("radio") && Boolean(radioUrl.trim()) });
-      }
-    } catch {
-      toast.error("Channel saved, but its services could not be updated");
+      const id = await saveChannelConfiguration(services, radioUrl, {
+        saveChannel: () => onSave({ ...form, kind }),
+        saveServices: saveChannelServices,
+        saveRadio: saveRadioSettings,
+      });
+      setForm((current) => ({ ...current, id }));
+      toast.success("Channel and services saved");
+      onSaved();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not finish saving this channel. Please try again.");
     }
   }
 
   return (
-    <ModalShell title={form.id ? "Edit channel" : "New channel"} onClose={onClose} onSave={() => void saveAll()}>
+    <ModalShell title={form.id ? "Edit channel" : "New channel"} onClose={onClose} onSave={saveAll}>
       <div className="mb-5 rounded-lg border border-border p-4">
         <h4 className="text-sm font-semibold">Services on this channel</h4>
         <p className="text-xs text-[color:var(--muted-foreground)] mt-1">Turn on any combination — one channel can run live TV, live radio and on-demand videos together.</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {SERVICE_CATALOG.map((s) => (
-            <button key={s.key} type="button" onClick={() => toggleService(s.key)} aria-pressed={services.includes(s.key)}
+            <Button variant="ghost" key={s.key} type="button" disabled={servicesLoading || servicesError} onClick={() => toggleService(s.key)} aria-pressed={services.includes(s.key)}
               className={`h-9 px-3 rounded-md border text-sm ${services.includes(s.key) ? "border-primary bg-primary/15 text-primary" : "border-border hover:bg-elevated"}`}>
               {services.includes(s.key) ? "✓ " : ""}{s.label}
-            </button>
+            </Button>
           ))}
         </div>
         {services.includes("radio") && (

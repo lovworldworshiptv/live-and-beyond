@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Radio, Tv, Mic2, Film, Video,
   Loader2, ShieldOff, Pencil, Sparkles, ExternalLink, Settings, Check, ArrowRight, RefreshCw,
@@ -58,6 +58,7 @@ function StudioPage() {
   const navigate = useNavigate();
   const { channel: requestedChannel } = Route.useSearch();
   const [allChannels, setAllChannels] = useState<{ id: string; name: string }[]>([]);
+  const loadGeneration = useRef(0);
   const [channel, setChannel] = useState<Partial<Channel> | null>(null);
   const [services, setServices] = useState<ServiceKey[]>([]);
   const [loadingChannel, setLoadingChannel] = useState(true);
@@ -104,22 +105,27 @@ function StudioPage() {
 
   const load = useCallback(async () => {
     if (!user) return;
+    const generation = ++loadGeneration.current;
     setLoadingChannel(true);
     setChannelError(false);
+    setAdvanced(null);
+    setWizard(false);
     try {
-      const base = supabase.from("cms_channels").select("*");
+      const base = supabase.from("cms_channels").select("*").is("deleted_at", null);
       const { data, error } = isAdmin && requestedChannel
         ? await base.eq("id", requestedChannel).maybeSingle()
         : await base.eq("creator_id", user.id).order("created_at", { ascending: true }).limit(1).maybeSingle();
       if (error) throw error;
+      if (isAdmin && requestedChannel && !data) throw new Error("Channel not found");
       const ch = (data as unknown as Channel) ?? null;
       const rows = ch?.id ? await fetchChannelServices(ch.id) : [];
+      if (generation !== loadGeneration.current) return;
       setChannel(ch);
       setServices(rows.filter(r => r.enabled).map(r => r.service));
     } catch {
-      setChannelError(true);
+      if (generation === loadGeneration.current) setChannelError(true);
     } finally {
-      setLoadingChannel(false);
+      if (generation === loadGeneration.current) setLoadingChannel(false);
     }
   }, [user, isAdmin, requestedChannel]);
 
@@ -160,16 +166,14 @@ function StudioPage() {
   }
 
   async function saveAdvanced(v: Partial<Channel>) {
-    if (!user) return;
+    if (!user) throw new Error("Please sign in again");
     // Keep the channel's real owner when an admin edits someone else's channel.
     const payload = v.id ? v : { ...v, creator_id: user.id };
-    const { error } = v.id
-      ? await supabase.from("cms_channels").update(payload as never).eq("id", v.id)
-      : await supabase.from("cms_channels").insert(payload as never);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Channel saved");
-    setAdvanced(null);
-    load();
+    const { data, error } = v.id
+      ? await supabase.from("cms_channels").update(payload as never).eq("id", v.id).select("id").single()
+      : await supabase.from("cms_channels").insert(payload as never).select("id").single();
+    if (error) throw error;
+    return data.id;
   }
 
   if (loading || !user) {
@@ -443,11 +447,11 @@ function StudioPage() {
           </div>
         )}
 
-        {tab === "content" && channel?.id && <MediaLibraryPanel channelId={channel.id} />}
+        {tab === "content" && channel?.id && <MediaLibraryPanel key={channel.id} channelId={channel.id} />}
 
 
 
-        {tab === "radio" && channel?.id && <RadioPanel channelId={channel.id} />}
+        {tab === "radio" && channel?.id && <RadioPanel key={channel.id} channelId={channel.id} />}
 
         {tab === "analytics" && channel?.id && <AnalyticsPanel channelId={channel.id} />}
 
@@ -486,7 +490,7 @@ function StudioPage() {
         />
       )}
       {advanced && (
-        <ChannelEditor value={advanced} onClose={() => setAdvanced(null)} onSave={saveAdvanced} />
+        <ChannelEditor value={advanced} onClose={() => setAdvanced(null)} onSave={saveAdvanced} onSaved={() => { setAdvanced(null); void load(); }} />
       )}
     </div>
   );

@@ -62,3 +62,4 @@
 - [ ] Netflix logo file — declined: it is Netflix's trademark
 
 - [x] Admin CMS channel editor: TV, radio and videos together; admin Open Studio + Studio channel switcher
+- [x] Verified authenticated Admin/Open Studio access, all Studio sections, combined TV/radio/VOD draft save and readback, unchanged creator ownership, failed-save recovery and editor reset on channel switching; phone/tablet layouts have no horizontal overflow. Test drafts removed; 19 regression tests pass. Actual streaming still depends on working media sources.

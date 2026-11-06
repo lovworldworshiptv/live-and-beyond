@@ -53,11 +53,12 @@ export const METADATA_PROVIDERS: { value: MetadataProvider; label: string }[] = 
 ];
 
 export async function fetchRadioSettings(channelId: string): Promise<RadioSettings | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("radio_settings")
     .select("*")
     .eq("channel_id", channelId)
     .maybeSingle();
+  if (error) throw error;
   return (data as unknown as RadioSettings) ?? null;
 }
 
@@ -68,12 +69,13 @@ export async function saveRadioSettings(channelId: string, patch: Partial<RadioS
   if (error) throw error;
   // Keep the channel's Radio service in step so the station shows on the public channel.
   if (patch.is_enabled !== undefined) {
-    await supabase
+    const { error: serviceError } = await supabase
       .from("channel_services")
       .upsert(
-        { channel_id: channelId, service: "radio", enabled: Boolean(patch.is_enabled && patch.stream_url), display_order: 1 } as never,
+        { channel_id: channelId, service: "radio", enabled: patch.is_enabled, display_order: 1 } as never,
         { onConflict: "channel_id,service" },
       );
+    if (serviceError) throw serviceError;
   }
 }
 

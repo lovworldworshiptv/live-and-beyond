@@ -39,11 +39,12 @@ export function slugify(input: string) {
 }
 
 export async function fetchChannelServices(channelId: string): Promise<ChannelService[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("channel_services")
     .select("*")
     .eq("channel_id", channelId)
     .order("display_order", { ascending: true });
+  if (error) throw error;
   return (data ?? []) as unknown as ChannelService[];
 }
 
