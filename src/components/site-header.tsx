@@ -186,6 +186,12 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
                   <Link to="/profile">My Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
+                  <Link to="/profiles">Switch profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/games">Games</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/account">Account & Settings</Link>
                 </DropdownMenuItem>
                 {(isCreator || isAdmin) && <DropdownMenuSeparator />}

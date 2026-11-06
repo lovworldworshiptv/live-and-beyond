@@ -18,6 +18,7 @@ import { Route as CommunityRouteImport } from './routes/community'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DocumentariesRouteImport } from './routes/documentaries'
 import { Route as EnterpriseRouteImport } from './routes/enterprise'
+import { Route as GamesRouteImport } from './routes/games'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as MoviesRouteImport } from './routes/movies'
 import { Route as OfflineRouteImport } from './routes/offline'
@@ -26,6 +27,7 @@ import { Route as PortalRouteImport } from './routes/portal'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ProfilesRouteImport } from './routes/profiles'
 import { Route as RadioRouteImport } from './routes/radio'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as StudioRouteImport } from './routes/studio'
@@ -89,6 +91,11 @@ const EnterpriseRoute = EnterpriseRouteImport.update({
   path: '/enterprise',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GuideRoute = GuideRouteImport.update({
   id: '/guide',
   path: '/guide',
@@ -127,6 +134,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilesRoute = ProfilesRouteImport.update({
+  id: '/profiles',
+  path: '/profiles',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RadioRoute = RadioRouteImport.update({
@@ -227,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/cookies': typeof CookiesRoute
   '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
+  '/games': typeof GamesRoute
   '/guide': typeof GuideRoute
   '/movies': typeof MoviesRouteWithChildren
   '/offline': typeof OfflineRoute
@@ -235,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/profiles': typeof ProfilesRoute
   '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
   '/studio': typeof StudioRouteWithChildren
@@ -262,6 +276,7 @@ export interface FileRoutesByTo {
   '/cookies': typeof CookiesRoute
   '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
+  '/games': typeof GamesRoute
   '/guide': typeof GuideRoute
   '/offline': typeof OfflineRoute
   '/podcasts': typeof PodcastsRoute
@@ -269,6 +284,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/profiles': typeof ProfilesRoute
   '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
   '/studio': typeof StudioRouteWithChildren
@@ -297,6 +313,7 @@ export interface FileRoutesById {
   '/cookies': typeof CookiesRoute
   '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
+  '/games': typeof GamesRoute
   '/guide': typeof GuideRoute
   '/movies': typeof MoviesRouteWithChildren
   '/offline': typeof OfflineRoute
@@ -305,6 +322,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/profiles': typeof ProfilesRoute
   '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
   '/studio': typeof StudioRouteWithChildren
@@ -335,6 +353,7 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/documentaries'
     | '/enterprise'
+    | '/games'
     | '/guide'
     | '/movies'
     | '/offline'
@@ -343,6 +362,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profile'
+    | '/profiles'
     | '/radio'
     | '/series'
     | '/studio'
@@ -370,6 +390,7 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/documentaries'
     | '/enterprise'
+    | '/games'
     | '/guide'
     | '/offline'
     | '/podcasts'
@@ -377,6 +398,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profile'
+    | '/profiles'
     | '/radio'
     | '/series'
     | '/studio'
@@ -404,6 +426,7 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/documentaries'
     | '/enterprise'
+    | '/games'
     | '/guide'
     | '/movies'
     | '/offline'
@@ -412,6 +435,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profile'
+    | '/profiles'
     | '/radio'
     | '/series'
     | '/studio'
@@ -441,6 +465,7 @@ export interface RootRouteChildren {
   CookiesRoute: typeof CookiesRoute
   DocumentariesRoute: typeof DocumentariesRoute
   EnterpriseRoute: typeof EnterpriseRoute
+  GamesRoute: typeof GamesRoute
   GuideRoute: typeof GuideRoute
   MoviesRoute: typeof MoviesRouteWithChildren
   OfflineRoute: typeof OfflineRoute
@@ -449,6 +474,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
+  ProfilesRoute: typeof ProfilesRoute
   RadioRoute: typeof RadioRoute
   SeriesRoute: typeof SeriesRoute
   StudioRoute: typeof StudioRouteWithChildren
@@ -526,6 +552,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnterpriseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guide': {
       id: '/guide'
       path: '/guide'
@@ -580,6 +613,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profiles': {
+      id: '/profiles'
+      path: '/profiles'
+      fullPath: '/profiles'
+      preLoaderRoute: typeof ProfilesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/radio': {
@@ -765,6 +805,7 @@ const rootRouteChildren: RootRouteChildren = {
   CookiesRoute: CookiesRoute,
   DocumentariesRoute: DocumentariesRoute,
   EnterpriseRoute: EnterpriseRoute,
+  GamesRoute: GamesRoute,
   GuideRoute: GuideRoute,
   MoviesRoute: MoviesRouteWithChildren,
   OfflineRoute: OfflineRoute,
@@ -773,6 +814,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
+  ProfilesRoute: ProfilesRoute,
   RadioRoute: RadioRoute,
   SeriesRoute: SeriesRoute,
   StudioRoute: StudioRouteWithChildren,

@@ -68,6 +68,7 @@ export const defaultNav: NavConfig = {
         { label: "Radio", to: "/radio" },
       ],
     },
+    { label: "Games", to: "/games" },
     { label: "Pricing", to: "/pricing" },
   ],
 };
