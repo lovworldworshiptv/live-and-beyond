@@ -199,7 +199,7 @@ function TitleDetail() {
 
           <div className="mt-12">
             <h2 className="text-xl font-semibold mb-4">More Like This</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {(related.length ? related : alsoLike).slice(0, 6).map((r) => (
                 <Link
                   key={r.id}
@@ -212,8 +212,8 @@ function TitleDetail() {
                     <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
                     <span className="absolute top-2 right-2 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-black/60">{r.kind}</span>
                   </div>
-                  <div className="p-3">
-                    <div className="font-semibold text-sm line-clamp-1">{r.title}</div>
+                  <div className="p-2 sm:p-3">
+                    <div className="font-semibold text-xs sm:text-sm line-clamp-1">{r.title}</div>
                     <div className="text-[11px] text-[color:var(--muted-foreground)] mt-0.5">{r.year} · {r.duration}</div>
                   </div>
                 </Link>
