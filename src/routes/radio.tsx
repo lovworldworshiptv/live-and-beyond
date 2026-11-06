@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { useRadio } from "@/components/radio-player";
 import { fetchRadioStations, type RadioStation } from "@/lib/radio";
 import { Button } from "@/components/ui/button";
-import { recordPlaybackEvent } from "@/lib/analytics";
+
 
 export const Route = createFileRoute("/radio")({
   head: () => ({
@@ -59,7 +59,6 @@ function RadioPage() {
 
   function onPlay(s: RadioStation) {
     toggle(s);
-    recordPlaybackEvent({ channelId: s.channelId, service: "radio", event: "start" });
   }
 
   return (

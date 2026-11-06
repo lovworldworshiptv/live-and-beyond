@@ -34,6 +34,8 @@ export type ProfileData = {
 };
 
 export type SettingsData = {
+  pushNotifications: boolean;
+  personalisedRecommendations: boolean;
   emailNotifications: boolean;
   liveAlerts: boolean;
   newReleases: boolean;
@@ -57,6 +59,8 @@ const DEFAULT_PROFILE: ProfileData = {
 };
 
 const DEFAULT_SETTINGS: SettingsData = {
+  pushNotifications: false,
+  personalisedRecommendations: true,
   emailNotifications: true,
   liveAlerts: true,
   newReleases: false,

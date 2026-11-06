@@ -2,19 +2,10 @@ import { Link } from "@tanstack/react-router";
 import logo from "@/assets/lettflix-logo.png.asset.json";
 import { useCmsSetting } from "@/lib/cms-catalog";
 import { defaultFooter, type FooterConfig } from "@/lib/homepage-defaults";
+import { resolveFooterHref } from "@/lib/navigation";
 
 /** Placeholder hrefs ("#", empty) lead nowhere, so they are not rendered. */
 const isRealHref = (href?: string) => !!href && href.trim() !== "" && href.trim() !== "#";
-
-/** The old /on-demand hub was replaced by per-kind catalogue pages; route saved links there. */
-function resolveHref(href: string, label: string) {
-  if (!href.startsWith("/on-demand")) return href;
-  const l = label.toLowerCase();
-  if (l.includes("podcast")) return "/podcasts";
-  if (l.includes("series")) return "/series";
-  if (l.includes("documentar")) return "/documentaries";
-  return "/movies";
-}
 
 const LEGAL_LINKS = [
   { label: "Privacy", to: "/privacy" },
@@ -49,7 +40,7 @@ export function SiteFooter() {
             <ul className="space-y-1 text-sm text-[color:var(--muted-foreground)]">
               {col.items.map((item) => (
                 <li key={`${item.label}-${item.href}`}>
-                  <a className="inline-block py-1 hover:text-foreground transition-colors" href={item.href}>
+                  <a className="inline-block py-1 hover:text-foreground transition-colors" href={resolveFooterHref(item.href, item.label)}>
                     {item.label}
                   </a>
                 </li>

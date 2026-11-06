@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -302,15 +303,7 @@ function PricingPage() {
                     </div>
                   )}
                 </div>
-                <button
-                  className={`mt-5 h-11 rounded-md font-semibold text-sm transition ${
-                    p.featured
-                      ? "bg-accent text-accent-foreground hover:bg-accent/90"
-                      : "bg-surface border border-border hover:bg-elevated"
-                  }`}
-                >
-                  {p.cta}
-                </button>
+                {p.monthly === 0 ? <Button asChild className="mt-5 h-11"><Link to="/auth">{p.cta}</Link></Button> : <Button variant="outline" disabled className="mt-5 h-11">Paid plans coming soon</Button>}
                 <ul className="mt-6 space-y-2.5 flex-1">
                   {p.features.map((f) => (
                     <li

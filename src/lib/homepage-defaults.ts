@@ -129,7 +129,7 @@ export const defaultFooter: FooterConfig = {
         { label: "Movies", href: "/movies" },
         { label: "Series", href: "/series" },
         { label: "Documentaries", href: "/documentaries" },
-        { label: "Radio", href: "/channels" },
+        { label: "Radio", href: "/radio" },
         { label: "Podcasts", href: "/podcasts" },
         { label: "Live Guide", href: "/guide" },
       ],

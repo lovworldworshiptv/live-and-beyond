@@ -23,24 +23,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) {
-        setTimeout(() => fetchRoles(s.user.id), 0);
-      } else {
-        setRoles([]);
+    let disposed = false;
+    let generation = 0;
+    let observedAuthEvent = false;
+    async function applySession(next: Session | null) {
+      const request = ++generation;
+      setSession(next);
+      setUser(next?.user ?? null);
+      setRoles([]);
+      setLoading(true);
+      if (next?.user) {
+        const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", next.user.id);
+        if (disposed || request !== generation) return;
+        setRoles(error ? [] : (data ?? []).map(r => r.role as Role));
       }
+      if (!disposed && request === generation) setLoading(false);
+    }
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+      observedAuthEvent = true;
+      // Do not make Auth API requests inside its locked event callback.
+      setTimeout(() => { if (!disposed) void applySession(next); }, 0);
     });
-
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      if (data.session?.user) fetchRoles(data.session.user.id);
-      setLoading(false);
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!disposed && !observedAuthEvent) void applySession(data.session);
     });
-
-    return () => sub.subscription.unsubscribe();
+    return () => { disposed = true; generation++; sub.subscription.unsubscribe(); };
   }, []);
 
   // Idle auto sign-out after 30 minutes of inactivity
@@ -66,11 +73,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [session]);
 
-
-  async function fetchRoles(uid: string) {
-    const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
-    setRoles((data ?? []).map((r) => r.role as Role));
-  }
 
   async function signOut() {
     await supabase.auth.signOut();

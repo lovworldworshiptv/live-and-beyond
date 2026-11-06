@@ -57,6 +57,7 @@ function StudioPage() {
   const [channel, setChannel] = useState<Partial<Channel> | null>(null);
   const [services, setServices] = useState<ServiceKey[]>([]);
   const [loadingChannel, setLoadingChannel] = useState(true);
+  const [channelError, setChannelError] = useState(false);
   const [wizard, setWizard] = useState(false);
   const [advanced, setAdvanced] = useState<Partial<Channel> | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
@@ -100,21 +101,21 @@ function StudioPage() {
   const load = useCallback(async () => {
     if (!user) return;
     setLoadingChannel(true);
-    const { data } = await supabase
-      .from("cms_channels")
-      .select("*")
-      .eq("creator_id", user.id)
-      .order("created_at", { ascending: true })
-      .maybeSingle();
-    const ch = (data as unknown as Channel) ?? null;
-    setChannel(ch);
-    if (ch?.id) {
-      const rows = await fetchChannelServices(ch.id);
-      setServices(rows.filter((r) => r.enabled).map((r) => r.service));
-    } else {
-      setServices([]);
+    setChannelError(false);
+    try {
+      const { data, error } = await supabase
+        .from("cms_channels").select("*").eq("creator_id", user.id)
+        .order("created_at", { ascending: true }).limit(1).maybeSingle();
+      if (error) throw error;
+      const ch = (data as unknown as Channel) ?? null;
+      const rows = ch?.id ? await fetchChannelServices(ch.id) : [];
+      setChannel(ch);
+      setServices(rows.filter(r => r.enabled).map(r => r.service));
+    } catch {
+      setChannelError(true);
+    } finally {
+      setLoadingChannel(false);
     }
-    setLoadingChannel(false);
   }, [user]);
 
   useEffect(() => {
@@ -188,6 +189,11 @@ function StudioPage() {
       </div>
     );
   }
+
+  if (channelError) {
+    return <div className="min-h-screen flex flex-col"><SiteHeader /><main className="flex-1 grid place-items-center px-6"><div className="text-center"><h1 className="text-2xl font-bold">Your channel could not be loaded</h1><Button className="mt-4" onClick={() => void load()}><RefreshCw />Try again</Button></div></main><SiteFooter /></div>;
+  }
+  if (loadingChannel) return <div className="min-h-screen grid place-items-center"><Loader2 className="size-6 animate-spin text-primary" /></div>;
 
   // First-login welcome
   if (!loadingChannel && !channel) {

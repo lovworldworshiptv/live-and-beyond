@@ -22,3 +22,5 @@
 - Browser/app icons (favicon, apple-touch-icon, manifest icons) are static files in `public/` derived from the `lettflix-icon` asset, so tabs, home-screen installs and lock-screen artwork share one brand mark; regenerate them together when the logo changes.
 - Video players expose only the browser's native fullscreen button (beside volume), by user choice; no custom overlay button and no forced redirect to the frame, which caused fullscreen drop-outs. Double-click still uses `usePlayerFullscreen` on the frame.
 - Video frames share viewport-constrained 16:9 sizing through data-video-player; contain playback without cropping, while audio frames retain their own proportions.
+- Live provider operations must call the existing channel-management permission function before external side effects; preserve owner, team and admin access and fail closed on lookup errors.
+- Account security actions use verified Auth requests; unavailable payments, community rooms and account deletion must never display simulated success.

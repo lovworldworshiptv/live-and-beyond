@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   User, Bell, CreditCard, Shield, Monitor, Globe, LogOut, Check, KeyRound, AlertTriangle, Loader2,
@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AvatarChooser } from "@/components/avatar-picker";
+import { changeAccountPassword } from "@/lib/account-actions";
 
 
 export const Route = createFileRoute("/account")({
@@ -38,20 +39,45 @@ const sections = [
 ] as const;
 
 function AccountPage() {
-  const { signOut } = useAuth();
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => { if (!loading && !user) void navigate({ to: "/auth", search: { redirect: "/account" }, replace: true }); }, [user, loading, navigate]);
   const { profile, setProfile } = useProfile();
   const { settings, setSettings } = useSettings();
   const [active, setActive] = useState<(typeof sections)[number]["id"]>("profile");
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [autoAdvance, setAutoAdvance] = useState(true);
+  const [passwordBusy, setPasswordBusy] = useState(false);
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
-  const [deleteConfirm, setDeleteConfirm] = useState("");
+
 
   const update = <K extends keyof SettingsData>(k: K, v: SettingsData[K]) => {
     setSettings({ ...settings, [k]: v });
-    toast.success("Settings saved");
+    toast.success("Preference saved on this device");
   };
 
+
+  async function updatePassword() {
+    if (!user?.email) return toast.error("Please sign in with email first.");
+    setPasswordBusy(true);
+    try {
+      await changeAccountPassword(supabase.auth, user.email, pw.current, pw.next, pw.confirm);
+      setPw({ current: "", next: "", confirm: "" });
+      toast.success("Password updated");
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Could not update password."); }
+    finally { setPasswordBusy(false); }
+  }
+  async function downloadData() {
+    if (!user) return;
+    const { data, error } = await supabase.from("profiles").select("display_name, handle, created_at").eq("id", user.id).maybeSingle();
+    if (error) return toast.error("Could not export your account data. Try again.");
+    const deviceData = Object.fromEntries(["progress", "mylist", "reminders", "following", "profile", "settings"].map(key => {
+      const raw = localStorage.getItem(`lettflix.${key}`);
+      try { return [key, raw ? JSON.parse(raw) : null]; } catch { return [key, null]; }
+    }));
+    const url = URL.createObjectURL(new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), account: { email: user.email, profile: data }, deviceData }, null, 2)], { type: "application/json" }));
+    const link = document.createElement("a"); link.href = url; link.download = "lettflix-account-data.json"; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  if (loading || !user) return <div className="min-h-screen grid place-items-center"><Loader2 className="size-6 animate-spin text-primary" /></div>;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -99,7 +125,7 @@ function AccountPage() {
         {/* Content */}
         <div className="space-y-4">
           {active === "profile" && (
-            <Card title="Profile" subtitle="How you appear across Lettflix.">
+            <Card title="Profile" subtitle="Your account details and preferences for this device.">
               <div className="mb-6 rounded-xl border border-border bg-elevated/40 p-4 sm:p-5">
                 <div className="mb-4">
                   <div className="text-sm font-semibold">Profile photo</div>
@@ -109,15 +135,6 @@ function AccountPage() {
               </div>
               <AccountPanel />
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Display name">
-                  <input
-                    className={inputClass}
-                    value={profile.displayName}
-                    onChange={(e) =>
-                      setProfile({ ...profile, displayName: e.target.value })
-                    }
-                  />
-                </Field>
                 <Field label="Handle">
                   <input
                     className={inputClass}
@@ -145,14 +162,7 @@ function AccountPage() {
                   />
                 </Field>
               </div>
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={() => toast.success("Profile updated")}
-                  className="h-10 px-5 rounded-md bg-accent text-accent-foreground font-semibold hover:bg-accent/90 transition"
-                >
-                  Save changes
-                </button>
-              </div>
+              <p className="text-xs text-muted-foreground mt-4">Handle, location and bio are saved automatically on this device.</p>
             </Card>
           )}
 
@@ -166,12 +176,10 @@ function AccountPage() {
               />
               <Toggle
                 label="Push notifications"
-                description="Real-time pings on your mobile and desktop devices."
-                value={pushEnabled}
-                onChange={(v) => {
-                  setPushEnabled(v);
-                  toast.success(v ? "Push notifications enabled" : "Push notifications disabled");
-                }}
+                description="Push delivery is not available yet."
+                value={false}
+                disabled
+                onChange={() => {}}
               />
               <Toggle
                 label="Live channel alerts"
@@ -191,13 +199,10 @@ function AccountPage() {
           {active === "playback" && (
             <Card title="Playback" subtitle="Tune quality and previews.">
               <Toggle
-                label="Autoplay next episode"
-                description="Automatically continue to the next episode in a series."
-                value={autoAdvance}
-                onChange={(v) => {
-                  setAutoAdvance(v);
-                  toast.success("Autoplay preference saved");
-                }}
+                label="Autoplay playback"
+                description="Start playback automatically when a playable title opens."
+                value={settings.autoplayPlayback}
+                onChange={(v) => update("autoplayPlayback", v)}
               />
               <Toggle
                 label="Auto preview on hover"
@@ -262,57 +267,8 @@ function AccountPage() {
           )}
 
           {active === "billing" && (
-            <Card title="Billing" subtitle="Your subscription plan.">
-              <div className="grid gap-3 sm:grid-cols-3">
-                {(
-                  [
-                    { id: "essential", name: "Essential", price: "$5.99", features: ["HD", "1 device", "Basic library"] },
-                    { id: "premium", name: "Premium", price: "$12.99", features: ["4K UHD", "4 devices", "Full library", "Live TV"] },
-                    { id: "family", name: "Family", price: "$18.99", features: ["4K UHD", "6 profiles", "Full library", "Kids mode"] },
-                  ] as const
-                ).map((p) => {
-                  const on = settings.plan === p.id;
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => update("plan", p.id)}
-                      className={`text-left rounded-xl border p-4 transition ${
-                        on
-                          ? "border-accent bg-accent/10"
-                          : "border-border bg-surface hover:border-accent/50"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="font-semibold">{p.name}</div>
-                        {on && (
-                          <span className="text-[10px] uppercase tracking-widest text-accent font-bold">
-                            Current
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1 text-2xl font-bold">
-                        {p.price}
-                        <span className="text-sm text-[color:var(--muted-foreground)] font-normal">
-                          /mo
-                        </span>
-                      </div>
-                      <ul className="mt-3 space-y-1.5 text-sm text-[color:var(--secondary-foreground)]">
-                        {p.features.map((f) => (
-                          <li key={f} className="flex items-center gap-1.5">
-                            <Check className="size-3.5 text-accent" /> {f}
-                          </li>
-                        ))}
-                      </ul>
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="mt-4 rounded-xl border border-border bg-surface p-4 text-sm">
-                <div className="font-medium">Next payment</div>
-                <div className="text-[color:var(--muted-foreground)] mt-1">
-                  {settings.plan === "essential" ? "$5.99" : settings.plan === "premium" ? "$12.99" : "$18.99"} on {new Date(Date.now() + 12 * 24 * 3600 * 1000).toDateString()}
-                </div>
-              </div>
+            <Card title="Subscription" subtitle="No verified subscription or billing record is available.">
+              <Button asChild><Link to="/pricing">Explore plans</Link></Button>
             </Card>
           )}
 
@@ -345,17 +301,9 @@ function AccountPage() {
                 </Field>
               </div>
               <div className="flex justify-end">
-                <button
-                  onClick={() => {
-                    if (!pw.current || !pw.next) return toast.error("Fill both fields");
-                    if (pw.next !== pw.confirm) return toast.error("Passwords do not match");
-                    setPw({ current: "", next: "", confirm: "" });
-                    toast.success("Password updated");
-                  }}
-                  className="h-10 px-5 rounded-md bg-accent text-accent-foreground font-semibold hover:bg-accent/90 transition"
-                >
-                  Update password
-                </button>
+                <Button onClick={() => void updatePassword()} disabled={passwordBusy}>
+                  {passwordBusy && <Loader2 className="size-4 animate-spin" />} Update password
+                </Button>
               </div>
               <MfaPanel />
               <LoginHistoryPanel />
@@ -368,37 +316,20 @@ function AccountPage() {
               <Toggle
                 label="Personalised recommendations"
                 description="Use viewing history to power your rows."
-                value={true}
-                onChange={() => toast.success("Preference updated")}
+                value={settings.personalisedRecommendations}
+                onChange={(v) => update("personalisedRecommendations", v)}
               />
               <div className="pt-2 flex gap-2">
-                <button className="h-10 px-4 rounded-md bg-surface border border-border text-sm hover:bg-elevated transition">
-                  Download my data
-                </button>
+                <Button variant="outline" onClick={() => void downloadData()}>Download my data</Button>
+                <p className="text-xs text-muted-foreground">Account profile and activity saved on this device.</p>
               </div>
               <div className="mt-6 rounded-xl border border-primary/40 bg-primary/5 p-5">
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="size-5 text-primary shrink-0 mt-0.5" />
                   <div className="flex-1">
                     <div className="font-semibold">Delete account</div>
-                    <p className="text-sm text-[color:var(--secondary-foreground)] mt-1">
-                      Permanent, after a 30-day grace period. To confirm, type <span className="font-mono text-primary">DELETE</span> below.
-                    </p>
-                    <div className="mt-3 flex gap-2">
-                      <input
-                        className={inputClass + " max-w-[220px]"}
-                        placeholder="Type DELETE to confirm"
-                        value={deleteConfirm}
-                        onChange={(e) => setDeleteConfirm(e.target.value)}
-                      />
-                      <button
-                        disabled={deleteConfirm !== "DELETE"}
-                        onClick={() => toast.success("Deletion scheduled — you have 30 days to cancel.")}
-                        className="h-10 px-4 rounded-md bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/90 transition"
-                      >
-                        Delete my account
-                      </button>
-                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">Self-service account deletion is not available yet. No deletion will be scheduled here.</p>
+                    <Button variant="destructive" disabled className="mt-3">Delete my account</Button>
                   </div>
                 </div>
               </div>
@@ -463,10 +394,12 @@ function Toggle({
   description,
   value,
   onChange,
+  disabled = false,
 }: {
   label: string;
   description: string;
   value: boolean;
+  disabled?: boolean;
   onChange: (v: boolean) => void;
 }) {
   return (
@@ -477,19 +410,19 @@ function Toggle({
           {description}
         </div>
       </div>
-      <button
+      <Button variant="ghost" disabled={disabled} aria-label={label}
         onClick={() => onChange(!value)}
-        className={`relative w-11 h-6 rounded-full transition shrink-0 ${
+        className={`relative p-0 w-11 h-6 rounded-full transition shrink-0 ${
           value ? "bg-accent" : "bg-surface border border-border"
         }`}
         aria-pressed={value}
       >
         <span
-          className={`absolute top-0.5 size-5 rounded-full bg-white transition ${
+          className={`absolute top-0.5 size-5 rounded-full bg-foreground transition ${
             value ? "left-[22px]" : "left-0.5"
           }`}
         />
-      </button>
+      </Button>
     </div>
   );
 }
@@ -627,7 +560,6 @@ function AccountPanel() {
   const email = user?.email ?? "";
   const [initialName, setInitialName] = useState("");
   const [name, setName] = useState("");
-  const [pw, setPw] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -650,20 +582,10 @@ function AccountPanel() {
     toast.success("Display name updated");
   }
 
-  async function changePassword() {
-    if (pw.length < 12) return toast.error("Password must be at least 12 characters");
-    setBusy(true);
-    const { error } = await supabase.auth.updateUser({ password: pw });
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    setPw("");
-    toast.success("Password updated");
-  }
-
   if (!user) return null;
 
   return (
-    <div className="mb-6 grid gap-4 md:grid-cols-3">
+    <div className="mb-6 grid gap-4 md:grid-cols-2">
       <label className="rounded-xl border border-border bg-elevated/40 p-4 flex flex-col gap-2">
         <span className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">Account name</span>
         <input value={name} onChange={(e) => setName(e.target.value)} className="h-10 px-3 rounded-md bg-background border border-border text-sm" />
@@ -676,13 +598,7 @@ function AccountPanel() {
         <div className="h-10 px-3 rounded-md bg-background border border-border text-sm inline-flex items-center truncate">{email || "—"}</div>
         <p className="text-[11px] text-[color:var(--muted-foreground)]">Contact support to change your email.</p>
       </div>
-      <label className="rounded-xl border border-border bg-elevated/40 p-4 flex flex-col gap-2">
-        <span className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">Change password</span>
-        <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="New password (min 12 chars)" className="h-10 px-3 rounded-md bg-background border border-border text-sm" />
-        <button onClick={changePassword} disabled={busy || pw.length < 12} className="mt-1 h-9 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2">
-          {busy && <Loader2 className="size-3 animate-spin" />} Update password
-        </button>
-      </label>
+
     </div>
   );
 }

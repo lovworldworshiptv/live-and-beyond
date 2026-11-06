@@ -10,6 +10,8 @@
 - [x] Landing page hover effects and entrance/scroll animations
 
 ## UI/UX polish
+- [ ] Functionality audit: public pages, navigation, tabs, games and movie actions; fix reproduced defects.
+- [ ] Functionality audit: authenticated Profile, Account, Creator Studio and Admin journeys; record external blockers.
 - [x] Verify movie artwork loading and fallback recovery across movie cards and detail pages.
 - [x] Make Movies fit phone and tablet screens and verify no page overflow.
 - [x] Profile: natural greeting, saved activity navigation, honest account profiles, mobile layout
@@ -53,5 +55,6 @@
 - [ ] Phase 7 Safety: 18+ check, play limits, fraud panel, paid_entry_enabled flag (off) — needs legal sign-off
 
 ## Assets
+- [ ] Generate fitting thumbnails for all channels, preserving channel logos and verified uploaded artwork.
 - [x] Lettflix logo with transparent background (Files)
 - [ ] Netflix logo file — declined: it is Netflix's trademark

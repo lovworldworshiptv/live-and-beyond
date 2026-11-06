@@ -71,7 +71,7 @@ function ProfilePage() {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight break-words">{greeting}{name !== "there" ? `, ${name}` : ""}</h1>
             <p className="text-sm text-muted-foreground truncate mt-1.5">{user?.email || "Your saved activity on this device"}{memberSince ? ` · Member since ${memberSince}` : ""}</p>
             <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-2">
-              {sections.map(s => <button key={s.key} type="button" onClick={() => { setActive(s.key); document.getElementById("profile-activity")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/50 backdrop-blur px-3 h-9 text-xs text-muted-foreground transition hover:text-foreground hover:border-foreground/30"><s.icon className="size-3.5" /><span className="font-semibold text-foreground">{s.count}</span>{s.label}</button>)}
+              {sections.map(s => <button key={s.key} type="button" onClick={() => { setActive(s.key); document.getElementById("profile-activity-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/50 backdrop-blur px-3 h-9 text-xs text-muted-foreground transition hover:text-foreground hover:border-foreground/30"><s.icon className="size-3.5" /><span className="font-semibold text-foreground">{s.count}</span>{s.label}</button>)}
             </div>
           </div>
           <div className="flex flex-col sm:flex-row md:flex-col gap-2 justify-center">
@@ -90,7 +90,7 @@ function ProfilePage() {
         <p className="text-sm text-muted-foreground mt-2">{myList.length ? "Choose a saved title below, or discover something new." : "Save a title for later or follow a channel you love."}</p>
         <div className="flex gap-3 flex-wrap mt-4"><Button asChild className="h-11"><Link to="/movies">Browse movies<ArrowRight /></Link></Button><Button asChild variant="outline" className="h-11"><Link to="/channels">Follow a channel</Link></Button></div>
       </section>}
-      <section aria-label="Saved activity" className="space-y-5">
+      <section id="profile-activity-tabs" aria-label="Saved activity" className="space-y-5 scroll-mt-20">
         <nav aria-label="Profile activity" className="grid grid-cols-2 sm:grid-cols-4 gap-2 sticky top-16 z-20 bg-background/95 backdrop-blur-xl py-2">
           {sections.map(s => <Button key={s.key} variant={active === s.key ? "secondary" : "ghost"} onClick={() => setActive(s.key)} aria-pressed={active === s.key} aria-controls="profile-activity" className={`h-12 px-3 justify-start min-w-0 ${active === s.key ? "border border-accent text-accent" : "border border-transparent text-muted-foreground"}`}><s.icon /><span>{s.label}</span><span className="ml-auto text-xs">{s.count}</span></Button>)}
         </nav>

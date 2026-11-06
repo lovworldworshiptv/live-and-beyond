@@ -7,6 +7,7 @@ import Hls from "hls.js";
 import { Button } from "@/components/ui/button";
 import type { RadioStation } from "@/lib/radio";
 import { getRadioNowPlaying } from "@/lib/radio.functions";
+import { recordPlaybackEvent } from "@/lib/analytics";
 
 type NowPlaying = { title: string | null; artist: string | null };
 
@@ -30,6 +31,8 @@ export function useRadio() {
 
 export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const trackedStation = useRef<RadioStation | null>(null);
+  const playbackStarted = useRef(false);
   const hlsRef = useRef<Hls | null>(null);
   const [station, setStation] = useState<RadioStation | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -62,6 +65,14 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     return () => {
       hlsRef.current?.destroy();
       hlsRef.current = null;
+    };
+  }, [station]);
+
+  useEffect(() => {
+    trackedStation.current = station;
+    playbackStarted.current = false;
+    return () => {
+      if (station && playbackStarted.current) void recordPlaybackEvent({ channelId: station.channelId, service: "radio", event: "end" });
     };
   }, [station]);
 
@@ -126,7 +137,17 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     <Ctx.Provider value={value}>
       {children}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-      <audio ref={audioRef} muted={muted} className="hidden" onPlaying={() => { setPlaying(true); setError(null); }} onPause={() => setPlaying(false)} onError={() => { setPlaying(false); setError("Station unavailable. Try again shortly."); }} />
+      <audio ref={audioRef} muted={muted} className="hidden" onPlaying={() => {
+        setPlaying(true); setError(null);
+        if (!playbackStarted.current && trackedStation.current) {
+          playbackStarted.current = true;
+          void recordPlaybackEvent({ channelId: trackedStation.current.channelId, service: "radio", event: "start" });
+        }
+      }} onPause={() => {
+        setPlaying(false);
+        if (playbackStarted.current && trackedStation.current) void recordPlaybackEvent({ channelId: trackedStation.current.channelId, service: "radio", event: "end" });
+        playbackStarted.current = false;
+      }} onError={() => { setPlaying(false); setError("Station unavailable. Try again shortly."); }} />
       {station && (
         <div data-radio-player className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom,0px))] z-50 lg:bottom-0">
           <div className="mx-auto max-w-[1480px] px-3 pb-3">

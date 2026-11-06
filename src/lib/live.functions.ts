@@ -20,6 +20,8 @@ export const provisionLiveInput = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => provisionSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    const { requireChannelAccess } = await import("@/lib/channel-access.server");
+    await requireChannelAccess(supabase, context.userId, data.channelId);
     const { getLiveProvider } = await import("@/lib/live.server");
 
     const { data: channel, error: chErr } = await supabase
@@ -73,6 +75,8 @@ export const refreshLiveInput = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    const { requireChannelAccess } = await import("@/lib/channel-access.server");
+    await requireChannelAccess(supabase, context.userId, data.channelId);
     const { getLiveProvider } = await import("@/lib/live.server");
 
     const { data: row } = await supabase
@@ -127,6 +131,8 @@ export const deleteLiveInput = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    const { requireChannelAccess } = await import("@/lib/channel-access.server");
+    await requireChannelAccess(supabase, context.userId, data.channelId);
     const { getLiveProvider } = await import("@/lib/live.server");
 
     const { data: row } = await supabase
@@ -156,6 +162,8 @@ export const purgeLiveRecordings = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    const { requireChannelAccess } = await import("@/lib/channel-access.server");
+    await requireChannelAccess(supabase, context.userId, data.channelId);
     const { getLiveProvider } = await import("@/lib/live.server");
 
     const { data: row } = await supabase
@@ -185,6 +193,8 @@ export const getLiveRenditions = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    const { requireChannelAccess } = await import("@/lib/channel-access.server");
+    await requireChannelAccess(supabase, context.userId, data.channelId);
     const { data: row } = await supabase
       .from("live_inputs")
       .select("playback_hls_url, status")
@@ -207,7 +217,7 @@ export const getLiveRenditions = createServerFn({ method: "POST" })
         renditions.push({
           label: res_ ? `${res_[2]}p` : "audio",
           bandwidthKbps: bw ? Math.round(Number(bw[1]) / 1000) : 0,
-          codecs: codecs ? codecs[1]! : null,
+          codecs: codecs?.[1] ?? null,
         });
       }
       const seen = new Set<string>();
