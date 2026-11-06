@@ -1,4 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { phoneMessagePage } from "@/lib/tv-support";
+
+const tvSuccess = () =>
+  phoneMessagePage("You're signed in on your TV", "You can close this page.", true);
+const tvFailure = () =>
+  phoneMessagePage("Sign-in didn't finish", "Try again on your TV.", false);
 
 type CallbackPayload = { code?: string; origin?: string };
 
@@ -30,15 +36,17 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
 
   const attempt = parseAttemptOrigin(payload.origin);
   let next = "/";
+  let isTv = false;
 
   if (attempt) {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: attemptData } = await supabaseAdmin
       .from("kingschat_login_attempts")
-      .select("return_path")
+      .select("return_path, device")
       .eq("id", attempt.attemptId)
       .maybeSingle();
     next = attempt.next ?? attemptData?.return_path ?? "/";
+    isTv = attemptData?.device === "tv";
   }
 
   const markAttemptFailed = async (message: string) => {
@@ -58,6 +66,7 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
     console.error(`[KingsChat] callback failed: ${message}`);
     if (attempt) {
       await markAttemptFailed(message);
+      if (isTv) return tvFailure();
       return closingPage("KingsChat sign-in failed. You can close this window.", false, "/auth");
     }
     return Response.redirect(
@@ -142,6 +151,7 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
       })
       .eq("id", attempt.attemptId);
     if (attemptError) return fail(attemptError.message);
+    if (isTv) return tvSuccess();
     return closingPage("Signed in with KingsChat. You can close this window.", true, "/auth");
   } catch (error) {
     return fail(error instanceof Error ? error.message : "KingsChat sign-in failed");

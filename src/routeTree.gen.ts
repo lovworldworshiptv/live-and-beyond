@@ -31,10 +31,12 @@ import { Route as ProfilesRouteImport } from './routes/profiles'
 import { Route as RadioRouteImport } from './routes/radio'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as StudioRouteImport } from './routes/studio'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ChannelsIndexRouteImport } from './routes/channels.index'
 import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
 import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
+import { Route as KCodeRouteImport } from './routes/k.$code'
 import { Route as MoviesIndexRouteImport } from './routes/movies.index'
 import { Route as MoviesTitleIdRouteImport } from './routes/movies.$titleId'
 import { Route as StudioPreviewRouteImport } from './routes/studio.preview'
@@ -156,6 +158,11 @@ const StudioRoute = StudioRouteImport.update({
   path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -174,6 +181,11 @@ const ChannelsChannelIdRoute = ChannelsChannelIdRouteImport.update({
 const CollectionsCollectionIdRoute = CollectionsCollectionIdRouteImport.update({
   id: '/collections/$collectionId',
   path: '/collections/$collectionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KCodeRoute = KCodeRouteImport.update({
+  id: '/k/$code',
+  path: '/k/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MoviesIndexRoute = MoviesIndexRouteImport.update({
@@ -252,9 +264,11 @@ export interface FileRoutesByFullPath {
   '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
   '/studio': typeof StudioRouteWithChildren
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
+  '/k/$code': typeof KCodeRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
   '/studio/preview': typeof StudioPreviewRoute
   '/channels/': typeof ChannelsIndexRoute
@@ -288,8 +302,10 @@ export interface FileRoutesByTo {
   '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
   '/studio': typeof StudioRouteWithChildren
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
+  '/k/$code': typeof KCodeRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
   '/studio/preview': typeof StudioPreviewRoute
   '/channels': typeof ChannelsIndexRoute
@@ -326,9 +342,11 @@ export interface FileRoutesById {
   '/radio': typeof RadioRoute
   '/series': typeof SeriesRoute
   '/studio': typeof StudioRouteWithChildren
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/channels/$channelId': typeof ChannelsChannelIdRouteWithChildren
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
+  '/k/$code': typeof KCodeRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
   '/studio/preview': typeof StudioPreviewRoute
   '/channels/': typeof ChannelsIndexRoute
@@ -366,9 +384,11 @@ export interface FileRouteTypes {
     | '/radio'
     | '/series'
     | '/studio'
+    | '/support'
     | '/terms'
     | '/channels/$channelId'
     | '/collections/$collectionId'
+    | '/k/$code'
     | '/movies/$titleId'
     | '/studio/preview'
     | '/channels/'
@@ -402,8 +422,10 @@ export interface FileRouteTypes {
     | '/radio'
     | '/series'
     | '/studio'
+    | '/support'
     | '/terms'
     | '/collections/$collectionId'
+    | '/k/$code'
     | '/movies/$titleId'
     | '/studio/preview'
     | '/channels'
@@ -439,9 +461,11 @@ export interface FileRouteTypes {
     | '/radio'
     | '/series'
     | '/studio'
+    | '/support'
     | '/terms'
     | '/channels/$channelId'
     | '/collections/$collectionId'
+    | '/k/$code'
     | '/movies/$titleId'
     | '/studio/preview'
     | '/channels/'
@@ -478,8 +502,10 @@ export interface RootRouteChildren {
   RadioRoute: typeof RadioRoute
   SeriesRoute: typeof SeriesRoute
   StudioRoute: typeof StudioRouteWithChildren
+  SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
+  KCodeRoute: typeof KCodeRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
   ApiPublicKingschatLoginRoute: typeof ApiPublicKingschatLoginRoute
   ApiPublicKingschatPollRoute: typeof ApiPublicKingschatPollRoute
@@ -643,6 +669,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -669,6 +702,13 @@ declare module '@tanstack/react-router' {
       path: '/collections/$collectionId'
       fullPath: '/collections/$collectionId'
       preLoaderRoute: typeof CollectionsCollectionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/k/$code': {
+      id: '/k/$code'
+      path: '/k/$code'
+      fullPath: '/k/$code'
+      preLoaderRoute: typeof KCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/movies/': {
@@ -818,8 +858,10 @@ const rootRouteChildren: RootRouteChildren = {
   RadioRoute: RadioRoute,
   SeriesRoute: SeriesRoute,
   StudioRoute: StudioRouteWithChildren,
+  SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
+  KCodeRoute: KCodeRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
   ApiPublicKingschatLoginRoute: ApiPublicKingschatLoginRoute,
   ApiPublicKingschatPollRoute: ApiPublicKingschatPollRoute,

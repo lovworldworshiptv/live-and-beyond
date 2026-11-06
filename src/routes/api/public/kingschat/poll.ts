@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { tvPreflight, withTvCors } from "@/lib/tv-support";
 
 /** Client polls this until the popup callback has stored a session. */
 async function poll(request: Request): Promise<Response> {
@@ -46,7 +47,8 @@ async function poll(request: Request): Promise<Response> {
 export const Route = createFileRoute("/api/public/kingschat/poll")({
   server: {
     handlers: {
-      POST: async ({ request }) => poll(request),
+      OPTIONS: async ({ request }) => tvPreflight(request),
+      POST: async ({ request }) => withTvCors(request, await poll(request)),
     },
   },
 });

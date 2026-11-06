@@ -784,31 +784,37 @@ export type Database = {
       kingschat_login_attempts: {
         Row: {
           created_at: string
+          device: string | null
           error: string | null
           id: string
           poll_secret: string
           return_path: string
           session: Json | null
+          short_code: string | null
           status: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          device?: string | null
           error?: string | null
           id?: string
           poll_secret: string
           return_path?: string
           session?: Json | null
+          short_code?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          device?: string | null
           error?: string | null
           id?: string
           poll_secret?: string
           return_path?: string
           session?: Json | null
+          short_code?: string | null
           status?: string
           updated_at?: string
         }
@@ -1092,6 +1098,7 @@ export type Database = {
           created_at: string
           event: string
           id: string
+          platform: string | null
           seconds: number
           service: string
           session_id: string | null
@@ -1103,6 +1110,7 @@ export type Database = {
           created_at?: string
           event?: string
           id?: string
+          platform?: string | null
           seconds?: number
           service?: string
           session_id?: string | null
@@ -1114,6 +1122,7 @@ export type Database = {
           created_at?: string
           event?: string
           id?: string
+          platform?: string | null
           seconds?: number
           service?: string
           session_id?: string | null

@@ -1,0 +1,14 @@
+/tv/
+  Cache-Control: no-cache
+
+/tv/index.html
+  Cache-Control: no-cache
+
+/tv/js/*
+  Cache-Control: public, max-age=86400
+
+/tv/css/*
+  Cache-Control: public, max-age=86400
+
+/tv/assets/*
+  Cache-Control: public, max-age=604800
