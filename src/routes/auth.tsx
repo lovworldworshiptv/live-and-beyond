@@ -4,7 +4,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Loader2, CheckCircle2, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useKingsChatLogin } from "@/hooks/use-kingschat-login";
 import logoIcon from "@/assets/lettflix-icon.png.asset.json";
 import kingschatLogo from "@/assets/kingschat-logo.svg.asset.json";
@@ -42,6 +42,7 @@ function AuthPage() {
   const [accountType, setAccountType] = useState<AccountType>("user");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
   const [pendingModal, setPendingModal] = useState(false);
@@ -156,29 +157,35 @@ function AuthPage() {
   const isCreatorSignup = mode === "signup" && accountType === "creator";
 
   return (
-    <div className="auth-stage relative isolate min-h-svh grid place-items-center overflow-hidden px-5 py-8 sm:px-8 sm:py-12">
+    <div className="auth-stage relative isolate min-h-svh flex flex-col overflow-hidden px-6 py-6 sm:px-8 sm:py-8">
       <div className="auth-scenery pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
         <img src={authCinema} alt="" width={1920} height={1088} fetchPriority="high" className="auth-camera h-full w-full object-cover" />
         <div className="auth-shade absolute inset-0" />
         <div className="auth-projector absolute inset-0" />
         <div className="auth-grain absolute inset-0" />
       </div>
-      <div className="auth-entrance w-full max-w-md">
-        <Link to="/" className="flex items-center gap-2.5 justify-center mb-5 sm:mb-7" aria-label="Lettflix home">
-          <img src={logoIcon.url} alt="Lettflix" className="size-10" />
+      <header className="relative z-10 flex items-center justify-between w-full max-w-6xl mx-auto">
+        <Link to="/" className="flex items-center gap-2" aria-label="Lettflix home">
+          <img src={logoIcon.url} alt="" className="size-9 object-contain" />
           <span className="font-display font-extrabold text-2xl">
             LETT<span className="text-primary">FLIX</span>
           </span>
         </Link>
-
-        <div className="auth-form px-1 sm:px-7 py-2 sm:py-5">
-          <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-[color:var(--muted-foreground)] hover:text-foreground transition mb-4">
-            <ArrowLeft className="size-4" />
-            Back
+        <Button asChild variant="ghost" className="h-11 text-secondary-foreground">
+          <Link to="/">
+            <ArrowLeft aria-hidden="true" />
+            Home
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-semibold mb-2">{mode === "signin" ? "Welcome back." : "Your story starts here."}</h1>
-          <p className="text-sm text-secondary-foreground mb-6">{mode === "signin" ? "Sign in to Lettflix." : "Create your Lettflix account."}</p>
-          <div className="flex gap-1 p-1 bg-elevated/80 rounded-lg mb-5">
+        </Button>
+      </header>
+      <main className="auth-entrance w-full max-w-[400px] mx-auto flex-1 flex flex-col justify-center py-8 sm:py-10">
+        <div className="auth-form">
+          <div className="text-center mb-7">
+            <img src={logoIcon.url} alt="" className="size-16 object-contain mx-auto mb-4" />
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2">{mode === "signin" ? "Welcome to Lettflix" : "Join Lettflix"}</h1>
+            <p className="text-sm text-secondary-foreground">{mode === "signin" ? "Sign in. Tune in. Make it yours." : "Your next favourite starts here."}</p>
+          </div>
+          <div className="flex gap-4 border-b border-input mb-6">
             {(["signin", "signup"] as const).map((m) => (
               <Button
                 variant="ghost"
@@ -186,8 +193,8 @@ function AuthPage() {
                 type="button"
                 aria-pressed={mode === m}
                 onClick={() => setMode(m)}
-                className={`flex-1 h-9 text-sm rounded-md font-medium transition ${
-                  mode === m ? "bg-background text-foreground shadow" : "text-[color:var(--muted-foreground)]"
+                className={`auth-mode flex-1 h-11 text-sm rounded-none font-semibold border-b-2 transition ${
+                  mode === m ? "border-primary text-foreground" : "border-transparent text-secondary-foreground"
                 }`}
               >
                 {m === "signin" ? "Sign In" : "Sign Up"}
@@ -206,7 +213,7 @@ function AuthPage() {
                     type="button"
                     aria-pressed={accountType === t}
                     onClick={() => setAccountType(t)}
-                    className={`h-10 rounded-md text-sm font-medium border transition ${
+                    className={`h-11 rounded-md text-sm font-medium border transition ${
                       accountType === t
                         ? "border-primary bg-primary/10 text-foreground"
                         : "border-border bg-elevated text-[color:var(--muted-foreground)] hover:text-foreground"
@@ -217,7 +224,7 @@ function AuthPage() {
                 ))}
               </div>
               {isCreatorSignup && (
-                <p className="text-[11px] text-[color:var(--muted-foreground)] mt-2">
+                <p className="text-xs text-secondary-foreground mt-2">
                   Creator accounts require admin approval. You can start watching immediately after signup.
                 </p>
               )}
@@ -230,7 +237,7 @@ function AuthPage() {
               variant="ghost"
               onClick={onKingsChat}
               disabled={busy || kcLoading || kcWaiting}
-              className="auth-kingschat group relative w-full h-11 rounded-md border border-border text-accent-foreground hover:opacity-90 transition-all duration-200 gap-2.5 text-sm font-semibold overflow-hidden"
+              className="auth-kingschat relative w-full h-12 rounded-lg border border-input text-foreground transition-all duration-200 gap-3 text-sm font-semibold overflow-hidden"
             >
               {kcLoading || kcWaiting ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -250,15 +257,18 @@ function AuthPage() {
 
           </div>
 
-          <div className="flex items-center gap-3 my-6">
+          <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-[color:var(--muted-foreground)]">OR</span>
+            <span className="text-xs text-secondary-foreground">or continue with email</span>
             <div className="flex-1 h-px bg-border" />
           </div>
 
-          <form onSubmit={onSubmit} className="space-y-3">
+          <form onSubmit={onSubmit} className="space-y-4">
             {mode === "signup" && (
+              <div className="space-y-2">
+              <label htmlFor="auth-name" className="block text-sm font-medium">Display name</label>
               <input
+                id="auth-name"
                 type="text"
                 required
                 placeholder="Display name"
@@ -266,21 +276,30 @@ function AuthPage() {
                 autoComplete="name"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full h-12 px-4 rounded-lg bg-surface border border-input text-base focus:outline-none focus:ring-2 focus:ring-ring"
               />
+              </div>
             )}
+            <div className="space-y-2">
+            <label htmlFor="auth-email" className="block text-sm font-medium">Email address</label>
             <input
+              id="auth-email"
               type="email"
               required
-              placeholder="Email"
+              placeholder="name@example.com"
               aria-label="Email"
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full h-12 px-4 rounded-lg bg-surface border border-input text-base focus:outline-none focus:ring-2 focus:ring-ring"
             />
+            </div>
+            <div className="space-y-2">
+            <label htmlFor="auth-password" className="block text-sm font-medium">Password</label>
+            <div className="relative">
             <input
-              type="password"
+              id="auth-password"
+              type={showPassword ? "text" : "password"}
               required
               minLength={mode === "signup" ? 12 : 8}
               placeholder={mode === "signup" ? "Password (min 12 characters)" : "Password"}
@@ -288,14 +307,18 @@ function AuthPage() {
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-11 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full h-12 pl-4 pr-14 rounded-lg bg-surface border border-input text-base focus:outline-none focus:ring-2 focus:ring-ring"
             />
-
+            <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-0.5 size-11 text-secondary-foreground" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"} title={showPassword ? "Hide password" : "Show password"}>
+              {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+            </Button>
+            </div>
+            </div>
 
             <Button
               type="submit"
               disabled={busy}
-              className="w-full h-11 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm transition flex items-center justify-center gap-2 disabled:opacity-60"
+              className="w-full h-12 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base transition gap-2 disabled:opacity-60"
             >
               {busy && <Loader2 className="size-4 animate-spin" />}
               {mode === "signin"
@@ -306,11 +329,11 @@ function AuthPage() {
             </Button>
           </form>
 
-          <p className="text-xs text-[color:var(--muted-foreground)] text-center mt-6">
+          <p className="text-xs leading-5 text-secondary-foreground text-center mt-6">
             By continuing you agree to Lettflix's <Link to="/terms" className="text-secondary-foreground hover:text-foreground underline underline-offset-2">Terms of Service</Link> and <Link to="/privacy" className="text-secondary-foreground hover:text-foreground underline underline-offset-2">Privacy Policy</Link>.
           </p>
         </div>
-      </div>
+      </main>
 
       {pendingModal && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-background/90 backdrop-blur-sm px-4">
