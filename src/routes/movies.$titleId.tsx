@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Play, Plus, Check, ThumbsUp, Download, ChevronRight, Star, Clock, Calendar } from "lucide-react";
+import { Plus, Check, ThumbsUp, Download, ChevronRight, Star, Clock, Calendar } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { StreamPlayer } from "@/components/stream-player";
@@ -155,13 +155,6 @@ function TitleDetail() {
           <p className="mt-5 text-[color:var(--secondary-foreground)] max-w-2xl">{title.synopsis}</p>
 
           <div className="mt-7 flex flex-wrap gap-3">
-            <a
-              href="#title-player"
-              onClick={(e) => { e.preventDefault(); const player = document.getElementById("title-player"); player?.scrollIntoView({ behavior: "smooth", block: "center" }); player?.querySelector<HTMLButtonElement>(`button[aria-label="${audioKind ? "Listen" : "Play"}"]`)?.click(); }}
-              className="inline-flex items-center gap-2 px-6 h-12 rounded-md bg-foreground text-background font-semibold hover:bg-foreground/90 transition"
-            >
-              <Play className="size-[19px] fill-current" strokeWidth={2.5} /> Play
-            </a>
             <Button variant="ghost"
               onClick={() => {
                 const wasIn = hasInList(title.id);
