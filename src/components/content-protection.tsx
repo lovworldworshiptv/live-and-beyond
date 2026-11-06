@@ -12,7 +12,7 @@ const COPY_ALLOWED = /^\/(studio|admin)(\/|$)/;
  * - Video goes black when the window loses focus, a screenshot shortcut is used,
  *   or the page is asked to share the screen; it stays black while sharing runs.
  * - Picture-in-picture and casting are disabled so video can't escape the shield.
- * - Native video fullscreen is moved onto the player frame so the account watermark stays visible.
+ * - Native video fullscreen remains available beside the volume control.
  * - Text and image copying (copy/cut, selection) is blocked outside form fields, [data-allow-copy]
  *   elements and the Studio/Admin workspaces. Copy buttons using the Clipboard API keep working.
  * Hardware-level capture blocking (black screenshots at OS level) needs DRM from the video provider.

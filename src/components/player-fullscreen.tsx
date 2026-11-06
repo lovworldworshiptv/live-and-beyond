@@ -21,7 +21,7 @@ const elementFullscreenSupported = () =>
   typeof document !== "undefined" && !!(document.fullscreenEnabled || doc().webkitFullscreenEnabled);
 
 /**
- * Fullscreen for the protected player frame (video + watermark + quality menu together).
+ * Fullscreen for the protected player frame (video + quality menu together).
  * Falls back to the video's native fullscreen on iPhone, where only <video> can go fullscreen.
  */
 export function usePlayerFullscreen(

@@ -4,7 +4,6 @@ import { useHlsAttach } from "@/hooks/use-hls";
 import { Button } from "@/components/ui/button";
 import { useProgress, useSettings } from "@/lib/personal";
 import { QualityMenu } from "@/components/quality-menu";
-import { PlayerWatermark } from "@/components/player-watermark";
 import { usePlayerFullscreen } from "@/components/player-fullscreen";
 import { MovieArtwork } from "./movie-artwork";
 
@@ -119,8 +118,6 @@ export function StreamPlayer({
           <div className="player-overlay-controls absolute bottom-14 right-3 z-20 flex items-center gap-2">
             <QualityMenu controller={hls} />
           </div>
-          <PlayerWatermark />
-
         </>
       )}
       {playing && kind === "audio" && (

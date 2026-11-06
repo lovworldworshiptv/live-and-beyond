@@ -13,7 +13,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { QualityMenu } from "@/components/quality-menu";
-import { PlayerWatermark } from "@/components/player-watermark";
 import { usePlayerFullscreen } from "@/components/player-fullscreen";
 import { protectedChannelSrc } from "@/lib/stream-src";
 import { useFollowing, useSettings } from "@/lib/personal";
@@ -354,7 +353,6 @@ function ChannelPage() {
 
           {playing && !isRadio && (
             <>
-              <PlayerWatermark />
               <div className="player-overlay-controls absolute bottom-14 right-3 z-20 flex items-center gap-2">
                 <QualityMenu controller={hls} />
               </div>
