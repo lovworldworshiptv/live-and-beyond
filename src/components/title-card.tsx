@@ -126,8 +126,8 @@ export function TitleCard({
           }`}
         >
           <MovieArtwork
-            src={t.cover}
-            fallbackSrc={t.hero}
+            src={portrait ? t.cover : t.hero || t.cover}
+            fallbackSrc={portrait ? t.hero : t.cover}
             alt={t.title}
             loading="lazy"
             className="size-full object-cover transition duration-500 group-hover:scale-105"
