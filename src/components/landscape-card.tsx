@@ -1,3 +1,4 @@
+import { titleCase } from "@/lib/title-case";
 import { Link } from "@tanstack/react-router";
 import type { Title } from "@/lib/catalog";
 
@@ -12,7 +13,7 @@ export function LandscapeCard({ t, progressPct, badge }: { t: Title; progressPct
       <div className="relative aspect-video overflow-hidden rounded-md bg-elevated ring-offset-2 ring-offset-background group-focus-visible:ring-2 group-focus-visible:ring-foreground">
         <img src={t.hero || t.cover} alt="" loading="lazy" className="size-full object-cover transition duration-300 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-transparent to-transparent" />
-        <span className="absolute left-3 right-3 bottom-2.5 font-title uppercase text-xl sm:text-3xl leading-[0.9] tracking-wide line-clamp-2 drop-shadow-lg">{t.title}</span>
+        <span className="absolute left-3 right-3 bottom-2.5 font-title font-bold text-lg sm:text-2xl leading-[1.05] line-clamp-2 drop-shadow-lg">{titleCase(t.title)}</span>
         {badge && <span className="absolute left-1/2 -translate-x-1/2 bottom-0 rounded-t px-2 py-0.5 text-[11px] font-bold bg-primary text-primary-foreground whitespace-nowrap">{badge}</span>}
       </div>
       {progressPct !== undefined && (

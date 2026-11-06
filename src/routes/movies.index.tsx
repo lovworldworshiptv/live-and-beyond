@@ -1,3 +1,4 @@
+import { titleCase } from "@/lib/title-case";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Play, Info } from "lucide-react";
@@ -71,7 +72,7 @@ function Movies() {
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-background" />
         <div className="relative h-full flex items-end px-4 sm:px-8 lg:px-12 pb-16 sm:pb-24">
           <div className="max-w-xl">
-            <h1 className="font-title uppercase text-6xl sm:text-8xl tracking-wide leading-[0.85] drop-shadow-lg">{featured.title}</h1>
+            <h1 className="font-title font-bold text-5xl sm:text-7xl leading-[0.95] drop-shadow-lg">{titleCase(featured.title)}</h1>
             <p className="mt-4 text-sm text-foreground/85">Film · {featured.category} · {featured.year} · {featured.duration} <span className="ml-1 rounded border border-foreground/50 px-1.5 text-xs">{featured.rating}</span></p>
             <p className="mt-3 hidden sm:block text-base text-foreground/85 line-clamp-3">{featured.synopsis}</p>
             <div className="mt-6 flex gap-3">
