@@ -285,7 +285,6 @@ p { margin: 0; }
 .seek-flash { position: absolute; left: 860px; top: 480px; width: 200px; text-align: center; font-size: 56px; font-weight: 800; opacity: 0; text-shadow: 0 4px 20px rgba(0,0,0,.8); }
 .seek-flash.show { animation: flash 0.8s ease-out; }
 @keyframes flash { 0% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0; transform: scale(1); } }
-.watermark { position: absolute; font-family: monospace; font-size: 20px; color: rgba(255,255,255,.2); pointer-events: none; transition: left 2s ease, top 2s ease; white-space: nowrap; }
 body.playing #main, body.playing .rail { visibility: hidden; }
 
 /* ---------------- Intro (cinematic logo reveal with sound) ---------------- */

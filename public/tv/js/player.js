@@ -7,7 +7,7 @@
   "use strict";
   var h = U.h, icon = U.icon, KEY = Nav.KEY, Personal = Api.Personal, Playback = Api.Playback;
 
-  var root = null, video = null, hls = null, src = null, hideTimer = null, tick = null, wmTimer = null;
+  var root = null, video = null, hls = null, src = null, hideTimer = null, tick = null;
   var ui = {};
   var seconds = 0, started = false, onClose = null, seekPreview = null, seekTimer = null;
 
@@ -54,7 +54,6 @@
     ui.spinner = h("div.spinner");
     ui.error = h("div.player-error");
     ui.flash = h("div.seek-flash");
-    ui.wm = h("div.watermark");
     ui.controls = h("div.player-controls", null, [
       h("div.player-top", null, [h("div", null, [ui.title, ui.sub]), ui.live]),
       h("div.player-bottom", null, [
@@ -62,7 +61,7 @@
         h("div.player-buttons", null, [ui.rw, ui.play, ui.ff, h("div.spacer"), ui.restart])
       ])
     ]);
-    root = h("div.player", null, [video, ui.art, ui.wm, ui.spinner, ui.flash, ui.error, ui.controls]);
+    root = h("div.player", null, [video, ui.art, ui.spinner, ui.flash, ui.error, ui.controls]);
     ["playing", "pause", "waiting", "canplay", "ended", "error", "loadedmetadata"].forEach(function (ev) { video.addEventListener(ev, onMedia); });
   }
 
@@ -134,16 +133,6 @@
     Playback.resolveChannel(src.id).then(function (s) { load(s); }, function (e) { fail(e.message); });
   }
 
-  function watermark() {
-    // Moving account watermark (web: player-watermark) deters screen recording.
-    var email = Api.Auth.email(), id = (Api.Auth.userId() || "").slice(0, 8);
-    var masked = email ? email.replace(/^(.{2})[^@]*(@.*)$/, "$1•••$2") : "Lettflix";
-    ui.wm.textContent = masked + (id ? " · " + id : "");
-    var spots = [[8, 12], [62, 14], [30, 46], [70, 62], [10, 78], [48, 82]], i = 0;
-    var place = function () { var s = spots[i++ % spots.length]; ui.wm.style.left = s[0] + "%"; ui.wm.style.top = s[1] + "%"; };
-    place(); clearInterval(wmTimer); wmTimer = setInterval(place, 12000);
-  }
-
   function load(s) {
     src = s; seconds = 0; started = false; seekPreview = null;
     root.className = "player buffering controls";
@@ -152,7 +141,7 @@
     ui.art.style.backgroundImage = s.artwork ? "url(\"" + s.artwork + "\")" : "";
     ui.restart.style.display = s.kind === "title" && s.start > 0 ? "" : "none";
     attach(s.url, s.start || 0);
-    paintPlay(); paintTime(); watermark(); showControls();
+    paintPlay(); paintTime(); showControls();
   }
 
   function onKey(k) {
@@ -182,7 +171,7 @@
   function close() {
     save();
     if (src && started) Playback.record(src, "stop", seconds % 30);
-    clearInterval(tick); clearInterval(wmTimer); clearTimeout(hideTimer); clearTimeout(seekTimer);
+    clearInterval(tick); clearTimeout(hideTimer); clearTimeout(seekTimer);
     detachHls();
     try { video.pause(); video.removeAttribute("src"); video.load(); } catch (e) { /* ignore */ }
     document.body.classList.remove("playing");
