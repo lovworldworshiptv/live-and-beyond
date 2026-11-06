@@ -1,6 +1,7 @@
 import { titleCase } from "@/lib/title-case";
 import { Link } from "@tanstack/react-router";
 import type { Title } from "@/lib/catalog";
+import { MovieArtwork } from "./movie-artwork";
 
 /** Netflix-style 16:9 tile: artwork, bold title on the image, optional badge and progress under it. */
 export function LandscapeCard({ t, progressPct, badge }: { t: Title; progressPct?: number; badge?: string }) {
@@ -8,12 +9,12 @@ export function LandscapeCard({ t, progressPct, badge }: { t: Title; progressPct
     <Link
       to="/movies/$titleId"
       params={{ titleId: t.id }}
-      className="group shrink-0 snap-start w-[44vw] sm:w-[calc((100%-2rem)/3)] lg:w-[calc((100%-3rem)/4)] xl:w-[calc((100%-4rem)/5)] focus-visible:outline-none"
+      className="group min-w-0 shrink-0 snap-start w-[44vw] sm:w-[calc((100%-2rem)/3)] lg:w-[calc((100%-3rem)/4)] xl:w-[calc((100%-4rem)/5)] focus-visible:outline-none"
     >
       <div className="relative aspect-video overflow-hidden rounded-md bg-elevated ring-offset-2 ring-offset-background group-focus-visible:ring-2 group-focus-visible:ring-foreground">
-        <img src={t.hero || t.cover} alt="" loading="lazy" className="size-full object-cover transition duration-300 group-hover:scale-105" />
+        <MovieArtwork src={t.hero} fallbackSrc={t.cover} alt={t.title} loading="lazy" className="size-full object-cover transition duration-300 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-transparent to-transparent" />
-        <span className="absolute left-3 right-3 bottom-2.5 font-title font-bold text-lg sm:text-2xl leading-[1.05] line-clamp-2 drop-shadow-lg">{titleCase(t.title)}</span>
+        <span className={`absolute left-3 right-3 ${badge ? "bottom-6" : "bottom-2.5"} font-title font-bold text-base sm:text-xl lg:text-2xl leading-[1.1] line-clamp-2 break-words drop-shadow-lg`}>{titleCase(t.title)}</span>
         {badge && <span className="absolute left-1/2 -translate-x-1/2 bottom-0 rounded-t px-2 py-0.5 text-[11px] font-bold bg-primary text-primary-foreground whitespace-nowrap">{badge}</span>}
       </div>
       {progressPct !== undefined && (

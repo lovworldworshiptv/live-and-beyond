@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Public discovery lists must use published CMS rows and published schedule entries, never seed catalog fallbacks, so empty catalogues stay honest.
+- Movie artwork uses MovieArtwork to try the same title's alternate image then a bundled brand fallback; never substitute another title's artwork when a URL fails.
 - Viewing progress is recorded from media playback events, never card navigation, so Continue Watching reflects actual viewing.
 - Creator Studio overview reuses the analytics panel rather than simulated statistics, so overview and detailed analytics share one source.
 - Profile resolves device-saved IDs against published CMS content and shows only the authenticated account profile; this avoids invented personalization and family accounts.

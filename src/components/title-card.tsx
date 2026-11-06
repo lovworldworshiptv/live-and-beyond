@@ -6,6 +6,7 @@ import { useMyList, useProgress, useSettings } from "@/lib/personal";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { ShareMenu } from "./share-menu";
 import type { Title } from "@/lib/catalog";
+import { MovieArtwork } from "./movie-artwork";
 
 const PREVIEW_WIDTH = 340;
 
@@ -124,8 +125,9 @@ export function TitleCard({
             portrait ? "aspect-[2/3]" : "aspect-video"
           }`}
         >
-          <img
+          <MovieArtwork
             src={t.cover}
+            fallbackSrc={t.hero}
             alt={t.title}
             loading="lazy"
             className="size-full object-cover transition duration-500 group-hover:scale-105"
@@ -165,7 +167,7 @@ export function TitleCard({
           >
             <div className="rounded-xl overflow-hidden border border-border bg-elevated shadow-[var(--shadow-card)] animate-in fade-in zoom-in-95 duration-150">
               <div className="relative aspect-video">
-                <img src={t.hero} alt="" className="size-full object-cover" />
+                <MovieArtwork src={t.hero} fallbackSrc={t.cover} alt="" className="size-full object-cover" />
                 {previewSrc && <video
                   ref={videoRef}
                   loop

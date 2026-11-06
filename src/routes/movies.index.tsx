@@ -9,6 +9,7 @@ import { useCmsTitles } from "@/lib/cms-catalog";
 import { useProgress } from "@/lib/personal";
 import { useViewerProfiles } from "@/lib/viewer-profiles";
 import { useAccountProfile } from "@/lib/account-profile";
+import { MovieArtwork } from "@/components/movie-artwork";
 
 export const Route = createFileRoute("/movies/")({
   head: () => ({
@@ -66,16 +67,16 @@ function Movies() {
 
       <section className="relative h-[72vh] min-h-[460px] max-h-[820px] overflow-hidden">
         {featuredList.map((f, i) => (
-          <img key={f.id} src={f.hero || f.cover} alt="" className="absolute inset-0 size-full object-cover transition-opacity duration-1000" style={{ opacity: i === idx ? 1 : 0 }} />
+          <MovieArtwork key={f.id} src={f.hero} fallbackSrc={f.cover} alt="" className="absolute inset-0 size-full object-cover transition-opacity duration-1000" style={{ opacity: i === idx ? 1 : 0 }} />
         ))}
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-background" />
         <div className="relative h-full flex items-end px-4 sm:px-8 lg:px-12 pb-16 sm:pb-24">
-          <div className="max-w-xl">
-            <h1 className="font-title font-bold text-5xl sm:text-7xl leading-[0.95] drop-shadow-lg">{titleCase(featured.title)}</h1>
-            <p className="mt-4 text-sm text-foreground/85">Film · {featured.category} · {featured.year} · {featured.duration} <span className="ml-1 rounded border border-foreground/50 px-1.5 text-xs">{featured.rating}</span></p>
+          <div className="min-w-0 w-full max-w-xl">
+            <h1 className="font-title font-bold text-4xl sm:text-5xl lg:text-7xl leading-[1.05] break-words drop-shadow-lg">{titleCase(featured.title)}</h1>
+            <p className="mt-4 text-sm text-foreground/85 break-words">Film · {featured.category} · {featured.year} · {featured.duration} <span className="ml-1 rounded border border-foreground/50 px-1.5 text-xs">{featured.rating}</span></p>
             <p className="mt-3 hidden sm:block text-base text-foreground/85 line-clamp-3">{featured.synopsis}</p>
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 grid grid-cols-[auto_minmax(0,1fr)] max-w-sm gap-3 sm:flex">
               <Link to="/movies/$titleId" params={{ titleId: featured.id }} className="inline-flex items-center gap-2 h-11 px-6 sm:px-8 rounded bg-foreground text-background font-bold hover:bg-foreground/80"><Play className="size-5 fill-current" />Play</Link>
               <Link to="/movies/$titleId" params={{ titleId: featured.id }} className="inline-flex items-center gap-2 h-11 px-6 rounded bg-muted-foreground/40 backdrop-blur font-bold hover:bg-muted-foreground/30"><Info className="size-5" />More info</Link>
             </div>

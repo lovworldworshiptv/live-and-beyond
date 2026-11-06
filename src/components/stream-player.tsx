@@ -6,11 +6,13 @@ import { useProgress, useSettings } from "@/lib/personal";
 import { QualityMenu } from "@/components/quality-menu";
 import { PlayerWatermark } from "@/components/player-watermark";
 import { usePlayerFullscreen } from "@/components/player-fullscreen";
+import { MovieArtwork } from "./movie-artwork";
 
 type Props = {
   src?: string | null;
   titleId?: string;
   poster?: string | null;
+  posterFallback?: string | null;
   kind?: "video" | "audio";
   autoPlay?: boolean;
   className?: string;
@@ -22,6 +24,7 @@ export function StreamPlayer({
   src,
   titleId,
   poster,
+  posterFallback,
   kind = "video",
   autoPlay = false,
   className,
@@ -86,8 +89,9 @@ export function StreamPlayer({
   return (
     <div ref={frameRef} data-protected-player data-idle={fs.idle || undefined} className={`relative rounded-2xl overflow-hidden border border-border bg-background ${className ?? "aspect-video"}`}>
       {poster && (
-        <img
+        <MovieArtwork
           src={poster}
+          fallbackSrc={posterFallback}
           alt=""
           className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${
             playing ? (kind === "audio" ? "opacity-40 blur-sm scale-110" : "opacity-0") : "opacity-60"

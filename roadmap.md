@@ -10,6 +10,8 @@
 - [x] Landing page hover effects and entrance/scroll animations
 
 ## UI/UX polish
+- [x] Verify movie artwork loading and fallback recovery across movie cards and detail pages.
+- [x] Make Movies fit phone and tablet screens and verify no page overflow.
 - [x] Profile: natural greeting, saved activity navigation, honest account profiles, mobile layout
 - [x] Studio: persistent real broadcast status, task groups, dated metrics, guided setup, mobile controls
 - [x] Authenticated desktop/mobile checks: activity tabs, real movie save/remove readback, Edit profile, Studio sections, setup wizard, checklist navigation, status refresh, analytics periods; no overflow

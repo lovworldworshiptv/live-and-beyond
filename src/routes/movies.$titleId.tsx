@@ -11,6 +11,7 @@ import { mapTitleRow, useCmsTitles } from "@/lib/cms-catalog";
 import { useMyList } from "@/lib/personal";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { MovieArtwork } from "@/components/movie-artwork";
 
 export const Route = createFileRoute("/movies/$titleId")({
   head: () => ({
@@ -107,7 +108,7 @@ function TitleDetail() {
       {/* HERO PLAYER */}
       <section className="relative">
         <div className="absolute inset-0 -z-10">
-          <img src={title.hero} alt="" className="size-full object-cover opacity-50" />
+          <MovieArtwork src={title.hero} fallbackSrc={title.cover} alt="" className="size-full object-cover opacity-50" />
           <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
           <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-background" />
         </div>
@@ -124,6 +125,7 @@ function TitleDetail() {
               titleId={title.id}
               src={title.streamUrl}
               poster={title.hero || title.cover}
+              posterFallback={title.cover}
               kind={audioKind ? "audio" : "video"}
               className={audioKind ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}
               posterOverlayLabel={`Play — ${title.title}`}
@@ -213,7 +215,7 @@ function TitleDetail() {
                   className="group rounded-xl overflow-hidden border border-border bg-elevated/40 hover:border-accent/40 transition"
                 >
                   <div className="relative aspect-video">
-                    <img src={r.cover} alt="" className="size-full object-cover group-hover:scale-105 transition duration-500" />
+                    <MovieArtwork src={r.hero} fallbackSrc={r.cover} alt={r.title} className="size-full object-cover group-hover:scale-105 transition duration-500" />
                     <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
                     <span className="absolute top-2 right-2 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-black/60">{r.kind}</span>
                   </div>
