@@ -96,30 +96,32 @@ function ChannelsPage() {
           </div>
 
           {/* Filters */}
-          <div className="mt-6 space-y-3">
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
-              <Filter className="size-4 text-[color:var(--muted-foreground)] shrink-0" />
+          <div className="mt-8 min-w-0 space-y-4 border-t border-border pt-5">
+            <div className="flex min-w-0 items-center gap-3">
+              <Filter aria-hidden="true" className="hidden size-4 shrink-0 text-muted-foreground lg:block" />
+              <div role="group" aria-label="Channel categories" className="flex min-w-0 flex-1 snap-x snap-proximity items-center gap-2 overflow-x-auto overscroll-x-contain scrollbar-none py-1 lg:flex-wrap lg:overflow-visible">
               {genres.map((g) => (
                 <Button variant="ghost"
                   key={g}
                   aria-pressed={genre === g}
                   onClick={() => setGenre(g)}
-                  className={`shrink-0 px-3 h-11 rounded-md text-sm border transition ${
+                  className={`h-11 shrink-0 snap-start rounded-md border px-4 text-sm transition ${
                     genre === g
-                      ? "bg-primary text-primary-foreground border-primary shadow-[var(--shadow-glow)]"
-                      : "bg-elevated/50 border-border text-[color:var(--secondary-foreground)] hover:text-foreground hover:bg-elevated"
+                      ? "border-foreground bg-foreground text-background hover:bg-foreground/90 hover:text-background"
+                      : "border-border bg-surface text-secondary-foreground hover:border-muted-foreground hover:bg-elevated hover:text-foreground"
                   }`}
                 >
                   {g}
                 </Button>
               ))}
+              </div>
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
+            <div role="group" aria-label="Channel language, country and sorting" className="flex min-w-0 items-center gap-4 overflow-x-auto overscroll-x-contain scrollbar-none py-1 lg:flex-wrap lg:gap-5">
               <SelectPill label="Language" value={language} onChange={setLanguage} options={channelLanguages} />
               <SelectPill label="Country" value={country} onChange={setCountry} options={channelCountries} />
 
-              <div className="flex max-w-full items-center gap-1 overflow-x-auto rounded-md border border-border bg-elevated/50 p-1">
+              <div role="group" aria-label="Sort channels" className="flex shrink-0 items-center gap-1 border-l border-border pl-4 lg:ml-auto lg:pl-5">
                 {channelSorts.map((s) => {
                   const Icon = sortIcon(s.id);
                   const active = sort === s.id;
@@ -128,10 +130,10 @@ function ChannelsPage() {
                       key={s.id}
                       aria-pressed={active}
                       onClick={() => setSort(s.id)}
-                      className={`inline-flex items-center gap-1.5 px-3 h-11 rounded-md text-xs font-medium transition ${
+                      className={`inline-flex h-11 shrink-0 items-center gap-1.5 rounded-md px-3 text-xs font-medium transition ${
                         active
-                          ? "bg-accent text-accent-foreground"
-                          : "text-[color:var(--secondary-foreground)] hover:text-foreground"
+                          ? "bg-elevated text-foreground hover:bg-elevated hover:text-foreground"
+                          : "text-muted-foreground hover:bg-surface hover:text-foreground"
                       }`}
                     >
                       <Icon className="size-3.5" /> {s.label}
@@ -184,12 +186,12 @@ function SelectPill({
   options: string[];
 }) {
   return (
-    <label className="inline-flex items-center gap-2 text-xs text-[color:var(--muted-foreground)]">
-      <span className="uppercase tracking-wider">{label}</span>
+    <label className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-xs text-muted-foreground">
+      <span>{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 rounded-md bg-elevated/60 border border-border pl-3 pr-8 text-xs text-foreground outline-none focus:border-accent transition"
+        className="h-11 min-w-28 rounded-md border border-border bg-surface pl-3 pr-8 text-xs text-foreground outline-none transition focus:border-accent"
       >
         {options.map((o) => (
           <option key={o} value={o}>
