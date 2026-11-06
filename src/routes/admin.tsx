@@ -10,6 +10,8 @@ import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, La
 import { toast } from "sonner";
 import { defaultNav, defaultHero, defaultFooter, defaultBottomNav } from "@/lib/homepage-defaults";
 import { bottomNavIconComponents, bottomNavIcons } from "@/lib/bottom-nav-icons";
+import { SERVICE_CATALOG, fetchChannelServices, saveChannelServices, type ServiceKey } from "@/lib/channel-services";
+import { fetchRadioSettings, saveRadioSettings } from "@/lib/radio";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -317,6 +319,7 @@ function ChannelsCms() {
                     <td className="py-3 pr-4">{r.language ?? "—"}</td>
                     <td className="py-3 pr-4">
                       <div className="flex justify-end gap-1">
+                        <Link to="/studio" search={{ channel: r.id }} className="h-8 px-2 inline-flex items-center rounded-md text-xs font-medium hover:bg-elevated whitespace-nowrap">Open Studio</Link>
                         <button onClick={() => setEditing(r)} className="size-8 grid place-items-center rounded-md hover:bg-elevated"><Pencil className="size-4" /></button>
                         <button onClick={() => remove(r.id)} className="size-8 grid place-items-center rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
                       </div>
@@ -352,9 +355,51 @@ export function ChannelEditor({ value, onClose, onSave }: { value: Partial<Chann
     setForm((f) => ({ ...f, now_playing: { ...(f.now_playing ?? {}), ...patch } }));
   const listToStr = (a?: string[] | null) => (a ?? []).join(", ");
   const strToList = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
+  const [services, setServices] = useState<ServiceKey[]>(["tv"]);
+  const [radioUrl, setRadioUrl] = useState("");
+  useEffect(() => {
+    if (!value.id) return;
+    void fetchChannelServices(value.id).then((rows) => setServices(rows.filter((r) => r.enabled).map((r) => r.service)));
+    void fetchRadioSettings(value.id).then((r) => setRadioUrl(r?.stream_url ?? ""));
+  }, [value.id]);
+  const toggleService = (k: ServiceKey) => setServices((s) => (s.includes(k) ? s.filter((x) => x !== k) : [...s, k]));
+
+  async function saveAll() {
+    const kind = services.includes("tv") || !services.includes("radio") ? "tv" : "radio";
+    await onSave({ ...form, kind });
+    let id = form.id;
+    if (!id && form.slug) {
+      const { data } = await supabase.from("cms_channels").select("id").eq("slug", form.slug).maybeSingle();
+      id = data?.id;
+    }
+    if (!id) return;
+    try {
+      await saveChannelServices(id, services);
+      if (services.includes("radio") || radioUrl) {
+        await saveRadioSettings(id, { stream_url: radioUrl.trim() || null, is_enabled: services.includes("radio") && Boolean(radioUrl.trim()) });
+      }
+    } catch {
+      toast.error("Channel saved, but its services could not be updated");
+    }
+  }
 
   return (
-    <ModalShell title={form.id ? "Edit channel" : "New channel"} onClose={onClose} onSave={() => onSave(form)}>
+    <ModalShell title={form.id ? "Edit channel" : "New channel"} onClose={onClose} onSave={() => void saveAll()}>
+      <div className="mb-5 rounded-lg border border-border p-4">
+        <h4 className="text-sm font-semibold">Services on this channel</h4>
+        <p className="text-xs text-[color:var(--muted-foreground)] mt-1">Turn on any combination — one channel can run live TV, live radio and on-demand videos together.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {SERVICE_CATALOG.map((s) => (
+            <button key={s.key} type="button" onClick={() => toggleService(s.key)} aria-pressed={services.includes(s.key)}
+              className={`h-9 px-3 rounded-md border text-sm ${services.includes(s.key) ? "border-primary bg-primary/15 text-primary" : "border-border hover:bg-elevated"}`}>
+              {services.includes(s.key) ? "✓ " : ""}{s.label}
+            </button>
+          ))}
+        </div>
+        {services.includes("radio") && (
+          <div className="mt-3"><Field label="Live radio stream URL"><input className={inputClass} value={radioUrl} onChange={(e) => setRadioUrl(e.target.value)} placeholder="https://…/stream.mp3" /></Field></div>
+        )}
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Name"><input className={inputClass} value={form.name ?? ""} onChange={(e) => set("name", e.target.value)} /></Field>
         <Field label="Slug"><input className={inputClass} value={form.slug ?? ""} onChange={(e) => set("slug", e.target.value)} placeholder="loveworld-plus" /></Field>
@@ -364,19 +409,13 @@ export function ChannelEditor({ value, onClose, onSave }: { value: Partial<Chann
             {["Sports","News","Entertainment","Christian Living","Music","LoveWorld","Radio","Audio","Video","Education","Lifestyle","Kids & Family"].map((c) => <option key={c}>{c}</option>)}
           </select>
         </Field>
-        <Field label="Kind">
-          <select className={inputClass} value={form.kind ?? "tv"} onChange={(e) => set("kind", e.target.value)}>
-            <option value="tv">TV / Video</option>
-            <option value="radio">Radio</option>
-          </select>
-        </Field>
         <Field label="Language"><input className={inputClass} value={form.language ?? ""} onChange={(e) => set("language", e.target.value)} /></Field>
         <Field label="Country"><input className={inputClass} value={form.country ?? ""} onChange={(e) => set("country", e.target.value)} /></Field>
         <Field label="Region"><input className={inputClass} value={form.region ?? ""} onChange={(e) => set("region", e.target.value)} placeholder="Global" /></Field>
         <Field label="Viewers (display)"><input className={inputClass} value={form.viewers ?? ""} onChange={(e) => set("viewers", e.target.value)} placeholder="12.4K" /></Field>
         <Field label="Popularity (0-100)"><input type="number" min={0} max={100} className={inputClass} value={form.popularity ?? 0} onChange={(e) => set("popularity", Number(e.target.value))} /></Field>
         <Field label="Display order (lower = first)"><input type="number" className={inputClass} value={form.display_order ?? 0} onChange={(e) => set("display_order", Number(e.target.value))} /></Field>
-        <Field label="Stream URL (HLS / MP4 / radio)"><input className={inputClass} value={form.stream_url ?? ""} onChange={(e) => set("stream_url", e.target.value)} placeholder="https://…/index.m3u8" /></Field>
+        <Field label="Live TV stream URL (HLS / MP4)"><input className={inputClass} value={form.stream_url ?? ""} onChange={(e) => set("stream_url", e.target.value)} placeholder="https://…/index.m3u8" /></Field>
       </div>
 
       <div className="grid gap-4 mt-4 md:grid-cols-2">

@@ -40,6 +40,8 @@ export const Route = createFileRoute("/studio")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { channel?: string } =>
+    typeof s.channel === "string" && s.channel ? { channel: s.channel } : {},
   component: StudioPage,
 });
 
@@ -54,6 +56,8 @@ type Tab =
 function StudioPage() {
   const { user, isAdmin, isCreator, loading } = useAuth();
   const navigate = useNavigate();
+  const { channel: requestedChannel } = Route.useSearch();
+  const [allChannels, setAllChannels] = useState<{ id: string; name: string }[]>([]);
   const [channel, setChannel] = useState<Partial<Channel> | null>(null);
   const [services, setServices] = useState<ServiceKey[]>([]);
   const [loadingChannel, setLoadingChannel] = useState(true);
@@ -103,9 +107,10 @@ function StudioPage() {
     setLoadingChannel(true);
     setChannelError(false);
     try {
-      const { data, error } = await supabase
-        .from("cms_channels").select("*").eq("creator_id", user.id)
-        .order("created_at", { ascending: true }).limit(1).maybeSingle();
+      const base = supabase.from("cms_channels").select("*");
+      const { data, error } = isAdmin && requestedChannel
+        ? await base.eq("id", requestedChannel).maybeSingle()
+        : await base.eq("creator_id", user.id).order("created_at", { ascending: true }).limit(1).maybeSingle();
       if (error) throw error;
       const ch = (data as unknown as Channel) ?? null;
       const rows = ch?.id ? await fetchChannelServices(ch.id) : [];
@@ -116,7 +121,12 @@ function StudioPage() {
     } finally {
       setLoadingChannel(false);
     }
-  }, [user]);
+  }, [user, isAdmin, requestedChannel]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    void supabase.from("cms_channels").select("id, name").is("deleted_at", null).order("name").then(({ data }) => setAllChannels(data ?? []));
+  }, [isAdmin]);
 
   useEffect(() => {
     if (loading) return;
@@ -151,7 +161,8 @@ function StudioPage() {
 
   async function saveAdvanced(v: Partial<Channel>) {
     if (!user) return;
-    const payload = { ...v, creator_id: user.id };
+    // Keep the channel's real owner when an admin edits someone else's channel.
+    const payload = v.id ? v : { ...v, creator_id: user.id };
     const { error } = v.id
       ? await supabase.from("cms_channels").update(payload as never).eq("id", v.id)
       : await supabase.from("cms_channels").insert(payload as never);
@@ -268,6 +279,17 @@ function StudioPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
+              {isAdmin && allChannels.length > 0 && (
+                <select
+                  aria-label="Manage channel (admin)"
+                  className="h-11 max-w-[16rem] rounded-md border border-border bg-elevated px-3 text-sm"
+                  value={channel?.id ?? ""}
+                  onChange={(e) => navigate({ to: "/studio", search: { channel: e.target.value } })}
+                >
+                  {!channel?.id && <option value="">Choose a channel…</option>}
+                  {allChannels.map((c) => <option key={c.id} value={c.id}>Admin · {c.name}</option>)}
+                </select>
+              )}
               <Button variant="ghost"
                 onClick={() => setWizard(true)}
                 className="h-11 px-5 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition inline-flex items-center gap-2"

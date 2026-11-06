@@ -63,7 +63,8 @@ export function ChannelSetupWizard({ channel, creatorId, initialServices, onClos
       const payload = {
         ...form,
         slug: slugify(str("slug")),
-        creator_id: creatorId,
+        // Existing channels keep their owner (admins may edit any creator's channel).
+        creator_id: (form["creator_id"] as string | null | undefined) ?? creatorId,
         setup_completed_at: new Date().toISOString(),
       } as Record<string, unknown>;
       delete payload["created_at"];

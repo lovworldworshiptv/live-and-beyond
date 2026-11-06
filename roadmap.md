@@ -60,3 +60,5 @@
 - [x] Generate fitting editorial thumbnail fallbacks across all channel categories; preserve logos and uploaded artwork, verify image loading at 390/614/768/1280px.
 - [x] Lettflix logo with transparent background (Files)
 - [ ] Netflix logo file — declined: it is Netflix's trademark
+
+- [x] Admin CMS channel editor: TV, radio and videos together; admin Open Studio + Studio channel switcher
