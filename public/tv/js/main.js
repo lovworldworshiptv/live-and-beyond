@@ -168,8 +168,12 @@
 
   // ---- Boot ----
   var warm = signedIn() ? Catalog.refresh().catch(function () {}) : Promise.resolve();
-  Promise.all([intro(), Auth.keepFresh()]).then(function () {
+  // Coming back from KingsChat (on-screen sign-in): skip the intro and finish signing in.
+  var resumingKc = !signedIn() && !!Api.KingsChat.pending();
+  Promise.all([resumingKc ? Promise.resolve() : intro(), Auth.keepFresh()]).then(function () {
     if (signedIn() && !Catalog.hasData()) return warm;
   }).then(startApp);
   setInterval(function () { if (Auth.signedIn()) Auth.keepFresh(); }, 5 * 60 * 1000);
+  // Returning with the browser Back key may restore a frozen page: reload it so it runs again.
+  window.addEventListener("pageshow", function (e) { if (e.persisted) window.location.reload(); });
 })();

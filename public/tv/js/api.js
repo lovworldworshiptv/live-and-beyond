@@ -135,10 +135,16 @@
   // ---------------- KingsChat (sign in on your phone) ----------------
 
   /** Starts a login attempt; the TV shows auth_url as a QR code and polls for the session. */
+  var KC_PENDING = "lf.kcPending";
   var KingsChat = {
-    start: function () {
+    /**
+     * [direct] = sign in on this screen: the TV goes to KingsChat and the website sends it back to
+     * /tv/ afterwards (return_path "/tv/"). Otherwise it's the phone QR flow (device "tv").
+     */
+    start: function (direct) {
+      var body = direct ? { return_path: "/tv/" } : { return_path: "/", device: "tv" };
       return timeoutFetch(C.API_ORIGIN + "/api/public/kingschat/login", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ return_path: "/", device: "tv" })
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
       }).then(function (r) { return r.json(); }).then(function (j) {
         if (!j.auth_url || !j.poll_secret) throw new Error(j.error || "KingsChat sign-in is unavailable right now.");
         return j;
@@ -148,7 +154,16 @@
       return timeoutFetch(C.API_ORIGIN + "/api/public/kingschat/poll", {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ poll_secret: secret })
       }).then(function (r) { return r.json(); });
-    }
+    },
+    /** Remembers an on-screen attempt across the trip to KingsChat (attempts last 10 minutes). */
+    setPending: function (secret) { U.store.set(KC_PENDING, { secret: secret, at: Date.now() }); },
+    pending: function () {
+      var p = U.store.get(KC_PENDING, null);
+      if (p && p.secret && Date.now() - p.at < 10 * 60 * 1000) return p.secret;
+      if (p) U.store.del(KC_PENDING);
+      return null;
+    },
+    clearPending: function () { U.store.del(KC_PENDING); }
   };
 
   // ---------------- Catalogue ----------------

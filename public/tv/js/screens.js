@@ -326,6 +326,40 @@
         timer = setTimeout(startKc, 30000);
       });
     }
+    // Sign in on this screen: go to KingsChat here; the website brings the TV back to /tv/.
+    var kcBusy = false;
+    function signInHere() {
+      if (kcBusy) return;
+      kcBusy = true;
+      status.textContent = "Opening KingsChat…";
+      Api.KingsChat.start(true).then(function (j) {
+        Api.KingsChat.setPending(j.poll_secret);
+        stop = true; clearTimeout(timer);
+        window.location.href = j.auth_url;
+      }, function (e) {
+        kcBusy = false;
+        UI.toast(e.message || "KingsChat sign-in isn't available right now.");
+        status.textContent = "Waiting for you to sign in on your phone…";
+      });
+    }
+    // Back from KingsChat: collect the session for the attempt started on this screen.
+    function finishHere(secret) {
+      UI.toast("Finishing KingsChat sign-in…");
+      var tries = 0;
+      (function check() {
+        Api.KingsChat.poll(secret).then(function (r) {
+          if (r.status === "ready" && r.session) {
+            Api.KingsChat.clearPending();
+            return Auth.adoptTokens(r.session.access_token, r.session.refresh_token).catch(function (e) { UI.toast(e.message); });
+          }
+          if (r.status === "pending" && ++tries < 5) return setTimeout(check, 1500);
+          Api.KingsChat.clearPending();
+          if (r.status !== "pending") UI.toast(r.error || "KingsChat sign-in didn't finish. Please try again.");
+        }, function () { if (++tries < 5) setTimeout(check, 3000); });
+      })();
+    }
+    var kcBtn = UI.button("Sign in with KingsChat", null, signInHere, "primary autofocus kc");
+    kcBtn.insertBefore(h("img.kc-logo", { src: "assets/kingschat.svg", alt: "" }), kcBtn.firstChild);
     var el = h("div.screen.welcome", null, [
       h("div.auth-scenery", null, [h("div.auth-camera"), h("div.auth-shade"), h("div.auth-projector"), h("div.auth-grain")]),
       h("header.welcome-head", null, h("img.welcome-logo", { src: "assets/lettflix_horizontal.png", alt: "Lettflix" })),
@@ -335,7 +369,8 @@
           h("h1", { text: "Welcome to Lettflix" }),
           h("p", { text: "Sign in. Tune in. Make it yours." }),
           h("div.bb-actions", null, [
-            UI.button("Sign in with email", "mail", function () { go.push("signin"); }, "primary autofocus"),
+            kcBtn,
+            UI.button("Sign in with email", "mail", function () { go.push("signin"); }),
             UI.button("Exit", "exit", function () { go.exit(); })
           ])
         ]),
@@ -349,6 +384,8 @@
       ])
     ]);
     startKc();
+    var pendingKc = Api.KingsChat.pending();
+    if (pendingKc) finishHere(pendingKc);
     return {
       el: el, focus: function () { return el.querySelector(".autofocus"); },
       destroy: function () { stop = true; clearTimeout(timer); }

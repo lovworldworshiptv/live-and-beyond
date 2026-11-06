@@ -48,6 +48,9 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
     next = attempt.next ?? attemptData?.return_path ?? "/";
     isTv = attemptData?.device === "tv";
   }
+  // The TV app's on-screen sign-in (return_path "/tv/...") comes back to the TV app, which
+  // collects the session through poll; every other flow keeps returning to /auth.
+  const returnTo = () => (next === "/tv/" || next.startsWith("/tv/") ? next : "/auth");
 
   const markAttemptFailed = async (message: string) => {
     if (!attempt) return;
@@ -67,7 +70,7 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
     if (attempt) {
       await markAttemptFailed(message);
       if (isTv) return tvFailure();
-      return closingPage("KingsChat sign-in failed. You can close this window.", false, "/auth");
+      return closingPage("KingsChat sign-in failed. You can close this window.", false, returnTo());
     }
     return Response.redirect(
       new URL(`/auth?kingschat_error=${encodeURIComponent(message)}`, appOrigin).toString(),
@@ -152,7 +155,7 @@ async function handleCallback(request: Request, payload: CallbackPayload): Promi
       .eq("id", attempt.attemptId);
     if (attemptError) return fail(attemptError.message);
     if (isTv) return tvSuccess();
-    return closingPage("Signed in with KingsChat. You can close this window.", true, "/auth");
+    return closingPage("Signed in with KingsChat. You can close this window.", true, returnTo());
   } catch (error) {
     return fail(error instanceof Error ? error.message : "KingsChat sign-in failed");
   }
