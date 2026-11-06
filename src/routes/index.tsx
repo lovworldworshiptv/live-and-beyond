@@ -16,6 +16,8 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Row } from "@/components/row";
+import { useBrandColor } from "@/hooks/use-brand-color";
+import type { Channel } from "@/lib/catalog";
 import { TitleCard } from "@/components/title-card";
 
 import { SponsorBanner } from "@/components/sponsor-banner";
@@ -283,43 +285,7 @@ function Index() {
           }
         >
           {liveNow.map((c) => (
-            <article
-              key={c.id}
-              className="group relative shrink-0 w-[80vw] sm:w-[300px] md:w-[340px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/40 transition"
-            >
-              <Link to="/channels/$channelId" params={{ channelId: c.id }} className="block">
-                <div className="relative aspect-video overflow-hidden">
-                  <img src={c.banner || ch1} alt={c.nowPlaying.title || c.name} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 50%, oklch(0.24 0.59 359.4 / 0.45) 100%)" }} />
-                  <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded text-[11px] font-bold tracking-wide bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
-                    LIVE
-                  </span>
-                  <span className="absolute top-3 right-3 text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur text-white/90">
-                    {c.viewers} watching
-                  </span>
-                  <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
-                    <div
-                      className="size-16 rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
-                      style={{
-                        boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 24px oklch(0.55 0.22 25 / 0.55), 0 0 50px oklch(0.55 0.22 25 / 0.25)",
-                      }}
-                    >
-                      <Play className="size-6 text-background fill-current ml-0.5" />
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4" style={{ background: "linear-gradient(180deg, oklch(0.24 0.59 359.4 / 0.75), oklch(0.24 0.59 359.4 / 0.95))" }}>
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-white/90">{c.category}</div>
-                    <span className="text-white/70" aria-label="Reminder">
-                      <Bell className="size-3.5" />
-                    </span>
-                  </div>
-                  <div className="mt-1.5 font-semibold leading-tight line-clamp-1 text-white">{c.nowPlaying.title || "Live broadcast"}</div>
-                  <div className="text-sm text-white/70 mt-0.5">{c.name}</div>
-                </div>
-              </Link>
-            </article>
+            <LiveNowCard key={c.id} c={c} />
           ))}
         </Row>
       )}
@@ -521,5 +487,50 @@ function Index() {
 
       <SiteFooter />
     </div>
+  );
+}
+
+function LiveNowCard({ c }: { c: Channel }) {
+  const brand = useBrandColor(c.logoImg, c.banner);
+  // Darken the brand colour so white text stays readable; maroon until a colour is found.
+  const tint = (a: number) =>
+    brand ? `color-mix(in oklab, rgb(${brand} / ${a}) 62%, rgb(0 0 0 / ${a}))` : `oklch(0.24 0.59 359.4 / ${a})`;
+  return (
+            <article
+              className="group relative shrink-0 w-[80vw] sm:w-[300px] md:w-[340px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/40 transition"
+            >
+              <Link to="/channels/$channelId" params={{ channelId: c.id }} className="block">
+                <div className="relative aspect-video overflow-hidden">
+                  <img src={c.banner || ch1} alt={c.nowPlaying.title || c.name} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
+                  <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent 50%, ${tint(0.45)} 100%)` }} />
+                  <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded text-[11px] font-bold tracking-wide bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
+                    LIVE
+                  </span>
+                  <span className="absolute top-3 right-3 text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur text-white/90">
+                    {c.viewers} watching
+                  </span>
+                  <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
+                    <div
+                      className="size-16 rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
+                      style={{
+                        boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 24px oklch(0.55 0.22 25 / 0.55), 0 0 50px oklch(0.55 0.22 25 / 0.25)",
+                      }}
+                    >
+                      <Play className="size-6 text-background fill-current ml-0.5" />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4" style={{ background: `linear-gradient(180deg, ${tint(0.75)}, ${tint(0.95)})`, transition: "background 400ms" }}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-white/90">{c.category}</div>
+                    <span className="text-white/70" aria-label="Reminder">
+                      <Bell className="size-3.5" />
+                    </span>
+                  </div>
+                  <div className="mt-1.5 font-semibold leading-tight line-clamp-1 text-white">{c.nowPlaying.title || "Live broadcast"}</div>
+                  <div className="text-sm text-white/70 mt-0.5">{c.name}</div>
+                </div>
+              </Link>
+            </article>
   );
 }
