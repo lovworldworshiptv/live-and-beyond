@@ -1,32 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  Home,
-  Tv,
-  Film,
-  User,
-  Search,
-  Radio,
-  CalendarDays,
-  Mic,
-  Sparkles,
-  List,
-} from "lucide-react";
-import type { ComponentType, SVGProps } from "react";
+import { bottomNavIcon } from "@/lib/bottom-nav-icons";
 import { useCmsSetting } from "@/lib/cms-catalog";
 import { defaultBottomNav, type BottomNavConfig } from "@/lib/homepage-defaults";
-
-const ICONS: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
-  home: Home,
-  tv: Tv,
-  film: Film,
-  user: User,
-  search: Search,
-  radio: Radio,
-  calendar: CalendarDays,
-  mic: Mic,
-  sparkles: Sparkles,
-  list: List,
-};
 
 // Locked bar height (content area, excluding safe-area inset).
 const BAR_HEIGHT = "64px";
@@ -72,7 +47,7 @@ export function MobileBottomNav() {
         <ul className="grid h-full" style={{ gridTemplateColumns: `repeat(${tabCount}, minmax(0, 1fr))` }}>
           {items.map((item, idx) => {
             const active = idx === activeIndex && hasActive;
-            const Icon = ICONS[item.icon] ?? Home;
+            const Icon = bottomNavIcon(item.icon);
             return (
               <li key={`${item.label}-${idx}`} className="flex min-w-0">
                 <Link

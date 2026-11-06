@@ -78,23 +78,13 @@ export const defaultBottomNav: BottomNavConfig = {
     { label: "Home", to: "/", icon: "home" },
     { label: "Channels", to: "/channels", icon: "tv" },
     { label: "Movies", to: "/movies", icon: "film" },
+    { label: "Games", to: "/games", icon: "gamepad" },
     { label: "Profile", to: "/profile", icon: "user" },
   ],
 };
 
 /** Icon keys selectable for bottom nav items in the CMS. */
-export const bottomNavIcons = [
-  "home",
-  "tv",
-  "film",
-  "user",
-  "search",
-  "radio",
-  "calendar",
-  "mic",
-  "sparkles",
-  "list",
-] as const;
+export { bottomNavIcons } from "@/lib/bottom-nav-icons";
 
 
 export const defaultHero: HeroConfig = {

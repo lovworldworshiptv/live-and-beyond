@@ -8,7 +8,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MediaPicker } from "@/components/media-picker";
 import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X, Home } from "lucide-react";
 import { toast } from "sonner";
-import { defaultNav, defaultHero, defaultFooter, defaultBottomNav, bottomNavIcons } from "@/lib/homepage-defaults";
+import { defaultNav, defaultHero, defaultFooter, defaultBottomNav } from "@/lib/homepage-defaults";
+import { bottomNavIconComponents, bottomNavIcons } from "@/lib/bottom-nav-icons";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -1808,21 +1809,56 @@ function NavForm({ value, onChange }: { value: any; onChange: (v: any) => void }
   );
 }
 
+function BottomNavIconPicker({ value, onChange }: { value: string; onChange: (icon: string) => void }) {
+  return (
+    <div className="max-h-40 overflow-y-auto rounded-md border border-border bg-background/40 p-2">
+      <div className="grid grid-cols-8 sm:grid-cols-12 gap-1">
+        {bottomNavIcons.map((key) => {
+          const Icon = bottomNavIconComponents[key];
+          const active = value === key;
+          return (
+            <button
+              key={key}
+              type="button"
+              title={key}
+              aria-label={`Use ${key} icon`}
+              aria-pressed={active}
+              onClick={() => onChange(key)}
+              className={`grid place-items-center h-9 rounded-md border transition-colors ${
+                active
+                  ? "border-primary bg-primary/15 text-primary"
+                  : "border-transparent text-[color:var(--muted-foreground)] hover:bg-elevated hover:text-foreground"
+              }`}
+            >
+              <Icon className="size-4" />
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function BottomNavForm({ value, onChange }: { value: any; onChange: (v: any) => void }) {
   const items: { label: string; to: string; icon: string }[] = value?.items ?? [];
   const set = (next: typeof items) => onChange({ ...value, items: next });
+  const patch = (i: number, p: Partial<{ label: string; to: string; icon: string }>) =>
+    set(items.map((x, j) => (j === i ? { ...x, ...p } : x)));
   return (
     <div className="space-y-3">
       {items.map((item, i) => (
-        <div key={i} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_150px_auto] gap-2 items-center">
-          <input className={inputClass} placeholder="Label" value={item.label} onChange={(e) => set(items.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} />
-          <input className={inputClass} placeholder="/path" value={item.to} onChange={(e) => set(items.map((x, j) => (j === i ? { ...x, to: e.target.value } : x)))} />
-          <select className={inputClass} value={item.icon} onChange={(e) => set(items.map((x, j) => (j === i ? { ...x, icon: e.target.value } : x)))}>
-            {bottomNavIcons.map((ic) => (
-              <option key={ic} value={ic}>{ic}</option>
-            ))}
-          </select>
-          <button onClick={() => set(items.filter((_, j) => j !== i))} className="h-10 px-3 rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+        <div key={i} className="rounded-lg border border-border bg-background/40 p-3 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2 items-center">
+            <input className={inputClass} placeholder="Label" value={item.label} onChange={(e) => patch(i, { label: e.target.value })} />
+            <input className={inputClass} placeholder="/path" value={item.to} onChange={(e) => patch(i, { to: e.target.value })} />
+            <button onClick={() => set(items.filter((_, j) => j !== i))} className="h-10 px-3 rounded-md hover:bg-elevated text-destructive"><Trash2 className="size-4" /></button>
+          </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-[color:var(--muted-foreground)] mb-1">
+              Icon — {item.icon}
+            </p>
+            <BottomNavIconPicker value={item.icon} onChange={(icon) => patch(i, { icon })} />
+          </div>
         </div>
       ))}
       {items.length < 5 && (
