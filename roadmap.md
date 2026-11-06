@@ -34,6 +34,7 @@
 - [x] Footer runs to the bottom of the screen on all pages; 2-up mobile footer, legal links, dead buttons/placeholder links hidden
 - [x] Modern profile header with avatar choice (male / female presets or uploaded photo), shown in the top bar and account settings
 - [x] Legal pages styled with site header/footer; consistent 24px phone margins; Pricing stray divider removed
+- [x] Mobile bottom nav editable from Admin CMS: add/remove tabs, label, path and icon choice (37 icons including a game console); save round-trip verified on the public phone view
 - [ ] Verify successful published movie playback and Continue Watching readback — blocked by current movie source failing playback (media error 4)
 - [ ] Verify live radio playback and device lock-screen controls — blocked by no published radio stations
 
