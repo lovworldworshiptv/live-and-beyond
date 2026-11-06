@@ -4,6 +4,7 @@ import { LibraryBig } from "lucide-react";
 import { Play, Volume2, VolumeX, Users, Radio, Bell, BellRing, Plus, Check, ChevronRight, Signal, Sparkles, Tv, Mic } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ChannelArtwork } from "@/components/channel-artwork";
 import { TitleCard } from "@/components/title-card";
 import { ShareMenu } from "@/components/share-menu";
 import { channels, getChannel, getTitle, type Channel } from "@/lib/catalog";
@@ -263,7 +264,7 @@ function ChannelPage() {
       {/* BRANDING BANNER */}
       <section className="relative border-b border-border">
         <div className="relative h-[210px] lg:h-[270px] overflow-hidden">
-          <img src={channel.banner} alt="" className="absolute inset-0 size-full object-cover" />
+          <ChannelArtwork channel={channel} alt="" className="absolute inset-0 size-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/20" />
           <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-background/30 to-transparent" />
         </div>
@@ -302,7 +303,6 @@ function ChannelPage() {
                 nowPlayingTitle: radio.now_playing_title, nowPlayingArtist: radio.now_playing_artist,
                 nowPlayingArtwork: radio.now_playing_artwork_url, stationMessage: radio.station_message,
               });
-              if (dbChannelId) recordPlaybackEvent({ channelId: dbChannelId, service: "radio", event: "start" });
             }}
             className="h-11 px-5 rounded-md bg-elevated border border-border text-sm font-semibold inline-flex items-center gap-2 hover:bg-elevated/70"
           >
@@ -315,14 +315,14 @@ function ChannelPage() {
       <section ref={playerRef} className={`mx-auto max-w-[1480px] px-4 lg:px-10 pt-4 lg:pt-8 scroll-mt-24 ${playing ? "sticky top-16 z-30 bg-background lg:static" : ""}`}>
         <div ref={frameRef} data-protected-player data-video-player={!isRadio || undefined} data-idle={fullscreen.idle || undefined} className={`relative rounded-lg overflow-hidden border border-border bg-background ${isRadio ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}`}>
           {/* Poster / backdrop */}
-          <img src={channel.banner} alt="" className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${playing ? "opacity-0" : isRadio ? "opacity-40 blur-sm scale-110" : "opacity-60"}`} />
+          <ChannelArtwork channel={channel} alt="" className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${playing ? "opacity-0" : isRadio ? "opacity-40 blur-sm scale-110" : "opacity-60"}`} />
           {!playing && <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />}
 
           {/* Actual media element */}
           {playing && (
             isRadio ? (
               <>
-                <img src={channel.banner} alt="" className="absolute inset-0 size-full object-cover opacity-40 blur-sm scale-110" />
+                <ChannelArtwork channel={channel} alt="" className="absolute inset-0 size-full object-cover opacity-40 blur-sm scale-110" />
                 <audio
                   ref={(el) => { mediaRef.current = el; }}
                   autoPlay
@@ -595,7 +595,7 @@ function ChannelPage() {
                   className="group flex gap-3 p-3 rounded-xl border border-border bg-elevated/40 hover:border-accent/40 transition min-w-0"
                 >
                   <div className="relative size-16 shrink-0 rounded-md overflow-hidden">
-                    <img src={r.banner} alt="" className="size-full object-cover" />
+                    <ChannelArtwork channel={r} alt="" className="size-full object-cover" />
                     {r.isLive && (
                       <span className="absolute top-1 left-1 text-[9px] font-bold px-1 py-0.5 rounded bg-primary text-primary-foreground">LIVE</span>
                     )}
@@ -627,7 +627,7 @@ function ChannelPage() {
               className="group flex gap-3 p-3 rounded-xl border border-border bg-elevated/40 hover:border-accent/40 transition min-w-0"
             >
               <div className="relative size-20 shrink-0 rounded-md overflow-hidden">
-                <img src={r.banner} alt="" className="size-full object-cover" />
+                <ChannelArtwork channel={r} alt="" className="size-full object-cover" />
                 {r.isLive && (
                   <span className="absolute top-1 left-1 text-[9px] font-bold px-1 py-0.5 rounded bg-primary text-primary-foreground">LIVE</span>
                 )}

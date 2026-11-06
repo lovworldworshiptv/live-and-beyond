@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { channels as staticChannels, titles as staticTitles, type Channel, type Title } from "./catalog";
+import { channelArtwork } from "./channel-artwork";
 
 const staticChannelMap = new Map(staticChannels.map((c) => [c.id, c]));
 const staticTitleMap = new Map(staticTitles.map((t) => [t.id, t]));
@@ -81,7 +82,7 @@ export function mapChannelRow(r: ChannelRow): Channel {
     streamKind: r.kind === "radio" ? "radio" : "video",
     isLive: r.is_live,
     logoImg: r.logo_url ?? fallback?.logoImg ?? "",
-    banner: r.banner_url ?? fallback?.banner ?? "",
+    banner: r.banner_url || channelArtwork(r.category ?? "", r.kind, r.slug),
     streamUrl: r.stream_url ?? fallback?.streamUrl ?? undefined,
     videoLibrary: r.video_library ?? fallback?.videoLibrary,
     podcastLibrary: r.podcast_library ?? fallback?.podcastLibrary,

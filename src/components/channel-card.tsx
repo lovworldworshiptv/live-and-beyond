@@ -28,6 +28,7 @@ import { useHlsAttach } from "@/hooks/use-hls";
 import { useFollowing, useReminders, useSettings } from "@/lib/personal";
 import { toast } from "sonner";
 import type { Channel } from "@/lib/catalog";
+import { ChannelArtwork } from "@/components/channel-artwork";
 
 export function ChannelCard({ c }: { c: Channel }) {
   const [hovering, setHovering] = useState(false);
@@ -105,8 +106,8 @@ export function ChannelCard({ c }: { c: Channel }) {
         className="flex min-w-0 flex-1 flex-col rounded-2xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/50 transition"
       >
         <div className="relative aspect-[16/9] overflow-hidden">
-          <img
-            src={c.banner}
+          <ChannelArtwork
+            channel={c}
             alt={c.name}
             loading="lazy"
             className={`size-full object-cover transition duration-700 ${

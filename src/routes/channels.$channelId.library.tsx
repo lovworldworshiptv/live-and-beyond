@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronRight, ArrowLeft, Search, Filter, LibraryBig } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ChannelArtwork } from "@/components/channel-artwork";
 import { TitleCard } from "@/components/title-card";
 import { Pagination } from "@/components/pagination";
 import { getChannel, getTitle, type Channel, type Title } from "@/lib/catalog";
@@ -148,7 +149,7 @@ function ChannelLibraryPage() {
       {/* Hero strip */}
       <section className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-4">
         <div className="relative rounded-2xl overflow-hidden border border-border">
-          <img src={channel.banner} alt="" className="absolute inset-0 size-full object-cover opacity-40" />
+          <ChannelArtwork channel={channel} alt="" className="absolute inset-0 size-full object-cover opacity-40" />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent" />
           <div className="relative p-6 lg:p-8 flex items-center gap-4">
             <div className="size-16 rounded-xl overflow-hidden border border-border bg-elevated shrink-0">
