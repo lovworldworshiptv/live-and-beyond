@@ -113,14 +113,14 @@ function TitleDetail() {
           <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-background" />
         </div>
 
-        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-6">
+        <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 pt-6">
           <div className="text-xs text-[color:var(--muted-foreground)] flex items-center gap-1.5">
             <Link to="/movies" className="hover:text-foreground">On Demand</Link>
             <ChevronRight className="size-3" />
             <span className="text-foreground">{title.title}</span>
           </div>
 
-          <div id="title-player" className="mt-6 max-w-5xl">
+          <div id="title-player" className="mt-6 w-full min-w-0 scroll-mt-24">
             <StreamPlayer
               titleId={title.id}
               src={title.streamUrl}

@@ -87,7 +87,7 @@ export function StreamPlayer({
   };
 
   return (
-    <div ref={frameRef} data-protected-player data-idle={fs.idle || undefined} className={`relative rounded-2xl overflow-hidden border border-border bg-background ${className ?? "aspect-video"}`}>
+    <div ref={frameRef} data-protected-player data-video-player={kind === "video" || undefined} data-idle={fs.idle || undefined} className={`relative rounded-lg overflow-hidden border border-border bg-background ${className ?? "aspect-video"}`}>
       {poster && (
         <MovieArtwork
           src={poster}
