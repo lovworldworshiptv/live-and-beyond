@@ -6,9 +6,10 @@ import { SiteFooter } from "@/components/site-footer";
 import { ChannelArtwork } from "@/components/channel-artwork";
 import { TitleCard } from "@/components/title-card";
 import { Pagination } from "@/components/pagination";
-import { getChannel, getTitle, type Channel, type Title } from "@/lib/catalog";
+import { type Channel, type Title } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
-import { mapChannelRow, mapTitleRow } from "@/lib/cms-catalog";
+import { mapChannelRow } from "@/lib/cms-catalog";
+import { fetchChannelLibrary } from "@/lib/channel-library";
 
 export const Route = createFileRoute("/channels/$channelId/library")({
   head: () => ({
@@ -62,6 +63,7 @@ function ChannelLibraryPage() {
   const [notFoundState, setNotFoundState] = useState(false);
   const [titles, setTitles] = useState<Title[]>([]);
   const [loading, setLoading] = useState(true);
+  const [libraryError, setLibraryError] = useState(false);
   const [kind, setKind] = useState<(typeof KINDS)[number]>("All");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -69,6 +71,9 @@ function ChannelLibraryPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setTitles([]);
+    setLibraryError(false);
+    setNotFoundState(false);
     (async () => {
 
       const { data: chRow } = await supabase
@@ -79,33 +84,17 @@ function ChannelLibraryPage() {
         .maybeSingle();
       const merged: Channel | null = chRow ? mapChannelRow(chRow as never) : null;
       if (cancelled) return;
-      if (!merged) { setNotFoundState(true); setLoading(false); return; }
+      if (!merged || !chRow) { setNotFoundState(true); setLoading(false); return; }
       setChannel(merged);
 
-      const uuid = (chRow as { id?: string } | null)?.id ?? null;
-      const collected: Title[] = [];
-      const seen = new Set<string>();
-
-      // Union of slug-linked libraries from CMS/static channel record
-      const slugSet = new Set<string>([
-        ...(merged.videoLibrary ?? []),
-        ...(merged.podcastLibrary ?? []),
-        ...(merged.featuredContent ?? []),
-      ]);
-      if (slugSet.size) {
-        const { data: rows } = await supabase
-          .from("cms_titles")
-          .select("*")
-          .in("slug", Array.from(slugSet))
-          .eq("is_published", true);
-        for (const r of rows ?? []) {
-          const t = mapTitleRow(r as never);
-          if (!seen.has(t.id)) { seen.add(t.id); collected.push(t); }
-        }
+      try {
+        const collected = await fetchChannelLibrary(chRow.id, merged);
+        if (!cancelled) setTitles(collected);
+      } catch {
+        if (!cancelled) setLibraryError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-
-      void uuid;
-      if (!cancelled) { setTitles(collected); setLoading(false); }
     })();
     return () => { cancelled = true; };
   }, [channelId]);
@@ -207,7 +196,7 @@ function ChannelLibraryPage() {
 
         {pageItems.length === 0 && !loading ? (
           <div className="mt-8 rounded-xl border border-dashed border-border bg-elevated/30 p-12 text-center text-sm text-[color:var(--muted-foreground)]">
-            {titles.length === 0
+            {libraryError ? "Couldn't load this channel's library. Please refresh to try again." : titles.length === 0
               ? "This channel hasn't uploaded any on-demand content yet."
               : "Nothing matches those filters."}
           </div>

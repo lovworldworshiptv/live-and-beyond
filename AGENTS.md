@@ -25,3 +25,4 @@
 - Live provider operations must call the existing channel-management permission function before external side effects; preserve owner, team and admin access and fail closed on lookup errors.
 - Account security actions use verified Auth requests; unavailable payments, community rooms and account deletion must never display simulated success.
 - Channel thumbnails preserve uploaded artwork and recover missing or failed URLs with bundled, category-matched editorial artwork; generated images must not imply a real current programme.
+- Channel overview shelves and libraries share the published CMS library fetch, combining channel_id uploads with curated slug links and deduplicating titles, so creator-published movies appear without manual linking.

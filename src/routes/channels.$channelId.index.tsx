@@ -7,7 +7,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { ChannelArtwork } from "@/components/channel-artwork";
 import { TitleCard } from "@/components/title-card";
 import { ShareMenu } from "@/components/share-menu";
-import { channels, getChannel, getTitle, type Channel } from "@/lib/catalog";
+import { channels, type Channel, type Title } from "@/lib/catalog";
+import { fetchChannelLibrary } from "@/lib/channel-library";
 import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
 import { useHlsAttach } from "@/hooks/use-hls";
@@ -81,12 +82,15 @@ function ChannelPage() {
   const { following: followingDb, toggle: toggleFollowDb } = useChannelFollow(dbChannelId);
   const { settings, setSettings } = useSettings();
   const [radio, setRadio] = useState<RadioSettings | null>(null);
+  const [libraryTitles, setLibraryTitles] = useState<Title[]>([]);
   const radioPlayer = useRadio();
 
   useEffect(() => {
     let cancelled = false;
     setNotFoundState(false);
     setChannel(null);
+    setLibraryTitles([]);
+    setRadio(null);
     (async () => {
       const { data } = await supabase
         .from("cms_channels")
@@ -100,6 +104,9 @@ function ChannelPage() {
         const id = (data as { id: string }).id;
         setDbChannelId(id);
         fetchRadioSettings(id).then((r) => { if (!cancelled) setRadio(r); }).catch(() => {});
+        fetchChannelLibrary(id, mapChannelRow(data as never)).then((titles) => {
+          if (!cancelled) setLibraryTitles(titles);
+        }).catch(() => {});
       }
       else setNotFoundState(true);
     })();
@@ -250,9 +257,9 @@ function ChannelPage() {
     .concat(channels.filter((c) => c.id !== channel.id && c.category !== channel.category))
     .slice(0, 4);
   const recommendations = channels.filter((c) => c.id !== channel.id).sort((a, b) => b.popularity - a.popularity).slice(0, 6);
-  const videoLib = (channel.videoLibrary ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
-  const podcastLib = (channel.podcastLibrary ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
-  const featured = (channel.featuredContent ?? []).map(getTitle).filter(Boolean) as ReturnType<typeof getTitle>[];
+  const videoLib = libraryTitles.filter((t) => t.kind !== "Podcast");
+  const podcastLib = libraryTitles.filter((t) => t.kind === "Podcast");
+  const featured = libraryTitles.filter((t) => (channel.featuredContent ?? []).includes(t.id));
   const isRadio = channel.streamKind === "radio";
 
 
