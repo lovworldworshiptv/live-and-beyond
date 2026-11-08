@@ -281,8 +281,8 @@ function ChannelPage() {
             <span className="text-foreground">{channel.name}</span>
           </div>
           <div className="flex items-end gap-5 flex-wrap">
-            <div className="size-24 lg:size-28 rounded-2xl overflow-hidden border border-border shadow-[var(--shadow-card)] shrink-0 bg-elevated">
-              <img src={channel.logoImg} alt="" className="size-full object-cover" />
+            <div className="size-24 lg:size-28 rounded-2xl overflow-hidden border border-border shadow-[var(--shadow-card)] shrink-0 bg-elevated grid place-items-center">
+              <img src={channel.logoImg} alt="" className="size-full object-contain p-2" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-accent">

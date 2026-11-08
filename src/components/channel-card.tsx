@@ -103,9 +103,9 @@ export function ChannelCard({ c }: { c: Channel }) {
       <Link
         to="/channels/$channelId"
         params={{ channelId: c.id }}
-        className="flex min-w-0 flex-1 flex-col rounded-2xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/50 transition"
+        className="flex min-w-0 flex-1 flex-col rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/40 transition"
       >
-        <div className="relative aspect-[16/9] overflow-hidden">
+        <div className="relative aspect-video overflow-hidden">
           <ChannelArtwork
             channel={c}
             alt={c.name}
@@ -166,21 +166,16 @@ export function ChannelCard({ c }: { c: Channel }) {
 
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
+        <div className="flex min-w-0 flex-1 flex-col p-4">
           <div className="flex items-center justify-between gap-2 min-w-0">
-            <div className="truncate text-xs text-accent font-semibold uppercase tracking-wider">
+            <div className="truncate text-xs font-semibold uppercase tracking-wider text-accent">
               {c.category}
             </div>
             <div className="shrink-0 text-[11px] text-[color:var(--muted-foreground)]">{c.region}</div>
           </div>
-          <div className="mt-1.5 font-semibold text-base sm:text-lg leading-tight line-clamp-2">{c.name}</div>
-          <div className="text-sm text-[color:var(--muted-foreground)] mt-1 line-clamp-1 min-w-0">
-            {c.tagline}
-          </div>
-          <div className="mt-auto pt-4 flex items-center justify-between gap-2 text-sm">
-            <div className="min-w-0 truncate text-[color:var(--secondary-foreground)]">
-              <span className="text-foreground font-medium">{c.isLive ? "Now:" : "Programme:"}</span> {c.nowPlaying.title}
-            </div>
+          <div className="mt-1.5 font-semibold leading-tight line-clamp-1">{c.nowPlaying.title}</div>
+          <div className="mt-0.5 flex items-center justify-between gap-2 min-w-0">
+            <div className="min-w-0 truncate text-sm text-[color:var(--muted-foreground)]">{c.name}</div>
             <button
               onClick={(e) => {
                 e.preventDefault();
