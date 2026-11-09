@@ -40,6 +40,7 @@ import { Route as KCodeRouteImport } from './routes/k.$code'
 import { Route as MoviesIndexRouteImport } from './routes/movies.index'
 import { Route as MoviesTitleIdRouteImport } from './routes/movies.$titleId'
 import { Route as StudioPreviewRouteImport } from './routes/studio.preview'
+import { Route as ApiPublicRadioNowPlayingRouteImport } from './routes/api/public/radio-now-playing'
 import { Route as ChannelsChannelIdIndexRouteImport } from './routes/channels.$channelId.index'
 import { Route as ChannelsChannelIdLibraryRouteImport } from './routes/channels.$channelId.library'
 import { Route as ApiPublicKingschatCallbackRouteImport } from './routes/api/public/kingschat/callback'
@@ -203,6 +204,12 @@ const StudioPreviewRoute = StudioPreviewRouteImport.update({
   path: '/preview',
   getParentRoute: () => StudioRoute,
 } as any)
+const ApiPublicRadioNowPlayingRoute =
+  ApiPublicRadioNowPlayingRouteImport.update({
+    id: '/api/public/radio-now-playing',
+    path: '/api/public/radio-now-playing',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ChannelsChannelIdIndexRoute = ChannelsChannelIdIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -273,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/studio/preview': typeof StudioPreviewRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
+  '/api/public/radio-now-playing': typeof ApiPublicRadioNowPlayingRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -310,6 +318,7 @@ export interface FileRoutesByTo {
   '/studio/preview': typeof StudioPreviewRoute
   '/channels': typeof ChannelsIndexRoute
   '/movies': typeof MoviesIndexRoute
+  '/api/public/radio-now-playing': typeof ApiPublicRadioNowPlayingRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -351,6 +360,7 @@ export interface FileRoutesById {
   '/studio/preview': typeof StudioPreviewRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
+  '/api/public/radio-now-playing': typeof ApiPublicRadioNowPlayingRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/studio/preview'
     | '/channels/'
     | '/movies/'
+    | '/api/public/radio-now-playing'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
@@ -430,6 +441,7 @@ export interface FileRouteTypes {
     | '/studio/preview'
     | '/channels'
     | '/movies'
+    | '/api/public/radio-now-playing'
     | '/channels/$channelId/library'
     | '/channels/$channelId'
     | '/api/public/kingschat/callback'
@@ -470,6 +482,7 @@ export interface FileRouteTypes {
     | '/studio/preview'
     | '/channels/'
     | '/movies/'
+    | '/api/public/radio-now-playing'
     | '/channels/$channelId/library'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
@@ -506,6 +519,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   KCodeRoute: typeof KCodeRoute
+  ApiPublicRadioNowPlayingRoute: typeof ApiPublicRadioNowPlayingRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
   ApiPublicKingschatLoginRoute: typeof ApiPublicKingschatLoginRoute
   ApiPublicKingschatPollRoute: typeof ApiPublicKingschatPollRoute
@@ -732,6 +746,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioPreviewRouteImport
       parentRoute: typeof StudioRoute
     }
+    '/api/public/radio-now-playing': {
+      id: '/api/public/radio-now-playing'
+      path: '/api/public/radio-now-playing'
+      fullPath: '/api/public/radio-now-playing'
+      preLoaderRoute: typeof ApiPublicRadioNowPlayingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/channels/$channelId/': {
       id: '/channels/$channelId/'
       path: '/'
@@ -862,6 +883,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   KCodeRoute: KCodeRoute,
+  ApiPublicRadioNowPlayingRoute: ApiPublicRadioNowPlayingRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
   ApiPublicKingschatLoginRoute: ApiPublicKingschatLoginRoute,
   ApiPublicKingschatPollRoute: ApiPublicKingschatPollRoute,

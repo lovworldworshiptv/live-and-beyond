@@ -114,10 +114,10 @@
     var newest = films.slice().sort(byNewest).slice(0, 12);
     var topYear = newest.length ? newest[0].createdAt : null;
     var rows = [
-      UI.row("Live now", videoChannels().slice(0, 15).map(function (c) { return UI.channelCard(c, go.openChannel); })),
+      UI.row("Live Right Now", videoChannels().filter(function (c) { return c.isLive; }).slice(0, 15).map(function (c) { return UI.channelCard(c, go.openChannel); }), { cls: "live-channel-row" }),
       UI.row("Continue watching for " + (Auth.displayName() || "you"), cardsFor(continueWatching(), go)),
       UI.row("New on Lettflix", cardsFor(newest, go, function (t) { return t.createdAt === topYear ? "Recently added" : null; })),
-      UI.row("Featured", cardsFor(featured, go)),
+      UI.row("Featured On-Demand", cardsFor(Catalog.featured(), go)),
       UI.row("Podcasts", cardsFor(d.titles.filter(function (t) { return t.isAudio; }), go)),
       UI.row("Radio", d.radio.map(function (r) { return UI.radioCard(r, go.openRadio); }))
     ].concat(categories(films).map(function (cat) {
@@ -261,12 +261,37 @@
     return { el: el, focus: function () { return el.querySelector(".autofocus") || el.querySelector(".focusable"); } };
   }
 
+  // ---------------- Combined channel broadcasts and published library ----------------
+
+  function channel(slug, go) {
+    var c = Catalog.channel(slug);
+    if (!c) return { el: h("div.screen", null, empty("This channel is no longer available", "")) };
+    var station = Catalog.radioStation(slug), titles = Catalog.library(c), active = "All";
+    var grid = h("div.grid"), actions = h("div.bb-actions"), mode = c.filterMode;
+    if (!c.isRadio) actions.appendChild(UI.button("Watch Live TV", "live", function () { Player.playChannel(slug); }, "primary autofocus"));
+    if (station && station.stream) actions.appendChild(UI.button("Listen To Radio", "radio", function () { Player.playRadio(slug); }, c.isRadio ? "primary autofocus" : ""));
+    var chips = h("div.hrow.chips", { data: { pad: "0" } }, h("div.htrack", null, Catalog.filterOptions(titles, mode).map(function (value) {
+      return UI.sel(h("div.chip" + (value === "All" ? ".active" : ""), { text: U.titleCase(value) }), function () {
+        active = value;
+        var nodes = chips.querySelectorAll(".chip");
+        for (var i = 0; i < nodes.length; i++) nodes[i].classList.toggle("active", nodes[i].textContent === U.titleCase(value));
+        fill();
+      });
+    })));
+    function fill() { grid.innerHTML = ""; var filtered = titles.filter(function (t) { return Catalog.matchesFilter(t, mode, active); }); U.append(grid, filtered.length ? cardsFor(filtered, go) : empty("No content yet", "")); }
+    fill();
+    var banner = UI.channelArtwork(h("div.channel-header-art"), [c.banner, c.logo, U.channelArt(c.category, c.isRadio)]);
+    var content = h("div.vtrack", null, [h("header.page-head.vanchor", null, [banner, h("h1", { text: c.name }), actions]), h("h2", { text: "Channel Library" }), chips, grid]);
+    var el = h("div.screen.grid-screen.channel-detail", null, h("div.vscroll.page", { data: { mode: "keep" } }, content));
+    return { el: el, focus: function () { return el.querySelector(".autofocus") || el.querySelector(".focusable"); } };
+  }
+
   // ---------------- Account ----------------
 
   function account(go) {
     var name = Auth.displayName() || "You", email = Auth.email();
     var el = h("div.screen.account", null, h("div.account-card", null, [
-      h("div.account-avatar", { text: name.charAt(0).toUpperCase() }),
+      h("div.account-avatar", null, Auth.avatar() ? h("img", { src: Auth.avatar(), alt: "", onerror: function () { this.parentNode.textContent = name.charAt(0).toUpperCase(); } }) : name.charAt(0).toUpperCase()),
       h("div.account-kicker", { text: "YOUR PROFILE" }),
       h("h1", { text: U.greeting() + ", " + name }),
       email ? h("p.muted", { text: email }) : null,
@@ -427,6 +452,6 @@
   window.Screens = {
     home: home, movies: function (go) { return hub("movies", go); }, series: function (go) { return hub("series", go); },
     podcasts: function (go) { return hub("podcasts", go); }, channels: channels, radio: radio, mylist: myList,
-    search: search, title: title, account: account, welcome: welcome, signin: signin
+    search: search, title: title, channel: channel, account: account, welcome: welcome, signin: signin
   };
 })();

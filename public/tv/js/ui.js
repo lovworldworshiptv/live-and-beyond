@@ -7,7 +7,7 @@
   function sel(el, fn) { el.classList.add("focusable"); el.onselect = fn; return el; }
 
   function button(label, iconName, fn, cls) {
-    return sel(h("div.btn" + (cls ? "." + cls : ""), { role: "button" }, [iconName ? icon(iconName) : null, h("span", { text: label })]), fn);
+    return sel(h("div.btn" + (cls ? "." + cls : ""), { role: "button", "aria-label": label, title: label }, [iconName ? icon(iconName) : null, h("span", { text: label })]), fn);
   }
 
   // ---------------- Side rail (Netflix / Prime Video TV navigation) ----------------
@@ -44,6 +44,7 @@
     el.refreshUser = function () {
       var name = Api.Auth.displayName() || "You";
       avatar.textContent = name.charAt(0).toUpperCase(); myName.textContent = name;
+      var image = Api.Auth.avatar(); if (image) { avatar.textContent = ""; avatar.appendChild(h("img", { src: image, alt: "", onerror: function () { avatar.textContent = name.charAt(0).toUpperCase(); } })); }
     };
     el.refreshUser();
     return el;
@@ -59,7 +60,7 @@
   function titleCard(t, onSelect, opts) {
     opts = opts || {};
     var art = h("div.card-art.fallback");
-    U.bg(art, [t.backdrop, t.poster]);
+    U.bg(art, [t.backdrop, t.poster, "assets/lettflix_symbol.png"]);
     var p = Personal.progress(t.slug);
     var badge = opts.badge ? h("span.card-badge", { text: opts.badge }) : null;
     var el = h("div.card", null, [
@@ -74,11 +75,11 @@
   /** Live channel card: banner art, logo, LIVE badge and what's on now. */
   function channelCard(c, onSelect) {
     var art = h("div.card-art.fallback");
-    U.bg(art, [c.banner, U.channelArt(c.category, c.isRadio)]);
+    channelArtwork(art, [c.banner, c.logo, U.channelArt(c.category, c.isRadio)]);
     var now = Catalog.nowOn(c);
     var el = h("div.card.channel-card", null, [
       art, h("div.card-scrim"),
-      c.isLive || c.stream || c.playout ? h("span.live-badge", null, [h("i.live-dot"), "LIVE"]) : null,
+      c.isLive ? h("span.live-badge", null, [h("i.live-dot"), "LIVE"]) : null,
       c.logo ? h("img.card-logo", { src: c.logo, alt: "", onerror: function () { this.style.display = "none"; } }) : null,
       h("div.card-meta", null, [h("div.card-name", { text: c.name }), h("div.card-now", { text: now ? "Now: " + now : (c.tagline || U.titleCase(c.category)) })])
     ]);
@@ -86,9 +87,20 @@
     return sel(el, function () { onSelect(c); });
   }
 
+  function channelArtwork(el, sources) {
+    var edit = U.channelEdit(sources[0]);
+    if (edit) { sources = [edit[1]].concat(sources); el.setAttribute("data-artwork-theme", edit[2]); }
+    U.firstImage(sources).then(function (src) {
+      if (!src) return;
+      el.classList.remove("fallback"); el.style.backgroundImage = "none";
+      U.append(el, [h("img.channel-art-fill", { src: src, alt: "" }), h("img.channel-art-full", { src: src, alt: "" })]);
+    });
+    return el;
+  }
+
   function radioCard(r, onSelect) {
     var art = h("div.card-art.fallback");
-    U.bg(art, [r.nowArtwork, r.banner, r.logo, "assets/channels/radio.jpg"]);
+    channelArtwork(art, [r.artwork, r.logo, r.banner, "assets/channels/radio.jpg"]);
     var el = h("div.card.radio-card", null, [
       art, h("div.card-scrim"), h("span.live-badge", null, [h("i.live-dot"), "ON AIR"]),
       h("div.card-meta", null, [h("div.card-name", { text: r.name }),
@@ -213,6 +225,6 @@
 
   window.UI = {
     sel: sel, button: button, rail: rail, titleCard: titleCard, channelCard: channelCard, radioCard: radioCard,
-    row: row, toast: toast, dialog: dialog, keyboard: keyboard, field: field, progressBar: progressBar
+    row: row, toast: toast, dialog: dialog, keyboard: keyboard, field: field, progressBar: progressBar, channelArtwork: channelArtwork
   };
 })();

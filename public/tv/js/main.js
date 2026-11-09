@@ -29,7 +29,7 @@
     back: back,
     exit: confirmExit,
     openTitle: function (t) { go.push("title", t.slug); },
-    openChannel: function (c) { Player.playChannel(c.slug); },
+    openChannel: function (c) { go.push("channel", c.slug); },
     openRadio: function (r) { Player.playRadio(r.slug); },
     open: function (item) { if (item.type === "title") go.openTitle(item.data); else go.play(item); },
     play: function (item) {
@@ -47,7 +47,7 @@
   };
 
   function build(name, arg) {
-    return name === "title" ? Screens.title(arg, go) : Screens[name](go);
+    return name === "title" ? Screens.title(arg, go) : name === "channel" ? Screens.channel(arg, go) : Screens[name](go);
   }
   function rebuild(entry) {
     if (entry.screen.destroy) entry.screen.destroy();
@@ -73,6 +73,7 @@
     entry.screen.el.classList.add("enter");
     main.appendChild(entry.screen.el);
     focusScreen(entry);
+    if (signedIn()) U.store.set("lf.screen." + (Auth.userId() || "guest"), { name: name, arg: arg });
   }
   function focusScreen(entry) {
     var f = entry.screen.focus ? entry.screen.focus() : null;
@@ -113,7 +114,7 @@
       railEl.refreshUser();
       railEl.style.display = "";
       var ready = Catalog.hasData() ? Promise.resolve() : loading(Catalog.refresh());
-      ready.then(function () { go.root("home"); }, function () { offline(); });
+      ready.then(function () { var saved = U.store.get("lf.screen." + (Auth.userId() || "guest"), null); if (saved && ROOTS.indexOf(saved.name) >= 0) go.root(saved.name); else if (saved && (saved.name === "title" || saved.name === "channel")) { go.root("home"); go.push(saved.name, saved.arg); } else go.root("home"); }, function () { offline(); });
     } else {
       if (railEl) railEl.style.display = "none";
       go.root("welcome");
@@ -165,6 +166,8 @@
   document.addEventListener("contextmenu", function (e) { e.preventDefault(); });
   document.addEventListener("dragstart", function (e) { e.preventDefault(); });
   document.addEventListener("selectstart", function (e) { e.preventDefault(); });
+
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && Auth.signedIn()) { Auth.keepFresh(); Catalog.refreshIfStale().catch(function () {}); } });
 
   // ---- Boot ----
   var warm = signedIn() ? Catalog.refresh().catch(function () {}) : Promise.resolve();

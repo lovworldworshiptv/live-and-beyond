@@ -30,7 +30,7 @@
         return Auth.refresh().then(function () { opts.retried = true; return rest(path, query, opts); });
       }
       if (!r.ok) throw new Error("HTTP " + r.status);
-      return opts.body ? null : r.json();
+      return opts.body && !opts.jsonResult ? null : r.json();
     });
   }
 
@@ -73,6 +73,7 @@
     user: function () { return session ? session.user : null; },
     userId: function () { return session && session.user ? session.user.id : null; },
     email: function () { return session && session.user ? session.user.email : null; },
+    avatar: function () { var value = session && session.avatar; return value === "preset:male" ? "assets/avatar-male.jpg" : value === "preset:female" ? "assets/avatar-female.jpg" : value || null; },
     displayName: function () {
       if (!session) return null;
       var u = session.user || {}, meta = u.user_metadata || {};
@@ -168,9 +169,9 @@
 
   // ---------------- Catalogue ----------------
 
-  var KIND_LABEL = { movie: "Film", film: "Film", series: "Series", podcast: "Podcast", documentary: "Documentary", concert: "Concert", event: "Event" };
-  var CATALOG_KEY = "lf.catalog", STALE_MS = 5 * 60 * 1000;
-  var RADIO_COLUMNS = "channel_id,stream_url,format,bitrate_kbps,now_playing_title,now_playing_artist,now_playing_artwork_url,station_message,is_enabled," +
+  var KIND_LABEL = { movie: "Film", film: "Film", series: "Series", podcast: "Podcast", documentary: "Documentary", concert: "Concert", event: "Event", music: "Music", video: "Video" };
+  var CATALOG_KEY = "lf.catalog.v2", STALE_MS = 5 * 60 * 1000;
+  var RADIO_COLUMNS = "channel_id,stream_url,format,bitrate_kbps,artwork_url,now_playing_title,now_playing_artist,now_playing_artwork_url,station_message,is_enabled," +
     "cms_channels!inner(id,slug,name,tagline,logo_url,banner_url,category,country,language,is_published,deleted_at,display_order)";
 
   /** Non-empty URL; site-relative CMS paths (/__l5e/assets-v1/…) resolve against lettflix.com. */
@@ -189,14 +190,14 @@
       isRadio: r.kind === "radio", isLive: !!r.is_live, logo: nz(r.logo_url), banner: nz(r.banner_url),
       stream: nz(r.stream_url), tvSource: r.tv_source || null, playout: !!r.playout_enabled,
       fallbackPlaylist: r.fallback_playlist_id || null, nowTitle: np.title || null, nowDescription: np.description || null,
-      createdAt: r.created_at || "", position: i,
+      createdAt: r.created_at || "", position: i, filterMode: r.library_filter_mode === "genres" ? "genres" : "categories",
       videoLibrary: r.video_library || [], podcastLibrary: r.podcast_library || [], featured: r.featured_content || []
     };
   }
   function mapTitle(r, i) {
     var kind = KIND_LABEL[String(r.kind || "movie").toLowerCase()] || "Film";
     return {
-      slug: r.slug, id: r.id, title: r.title, synopsis: r.synopsis || "", kind: kind,
+      slug: r.slug, id: r.id, rawKind: String(r.kind || "movie").toLowerCase(), title: r.title, synopsis: r.synopsis || "", kind: kind,
       category: U.titleCase(r.genre || ""), year: r.year || null, rating: r.rating || "TV-PG",
       duration: r.duration_label || (r.duration_minutes ? U.minutesLabel(r.duration_minutes) : ""),
       seasons: r.seasons || null, episodes: r.episodes || null, featured: !!r.is_featured, cast: r.cast_list || [],
@@ -208,7 +209,7 @@
     return (rows || []).filter(function (r) { var c = r.cms_channels; return c && c.is_published && !c.deleted_at; }).map(function (r) {
       var c = r.cms_channels;
       return {
-        channelId: r.channel_id, slug: c.slug, name: c.name, tagline: c.tagline || "", logo: nz(c.logo_url), banner: nz(c.banner_url),
+        channelId: r.channel_id, slug: c.slug, name: c.name, tagline: c.tagline || "", logo: nz(c.logo_url), banner: nz(c.banner_url), artwork: nz(r.artwork_url),
         category: c.category || "", stream: nz(r.stream_url), nowTitle: r.now_playing_title || null,
         nowArtist: r.now_playing_artist || null, nowArtwork: nz(r.now_playing_artwork_url), message: r.station_message || null,
         order: c.display_order || 0
@@ -218,21 +219,22 @@
 
   var cache = store.get(CATALOG_KEY, null);
   var Catalog = {
-    data: cache ? cache.data : { channels: [], titles: [], radio: [], schedule: [] },
+    data: cache ? cache.data : { channels: [], titles: [], radio: [], schedule: [], rankings: [] },
     syncedAt: cache ? cache.at : 0,
     hasData: function () { return Catalog.data.channels.length + Catalog.data.titles.length > 0; },
     refresh: function () {
       var since = new Date(Date.now() - 12 * 3600 * 1000).toISOString();
       var soft = function (p) { return p.catch(function () { return null; }); };
       return Promise.all([
-        rest("cms_channels", "select=*&is_published=eq.true&order=display_order.asc,created_at.desc"),
+        rest("cms_channels", "select=*&is_published=eq.true&deleted_at=is.null&order=display_order.asc,created_at.desc"),
         rest("cms_titles", "select=*&is_published=eq.true&deleted_at=is.null&order=display_order.asc,created_at.desc"),
         soft(rest("radio_settings", "select=" + encodeURIComponent(RADIO_COLUMNS) + "&is_enabled=eq.true")),
+        soft(rest("rpc/featured_on_demand_rankings", "", { method: "POST", jsonResult: true })),
         soft(rest("cms_schedule", "select=id,channel_id,program_title,starts_at,ends_at&is_published=eq.true&ends_at=gte." + encodeURIComponent(since) + "&order=starts_at.asc"))
       ]).then(function (res) {
         Catalog.data = {
           channels: res[0].map(mapChannel), titles: res[1].map(mapTitle),
-          radio: res[2] ? mapRadio(res[2]) : Catalog.data.radio, schedule: res[3] || Catalog.data.schedule
+          radio: res[2] ? mapRadio(res[2]) : [], rankings: res[3] || [], schedule: res[4] || []
         };
         Catalog.syncedAt = Date.now();
         store.set(CATALOG_KEY, { at: Catalog.syncedAt, data: Catalog.data });
@@ -243,6 +245,20 @@
     title: function (slug) { return Catalog.data.titles.filter(function (t) { return t.slug === slug; })[0] || null; },
     channel: function (slug) { return Catalog.data.channels.filter(function (c) { return c.slug === slug; })[0] || null; },
     radioStation: function (slug) { return Catalog.data.radio.filter(function (r) { return r.slug === slug; })[0] || null; },
+    library: function (channel) {
+      var links = channel.videoLibrary.concat(channel.podcastLibrary, channel.featured);
+      return Catalog.data.titles.filter(function (t) { return t.channelId === channel.id || links.indexOf(t.slug) >= 0; });
+    },
+    filterOptions: function (titles, mode) {
+      var seen = {}, values = [];
+      titles.forEach(function (t) { var value = mode === "genres" ? t.category.trim() : t.rawKind; if (value && !seen[value]) { seen[value] = true; values.push(value); } });
+      return ["All"].concat(values.sort(function (a, b) { return a.localeCompare(b); }));
+    },
+    matchesFilter: function (title, mode, value) { return value === "All" || (mode === "genres" ? title.category.trim() : title.rawKind) === value; },
+    featured: function () {
+      var seen = {};
+      return (Catalog.data.rankings || []).map(function (r) { var t = Catalog.title(r.slug); if (!t || r.plays <= 0 || seen[r.slug] || ["movie", "series", "podcast"].indexOf(t.rawKind) < 0) return null; seen[r.slug] = true; return t; }).filter(Boolean).slice(0, 12);
+    },
     /** What a channel is airing now: its schedule, else the CMS now_playing title. */
     nowOn: function (ch) {
       var now = Date.now();
@@ -341,7 +357,7 @@
       return Promise.resolve({
         kind: "title", id: slug, url: t.stream, title: t.title, artwork: t.backdrop || t.poster, isAudio: t.isAudio, isLive: false,
         subtitle: [t.kind, t.year, t.duration].filter(Boolean).join(" · "),
-        start: p && p.pct >= 1 && p.pct <= 97 ? p.pos : 0, titleId: t.id
+        start: p && p.pct >= 1 && p.pct <= 97 ? p.pos : 0, titleId: t.id, channelId: t.channelId
       });
     },
     resolveChannel: function (slug) {
@@ -373,7 +389,7 @@
         return Promise.resolve({
           kind: "radio", id: slug, url: r.stream, title: r.name, isAudio: true, isLive: true, channelId: r.channelId, start: 0,
           subtitle: [r.nowTitle, r.nowArtist].filter(Boolean).join(" — ") || r.tagline || "Live radio",
-          artwork: r.nowArtwork || r.logo || r.banner
+          artwork: r.artwork || r.logo || r.banner
         });
       }
       return Playback.resolveChannel(slug).then(function (s) { return Object.assign(s, { kind: "radio", isAudio: true }); });

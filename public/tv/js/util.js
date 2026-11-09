@@ -117,6 +117,13 @@
     });
   }
   /** Sets a CSS background from the first working image, else the fallback class keeps the brand art. */
+  var CHANNEL_EDITS = [
+    ["b44b17a1-80cb-4ba4-b6fa-d3b77dd42467", "assets/joycall-tv.png", "joycall"],
+    ["e37fa535-a86f-41c7-9f2a-ea7f31124a40", "assets/lxp-wide.jpg", "lxp"],
+    ["7987409c-f107-4d66-8728-f9d68d1139e6", "assets/healing-streams-tv.png", "healing"],
+    ["ANd9GcRIsdi08fsNCCXUi9-fssXu6MlqtdHwvtVamm7tPbXWLNFgbc5QAvxVEA-1", "assets/rhapsodytv.png", "rhapsody"]
+  ];
+  function channelEdit(src) { return CHANNEL_EDITS.filter(function (art) { return src && src.indexOf(art[0]) >= 0; })[0] || null; }
   function bg(el, srcs) {
     firstImage(srcs).then(function (src) {
       if (src) { el.style.backgroundImage = "url(\"" + src.replace(/"/g, "%22") + "\")"; el.classList.add("has-img"); }
@@ -135,6 +142,6 @@
 
   window.U = {
     h: h, append: append, icon: icon, store: store, titleCase: titleCase, clock: clock, minutesLabel: minutesLabel,
-    greeting: greeting, debounce: debounce, uuid: uuid, bg: bg, firstImage: firstImage, channelArt: channelArt
+    greeting: greeting, debounce: debounce, uuid: uuid, channelEdit: channelEdit, bg: bg, firstImage: firstImage, channelArt: channelArt
   };
 })();

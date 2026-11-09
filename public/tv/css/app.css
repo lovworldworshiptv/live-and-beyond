@@ -302,3 +302,34 @@ body.playing #main, body.playing .rail { visibility: hidden; }
 @keyframes i-symbol { 0% { opacity: 0; transform: scale(.55); filter: blur(12px); } 30% { opacity: 1; transform: scale(1); filter: blur(0); } 48% { opacity: 1; transform: scale(1.04); } 60% { opacity: 0; transform: scale(1.25); } 100% { opacity: 0; } }
 @keyframes i-beam { 0% { opacity: 0; left: -600px; } 30% { opacity: 1; } 100% { opacity: 0; left: 2100px; } }
 @keyframes i-word { 0%, 50% { opacity: 0; transform: scale(1.08); letter-spacing: .1em; } 70% { opacity: 1; transform: scale(1); } 90% { opacity: 1; transform: scale(.985); } 100% { opacity: 1; transform: scale(.98); } }
+
+/* Viewer parity: complete channel artwork and calm radio ticker. */
+:root { --channel-fill-opacity: .7; --channel-fill-blur: 18px; }
+.channel-art-full, .channel-art-fill { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.channel-art-fill { object-fit: cover; filter: blur(var(--channel-fill-blur)); opacity: var(--channel-fill-opacity); }
+.channel-art-full { object-fit: contain; }
+.channel-header-art { position: relative; width: 720px; height: 405px; overflow: hidden; background: var(--elevated); margin-bottom: 26px; }
+.channel-detail .bb-actions { margin-top: 24px; flex-wrap: wrap; }
+.channel-detail .bb-actions .btn { margin-bottom: 16px; }
+.channel-detail .grid { margin-top: 26px; }
+.live-channel-row .card { width: 479px; height: 269px; }
+.player-art { background-size: contain; }
+.player-top > div { min-width: 0; max-width: 1500px; overflow: hidden; }
+.player.audio .player-sub { width: max-content; max-width: none; white-space: nowrap; animation: radio-song-slide 18s linear infinite; }
+.player.audio.paused .player-sub { animation-play-state: paused; }
+@keyframes radio-song-slide { 0%, 10% { transform: translateX(0); } 90%, 100% { transform: translateX(-100%); } }
+.player-error .btn { margin-top: 24px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+:root {
+  --channel-joycall-fill: linear-gradient(120deg, #64ae64, #dcdb52);
+  --channel-lxp-fill: linear-gradient(120deg, #176285, #3eafbe);
+  --channel-healing-fill: linear-gradient(120deg, #274aab, #6cb7ee);
+  --channel-rhapsody-fill: linear-gradient(120deg, #409caf, #a4e4ec);
+}
+[data-artwork-theme="joycall"] { background: var(--channel-joycall-fill); }
+[data-artwork-theme="lxp"] { background: var(--channel-lxp-fill); }
+[data-artwork-theme="healing"] { background: var(--channel-healing-fill); }
+[data-artwork-theme="rhapsody"] { background: var(--channel-rhapsody-fill); }
+[data-artwork-theme] .channel-art-fill { display: none; }
+.rail-avatar img, .account-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }

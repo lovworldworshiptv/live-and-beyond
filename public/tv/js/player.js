@@ -10,14 +10,17 @@
   var root = null, video = null, hls = null, src = null, hideTimer = null, tick = null;
   var ui = {};
   var seconds = 0, started = false, onClose = null, seekPreview = null, seekTimer = null;
+  var loadGeneration = 0, radioTimer = null;
 
   function isHls(url) { return /\.m3u8(\?|$)/i.test(url); }
 
   function attach(url, start) {
     detachHls();
+    var generation = loadGeneration;
     var native = video.canPlayType("application/vnd.apple.mpegurl");
     if (isHls(url) && window.Hls && Hls.isSupported() && !(native === "probably")) {
       hls = new Hls({ startPosition: start > 0 ? start : -1, capLevelToPlayerSize: true, maxBufferLength: 30 });
+      hls.on(Hls.Events.MANIFEST_PARSED, function () { if (generation === loadGeneration) startPlayback(); });
       hls.on(Hls.Events.ERROR, function (e, d) {
         if (!d.fatal) return;
         if (d.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
@@ -33,8 +36,17 @@
         video.addEventListener("loadedmetadata", seek);
       }
     }
-    var p = video.play();
-    if (p && p.catch) p.catch(function () { /* autoplay blocked: OK starts it */ showControls(); });
+    video.onloadedmetadata = function () { if (generation === loadGeneration) startPlayback(); };
+    if (video.readyState >= 1) startPlayback();
+  }
+  function startPlayback() {
+    var generation = loadGeneration, media = video;
+    var p = media.play();
+    if (p && p.catch) p.catch(function (e) {
+      if (generation !== loadGeneration) return;
+      if (e.name === "NotAllowedError" && !media.muted) { media.muted = true; var retry = media.play(); if (retry && retry.catch) retry.catch(function () { showControls(true); }); }
+      else if (e.name !== "AbortError") fail("This stream can't play right now.");
+    });
   }
   function detachHls() { if (hls) { try { hls.destroy(); } catch (e) { /* ignore */ } hls = null; } }
 
@@ -68,7 +80,8 @@
   function onMedia(e) {
     if (e.type === "waiting") root.classList.add("buffering");
     if (e.type === "playing" || e.type === "canplay") root.classList.remove("buffering");
-    if (e.type === "playing" || e.type === "pause") paintPlay();
+    if (e.type === "playing" || e.type === "pause") { paintPlay(); root.classList.toggle("paused", video.paused); }
+    if (e.type === "playing" && src && !started) { started = true; Playback.record(src, "start"); }
     if (e.type === "error" && !hls) fail("This stream can't play right now.");
     if (e.type === "ended") {
       if (src && src.playout) return reloadChannel();           // next programme
@@ -101,7 +114,7 @@
     if (!stay && !video.paused) hideTimer = setTimeout(function () { root.classList.remove("controls"); }, 4000);
   }
   function togglePlay() {
-    if (video.paused) { var p = video.play(); if (p && p.catch) p.catch(function () {}); } else video.pause();
+    if (video.paused) { if (root.classList.contains("failed") && src) load(src); else startPlayback(); } else video.pause();
     showControls();
   }
   function canSeek() { return src && !src.isLive && isFinite(video.duration); }
@@ -121,7 +134,7 @@
   function fail(msg) {
     root.classList.add("failed"); root.classList.remove("buffering");
     ui.error.innerHTML = "";
-    U.append(ui.error, [h("h2", { text: msg }), h("p", { text: "Press Back to return." })]);
+    U.append(ui.error, [h("h2", { text: msg }), UI.button("Retry", "replay", function () { if (src) load(src); }, "primary"), h("p", { text: "Press Back to return." })]);
   }
 
   function save() {
@@ -134,18 +147,29 @@
   }
 
   function load(s) {
+    loadGeneration++; clearTimeout(radioTimer); video.pause();
     src = s; seconds = 0; started = false; seekPreview = null;
     root.className = "player buffering controls";
     root.classList.toggle("audio", !!s.isAudio);
-    ui.title.textContent = s.kind === "title" ? U.titleCase(s.title) : s.title; ui.sub.textContent = s.subtitle || "";
+    ui.title.textContent = s.kind === "title" ? U.titleCase(s.title) : s.title; ui.sub.textContent = U.titleCase(s.subtitle || "");
     ui.art.style.backgroundImage = s.artwork ? "url(\"" + s.artwork + "\")" : "";
     ui.restart.style.display = s.kind === "title" && s.start > 0 ? "" : "none";
+    if (s.kind === "radio") {
+      var generation = loadGeneration;
+      (function pollSong() {
+        fetch(LETT_CONFIG.API_ORIGIN + "/api/public/radio-now-playing?channelId=" + encodeURIComponent(s.channelId)).then(function (r) { if (!r.ok) throw new Error("metadata unavailable"); return r.json(); }).then(function (song) {
+          if (generation !== loadGeneration) return;
+          var title = [song.title, song.artist].filter(Boolean).map(U.titleCase).join(" — ");
+          if (title && ui.sub.textContent !== title) ui.sub.textContent = title;
+        }).catch(function () {}).then(function () { if (generation === loadGeneration) radioTimer = setTimeout(pollSong, 15000); });
+      })();
+    }
     attach(s.url, s.start || 0);
     paintPlay(); paintTime(); showControls();
   }
 
   function onKey(k) {
-    if (root.classList.contains("failed")) { if (k === KEY.BACK) close(); return true; }
+    if (root.classList.contains("failed")) { if (k === KEY.BACK) close(); else if (k === KEY.OK && src) load(src); return true; }
     var visible = root.classList.contains("controls");
     switch (k) {
       case KEY.BACK:
@@ -169,6 +193,7 @@
   }
 
   function close() {
+    loadGeneration++; clearTimeout(radioTimer);
     save();
     if (src && started) Playback.record(src, "stop", seconds % 30);
     clearInterval(tick); clearTimeout(hideTimer); clearTimeout(seekTimer);
@@ -183,6 +208,7 @@
   }
 
   function open(resolver, closed) {
+    if (root && root.parentNode) close();
     if (!root) build();
     onClose = closed || null;
     document.getElementById("overlay").appendChild(root);
@@ -190,13 +216,13 @@
     root.className = "player buffering controls";
     ui.error.innerHTML = ""; ui.title.textContent = ""; ui.sub.textContent = "";
     Nav.push(root, { focus: ui.play, onKey: onKey });
-    resolver.then(load, function (e) { fail(e.message || "This isn't available to play yet."); });
+    var generation = ++loadGeneration;
+    resolver.then(function (s) { if (generation === loadGeneration) load(s); }, function (e) { if (generation === loadGeneration) fail(e.message || "This isn't available to play yet."); });
     clearInterval(tick);
     tick = setInterval(function () {
       if (!src) return;
       paintTime();
       if (!video.paused && !video.seeking && video.readyState > 2) {
-        if (!started) { started = true; Playback.record(src, "start"); }
         seconds++;
         if (seconds % 30 === 0) Playback.record(src, "heartbeat", 30);
         if (seconds % 5 === 0) save();
