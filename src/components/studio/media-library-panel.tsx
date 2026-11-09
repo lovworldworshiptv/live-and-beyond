@@ -7,7 +7,7 @@ import { Field, inputClass, textareaClass } from "@/routes/admin";
 import { fetchMediaAssets, formatDuration, type MediaAsset } from "@/lib/playout";
 import { slugify } from "@/lib/channel-services";
 
-type Kind = "movie" | "series" | "podcast" | "documentary";
+type Kind = "movie" | "series" | "podcast" | "documentary" | "music";
 
 type Draft = {
   id?: string;
@@ -219,6 +219,8 @@ function ContentEditor({
               <option value="series">Series → /series</option>
               <option value="podcast">Podcast → /podcasts</option>
               <option value="documentary">Documentary → /documentaries</option>
+              <option value="music">Music</option>
+              <option value="music">Music</option>
             </select>
           </Field>
           <Field label="Media type">

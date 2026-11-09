@@ -119,6 +119,8 @@ function ChannelPage() {
 
   const startPlayback = () => {
     if (!streamSrc) { toast("This channel is not available to play yet."); return; }
+    // One broadcast at a time: starting TV stops any radio station.
+    if (radioPlayer.station) radioPlayer.stop();
     setPlaying(true);
     setMuted(false);
     playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -134,6 +136,14 @@ function ChannelPage() {
       }
     });
   };
+
+  // If a radio station starts anywhere (e.g. the mini player), stop the TV stream.
+  useEffect(() => {
+    if (radioPlayer.station) {
+      mediaRef.current?.pause();
+      setPlaying(false);
+    }
+  }, [radioPlayer.station]);
 
   useEffect(() => {
     if (channel && typeof window !== "undefined" && window.location.hash === "#watch") {
@@ -260,6 +270,7 @@ function ChannelPage() {
   const podcastLib = libraryTitles.filter((t) => t.kind === "Podcast");
   const featured = libraryTitles.filter((t) => (channel.featuredContent ?? []).includes(t.id));
   const isRadio = channel.streamKind === "radio";
+  const radioOnHere = !!radioPlayer.station && radioPlayer.station.slug === channelId;
 
 
 
@@ -299,9 +310,25 @@ function ChannelPage() {
 
       {radio?.is_enabled && radio.stream_url && (
         <div className="mx-auto max-w-[1480px] px-4 lg:px-10 pt-4">
-          <button
-            onClick={() => {
-              radioPlayer.play({
+          <div role="group" aria-label={`Choose how to follow ${channel.name}`} className="inline-flex rounded-lg border border-border bg-elevated p-1">
+            {streamSrc && !isRadio && (
+              <button
+                type="button"
+                aria-pressed={!radioOnHere}
+                onClick={() => { if (radioOnHere || !playing) startPlayback(); }}
+                className={`h-10 px-4 rounded-md text-sm font-semibold inline-flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${!radioOnHere ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <Tv className="size-4" /> Watch live TV
+              </button>
+            )}
+            <button
+              type="button"
+              aria-pressed={radioOnHere}
+              onClick={() => {
+                if (radioOnHere) return;
+                mediaRef.current?.pause();
+                setPlaying(false);
+                radioPlayer.play({
                 channelId: dbChannelId ?? channel.id, slug: channelId, name: channel.name,
                 tagline: channel.tagline ?? null, logoUrl: channel.logoImg || null, bannerUrl: channel.banner || null,
                 category: channel.category ?? null, country: channel.country ?? null, language: channel.language ?? null,
@@ -309,11 +336,13 @@ function ChannelPage() {
                 nowPlayingTitle: radio.now_playing_title, nowPlayingArtist: radio.now_playing_artist,
                 nowPlayingArtwork: radio.now_playing_artwork_url, stationMessage: radio.station_message,
               });
-            }}
-            className="h-11 px-5 rounded-md bg-elevated border border-border text-sm font-semibold inline-flex items-center gap-2 hover:bg-elevated/70"
-          >
-            <Radio className="size-4 text-primary" /> Listen to {channel.name} Radio
-          </button>
+              }}
+              className={`h-10 px-4 rounded-md text-sm font-semibold inline-flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${radioOnHere ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <Radio className="size-4" /> Listen to radio
+            </button>
+          </div>
+          {radioOnHere && <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">Radio is playing below the page. Choose Watch live TV to switch back.</p>}
         </div>
       )}
 

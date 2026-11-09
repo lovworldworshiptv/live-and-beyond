@@ -1,3 +1,4 @@
+import { COUNTRIES } from "@/lib/countries";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
@@ -421,7 +422,13 @@ export function ChannelEditor({ value, onClose, onSave, onSaved }: { value: Part
           </select>
         </Field>
         <Field label="Language"><input className={inputClass} value={form.language ?? ""} onChange={(e) => set("language", e.target.value)} /></Field>
-        <Field label="Country"><input className={inputClass} value={form.country ?? ""} onChange={(e) => set("country", e.target.value)} /></Field>
+        <Field label="Country">
+          <select className={inputClass} value={form.country ?? ""} onChange={(e) => set("country", e.target.value)}>
+            <option value="">Choose a country</option>
+            {form.country && !(COUNTRIES as readonly string[]).includes(form.country) && <option value={form.country}>{form.country}</option>}
+            {COUNTRIES.map((c) => <option key={c}>{c}</option>)}
+          </select>
+        </Field>
         <Field label="Region"><input className={inputClass} value={form.region ?? ""} onChange={(e) => set("region", e.target.value)} placeholder="Global" /></Field>
         <Field label="Viewers (display)"><input className={inputClass} value={form.viewers ?? ""} onChange={(e) => set("viewers", e.target.value)} placeholder="12.4K" /></Field>
         <Field label="Popularity (0-100)"><input type="number" min={0} max={100} className={inputClass} value={form.popularity ?? 0} onChange={(e) => set("popularity", Number(e.target.value))} /></Field>
@@ -590,6 +597,8 @@ function TitleEditor({ value, onClose, onSave }: { value: Partial<Title>; onClos
             <option value="series">Series → /series</option>
             <option value="podcast">Podcast → /podcasts</option>
             <option value="documentary">Documentary → /documentaries</option>
+            <option value="music">Music</option>
+            <option value="music">Music</option>
           </select>
         </Field>
         <Field label="Genre"><input className={inputClass} value={form.genre ?? ""} onChange={(e) => set("genre", e.target.value)} /></Field>

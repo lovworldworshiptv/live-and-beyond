@@ -63,3 +63,8 @@
 
 - [x] Admin CMS channel editor: TV, radio and videos together; admin Open Studio + Studio channel switcher
 - [x] Verified authenticated Admin/Open Studio access, all Studio sections, combined TV/radio/VOD draft save and readback, unchanged creator ownership, failed-save recovery and editor reset on channel switching; phone/tablet layouts have no horizontal overflow. Test drafts removed; 19 regression tests pass. Actual streaming still depends on working media sources.
+
+## Requests (Nov 9)
+- [x] Add "Music" as a content kind in Creator Studio and Admin CMS
+- [x] Country field uses a predetermined countries list (Studio setup and Admin channel editor)
+- [x] Channel page plays only one broadcast at a time (live TV or radio) with a Watch live TV / Listen to radio switcher

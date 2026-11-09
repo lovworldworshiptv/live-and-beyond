@@ -1,3 +1,4 @@
+import { COUNTRIES } from "@/lib/countries";
 import { useState } from "react";
 import { Check, ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -164,7 +165,11 @@ export function ChannelSetupWizard({ channel, creatorId, initialServices, onClos
                 <input className={inputClass} value={str("language")} onChange={(e) => set("language", e.target.value)} placeholder="English" />
               </Field>
               <Field label="Country">
-                <input className={inputClass} value={str("country")} onChange={(e) => set("country", e.target.value)} placeholder="Nigeria" />
+                <select className={inputClass} value={str("country")} onChange={(e) => set("country", e.target.value)}>
+                  <option value="">Choose a country</option>
+                  {str("country") && !(COUNTRIES as readonly string[]).includes(str("country")) && <option value={str("country")}>{str("country")}</option>}
+                  {COUNTRIES.map((c) => <option key={c}>{c}</option>)}
+                </select>
               </Field>
               <Field label="Region">
                 <input className={inputClass} value={str("region")} onChange={(e) => set("region", e.target.value)} placeholder="Global" />

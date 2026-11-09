@@ -55,7 +55,7 @@ function ErrorView({ error, reset }: ErrorComponentProps) {
 }
 
 const PAGE_SIZE = 18;
-const KINDS = ["All", "Film", "Series", "Podcast", "Documentary", "Concert", "Event"] as const;
+const KINDS = ["All", "Film", "Series", "Podcast", "Documentary", "Concert", "Event", "Music"] as const;
 
 function ChannelLibraryPage() {
   const { channelId } = Route.useParams();

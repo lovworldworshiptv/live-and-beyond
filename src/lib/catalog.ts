@@ -395,7 +395,7 @@ export type Title = {
   cover: string;
   hero: string;
   category: string;
-  kind: "Series" | "Film" | "Documentary" | "Concert" | "Podcast" | "Event";
+  kind: "Series" | "Film" | "Documentary" | "Concert" | "Podcast" | "Event" | "Music";
   year: number;
   rating: string;
   duration: string;

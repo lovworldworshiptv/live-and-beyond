@@ -59,6 +59,7 @@ const kindLabel: Record<string, Title["kind"]> = {
   series: "Series",
   podcast: "Podcast",
   documentary: "Documentary",
+  music: "Music",
   concert: "Concert",
   event: "Event",
 };
