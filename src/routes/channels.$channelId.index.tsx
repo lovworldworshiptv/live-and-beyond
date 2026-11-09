@@ -22,6 +22,7 @@ import { resolveChannelPlayout, type NowPlaying } from "@/lib/playout";
 import { toast } from "sonner";
 import { fetchRadioSettings, type RadioSettings, type RadioFormat } from "@/lib/radio";
 import { useRadio } from "@/components/radio-player";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/channels/$channelId/")({
   head: () => ({
@@ -116,25 +117,23 @@ function ChannelPage() {
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
+  const failPlayback = (message: string) => { setPlaybackError(message); setPlaying(false); };
+  useEffect(() => {
+    mediaRef.current?.pause();
+    setPlaying(false);
+    setPlaybackError(null);
+    setDbChannelId(null);
+  }, [channelId]);
 
   const startPlayback = () => {
     if (!streamSrc) { toast("This channel is not available to play yet."); return; }
     // One broadcast at a time: starting TV stops any radio station.
     if (radioPlayer.station) radioPlayer.stop();
     setPlaying(true);
+    setPlaybackError(null);
     setMuted(false);
     playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    requestAnimationFrame(() => {
-      const m = mediaRef.current;
-      if (m) {
-        m.muted = false;
-        m.play().catch(() => {
-          m.muted = true;
-          setMuted(true);
-          m.play().catch(() => {});
-        });
-      }
-    });
   };
 
   // If a radio station starts anywhere (e.g. the mini player), stop the TV stream.
@@ -144,13 +143,6 @@ function ChannelPage() {
       setPlaying(false);
     }
   }, [radioPlayer.station]);
-
-  useEffect(() => {
-    if (channel && typeof window !== "undefined" && window.location.hash === "#watch") {
-      startPlayback();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channel?.id]);
 
   // A running Lettflix Live broadcast takes precedence over the configured source,
   // which in turn takes precedence over automated playout.
@@ -216,7 +208,14 @@ function ChannelPage() {
   // Live/HLS sources are played through the same-origin manifest proxy so the
   // Cloudflare playback URL is never exposed in the DOM.
   const playbackSrc = protectedChannelSrc(channelId, streamSrc) ?? streamSrc;
-  const hls = useHlsAttach(mediaRef, playbackSrc, playing);
+  const hls = useHlsAttach(mediaRef, playbackSrc, playing, undefined, failPlayback);
+  const watchStarted = useRef<string | null>(null);
+  useEffect(() => {
+    if (watchStarted.current === channelId || !channel || !streamSrc || window.location.hash !== "#watch") return;
+    watchStarted.current = channelId;
+    startPlayback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channelId, channel, streamSrc]);
   const frameRef = useRef<HTMLDivElement | null>(null);
   const fullscreen = usePlayerFullscreen(frameRef, mediaRef, playing && channel?.streamKind !== "radio");
 
@@ -300,7 +299,7 @@ function ChannelPage() {
                 {isRadio ? <Mic className="size-3.5" /> : <Tv className="size-3.5" />}
                 {channel.category} · {channel.country}
               </div>
-              <h1 className="mt-1.5 text-3xl lg:text-5xl font-extrabold tracking-tight">{channel.name}</h1>
+              <h1 className="mt-1.5 text-3xl lg:text-5xl font-extrabold tracking-tight break-words">{channel.name}</h1>
               <p className="mt-2 text-[color:var(--secondary-foreground)] max-w-2xl">{channel.tagline}</p>
             </div>
           </div>
@@ -310,7 +309,7 @@ function ChannelPage() {
 
       {radio?.is_enabled && radio.stream_url && (
         <div className="mx-auto max-w-[1480px] px-4 lg:px-10 pt-4">
-          <div role="group" aria-label={`Choose how to follow ${channel.name}`} className="inline-flex rounded-lg border border-border bg-elevated p-1">
+          <div role="group" aria-label={`Choose how to follow ${channel.name}`} className="grid grid-cols-2 sm:inline-flex rounded-lg border border-border bg-elevated p-1">
             {streamSrc && !isRadio && (
               <button
                 type="button"
@@ -362,6 +361,8 @@ function ChannelPage() {
                   ref={(el) => { mediaRef.current = el; }}
                   autoPlay
                   controls={false}
+                  onError={() => failPlayback("Radio is unavailable. Tap play to retry.")}
+                  onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)}
                   className="hidden"
                 />
               </>
@@ -371,6 +372,8 @@ function ChannelPage() {
                 autoPlay
                 playsInline
                 controls
+                onError={() => failPlayback("This channel's live feed is unavailable. Tap play to retry.")}
+                onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)}
                 controlsList="nodownload noplaybackrate"
                 onContextMenu={(e) => e.preventDefault()}
                 onDoubleClick={(e) => { e.preventDefault(); fullscreen.toggle(); }}
@@ -407,7 +410,7 @@ function ChannelPage() {
           </div>
 
           {!playing && (
-            <button onClick={startPlayback} className="absolute inset-0 grid place-items-center group" aria-label={isRadio ? "Listen live" : "Watch live"}>
+            <Button variant="ghost" onClick={startPlayback} className="absolute inset-0 size-full grid place-items-center group hover:bg-transparent" aria-label={isRadio ? "Listen live" : "Watch live"}>
               <div
                 className="size-[46px] sm:size-[92px] rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
                 style={{
@@ -416,7 +419,7 @@ function ChannelPage() {
               >
                 {isRadio ? <Mic className="size-4 sm:size-8 text-background" /> : <Play className="size-4 sm:size-8 text-background fill-current ml-0.5 sm:ml-1" />}
               </div>
-            </button>
+            </Button>
           )}
 
           {/* Radio playback controls overlay */}
@@ -437,7 +440,7 @@ function ChannelPage() {
             </div>
           )}
 
-          <div className={`absolute bottom-0 inset-x-0 p-4 lg:p-6 ${playing && !isRadio ? "pointer-events-none opacity-0" : ""}`}>
+          <div className={`pointer-events-none absolute bottom-0 inset-x-0 p-4 lg:p-6 ${playing && !isRadio ? "opacity-0" : ""}`}>
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <div className="text-xs text-white/70 uppercase tracking-wider">
@@ -454,14 +457,15 @@ function ChannelPage() {
               <span>{channel.nowPlaying.endsAt}</span>
             </div>
           </div>
+          {playbackError && <div role="alert" className="pointer-events-none absolute bottom-2 inset-x-2 rounded bg-background/90 px-3 py-2 text-center text-xs text-foreground">{playbackError}</div>}
         </div>
       </section>
 
       {/* META + ACTIONS */}
       <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-8 grid gap-10 lg:grid-cols-[1fr_360px]">
         <div>
-          <div className="flex flex-wrap gap-3">
-            {!radioOnHere && <button
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3 [&>a]:min-w-0 [&>a]:justify-center [&>button]:min-w-0 [&>button]:px-2 sm:[&>button]:px-5 [&>button]:text-xs sm:[&>button]:text-sm [&>a]:text-xs sm:[&>a]:text-sm">
+            {!radioOnHere && <Button
               onClick={startPlayback}
               className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
               style={{
@@ -469,15 +473,15 @@ function ChannelPage() {
               }}
             >
               <Play className="size-[19px] fill-current" strokeWidth={2.5} /> {isRadio ? "Listen Live" : "Watch Live"}
-            </button>}
+            </Button>}
             <Link
               to="/channels/$channelId/library"
               params={{ channelId: channel.id }}
-              className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-accent text-accent-foreground font-semibold hover:opacity-95 transition"
+              className={`inline-flex items-center gap-2 px-2 sm:px-5 h-11 rounded-md bg-accent text-accent-foreground font-semibold hover:opacity-95 transition ${radioOnHere ? "col-span-2 sm:col-span-1" : ""}`}
             >
               <LibraryBig className="size-4" /> Browse Library
             </Link>
-            <button
+            <Button variant="outline"
               onClick={async () => {
                 const wasFollowing = isFollowing;
                 if (dbChannelId) await toggleFollowDb();
@@ -492,8 +496,8 @@ function ChannelPage() {
             >
               {isFollowing ? <Check className="size-4" /> : <Plus className="size-4" />}
               {isFollowing ? "Following" : "Follow Channel"}
-            </button>
-            <button
+            </Button>
+            <Button variant="outline"
               onClick={() => {
                 const next = !settings.liveAlerts;
                 setSettings({ ...settings, liveAlerts: next });
@@ -509,8 +513,8 @@ function ChannelPage() {
             >
               {settings.liveAlerts ? <BellRing className="size-4" /> : <Bell className="size-4" />}
               {settings.liveAlerts ? "Notifying" : "Notify Me"}
-            </button>
-            <div className="h-11 w-28">
+            </Button>
+            <div className="col-span-2 flex h-11 justify-end sm:col-span-1 sm:w-28">
               <ShareMenu title={channel.name} path={`/channels/${channel.id}`} variant="chip" />
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
+import { startMediaPlayback } from "@/lib/media-playback";
 
 export type QualityLevel = {
   /** hls.js level index */
@@ -31,7 +32,10 @@ export function useHlsAttach(
   src: string | undefined | null,
   playing: boolean,
   prefs?: { captions: boolean; captionLanguage: string; audioLanguage: string },
+  onError?: (message: string) => void,
 ): HlsController {
+  const errorRef = useRef(onError);
+  errorRef.current = onError;
   const prefsRef = useRef(prefs);
   prefsRef.current = prefs;
   const hlsRef = useRef<Hls | null>(null);
@@ -47,12 +51,21 @@ export function useHlsAttach(
     const isHls = /\.m3u8(\?|$)/i.test(src);
     const canNative = Boolean(media.canPlayType("application/vnd.apple.mpegurl"));
     let hls: Hls | null = null;
+    let disposed = false;
+    const start = () => {
+      if (disposed) return;
+      void startMediaPlayback(media).catch((error: unknown) => {
+        if (!disposed && (!(error instanceof Error) || error.name !== "AbortError")) {
+          errorRef.current?.("Playback could not start. Tap play to retry.");
+        }
+      });
+    };
     setLevels([]);
     setSelected(-1);
     setActive(-1);
     setNative(false);
 
-    if (isHls && media instanceof HTMLVideoElement && !canNative && Hls.isSupported()) {
+    if (isHls && !canNative && Hls.isSupported()) {
       // Adaptive bitrate: start on Auto and let hls.js switch renditions in-place.
       hls = new Hls({
         enableWorker: true,
@@ -80,6 +93,10 @@ export function useHlsAttach(
         );
       };
       hls.on(Hls.Events.MANIFEST_PARSED, publish);
+      hls.on(Hls.Events.MANIFEST_PARSED, start);
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal && !disposed) errorRef.current?.("This stream is unavailable. Tap play to retry.");
+      });
       // Viewer preferences: preferred audio language and captions, when the stream offers them.
       const matches = (lang: string | undefined, want: string) => !!lang && lang.toLowerCase().startsWith(want);
       hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_e, data) => {
@@ -109,13 +126,18 @@ export function useHlsAttach(
         }
       };
       media.addEventListener("loadedmetadata", applyNative, { once: true });
+      media.addEventListener("loadedmetadata", start, { once: true });
       if (media.src !== src) {
         media.src = src;
         media.load();
       }
+      if (media.readyState >= 1) start();
     }
 
     return () => {
+      disposed = true;
+      media.removeEventListener("loadedmetadata", start);
+      media.pause();
       if (hls) hls.destroy();
       hlsRef.current = null;
     };

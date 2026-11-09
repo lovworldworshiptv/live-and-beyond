@@ -36,7 +36,7 @@
 - [x] Legal pages styled with site header/footer; consistent 24px phone margins; Pricing stray divider removed
 - [x] Mobile bottom nav editable from Admin CMS: add/remove tabs, label, path and icon choice (37 icons including a game console); save round-trip verified on the public phone view
 - [ ] Verify successful published movie playback and Continue Watching readback — blocked by current movie source failing playback (media error 4)
-- [ ] Verify live radio playback and device lock-screen controls — blocked by no published radio stations
+- [ ] Verify device lock-screen radio controls on physical devices — browser playback, pause/resume and TV switching verified; physical lock-screen behaviour needs device testing.
 
 ## Platform protection
 - [x] TV sign-in branding checked: Lettflix only, published Lovable badge already hidden; removed viewer-identity watermark component, both player integrations and its styling. TV page and movie player verified.
@@ -65,6 +65,8 @@
 - [x] Verified authenticated Admin/Open Studio access, all Studio sections, combined TV/radio/VOD draft save and readback, unchanged creator ownership, failed-save recovery and editor reset on channel switching; phone/tablet layouts have no horizontal overflow. Test drafts removed; 19 regression tests pass. Actual streaming still depends on working media sources.
 
 ## Requests (Nov 9)
+- [x] Arrange Watch Live, Browse Library, Follow Channel and Notifying in an adaptive, evenly aligned mobile action grid; Share sits below and LN247's long name no longer overflows.
+- [x] Check every published channel play button across desktop, tablet and mobile: all 8 feeds played at 1280/768/394px; repaired blocked taps, source-ready starts, audio HLS and retry controls; verified Watch Now navigation and radio pause/resume/TV switching. Five regression tests pass.
 - [ ] Refresh Joycall TV with cinematic wide artwork like the new LXP banner; retain the complete channel identity, fill without black gaps and verify desktop, tablet and mobile.
 - [ ] Refresh Healing Streams TV with cinematic wide artwork like the new LXP banner; retain the complete channel identity, fill without black gaps and verify desktop, tablet and mobile.
 - [x] Remove backgrounds from Joycall, LXP, Healing Streams and Rhapsody artwork; preserve wide cards and full foreground artwork with brand-colored fill across desktop, tablet and mobile.

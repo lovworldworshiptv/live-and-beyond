@@ -497,7 +497,7 @@ function LiveNowCard({ c }: { c: Channel }) {
             <article
               className="group relative shrink-0 w-[80vw] sm:w-[300px] md:w-[340px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/40 transition"
             >
-              <Link to="/channels/$channelId" params={{ channelId: c.id }} className="block">
+              <Link to="/channels/$channelId" params={{ channelId: c.id }} hash="watch" className="block">
                 <div className="relative aspect-video overflow-hidden">
                   <ChannelArtwork channel={c} alt={c.name} loading="lazy" className="size-full" />
                   <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent 50%, ${tint(0.45)} 100%)` }} />

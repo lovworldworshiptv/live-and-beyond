@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import type { RadioStation } from "@/lib/radio";
 import { getRadioNowPlaying } from "@/lib/radio.functions";
 import { recordPlaybackEvent } from "@/lib/analytics";
+import { startMediaPlayback } from "@/lib/media-playback";
 
 type NowPlaying = { title: string | null; artist: string | null };
 
@@ -48,21 +49,31 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     const src = station.streamUrl;
     hlsRef.current?.destroy();
     hlsRef.current = null;
+    let disposed = false;
+    const start = () => {
+      void startMediaPlayback(audio).catch(() => {
+        if (!disposed) { setPlaying(false); setError("Playback could not start. Tap play to retry."); }
+      });
+    };
 
     const isHls = /\.m3u8(\?|$)/i.test(src) || station.format === "hls";
     if (isHls && !audio.canPlayType("application/vnd.apple.mpegurl") && Hls.isSupported()) {
       const hls = new Hls({ enableWorker: true });
       hls.loadSource(src);
       hls.attachMedia(audio);
+      hls.on(Hls.Events.MANIFEST_PARSED, start);
       hls.on(Hls.Events.ERROR, (_event, data) => { if (data.fatal) { setPlaying(false); setError("Station unavailable. Try playing again."); } });
       hlsRef.current = hls;
     } else if (audio.src !== src) {
+      audio.addEventListener("loadedmetadata", start, { once: true });
       audio.src = src;
       audio.load();
-    }
-    audio.play().then(() => setPlaying(true)).catch(() => { setPlaying(false); setError("Playback could not start. Tap play to retry."); });
+    } else start();
 
     return () => {
+      disposed = true;
+      audio.removeEventListener("loadedmetadata", start);
+      audio.pause();
       hlsRef.current?.destroy();
       hlsRef.current = null;
     };
@@ -97,17 +108,25 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true; clearInterval(t); };
   }, [station]);
 
-  const play = useCallback((next: RadioStation) => setStation(next), []);
+  const play = useCallback((next: RadioStation) => {
+    const audio = audioRef.current;
+    if (station?.channelId === next.channelId && audio && !error) {
+      void startMediaPlayback(audio).catch(() => setError("Playback could not start. Tap play to retry."));
+      return;
+    }
+    setStation({ ...next });
+  }, [station, error]);
 
   const toggle = useCallback((next: RadioStation) => {
     const audio = audioRef.current;
     if (station?.channelId === next.channelId && audio) {
-      if (audio.paused) { setError(null); audio.play().then(() => setPlaying(true)).catch(() => setError("Station unavailable. Try again shortly.")); }
+      if (error) { play(next); return; }
+      if (audio.paused) { setError(null); void startMediaPlayback(audio).catch(() => setError("Station unavailable. Try again shortly.")); }
       else { audio.pause(); setPlaying(false); }
       return;
     }
     setStation(next);
-  }, [station]);
+  }, [station, error, play]);
 
   const stop = useCallback(() => {
     audioRef.current?.pause();
@@ -137,7 +156,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     <Ctx.Provider value={value}>
       {children}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-      <audio ref={audioRef} muted={muted} className="hidden" onPlaying={() => {
+      <audio ref={audioRef} muted={muted} onVolumeChange={() => setMuted(audioRef.current?.muted ?? false)} className="hidden" onPlaying={() => {
         setPlaying(true); setError(null);
         if (!playbackStarted.current && trackedStation.current) {
           playbackStarted.current = true;

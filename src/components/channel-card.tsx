@@ -103,6 +103,7 @@ export function ChannelCard({ c }: { c: Channel }) {
       <Link
         to="/channels/$channelId"
         params={{ channelId: c.id }}
+        hash="watch"
         className="flex min-w-0 flex-1 flex-col rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/40 transition"
       >
         <div className="relative aspect-video overflow-hidden">
@@ -355,6 +356,7 @@ export function ChannelCard({ c }: { c: Channel }) {
               to="/channels/$channelId"
               params={{ channelId: c.id }}
               onClick={() => setScheduleOpen(false)}
+              hash="watch"
               className="flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:brightness-110 transition"
               style={{
                 boxShadow: "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",

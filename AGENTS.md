@@ -32,3 +32,4 @@
 - Admins open any creator's Studio via /studio?channel=<id>; edits keep the channel's original creator_id so ownership never transfers to the admin.
 - Channel configuration saves await channel, service and radio writes before success; Studio editors reset on channel changes so drafts cannot cross workspaces.
 - Auth token refresh retains same-user identity and role state without inactivity timers; Studio sections live in validated URL search parameters so tab return and reload preserve the workspace location.
+- Shared media attachment starts video and audio after source readiness, retries muted only for autoplay-policy rejection, and exposes source failures with a tappable retry; decorative player overlays must not intercept playback taps.

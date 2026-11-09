@@ -60,7 +60,8 @@ export function StreamPlayer({
   // Adaptive bitrate: hls.js consumes the master playlist and switches renditions
   // in place; Safari/iOS falls back to native HLS with the same source.
   const { settings } = useSettings();
-  const hls = useHlsAttach(mediaRef, playing ? src : null, playing, settings);
+  const failPlayback = (message: string) => { setError(message); setPlaying(false); };
+  const hls = useHlsAttach(mediaRef, playing ? src : null, playing, settings, failPlayback);
   const frameRef = useRef<HTMLDivElement | null>(null);
   const fs = usePlayerFullscreen(frameRef, mediaRef, playing && kind === "video");
   // Autoplay preference: start once when the player opens with a playable source.
@@ -78,17 +79,8 @@ export function StreamPlayer({
       return;
     }
     setError(null);
+    setMuted(false);
     setPlaying(true);
-    requestAnimationFrame(() => {
-      const media = mediaRef.current;
-      if (!media) return;
-      media.muted = false;
-      media.play().catch(() => {
-        media.muted = true;
-        setMuted(true);
-        media.play().catch((cause: unknown) => setError(cause instanceof Error && cause.name === "NotSupportedError" ? "Playback unavailable. Please try again shortly." : "Tap play in the controls to start playback."));
-      });
-    });
   };
 
   const toggleMute = () => {
@@ -123,7 +115,8 @@ export function StreamPlayer({
             onTimeUpdate={saveProgress}
             onPause={saveProgress}
             onEnded={saveProgress}
-            onError={() => setError("Playback unavailable. Please try again shortly.")}
+            onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)}
+            onError={() => failPlayback("Playback unavailable. Tap play to retry.")}
             controlsList="nodownload noplaybackrate"
             onContextMenu={(e) => e.preventDefault()}
             onDoubleClick={(e) => { e.preventDefault(); fs.toggle(); }}
@@ -135,7 +128,7 @@ export function StreamPlayer({
         </>
       )}
       {playing && kind === "audio" && (
-        <audio ref={(el) => { mediaRef.current = el; }} autoPlay onPlaying={() => trackStart.current?.()} onTimeUpdate={saveProgress} onPause={saveProgress} onEnded={saveProgress} onError={() => setError("Audio unavailable. Please try again shortly.")} className="hidden" />
+        <audio ref={(el) => { mediaRef.current = el; }} autoPlay controls onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)} onPlaying={() => trackStart.current?.()} onTimeUpdate={saveProgress} onPause={saveProgress} onEnded={saveProgress} onError={() => failPlayback("Audio unavailable. Tap play to retry.")} className="absolute bottom-3 inset-x-3 z-10 w-[calc(100%-1.5rem)]" />
       )}
 
       {!playing && (
@@ -176,7 +169,7 @@ export function StreamPlayer({
       )}
 
       {error && (
-        <div role="alert" className="absolute bottom-3 inset-x-3 text-center px-3 py-2 rounded bg-background/80 text-xs text-foreground">
+        <div role="alert" className="pointer-events-none absolute bottom-3 inset-x-3 text-center px-3 py-2 rounded bg-background/80 text-xs text-foreground">
           {error}
         </div>
       )}
