@@ -268,19 +268,19 @@ div:has(> .channel-cutout) > div.pointer-events-none.absolute.inset-0 {
 @media (max-width: 1023.98px) { .feedback-toaster { bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important; } body:has([data-radio-player]) .feedback-toaster { bottom: calc(176px + env(safe-area-inset-bottom, 0px)) !important; } }
 
 /* Content protection */
-.radio-song-window { height: 2rem; overflow: hidden; }
-.radio-song-scroll { animation: radio-song-rise 14s linear infinite; }
-.radio-song-line { min-height: 2.75rem; padding-bottom: 0.75rem; line-height: 1rem; overflow-wrap: anywhere; }
+.radio-song-window { height: 1rem; overflow: hidden; }
+.radio-song-scroll { display: flex; width: max-content; animation: radio-song-slide 18s linear infinite; }
+.radio-song-line { flex: none; padding-right: 3rem; line-height: 1rem; white-space: nowrap; }
 .radio-song-scroll[data-paused] { animation-play-state: paused; }
 .radio-song-window:hover .radio-song-scroll { animation-play-state: paused; }
-@keyframes radio-song-rise {
-  0%, 20% { transform: translateY(0); }
-  85%, 100% { transform: translateY(-50%); }
+@keyframes radio-song-slide {
+  0%, 15% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 @media (prefers-reduced-motion: reduce) {
   .radio-song-window { height: auto; }
-  .radio-song-scroll { animation: none; }
-  .radio-song-line { min-height: 0; padding-bottom: 0; }
+  .radio-song-scroll { display: block; width: auto; animation: none; }
+  .radio-song-line { padding-right: 0; white-space: normal; overflow-wrap: anywhere; }
   .radio-song-line + .radio-song-line { display: none; }
 }
 body { -webkit-touch-callout: none; }

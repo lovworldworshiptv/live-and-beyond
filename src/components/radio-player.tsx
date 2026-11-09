@@ -9,6 +9,7 @@ import type { RadioStation } from "@/lib/radio";
 import { getRadioNowPlaying } from "@/lib/radio.functions";
 import { recordPlaybackEvent } from "@/lib/analytics";
 import { startMediaPlayback } from "@/lib/media-playback";
+import { titleCase } from "@/lib/title-case";
 
 type NowPlaying = { title: string | null; artist: string | null };
 
@@ -189,12 +190,12 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
                 <div role="status" className="text-xs text-muted-foreground">
                   {nowPlaying.title && !error ? (
                     <>
-                      <span className="sr-only">{nowPlaying.title}{nowPlaying.artist ? ` — ${nowPlaying.artist}` : ""}</span>
-                      <div className="radio-song-window" aria-hidden="true" title={`${nowPlaying.title}${nowPlaying.artist ? ` — ${nowPlaying.artist}` : ""}`}>
+                      <span className="sr-only">{titleCase(nowPlaying.title)}{nowPlaying.artist ? ` — ${titleCase(nowPlaying.artist)}` : ""}</span>
+                      <div className="radio-song-window" aria-hidden="true" title={`${titleCase(nowPlaying.title)}${nowPlaying.artist ? ` — ${titleCase(nowPlaying.artist)}` : ""}`}>
                         <div key={`${nowPlaying.title}-${nowPlaying.artist}`} className="radio-song-scroll" data-paused={!playing || undefined}>
                           {[0, 1].map((copy) => (
                             <div key={copy} className="radio-song-line">
-                              {nowPlaying.title}{nowPlaying.artist ? ` — ${nowPlaying.artist}` : ""}
+                              {titleCase(nowPlaying.title ?? "")}{nowPlaying.artist ? ` — ${titleCase(nowPlaying.artist)}` : ""}
                             </div>
                           ))}
                         </div>

@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Public discovery lists must use published CMS rows and published schedule entries, never seed catalog fallbacks, so empty catalogues stay honest.
-- Radio metadata polls the configured provider or the stream's own Icecast status feed, matches the playing mount and preserves manual metadata; vertical song scrolling respects reduced motion so live titles stay truthful and accessible.
+- Radio metadata polls the configured provider or the stream's own Icecast status feed, matches the playing mount and preserves manual metadata; song scrolling respects reduced motion so live titles stay truthful and accessible.
 - Featured On-Demand reads the narrow public aggregate RPC for platform-wide playback starts; raw viewer analytics stay private, and native media playing events count once per loaded title using CMS UUIDs rather than slugs.
 - Movie artwork uses MovieArtwork to try the same title's alternate image then a bundled brand fallback; never substitute another title's artwork when a URL fails.
 - Viewing progress is recorded from media playback events, never card navigation, so Continue Watching reflects actual viewing.
