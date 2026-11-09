@@ -34,7 +34,7 @@ function FitImage({
     <img
       {...props}
       src={exhausted ? undefined : src}
-      className={`absolute inset-0 size-full object-contain ${branded ? "p-6" : ""} ${exhausted ? "invisible" : ""}`}
+      className={`absolute inset-0 size-full object-contain mix-blend-lighten ${branded ? "p-6" : ""} ${exhausted ? "invisible" : ""}`}
       onError={() => {
         if (index < sources.length - 1) {
           setIndex(index + 1);
@@ -46,7 +46,17 @@ function FitImage({
   );
 
   return (
-    <span className={`relative block overflow-hidden bg-elevated ${className ?? ""}`}>
+    <span className={`relative isolate block overflow-hidden bg-elevated ${className ?? ""}`}>
+      {!exhausted && (
+        <img
+          src={src}
+          alt=""
+          aria-hidden="true"
+          loading={props.loading}
+          decoding="async"
+          className="pointer-events-none absolute inset-0 size-full object-cover blur-xl scale-125 brightness-75"
+        />
+      )}
       {img}
     </span>
   );
