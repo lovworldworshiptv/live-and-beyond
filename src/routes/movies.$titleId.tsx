@@ -198,7 +198,7 @@ function TitleDetail() {
               <Download className="size-4" /> Download
             </Button>
             <div className="h-12 w-32">
-              <ShareMenu title={title.title} path={`/movies/${title.id}`} variant="chip" />
+              <ShareMenu title={title.title} path={`/movies/${title.id}`} image={title.hero || title.cover} variant="chip" />
             </div>
           </div>
 

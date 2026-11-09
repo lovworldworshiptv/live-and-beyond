@@ -516,7 +516,7 @@ function ChannelPage() {
               {settings.liveAlerts ? "Notifying" : "Notify Me"}
             </Button>
             <div className="col-span-2 flex h-11 justify-end sm:col-span-1 sm:w-28">
-              <ShareMenu title={channel.name} path={`/channels/${channel.id}`} variant="chip" />
+              <ShareMenu title={channel.name} path={`/channels/${channel.id}`} image={channel.banner || channel.logoImg} subtitle="Live on Lettflix" variant="chip" />
             </div>
           </div>
 

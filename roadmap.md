@@ -86,3 +86,4 @@
 - [x] Add "Music" as a content kind in Creator Studio and Admin CMS
 - [x] Country field uses a predetermined countries list (Studio setup and Admin channel editor)
 - [x] Channel page plays only one broadcast at a time (live TV or radio) with a Watch live TV / Listen to radio switcher
+- [x] Radio share button with unique QR share card

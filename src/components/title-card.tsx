@@ -216,7 +216,7 @@ export function TitleCard({
                     >
                       {inList ? <Check className="size-4" /> : <Plus className="size-4" />}
                     </button>
-                    <ShareMenu title={t.title} path={`/movies/${t.id}`} />
+                    <ShareMenu title={t.title} path={`/movies/${t.id}`} image={t.hero || t.cover} />
                   </div>
                   <Link
                     to="/movies/$titleId"

@@ -2,6 +2,7 @@ import {
   createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode,
 } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
+import { ShareMenu } from "./share-menu";
 import { Mic, Pause, Play, Volume2, VolumeX, X } from "lucide-react";
 import Hls from "hls.js";
 import { Button } from "@/components/ui/button";
@@ -230,6 +231,7 @@ export function RadioNowPlaying({ compact = false }: { compact?: boolean }) {
           <Button variant="ghost" onClick={() => { if (muted && volume === 0) setVolume(0.6); else toggleMute(); }} aria-label={muted ? "Unmute radio" : "Mute radio"} className="size-9 shrink-0 rounded-full">{muted || volume === 0 ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}</Button>
           <input type="range" min={0} max={100} step={1} value={muted ? 0 : Math.round(volume * 100)} onChange={(event) => setVolume(Number(event.currentTarget.value) / 100)} aria-label="Radio volume" aria-valuetext={`${muted ? 0 : Math.round(volume * 100)}%`} className="radio-volume-range" style={{ "--volume": `${muted ? 0 : volume * 100}%` } as CSSProperties} />
         </div>
+        <ShareMenu title={`${station.name} Radio`} subtitle="Live radio on Lettflix" path={`/channels/${station.slug}#radio`} image={station.logoUrl || station.bannerUrl} />
         <Button variant="ghost" onClick={stop} aria-label="Close radio player" className="size-11 rounded-full bg-elevated"><X className="size-5" /></Button>
       </div>
     </div>
