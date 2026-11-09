@@ -183,6 +183,7 @@ export type Database = {
           is_trending: boolean
           kind: string
           language: string | null
+          library_filter_mode: string
           logo_url: string | null
           name: string
           now_playing: Json | null
@@ -223,6 +224,7 @@ export type Database = {
           is_trending?: boolean
           kind?: string
           language?: string | null
+          library_filter_mode?: string
           logo_url?: string | null
           name: string
           now_playing?: Json | null
@@ -263,6 +265,7 @@ export type Database = {
           is_trending?: boolean
           kind?: string
           language?: string | null
+          library_filter_mode?: string
           logo_url?: string | null
           name?: string
           now_playing?: Json | null

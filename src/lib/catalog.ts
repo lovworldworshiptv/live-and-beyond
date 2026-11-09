@@ -14,6 +14,7 @@ export type Channel = {
   tagline: string;
   description?: string;
   category: string;
+  libraryFilterMode?: "categories" | "genres";
   language: string;
   country: string;
   region: string;

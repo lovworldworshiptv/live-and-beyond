@@ -164,6 +164,12 @@ export function ChannelSetupWizard({ channel, creatorId, initialServices, onClos
               <Field label="Language">
                 <input className={inputClass} value={str("language")} onChange={(e) => set("language", e.target.value)} placeholder="English" />
               </Field>
+              <Field label="Library browsing filters">
+                <select className={inputClass} value={str("library_filter_mode") || "categories"} onChange={(e) => set("library_filter_mode", e.target.value)}>
+                  <option value="categories">Categories — films, series, podcasts, music</option>
+                  <option value="genres">Genres — music styles</option>
+                </select>
+              </Field>
               <Field label="Country">
                 <select className={inputClass} value={str("country")} onChange={(e) => set("country", e.target.value)}>
                   <option value="">Choose a country</option>

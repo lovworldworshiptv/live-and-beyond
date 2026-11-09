@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Public discovery lists must use published CMS rows and published schedule entries, never seed catalog fallbacks, so empty catalogues stay honest.
+- Channel library filter mode is persisted on the channel; genre options derive from published title genre values and category options from content kinds, sharing one tested filter helper.
 - Shared AdaptiveControls measures icon-bearing commands on mobile and hides only overflowing labels while retaining accessible names; text-only actions, menus and content links remain readable.
 - Radio metadata polls the configured provider or the stream's own Icecast status feed, matches the playing mount and preserves manual metadata; song scrolling respects reduced motion so live titles stay truthful and accessible.
 - Featured On-Demand reads the narrow public aggregate RPC for platform-wide playback starts; raw viewer analytics stay private, and native media playing events count once per loaded title using CMS UUIDs rather than slugs.

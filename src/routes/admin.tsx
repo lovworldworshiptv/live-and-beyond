@@ -211,6 +211,7 @@ export type Channel = {
   tagline: string | null;
   description: string | null;
   category: string | null;
+  library_filter_mode?: "categories" | "genres";
   language: string | null;
   country: string | null;
   region: string | null;
@@ -425,6 +426,12 @@ export function ChannelEditor({ value, onClose, onSave, onSaved }: { value: Part
           </select>
         </Field>
         <Field label="Language"><input className={inputClass} value={form.language ?? ""} onChange={(e) => set("language", e.target.value)} /></Field>
+        <Field label="Library browsing filters">
+          <select className={inputClass} value={form.library_filter_mode ?? "categories"} onChange={(e) => set("library_filter_mode", e.target.value === "genres" ? "genres" : "categories")}>
+            <option value="categories">Categories — films, series, podcasts, music</option>
+            <option value="genres">Genres — music styles</option>
+          </select>
+        </Field>
         <Field label="Country">
           <select className={inputClass} value={form.country ?? ""} onChange={(e) => set("country", e.target.value)}>
             <option value="">Choose a country</option>

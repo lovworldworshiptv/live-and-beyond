@@ -10,6 +10,9 @@ import { type Channel, type Title } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { mapChannelRow } from "@/lib/cms-catalog";
 import { fetchChannelLibrary } from "@/lib/channel-library";
+import { libraryFilterOptions, matchesLibraryFilter } from "@/lib/library-filters";
+import { titleCase } from "@/lib/title-case";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/channels/$channelId/library")({
   head: () => ({
@@ -55,7 +58,6 @@ function ErrorView({ error, reset }: ErrorComponentProps) {
 }
 
 const PAGE_SIZE = 18;
-const KINDS = ["All", "Film", "Series", "Podcast", "Documentary", "Concert", "Event", "Music"] as const;
 
 function ChannelLibraryPage() {
   const { channelId } = Route.useParams();
@@ -64,7 +66,7 @@ function ChannelLibraryPage() {
   const [titles, setTitles] = useState<Title[]>([]);
   const [loading, setLoading] = useState(true);
   const [libraryError, setLibraryError] = useState(false);
-  const [kind, setKind] = useState<(typeof KINDS)[number]>("All");
+  const [kind, setKind] = useState("All");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
 
@@ -72,6 +74,9 @@ function ChannelLibraryPage() {
     let cancelled = false;
     setLoading(true);
     setTitles([]);
+    setKind("All");
+    setQuery("");
+    setPage(1);
     setLibraryError(false);
     setNotFoundState(false);
     (async () => {
@@ -99,10 +104,12 @@ function ChannelLibraryPage() {
     return () => { cancelled = true; };
   }, [channelId]);
 
+  const filterMode = channel?.libraryFilterMode ?? "categories";
+  const filterOptions = useMemo(() => libraryFilterOptions(titles, filterMode), [titles, filterMode]);
   const filtered = useMemo(() => titles.filter((t) =>
-    (kind === "All" || t.kind === kind) &&
+    matchesLibraryFilter(t, filterMode, kind) &&
     (query === "" || t.title.toLowerCase().includes(query.toLowerCase()))
-  ), [titles, kind, query]);
+  ), [titles, kind, query, filterMode]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -142,7 +149,7 @@ function ChannelLibraryPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent" />
           <div className="relative p-6 lg:p-8 flex items-center gap-4">
             <div className="size-16 rounded-xl overflow-hidden border border-border bg-elevated shrink-0">
-              <img src={channel.logoImg} alt="" className="size-full object-cover" />
+              <img src={channel.logoImg} alt="" className="size-full object-contain" />
             </div>
             <div className="min-w-0">
               <div className="text-xs font-semibold uppercase tracking-wider text-accent flex items-center gap-2">
@@ -159,29 +166,32 @@ function ChannelLibraryPage() {
 
       {/* Filters */}
       <section className="mx-auto max-w-[1480px] px-6 lg:px-10 pt-8">
-        <div className="flex items-end justify-between mb-4 flex-wrap gap-4">
-          <div>
+        <div className="grid gap-4 mb-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+          <div className="min-w-0">
             <h2 className="text-xl font-semibold tracking-tight">Browse contents</h2>
             <p className="text-sm text-[color:var(--muted-foreground)] mt-1">
               {loading ? "Loading library…" : `${filtered.length} of ${titles.length} titles${totalPages > 1 ? ` · Page ${currentPage} of ${totalPages}` : ""}`}
             </p>
           </div>
-          <div className="relative">
+          <div className="relative min-w-0">
             <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--muted-foreground)]" />
             <input
               value={query}
               onChange={(e) => { setQuery(e.target.value); setPage(1); }}
               placeholder="Search titles…"
-              className="h-10 pl-9 pr-4 rounded-md bg-surface border border-border w-64 text-sm outline-none focus:border-accent transition"
+              aria-label="Search channel library"
+              className="h-10 pl-9 pr-4 rounded-md bg-surface border border-border w-full sm:w-64 text-sm outline-none focus:border-accent transition"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+        <div className="text-xs font-semibold text-muted-foreground mb-2">{filterMode === "genres" ? "Genres" : "Categories"}</div>
+        <div role="group" aria-label={filterMode === "genres" ? "Filter by genre" : "Filter by category"} className="flex items-center gap-2 overflow-x-auto scrollbar-none">
           <Filter className="size-4 text-[color:var(--muted-foreground)] shrink-0" />
-          {KINDS.map((k) => (
-            <button
+          {filterOptions.map((k) => (
+            <Button variant="ghost"
               key={k}
+              aria-pressed={kind === k}
               onClick={() => { setKind(k); setPage(1); }}
               className={`shrink-0 px-3 h-8 rounded-full text-sm border transition ${
                 kind === k
@@ -189,8 +199,8 @@ function ChannelLibraryPage() {
                   : "bg-elevated/50 border-border text-[color:var(--secondary-foreground)] hover:text-foreground"
               }`}
             >
-              {k}
-            </button>
+              {titleCase(k)}
+            </Button>
           ))}
         </div>
 

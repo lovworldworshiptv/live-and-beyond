@@ -220,7 +220,6 @@ function ContentEditor({
               <option value="podcast">Podcast → /podcasts</option>
               <option value="documentary">Documentary → /documentaries</option>
               <option value="music">Music</option>
-              <option value="music">Music</option>
             </select>
           </Field>
           <Field label="Media type">
@@ -233,7 +232,7 @@ function ContentEditor({
               <option value="audio">Audio</option>
             </select>
           </Field>
-          <Field label="Genre">
+          <Field label={draft.kind === "music" ? "Music genre" : "Genre"}>
             <input className={inputClass} value={draft.genre} onChange={(e) => set("genre", e.target.value)} />
           </Field>
           <Field label="Year">

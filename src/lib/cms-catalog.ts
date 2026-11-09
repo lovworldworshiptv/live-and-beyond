@@ -13,6 +13,7 @@ type ChannelRow = {
   tagline: string | null;
   description: string | null;
   category: string | null;
+  library_filter_mode?: "categories" | "genres";
   language: string | null;
   country: string | null;
   region: string | null;
@@ -73,6 +74,7 @@ export function mapChannelRow(r: ChannelRow): Channel {
     tagline: r.tagline ?? fallback?.tagline ?? "",
     description: r.description ?? fallback?.description,
     category: r.category ?? fallback?.category ?? "",
+    libraryFilterMode: r.library_filter_mode ?? "categories",
     language: r.language ?? fallback?.language ?? "English",
     country: r.country ?? fallback?.country ?? "",
     region: r.region ?? fallback?.region ?? "Global",
