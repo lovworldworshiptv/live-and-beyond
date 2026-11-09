@@ -258,6 +258,10 @@ div:has(> .channel-cutout) > div.pointer-events-none.absolute.inset-0 {
     transform: translateY(0);
   }
 }
+/* Phones and tablets: sections stay put while scrolling, never fade or slide in. */
+@media (max-width: 1023px) {
+  .landing-reveal { opacity: 1; transform: none; transition: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   .landing-kenburns, .landing-glow, .landing-shimmer-text { animation: none; }
   .landing-fade-up, .landing-reveal { animation: none; opacity: 1; transform: none; transition: none; }
