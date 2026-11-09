@@ -263,7 +263,7 @@ function StudioPage() {
           <div className="grid gap-5 sm:flex sm:items-start sm:justify-between">
             <div className="flex items-center gap-4 min-w-0">
               {channel?.logo_url ? (
-                <img src={channel.logo_url} alt={`${channel?.name ?? "Channel"} logo`} className="size-16 shrink-0 rounded-lg object-cover border border-border" />
+                <img src={channel.logo_url} alt={`${channel?.name ?? "Channel"} logo`} className="size-16 shrink-0 rounded-lg object-contain bg-elevated border border-border" />
               ) : (
                 <div className="size-16 shrink-0 rounded-lg bg-elevated border border-border grid place-items-center">
                   <Tv className="size-6 text-[color:var(--muted-foreground)]" />
@@ -374,7 +374,7 @@ function StudioPage() {
             <div className="lg:col-span-2 rounded-2xl border border-border bg-elevated/40 overflow-hidden">
               <div className="h-40 bg-surface">
                 {channel.banner_url && (
-                  <img src={channel.banner_url} alt={`${channel.name} cover`} className="size-full object-cover" />
+                  <img src={channel.banner_url} alt={`${channel.name} cover`} className="size-full object-contain" />
                 )}
               </div>
               <div className="p-5">

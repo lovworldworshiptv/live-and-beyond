@@ -320,7 +320,7 @@ function Index() {
               className="group shrink-0 w-[60vw] sm:w-[220px] snap-start rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-accent/50 transition"
             >
               <div className="relative aspect-[4/5] overflow-hidden">
-                <ChannelArtwork channel={c} alt={c.name} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
+                <ChannelArtwork channel={c} alt={c.name} loading="lazy" className="size-full" />
                 <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
                 <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-accent/90 text-accent-foreground">
                   {c.trending ? "Trending" : c.category}
@@ -502,7 +502,7 @@ function LiveNowCard({ c }: { c: Channel }) {
             >
               <Link to="/channels/$channelId" params={{ channelId: c.id }} className="block">
                 <div className="relative aspect-video overflow-hidden">
-                  <ChannelArtwork channel={c} alt={c.nowPlaying.title || c.name} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
+                  <ChannelArtwork channel={c} alt={c.nowPlaying.title || c.name} loading="lazy" className="size-full" />
                   <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent 50%, ${tint(0.45)} 100%)` }} />
                   <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded text-[11px] font-bold tracking-wide bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
                     LIVE

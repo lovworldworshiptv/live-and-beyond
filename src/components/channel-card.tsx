@@ -110,8 +110,8 @@ export function ChannelCard({ c }: { c: Channel }) {
             channel={c}
             alt={c.name}
             loading="lazy"
-            className={`size-full object-cover transition duration-700 ${
-              hovering && canPreview ? "opacity-0" : "group-hover:scale-105"
+            className={`size-full transition-opacity duration-700 ${
+              hovering && canPreview ? "opacity-0" : "opacity-100"
             }`}
           />
           {canPreview && (

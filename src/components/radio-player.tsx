@@ -153,7 +153,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
           <div className="mx-auto max-w-[1480px] px-3 pb-3">
             <div className="flex items-center gap-2 sm:gap-3 rounded-lg border border-border bg-background/85 backdrop-blur-xl px-3 py-2 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]">
               {station.logoUrl ? (
-                <img src={station.logoUrl} alt="" className="size-11 shrink-0 rounded-lg object-cover border border-border" />
+                <img src={station.logoUrl} alt="" className="size-11 shrink-0 rounded-lg object-contain bg-elevated border border-border" />
               ) : (
                 <div className="size-11 shrink-0 rounded-lg bg-elevated grid place-items-center border border-border">
                   <img src="/favicon.png" alt="" className="size-7 object-contain" draggable={false} />

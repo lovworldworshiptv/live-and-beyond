@@ -97,7 +97,7 @@ export function MediaPicker({
               <Icon className="size-4" /> <span className="truncate">{value}</span>
             </div>
           ) : (
-            <img src={value} alt="preview" className="w-full max-h-40 object-cover" />
+            <img src={value} alt="preview" className={`w-full max-h-40 ${folder.startsWith("channels/") || folder.startsWith("radio/") ? "object-contain" : "object-cover"}`} />
           )}
         </div>
       )}
