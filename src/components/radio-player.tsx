@@ -222,7 +222,7 @@ export function RadioNowPlaying({ compact = false }: { compact?: boolean }) {
                 {[0, 1].map((copy) => <div key={copy} className="radio-song-line">{song}</div>)}
               </div>
             </div>
-          </> : <span className="radio-song-fallback">{titleCase(station.stationMessage || station.name)}{playing ? "" : " · Paused"}</span>}
+          </> : <div className="radio-song-window" title={station.name}><div className="radio-song-line">{titleCase(station.stationMessage || station.name)}{playing ? "" : " · Paused"}</div></div>}
         </div>
       </div>
       <div className="radio-podcast-controls">
