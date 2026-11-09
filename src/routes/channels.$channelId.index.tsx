@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { LibraryBig } from "lucide-react";
-import { Play, Volume2, VolumeX, Users, Radio, Bell, BellRing, Plus, Check, ChevronRight, Signal, Sparkles, Tv, Mic } from "lucide-react";
+import { Play, Volume2, VolumeX, Users, Radio, Bell, BellRing, Plus, Check, ChevronRight, Signal, Sparkles, Tv, Mic, RectangleHorizontal, Minimize2 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ChannelArtwork } from "@/components/channel-artwork";
@@ -81,6 +81,20 @@ function ChannelPage() {
   const [dbChannelId, setDbChannelId] = useState<string | null>(null);
   const { following: followingDb, toggle: toggleFollowDb, notify: notifyDb, setNotify: setNotifyDb, count: followerCount, signedIn } = useChannelFollow(dbChannelId);
   const { settings, setSettings } = useSettings();
+  const [theatre, setTheatre] = useState(false);
+  useEffect(() => { setTheatre(localStorage.getItem("lf.theatre") === "1"); }, []);
+  const toggleTheatre = useCallback(() => {
+    setTheatre((t) => { const n = !t; localStorage.setItem("lf.theatre", n ? "1" : "0"); return n; });
+  }, []);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
+      if (e.key.toLowerCase() === "t" && !e.metaKey && !e.ctrlKey && !e.altKey) toggleTheatre();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [toggleTheatre]);
   const notifyOn = Boolean(dbChannelId && signedIn ? followingDb && notifyDb : settings.liveAlerts);
   const [radio, setRadio] = useState<RadioSettings | null>(null);
   const [libraryTitles, setLibraryTitles] = useState<Title[]>([]);
@@ -346,7 +360,7 @@ function ChannelPage() {
       )}
 
       {/* PLAYER — Live Stream / Radio Stream */}
-      <section ref={playerRef} className={`mx-auto max-w-[1480px] px-4 lg:px-10 pt-4 lg:pt-8 scroll-mt-24 ${playing ? "sticky top-16 z-30 bg-background lg:static" : ""}`}>
+      <section ref={playerRef} data-theatre={theatre && !radioOnHere ? "" : undefined} className={`mx-auto max-w-[1480px] px-4 lg:px-10 pt-4 lg:pt-8 scroll-mt-24 theatre-stage ${playing ? "sticky top-16 z-30 bg-background lg:static" : ""}`}>
         {radioOnHere ? <RadioNowPlaying /> : <>
         <div ref={frameRef} data-protected-player data-video-player={!isRadio || undefined} data-idle={fullscreen.idle || undefined} className={`relative rounded-lg overflow-hidden border border-border bg-background ${isRadio ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}`}>
           {/* Poster / backdrop */}
@@ -451,6 +465,14 @@ function ChannelPage() {
           </div>
           {playbackError && <div role="alert" className="pointer-events-none absolute bottom-2 inset-x-2 rounded bg-background/90 px-3 py-2 text-center text-xs text-foreground">{playbackError}</div>}
         </div>
+        {!isRadio && (
+          <div className="theatre-bar mt-2 hidden sm:flex justify-end">
+            <Button variant="ghost" size="sm" onClick={toggleTheatre} aria-pressed={theatre} title="Theatre mode (T)" className="h-9 gap-2 text-muted-foreground hover:text-foreground">
+              {theatre ? <Minimize2 className="size-4" /> : <RectangleHorizontal className="size-4" />}
+              {theatre ? "Default view" : "Theatre mode"}
+            </Button>
+          </div>
+        )}
         </>}
       </section>
 

@@ -590,3 +590,21 @@ html[data-shielded] video { filter: brightness(0) !important; }
   [data-brand-loader] .brand-stage { animation: none !important; }
   [data-brand-loader] .brand-sheen { opacity: 0; }
 }
+
+/* Theatre mode — wide, edge-to-edge channel player on a dimmed stage (tablet/desktop) */
+@media (min-width: 640px) {
+  .theatre-stage[data-theatre] {
+    max-width: none;
+    padding-inline: 0;
+    padding-top: 0;
+    background: color-mix(in oklab, var(--background) 55%, black);
+    padding-bottom: 0.5rem;
+    transition: background-color .3s ease;
+  }
+  .theatre-stage[data-theatre] [data-video-player] {
+    width: min(100%, calc((100svh - 5rem) * 16 / 9));
+    border-radius: 0;
+    border-inline: 0;
+  }
+  .theatre-stage[data-theatre] .theatre-bar { padding-inline: 1.5rem; }
+}
