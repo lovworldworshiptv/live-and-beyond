@@ -26,6 +26,8 @@ type RadioCtx = {
   stop: () => void;
   muted: boolean;
   toggleMute: () => void;
+  volume: number;
+  setVolume: (volume: number) => void;
   visualRef: RefObject<HTMLDivElement | null>;
 };
 
@@ -49,7 +51,14 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const [muted, setMuted] = useState(false);
   const [nowPlaying, setNowPlaying] = useState<NowPlaying>({ title: null, artist: null });
   const visualRef = useAudioReactivity(audioRef, !!station, `${station?.slug}-${location.pathname}`);
+  const [volume, setVolumeState] = useState(1);
   const toggleMute = useCallback(() => setMuted((value) => !value), []);
+  const setVolume = useCallback((next: number) => {
+    const value = Math.min(1, Math.max(0, next));
+    setVolumeState(value);
+    setMuted(value === 0);
+  }, []);
+  useEffect(() => { if (audioRef.current) audioRef.current.volume = volume; }, [volume]);
 
   // Attach the stream whenever the station changes
   useEffect(() => {
@@ -160,8 +169,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   }, [station, playing, nowPlaying, stop]);
 
   const value = useMemo(
-    () => ({ station, playing, error, nowPlaying, play, toggle, stop, muted, toggleMute, visualRef }),
-    [station, playing, error, nowPlaying, play, toggle, stop, muted, toggleMute, visualRef],
+    () => ({ station, playing, error, nowPlaying, play, toggle, stop, muted, toggleMute, volume, setVolume, visualRef }),
+    [station, playing, error, nowPlaying, play, toggle, stop, muted, toggleMute, volume, setVolume, visualRef],
   );
 
   return (
@@ -191,7 +200,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
 }
 
 export function RadioNowPlaying({ compact = false }: { compact?: boolean }) {
-  const { station, nowPlaying, playing, muted, error, toggle, toggleMute, stop, visualRef } = useRadio();
+  const { station, nowPlaying, playing, muted, error, toggle, toggleMute, volume, setVolume, stop, visualRef } = useRadio();
   const brand = useBrandColor(station?.logoUrl ?? undefined, station?.bannerUrl ?? undefined);
   if (!station) return null;
   const song = [nowPlaying.title, nowPlaying.artist].filter((value): value is string => !!value).map(titleCase).join(" — ");
@@ -204,6 +213,7 @@ export function RadioNowPlaying({ compact = false }: { compact?: boolean }) {
         <Link to="/channels/$channelId" params={{ channelId: station.slug }} className="text-xs text-muted-foreground">{station.name}</Link>
         <h2 className="radio-show-title">{titleCase(station.stationMessage || station.name)}</h2>
         <div role="status" className="radio-song-status">
+          {!error && <span className="radio-now-label"><span className="radio-now-dot" aria-hidden="true" />{song ? "Now playing" : "On air"}</span>}
           {error ? <span>{error}</span> : song ? <>
             <span className="sr-only">{song}</span>
             <div className="radio-song-window" aria-hidden="true" title={song}>
@@ -211,12 +221,15 @@ export function RadioNowPlaying({ compact = false }: { compact?: boolean }) {
                 {[0, 1].map((copy) => <div key={copy} className="radio-song-line">{song}</div>)}
               </div>
             </div>
-          </> : <span>{playing ? "Live Radio" : "Paused"}</span>}
+          </> : <span className="radio-song-fallback">{titleCase(station.stationMessage || station.name)}{playing ? "" : " · Paused"}</span>}
         </div>
       </div>
       <div className="radio-podcast-controls">
         <Button variant="ghost" onClick={() => toggle(station)} aria-label={playing ? "Pause radio" : "Play radio"} className="size-11 rounded-full bg-foreground text-background hover:bg-foreground/90">{playing ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current" />}</Button>
-        <Button variant="ghost" onClick={toggleMute} aria-label={muted ? "Unmute radio" : "Mute radio"} className="size-11 rounded-full bg-elevated">{muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}</Button>
+        <div className="radio-volume">
+          <Button variant="ghost" onClick={() => { if (muted && volume === 0) setVolume(0.6); else toggleMute(); }} aria-label={muted ? "Unmute radio" : "Mute radio"} className="size-9 shrink-0 rounded-full">{muted || volume === 0 ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}</Button>
+          <input type="range" min={0} max={100} step={1} value={muted ? 0 : Math.round(volume * 100)} onChange={(event) => setVolume(Number(event.currentTarget.value) / 100)} aria-label="Radio volume" aria-valuetext={`${muted ? 0 : Math.round(volume * 100)}%`} className="radio-volume-range" style={{ "--volume": `${muted ? 0 : volume * 100}%` } as CSSProperties} />
+        </div>
         <Button variant="ghost" onClick={stop} aria-label="Close radio player" className="size-11 rounded-full bg-elevated"><X className="size-5" /></Button>
       </div>
     </div>

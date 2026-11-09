@@ -59,7 +59,7 @@
     ui.mic = h("div.radio-reactive-mic", null, icon("mic"));
     ui.show = h("div.radio-show-title");
     ui.song = h("div.radio-song-ticker");
-    ui.radioView = h("div.radio-podcast-view", null, [ui.mic, ui.show, h("div.radio-song-window", null, ui.song)]);
+    ui.radioView = h("div.radio-podcast-view", null, [ui.mic, ui.show, h("div.radio-now-label", null, [h("i.radio-now-dot"), "Now playing"]), h("div.radio-song-window", null, ui.song)]);
     ui.live = h("span.live-badge.player-live", null, [h("i.live-dot"), "LIVE"]);
     ui.fill = h("div.pbar-fill"); ui.buf = h("div.pbar-buf"); ui.knob = h("div.pbar-knob");
     ui.bar = h("div.pbar", null, [ui.buf, ui.fill, ui.knob]);
@@ -68,6 +68,11 @@
     ui.rw = UI.button("10", "rewind", function () { seekBy(-10); }, "round");
     ui.ff = UI.button("10", "forward", function () { seekBy(10); }, "round");
     ui.restart = UI.button("Start over", "replay", function () { seekTo(0); }, "ghost");
+    ui.volumeDown = UI.button("Decrease radio volume", "", function () { changeVolume(-.1); }, "round.volume-step");
+    ui.volumeUp = UI.button("Increase radio volume", "", function () { changeVolume(.1); }, "round.volume-step");
+    ui.volumeDown.querySelector("span").textContent = "−"; ui.volumeUp.querySelector("span").textContent = "+";
+    ui.volumeValue = h("span.radio-volume-value", { text: "100%" });
+    ui.volume = h("div.radio-volume-controls", null, [ui.volumeDown, ui.volumeValue, ui.volumeUp]);
     ui.spinner = h("div.spinner");
     ui.error = h("div.player-error");
     ui.flash = h("div.seek-flash");
@@ -75,11 +80,19 @@
       h("div.player-top", null, [h("div", null, [ui.title, ui.sub]), ui.live]),
       h("div.player-bottom", null, [
         h("div.pbar-row", null, [ui.time, ui.bar, ui.dur]),
-        h("div.player-buttons", null, [ui.rw, ui.play, ui.ff, h("div.spacer"), ui.restart])
+        h("div.player-buttons", null, [ui.rw, ui.play, ui.ff, ui.volume, h("div.spacer"), ui.restart])
       ])
     ]);
     root = h("div.player", null, [video, ui.art, ui.radioView, ui.spinner, ui.flash, ui.error, ui.controls]);
     ["playing", "pause", "waiting", "canplay", "ended", "error", "loadedmetadata"].forEach(function (ev) { video.addEventListener(ev, onMedia); });
+    video.addEventListener("volumechange", paintVolume);
+  }
+
+  function paintVolume() { ui.volumeValue.textContent = Math.round(video.muted ? 0 : video.volume * 100) + "%"; }
+  function changeVolume(delta) {
+    video.volume = Math.max(0, Math.min(1, (video.muted ? 0 : video.volume) + delta));
+    video.muted = video.volume === 0;
+    paintVolume(); showControls(true);
   }
 
   function onMedia(e) {
@@ -196,7 +209,9 @@
     root.classList.toggle("radio-podcast", s.kind === "radio");
     var station = s.kind === "radio" ? Api.Catalog.radioStation(s.id) : null;
     ui.show.textContent = U.titleCase(station && station.message || s.title);
-    setSong(U.titleCase(s.subtitle || "Live Radio"));
+    setSong(U.titleCase(station && [station.nowTitle, station.nowArtist].filter(Boolean).join(" — ") || station && station.message || s.title));
+    ui.volume.style.display = s.kind === "radio" ? "flex" : "none";
+    paintVolume();
     ui.title.textContent = s.kind === "title" ? U.titleCase(s.title) : s.title; ui.sub.textContent = U.titleCase(s.subtitle || "");
     ui.art.style.backgroundImage = s.artwork ? "url(\"" + s.artwork + "\")" : "";
     ui.restart.style.display = s.kind === "title" && s.start > 0 ? "" : "none";

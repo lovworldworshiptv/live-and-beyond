@@ -38,3 +38,4 @@
 - Auth token refresh retains same-user identity and role state without inactivity timers; Studio sections live in validated URL search parameters so tab return and reload preserve the workspace location.
 - Shared media attachment starts video and audio after source readiness, retries muted only for autoplay-policy rejection, and exposes source failures with a tappable retry; decorative player overlays must not intercept playback taps.
 - Radio microphone size follows captured playback RMS, never simulated beats, plus a steady artwork-coloured on-air ripple while playing; enable anonymous CORS only on verified compatible feeds, leaving unsupported streams audible with a static mic.
+- Radio volume controls operate on the shared playback element so full and compact players stay synchronized; TV uses remote-focusable volume steps.

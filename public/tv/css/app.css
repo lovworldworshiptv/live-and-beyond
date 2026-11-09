@@ -339,12 +339,21 @@ body.playing #main, body.playing .rail { visibility: hidden; }
 .player.radio-podcast .radio-podcast-view { display: block; }
 .player.radio-podcast .player-art { left: 0; top: 0; width: 1920px; height: 1080px; border-radius: 0; background-size: cover; opacity: .28; filter: blur(18px); box-shadow: none; }
 .player.radio-podcast .player-sub { display: none; }
+.radio-volume-controls { display: flex; align-items: center; margin-left: 32px; padding: 4px 12px; border-radius: 8px; background: var(--elevated); }
+.radio-volume-value { width: 100px; text-align: center; font-size: 26px; color: var(--text2); font-variant-numeric: tabular-nums; }
+.radio-volume-controls .btn { margin: 0 8px; }
+.player.is-live .player-buttons .round.volume-step { display: flex; }
+.btn.round.volume-step span { position: static; font-size: 42px; line-height: 1; }
 .radio-reactive-mic { margin: 0 auto 42px; width: 160px; height: 160px; border-radius: 50%; background: var(--text); color: var(--bg); display: flex; align-items: center; justify-content: center; transition: transform 80ms linear; }
 .radio-reactive-mic .ic { width: 70px; height: 70px; }
 .radio-show-title { font-family: "Sora", sans-serif; font-size: 48px; font-weight: 700; margin-bottom: 20px; }
+.radio-now-label { color: var(--text2); font-size: 20px; text-transform: uppercase; }
+.radio-now-dot { display: inline-block; width: 12px; height: 12px; margin-right: 12px; border-radius: 50%; background: var(--error); }
+.player:not(.paused) .radio-now-dot { animation: radio-on-air 1.4s ease-in-out infinite; }
+@keyframes radio-on-air { 50% { opacity: .3; transform: scale(.8); } }
 .radio-song-window { height: 100px; overflow: hidden; }
 .radio-song-ticker { animation: radio-song-rise 10s ease-in-out infinite; }
 .radio-song-line { height: 100px; font-size: 30px; color: var(--text2); display: flex; align-items: center; justify-content: center; }
 .player.paused .radio-song-ticker { animation-play-state: paused; }
-@keyframes radio-song-rise { 0%, 15% { transform: translateY(0); } 100% { transform: translateY(-100px); } }
+@keyframes radio-song-rise { 0%, 80% { transform: translateY(0); } 100% { transform: translateY(-100px); } }
 @media (prefers-reduced-motion: reduce) { .radio-reactive-mic { transform: none !important; } .radio-song-ticker { animation: none; } }
