@@ -1,8 +1,8 @@
 import {
   createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode,
 } from "react";
-import { Link } from "@tanstack/react-router";
-import { Pause, Play, Volume2, VolumeX, X } from "lucide-react";
+import { Link, useLocation } from "@tanstack/react-router";
+import { Mic, Pause, Play, Volume2, VolumeX, X } from "lucide-react";
 import Hls from "hls.js";
 import { Button } from "@/components/ui/button";
 import type { RadioStation } from "@/lib/radio";
@@ -10,6 +10,8 @@ import { getRadioNowPlaying } from "@/lib/radio.functions";
 import { recordPlaybackEvent } from "@/lib/analytics";
 import { startMediaPlayback } from "@/lib/media-playback";
 import { titleCase } from "@/lib/title-case";
+import { useAudioReactivity } from "@/hooks/use-audio-reactivity";
+import type { RefObject } from "react";
 
 type NowPlaying = { title: string | null; artist: string | null };
 
@@ -21,6 +23,9 @@ type RadioCtx = {
   play: (station: RadioStation) => void;
   toggle: (station: RadioStation) => void;
   stop: () => void;
+  muted: boolean;
+  toggleMute: () => void;
+  visualRef: RefObject<HTMLDivElement | null>;
 };
 
 const Ctx = createContext<RadioCtx | null>(null);
@@ -32,6 +37,7 @@ export function useRadio() {
 }
 
 export function RadioPlayerProvider({ children }: { children: ReactNode }) {
+  const location = useLocation();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const trackedStation = useRef<RadioStation | null>(null);
   const playbackStarted = useRef(false);
@@ -41,6 +47,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
   const [nowPlaying, setNowPlaying] = useState<NowPlaying>({ title: null, artist: null });
+  const visualRef = useAudioReactivity(audioRef, !!station, `${station?.slug}-${location.pathname}`);
+  const toggleMute = useCallback(() => setMuted((value) => !value), []);
 
   // Attach the stream whenever the station changes
   useEffect(() => {
@@ -48,6 +56,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     if (!audio || !station?.streamUrl) return;
     setError(null);
     const src = station.streamUrl;
+    // This provider advertises CORS; other providers remain unrestricted for playback.
+    audio.crossOrigin = /^https:\/\/[^/]*radiolize\.com(?::\d+)?\//i.test(src) ? "anonymous" : null;
     hlsRef.current?.destroy();
     hlsRef.current = null;
     let disposed = false;
@@ -149,8 +159,8 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
   }, [station, playing, nowPlaying, stop]);
 
   const value = useMemo(
-    () => ({ station, playing, error, nowPlaying, play, toggle, stop }),
-    [station, playing, error, nowPlaying, play, toggle, stop],
+    () => ({ station, playing, error, nowPlaying, play, toggle, stop, muted, toggleMute, visualRef }),
+    [station, playing, error, nowPlaying, play, toggle, stop, muted, toggleMute, visualRef],
   );
 
   return (
@@ -168,67 +178,45 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
         if (playbackStarted.current && trackedStation.current) void recordPlaybackEvent({ channelId: trackedStation.current.channelId, service: "radio", event: "end" });
         playbackStarted.current = false;
       }} onError={() => { setPlaying(false); setError("Station unavailable. Try again shortly."); }} />
-      {station && (
+      {station && !location.pathname.replace(/\/$/, "").endsWith(`/channels/${station.slug}`) && (
         <div data-radio-player className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom,0px))] z-50 lg:bottom-0">
           <div className="mx-auto max-w-[1480px] px-3 pb-3">
-            <div className="flex items-center gap-2 sm:gap-3 rounded-lg border border-border bg-background/85 backdrop-blur-xl px-3 py-2 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]">
-              {station.logoUrl ? (
-                <img src={station.logoUrl} alt="" className="size-11 shrink-0 rounded-lg object-contain bg-elevated border border-border" />
-              ) : (
-                <div className="size-11 shrink-0 rounded-lg bg-elevated grid place-items-center border border-border">
-                  <img src="/favicon.png" alt="" className="size-7 object-contain" draggable={false} />
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <Link
-                  to="/channels/$channelId"
-                  params={{ channelId: station.slug }}
-                  className="block truncate text-sm font-semibold hover:text-primary transition"
-                >
-                  {station.name}
-                </Link>
-                <div role="status" className="text-xs text-muted-foreground">
-                  {nowPlaying.title && !error ? (
-                    <>
-                      <span className="sr-only">{titleCase(nowPlaying.title)}{nowPlaying.artist ? ` — ${titleCase(nowPlaying.artist)}` : ""}</span>
-                      <div className="radio-song-window" aria-hidden="true" title={`${titleCase(nowPlaying.title)}${nowPlaying.artist ? ` — ${titleCase(nowPlaying.artist)}` : ""}`}>
-                        <div key={`${nowPlaying.title}-${nowPlaying.artist}`} className="radio-song-scroll" data-paused={!playing || undefined}>
-                          {[0, 1].map((copy) => (
-                            <div key={copy} className="radio-song-line">
-                              {titleCase(nowPlaying.title ?? "")}{nowPlaying.artist ? ` — ${titleCase(nowPlaying.artist)}` : ""}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  ) : <span className="block truncate">{error || station.stationMessage || "Live radio"}</span>}
-                </div>
-              </div>
-              <Button variant="ghost"
-                onClick={() => toggle(station)}
-                aria-label={playing ? "Pause radio" : "Play radio"}
-                className="size-11 shrink-0 grid place-items-center rounded-full bg-primary text-primary-foreground"
-              >
-                {playing ? <Pause className="size-4 fill-current" /> : <Play className="size-4 fill-current" />}
-              </Button>
-              <Button variant="ghost"
-                onClick={() => setMuted((m) => !m)}
-                aria-label={muted ? "Unmute radio" : "Mute radio"}
-                className="size-11 shrink-0 grid place-items-center rounded-full border border-border bg-elevated"
-              >
-                {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
-              </Button>
-              <Button variant="ghost"
-                onClick={stop}
-                aria-label="Close radio player"
-                className="size-11 shrink-0 grid place-items-center rounded-full border border-border bg-elevated"
-              >
-                <X className="size-4" />
-              </Button>
-            </div>
+            <RadioNowPlaying compact />
           </div>
         </div>
       )}
     </Ctx.Provider>
+  );
+}
+
+export function RadioNowPlaying({ compact = false }: { compact?: boolean }) {
+  const { station, nowPlaying, playing, muted, error, toggle, toggleMute, stop, visualRef } = useRadio();
+  if (!station) return null;
+  const song = [nowPlaying.title, nowPlaying.artist].filter((value): value is string => !!value).map(titleCase).join(" — ");
+  return (
+    <div ref={visualRef} data-audio-reactive data-playing={playing && !muted || undefined} className={`radio-podcast-player ${compact ? "radio-podcast-compact" : "radio-podcast-full"}`}>
+      <img src={station.logoUrl || station.bannerUrl || "/icon-512.png"} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/icon-512.png"; }} alt="" className="radio-podcast-backdrop" />
+      <div className="radio-podcast-shade" />
+      <div className="radio-podcast-mic" aria-hidden="true"><Mic /></div>
+      <div className="radio-podcast-copy">
+        <Link to="/channels/$channelId" params={{ channelId: station.slug }} className="text-xs text-muted-foreground">{station.name}</Link>
+        <h2 className="radio-show-title">{titleCase(station.stationMessage || station.name)}</h2>
+        <div role="status" className="radio-song-status">
+          {error ? <span>{error}</span> : song ? <>
+            <span className="sr-only">{song}</span>
+            <div className="radio-song-window" aria-hidden="true" title={song}>
+              <div key={song} className="radio-song-scroll" data-paused={!playing || undefined}>
+                {[0, 1].map((copy) => <div key={copy} className="radio-song-line">{song}</div>)}
+              </div>
+            </div>
+          </> : <span>{playing ? "Live Radio" : "Paused"}</span>}
+        </div>
+      </div>
+      <div className="radio-podcast-controls">
+        <Button variant="ghost" onClick={() => toggle(station)} aria-label={playing ? "Pause radio" : "Play radio"} className="size-11 rounded-full bg-foreground text-background hover:bg-foreground/90">{playing ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current" />}</Button>
+        <Button variant="ghost" onClick={toggleMute} aria-label={muted ? "Unmute radio" : "Mute radio"} className="size-11 rounded-full bg-elevated">{muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}</Button>
+        <Button variant="ghost" onClick={stop} aria-label="Close radio player" className="size-11 rounded-full bg-elevated"><X className="size-5" /></Button>
+      </div>
+    </div>
   );
 }

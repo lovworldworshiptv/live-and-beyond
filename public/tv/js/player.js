@@ -10,12 +10,13 @@
   var root = null, video = null, hls = null, src = null, hideTimer = null, tick = null;
   var ui = {};
   var seconds = 0, started = false, onClose = null, seekPreview = null, seekTimer = null;
-  var loadGeneration = 0, radioTimer = null;
+  var loadGeneration = 0, radioTimer = null, reactiveContext = null, reactiveFrame = null, reactiveStream = null;
 
   function isHls(url) { return /\.m3u8(\?|$)/i.test(url); }
 
   function attach(url, start) {
     detachHls();
+    video.crossOrigin = /^https:\/\/[^/]*radiolize\.com(?::\d+)?\//i.test(url) ? "anonymous" : null;
     var generation = loadGeneration;
     var native = video.canPlayType("application/vnd.apple.mpegurl");
     if (isHls(url) && window.Hls && Hls.isSupported() && !(native === "probably")) {
@@ -55,6 +56,10 @@
     ui.art = h("div.player-art");
     ui.title = h("div.player-title");
     ui.sub = h("div.player-sub");
+    ui.mic = h("div.radio-reactive-mic", null, icon("mic"));
+    ui.show = h("div.radio-show-title");
+    ui.song = h("div.radio-song-ticker");
+    ui.radioView = h("div.radio-podcast-view", null, [ui.mic, ui.show, h("div.radio-song-window", null, ui.song)]);
     ui.live = h("span.live-badge.player-live", null, [h("i.live-dot"), "LIVE"]);
     ui.fill = h("div.pbar-fill"); ui.buf = h("div.pbar-buf"); ui.knob = h("div.pbar-knob");
     ui.bar = h("div.pbar", null, [ui.buf, ui.fill, ui.knob]);
@@ -73,7 +78,7 @@
         h("div.player-buttons", null, [ui.rw, ui.play, ui.ff, h("div.spacer"), ui.restart])
       ])
     ]);
-    root = h("div.player", null, [video, ui.art, ui.spinner, ui.flash, ui.error, ui.controls]);
+    root = h("div.player", null, [video, ui.art, ui.radioView, ui.spinner, ui.flash, ui.error, ui.controls]);
     ["playing", "pause", "waiting", "canplay", "ended", "error", "loadedmetadata"].forEach(function (ev) { video.addEventListener(ev, onMedia); });
   }
 
@@ -81,6 +86,7 @@
     if (e.type === "waiting") root.classList.add("buffering");
     if (e.type === "playing" || e.type === "canplay") root.classList.remove("buffering");
     if (e.type === "playing" || e.type === "pause") { paintPlay(); root.classList.toggle("paused", video.paused); }
+    if (e.type === "playing" && src && src.kind === "radio") startReactive();
     if (e.type === "playing" && src && !started) { started = true; Playback.record(src, "start"); }
     if (e.type === "error" && !hls) fail("This stream can't play right now.");
     if (e.type === "ended") {
@@ -88,6 +94,42 @@
       if (src && src.kind === "title") { save(); close(); }
     }
     if (e.type === "pause") showControls(true);
+  }
+
+  function stopReactive() {
+    cancelAnimationFrame(reactiveFrame); reactiveFrame = null;
+    if (reactiveContext) reactiveContext.close().catch(function () {});
+    if (reactiveStream) reactiveStream.getTracks().forEach(function (track) { track.stop(); });
+    reactiveContext = null; reactiveStream = null;
+    if (ui.mic) ui.mic.style.transform = "scale(1)";
+  }
+  function startReactive() {
+    if (reactiveContext || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    try {
+      var capture = video.captureStream || video.mozCaptureStream;
+      var Context = window.AudioContext || window.webkitAudioContext;
+      if (!capture || !Context) return;
+      reactiveStream = capture.call(video);
+      if (!reactiveStream.getAudioTracks().length) return;
+      reactiveContext = new Context();
+      var analyser = reactiveContext.createAnalyser(); analyser.fftSize = 256;
+      reactiveContext.createMediaStreamSource(reactiveStream).connect(analyser);
+      reactiveContext.resume().catch(function () {});
+      var samples = new Uint8Array(analyser.fftSize);
+      (function draw() {
+        if (!reactiveContext) return;
+        analyser.getByteTimeDomainData(samples);
+        var sum = 0; for (var i = 0; i < samples.length; i++) sum += Math.pow((samples[i] - 128) / 128, 2);
+        var level = video.paused || video.muted ? 0 : Math.min(1, Math.sqrt(sum / samples.length) * 3);
+        ui.mic.style.transform = "scale(" + (1 + level * .2) + ")";
+        reactiveFrame = requestAnimationFrame(draw);
+      })();
+    } catch (e) { stopReactive(); }
+  }
+  function setSong(title) {
+    if (ui.song.getAttribute("data-song") === title) return;
+    ui.song.setAttribute("data-song", title); ui.song.innerHTML = "";
+    U.append(ui.song, [h("div.radio-song-line", { text: title }), h("div.radio-song-line", { text: title, "aria-hidden": "true" })]);
   }
 
   function paintPlay() {
@@ -147,10 +189,14 @@
   }
 
   function load(s) {
-    loadGeneration++; clearTimeout(radioTimer); video.pause();
+    loadGeneration++; clearTimeout(radioTimer); stopReactive(); video.pause();
     src = s; seconds = 0; started = false; seekPreview = null;
     root.className = "player buffering controls";
     root.classList.toggle("audio", !!s.isAudio);
+    root.classList.toggle("radio-podcast", s.kind === "radio");
+    var station = s.kind === "radio" ? Api.Catalog.radioStation(s.id) : null;
+    ui.show.textContent = U.titleCase(station && station.message || s.title);
+    setSong(U.titleCase(s.subtitle || "Live Radio"));
     ui.title.textContent = s.kind === "title" ? U.titleCase(s.title) : s.title; ui.sub.textContent = U.titleCase(s.subtitle || "");
     ui.art.style.backgroundImage = s.artwork ? "url(\"" + s.artwork + "\")" : "";
     ui.restart.style.display = s.kind === "title" && s.start > 0 ? "" : "none";
@@ -160,7 +206,7 @@
         fetch(LETT_CONFIG.API_ORIGIN + "/api/public/radio-now-playing?channelId=" + encodeURIComponent(s.channelId)).then(function (r) { if (!r.ok) throw new Error("metadata unavailable"); return r.json(); }).then(function (song) {
           if (generation !== loadGeneration) return;
           var title = [song.title, song.artist].filter(Boolean).map(U.titleCase).join(" — ");
-          if (title && ui.sub.textContent !== title) ui.sub.textContent = title;
+          if (title) { ui.sub.textContent = title; setSong(title); }
         }).catch(function () {}).then(function () { if (generation === loadGeneration) radioTimer = setTimeout(pollSong, 15000); });
       })();
     }
@@ -193,7 +239,7 @@
   }
 
   function close() {
-    loadGeneration++; clearTimeout(radioTimer);
+    loadGeneration++; clearTimeout(radioTimer); stopReactive();
     save();
     if (src && started) Playback.record(src, "stop", seconds % 30);
     clearInterval(tick); clearTimeout(hideTimer); clearTimeout(seekTimer);

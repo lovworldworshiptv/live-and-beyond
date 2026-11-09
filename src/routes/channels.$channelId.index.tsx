@@ -21,7 +21,7 @@ import { recordPlaybackEvent } from "@/lib/analytics";
 import { resolveChannelPlayout, type NowPlaying } from "@/lib/playout";
 import { toast } from "sonner";
 import { fetchRadioSettings, type RadioSettings, type RadioFormat } from "@/lib/radio";
-import { useRadio } from "@/components/radio-player";
+import { RadioNowPlaying, useRadio } from "@/components/radio-player";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/channels/$channelId/")({
@@ -341,12 +341,12 @@ function ChannelPage() {
               <Radio className="size-4" /> Listen to radio
             </Button>
           </div>
-          {radioOnHere && <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">Radio is playing below the page. Choose Watch live TV to switch back.</p>}
         </div>
       )}
 
       {/* PLAYER — Live Stream / Radio Stream */}
       <section ref={playerRef} className={`mx-auto max-w-[1480px] px-4 lg:px-10 pt-4 lg:pt-8 scroll-mt-24 ${playing ? "sticky top-16 z-30 bg-background lg:static" : ""}`}>
+        {radioOnHere ? <RadioNowPlaying /> : <>
         <div ref={frameRef} data-protected-player data-video-player={!isRadio || undefined} data-idle={fullscreen.idle || undefined} className={`relative rounded-lg overflow-hidden border border-border bg-background ${isRadio ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}`}>
           {/* Poster / backdrop */}
           <ChannelArtwork channel={channel} alt="" className={`absolute inset-0 size-full object-cover transition-opacity duration-300 ${playing ? "opacity-0" : isRadio ? "opacity-40 blur-sm scale-110" : "opacity-60"}`} />
@@ -459,6 +459,7 @@ function ChannelPage() {
           </div>
           {playbackError && <div role="alert" className="pointer-events-none absolute bottom-2 inset-x-2 rounded bg-background/90 px-3 py-2 text-center text-xs text-foreground">{playbackError}</div>}
         </div>
+        </>}
       </section>
 
       {/* META + ACTIONS */}

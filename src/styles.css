@@ -277,14 +277,14 @@ div:has(> .channel-cutout) > div.pointer-events-none.absolute.inset-0 {
 @media (max-width: 359.98px) {
   [data-radio-player] button { width: 2.25rem; height: 2.75rem; }
 }
-.radio-song-window { height: 1rem; overflow: hidden; }
-.radio-song-scroll { display: flex; width: max-content; animation: radio-song-slide 18s linear infinite; }
-.radio-song-line { flex: none; padding-right: 3rem; line-height: 1rem; white-space: nowrap; }
+.radio-song-window { height: 2.75rem; overflow: hidden; }
+.radio-song-scroll { display: block; width: 100%; animation: radio-song-rise 10s ease-in-out infinite; }
+.radio-song-line { height: 2.75rem; display: grid; place-items: center; line-height: 1.25rem; padding-inline: 0.5rem; overflow: hidden; overflow-wrap: anywhere; }
 .radio-song-scroll[data-paused] { animation-play-state: paused; }
 .radio-song-window:hover .radio-song-scroll { animation-play-state: paused; }
-@keyframes radio-song-slide {
+@keyframes radio-song-rise {
   0%, 15% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  100% { transform: translateY(-2.75rem); }
 }
 @media (prefers-reduced-motion: reduce) {
   .radio-song-window { height: auto; }
@@ -292,6 +292,28 @@ div:has(> .channel-cutout) > div.pointer-events-none.absolute.inset-0 {
   .radio-song-line { padding-right: 0; white-space: normal; overflow-wrap: anywhere; }
   .radio-song-line + .radio-song-line { display: none; }
 }
+.radio-podcast-player { --audio-level: 0; position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 8px; background: var(--background); }
+.radio-podcast-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(12px); opacity: .32; pointer-events: none; }
+.radio-podcast-shade { position: absolute; inset: 0; background: var(--gradient-card); pointer-events: none; }
+.radio-podcast-mic { position: relative; display: grid; place-items: center; width: 76px; height: 76px; border-radius: 50%; background: var(--foreground); color: var(--background); box-shadow: var(--shadow-glow); transform: scale(calc(1 + var(--audio-level) * .2)); transition: transform 80ms linear; }
+.radio-podcast-mic svg { width: 32px; height: 32px; }
+.radio-podcast-copy { position: relative; min-width: 0; }
+.radio-show-title { overflow-wrap: anywhere; font-size: 1.25rem; margin-top: .3rem; line-height: 1.3; }
+.radio-song-status { color: var(--secondary-foreground); font-size: .875rem; min-height: 2.75rem; }
+.radio-podcast-controls { position: relative; display: flex; gap: .5rem; justify-content: center; }
+.radio-podcast-full { min-height: 340px; padding: 32px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; }
+.radio-podcast-full .radio-podcast-copy { width: min(100%, 640px); }
+.radio-podcast-compact { display: grid; grid-template-columns: 44px minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 12px; }
+.radio-podcast-compact .radio-podcast-mic { width: 40px; height: 40px; }
+.radio-podcast-compact .radio-podcast-mic svg { width: 20px; height: 20px; }
+.radio-podcast-compact .radio-show-title { font-size: .875rem; margin: 0; }
+.radio-podcast-compact .radio-song-window, .radio-podcast-compact .radio-song-line { height: 1.5rem; }
+.radio-podcast-compact .radio-song-line { display: block; white-space: nowrap; text-overflow: ellipsis; line-height: 1.5rem; padding-inline: 0; }
+.radio-podcast-compact .radio-song-scroll { animation-name: radio-song-rise-compact; }
+.radio-podcast-compact .radio-song-status { min-height: 1.5rem; font-size: .75rem; }
+@keyframes radio-song-rise-compact { 0%, 15% { transform: translateY(0); } 100% { transform: translateY(-1.5rem); } }
+@media (max-width: 359.98px) { .radio-podcast-compact { grid-template-columns: minmax(0,1fr) auto; gap: 8px; } .radio-podcast-compact .radio-podcast-mic { display: none; } }
+@media (prefers-reduced-motion: reduce) { .radio-podcast-mic { transform: none; transition: none; } .radio-podcast-compact .radio-song-scroll { animation: none; } }
 body { -webkit-touch-callout: none; }
 html:not([data-copy-allowed]) body { user-select: none; -webkit-user-select: none; }
 html:not([data-copy-allowed]) :is(input, textarea, select, [contenteditable], [data-allow-copy]) { user-select: text; -webkit-user-select: text; }
