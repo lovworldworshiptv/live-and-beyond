@@ -364,6 +364,7 @@ export function ChannelEditor({ value, onClose, onSave, onSaved }: { value: Part
   const strToList = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
   const [services, setServices] = useState<ServiceKey[]>(value.kind === "radio" ? ["radio"] : ["tv"]);
   const [radioUrl, setRadioUrl] = useState("");
+  const [radioArtwork, setRadioArtwork] = useState<string | null>(null);
   const [servicesLoading, setServicesLoading] = useState(Boolean(value.id));
   const [servicesError, setServicesError] = useState(false);
   useEffect(() => {
@@ -372,6 +373,7 @@ export function ChannelEditor({ value, onClose, onSave, onSaved }: { value: Part
     void Promise.all([fetchChannelServices(value.id), fetchRadioSettings(value.id)]).then(([rows, radio]) => {
       if (!active) return;
       setServices(rows.length ? rows.filter((r) => r.enabled).map((r) => r.service) : value.kind === "radio" ? ["radio"] : ["tv"]);
+      setRadioArtwork(radio?.artwork_url ?? null);
       setRadioUrl(radio?.stream_url ?? (value.kind === "radio" ? value.stream_url ?? "" : ""));
     }).catch(() => { if (active) { setServicesError(true); toast.error("Could not load channel services. Reopen the editor to try again."); } }).finally(() => { if (active) setServicesLoading(false); });
     return () => { active = false; };
@@ -386,7 +388,7 @@ export function ChannelEditor({ value, onClose, onSave, onSaved }: { value: Part
         saveChannel: () => onSave({ ...form, kind }),
         saveServices: saveChannelServices,
         saveRadio: saveRadioSettings,
-      });
+      }, radioArtwork);
       setForm((current) => ({ ...current, id }));
       toast.success("Channel and services saved");
       onSaved();
@@ -409,7 +411,8 @@ export function ChannelEditor({ value, onClose, onSave, onSaved }: { value: Part
           ))}
         </div>
         {services.includes("radio") && (
-          <div className="mt-3"><Field label="Live radio stream URL"><input className={inputClass} value={radioUrl} onChange={(e) => setRadioUrl(e.target.value)} placeholder="https://…/stream.mp3" /></Field></div>
+          <div className="mt-3"><Field label="Live radio stream URL"><input className={inputClass} value={radioUrl} onChange={(e) => setRadioUrl(e.target.value)} placeholder="https://…/stream.mp3" /></Field>
+            <div className="mt-3"><Field label="Radio artwork (uses the channel image if empty)"><MediaPicker value={radioArtwork} onChange={(url) => setRadioArtwork(url)} folder="radio/artwork" /></Field></div></div>
         )}
       </div>
       <div className="grid gap-4 md:grid-cols-2">

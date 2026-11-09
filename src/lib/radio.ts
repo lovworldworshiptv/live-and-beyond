@@ -17,6 +17,7 @@ export type RadioSettings = {
   now_playing_artwork_url: string | null;
   now_playing_updated_at: string | null;
   station_message: string | null;
+  artwork_url: string | null;
 };
 
 export type RadioStation = {
@@ -84,7 +85,7 @@ export async function fetchRadioStations(): Promise<RadioStation[]> {
   const { data } = await supabase
     .from("radio_settings")
     .select(
-      "channel_id, stream_url, format, bitrate_kbps, now_playing_title, now_playing_artist, now_playing_artwork_url, station_message, is_enabled, cms_channels!inner(id, slug, name, tagline, logo_url, banner_url, category, country, language, is_published, deleted_at, display_order)",
+      "channel_id, stream_url, format, bitrate_kbps, now_playing_title, now_playing_artist, now_playing_artwork_url, station_message, artwork_url, is_enabled, cms_channels!inner(id, slug, name, tagline, logo_url, banner_url, category, country, language, is_published, deleted_at, display_order)",
     )
     .eq("is_enabled", true);
 
@@ -107,7 +108,8 @@ export async function fetchRadioStations(): Promise<RadioStation[]> {
       slug: r.cms_channels.slug,
       name: r.cms_channels.name,
       tagline: r.cms_channels.tagline,
-      logoUrl: r.cms_channels.logo_url,
+      // Radio artwork set in Studio/Admin wins; the TV channel logo is only a fallback.
+      logoUrl: r.artwork_url || r.cms_channels.logo_url,
       bannerUrl: r.cms_channels.banner_url,
       category: r.cms_channels.category,
       country: r.cms_channels.country,

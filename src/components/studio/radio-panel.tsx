@@ -18,6 +18,7 @@ const EMPTY: Partial<RadioSettings> = {
   now_playing_artist: "",
   now_playing_artwork_url: "",
   station_message: "",
+  artwork_url: "",
 };
 
 function Label({ children }: { children: React.ReactNode }) {
@@ -64,6 +65,7 @@ export function RadioPanel({ channelId }: { channelId: string }) {
         now_playing_artwork_url: value.now_playing_artwork_url || null,
         now_playing_updated_at: new Date().toISOString(),
         station_message: value.station_message || null,
+        artwork_url: value.artwork_url || null,
       });
       toast.success("Radio settings saved");
       load();
@@ -128,6 +130,11 @@ export function RadioPanel({ channelId }: { channelId: string }) {
               value={value.bitrate_kbps ?? 128}
               onChange={(e) => set("bitrate_kbps", Number(e.target.value))}
             />
+          </div>
+          <div className="sm:col-span-2">
+            <Label>Radio artwork</Label>
+            <p className="mb-2 text-xs text-muted-foreground">Shown on the radio player and lock screen. If empty, your channel image is used.</p>
+            <MediaPicker value={value.artwork_url || null} onChange={(url) => set("artwork_url", url)} folder="radio/artwork" />
           </div>
           <div className="sm:col-span-2">
             <Label>Station message</Label>

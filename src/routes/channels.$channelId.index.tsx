@@ -330,7 +330,7 @@ function ChannelPage() {
                 setPlaying(false);
                 radioPlayer.play({
                 channelId: dbChannelId ?? channel.id, slug: channelId, name: channel.name,
-                tagline: channel.tagline ?? null, logoUrl: channel.logoImg || null, bannerUrl: channel.banner || null,
+                tagline: channel.tagline ?? null, logoUrl: radio.artwork_url || channel.logoImg || null, bannerUrl: channel.banner || null,
                 category: channel.category ?? null, country: channel.country ?? null, language: channel.language ?? null,
                 streamUrl: radio.stream_url, format: (radio.format ?? "mp3") as RadioFormat, bitrate: radio.bitrate_kbps ?? 128,
                 nowPlayingTitle: radio.now_playing_title, nowPlayingArtist: radio.now_playing_artist,
@@ -461,7 +461,7 @@ function ChannelPage() {
       <section className="mx-auto max-w-[1480px] px-6 lg:px-10 mt-8 grid gap-10 lg:grid-cols-[1fr_360px]">
         <div>
           <div className="flex flex-wrap gap-3">
-            <button
+            {!radioOnHere && <button
               onClick={startPlayback}
               className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-[image:var(--gradient-live)] text-primary-foreground font-semibold hover:opacity-95 transition"
               style={{
@@ -469,7 +469,7 @@ function ChannelPage() {
               }}
             >
               <Play className="size-[19px] fill-current" strokeWidth={2.5} /> {isRadio ? "Listen Live" : "Watch Live"}
-            </button>
+            </button>}
             <Link
               to="/channels/$channelId/library"
               params={{ channelId: channel.id }}
