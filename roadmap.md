@@ -65,6 +65,7 @@
 - [x] Verified authenticated Admin/Open Studio access, all Studio sections, combined TV/radio/VOD draft save and readback, unchanged creator ownership, failed-save recovery and editor reset on channel switching; phone/tablet layouts have no horizontal overflow. Test drafts removed; 19 regression tests pass. Actual streaming still depends on working media sources.
 
 ## Requests (Nov 9)
+- [x] Remove backgrounds from Joycall, LXP, Healing Streams and Rhapsody artwork; preserve wide cards and full foreground artwork with brand-colored fill across desktop, tablet and mobile.
 - [x] Use the same wide channel cards as Lettflix Gospel and LN24 International for Featured Channels, including LXP and Rhapsody; verify Joycall and Healing Streams use the same full-image fitting.
 - [x] Fill viewer-facing banner frames without black gaps while keeping the entire artwork visible; use matching image fill for proportions unlike LN24 International. Verified at desktop, tablet and phone widths.
 - [x] Featured On-Demand ranks published movies, podcasts and series across all channels using actual playback starts; never fill with manual featured picks.

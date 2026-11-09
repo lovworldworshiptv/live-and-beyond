@@ -1,5 +1,6 @@
 import { useState, type ImgHTMLAttributes } from "react";
 import { channelArtwork } from "@/lib/channel-artwork";
+import { channelCutout } from "@/lib/channel-cutouts";
 
 type Props = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "onError" | "onLoad"> & {
   channel: { banner?: string; category: string; streamKind?: string };
@@ -10,6 +11,14 @@ type Props = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "onError" | "onLo
  * Every logo and banner fits fully inside its frame, regardless of its proportions.
  */
 export function ChannelArtwork({ channel, className, ...props }: Props) {
+  const cutout = channelCutout(channel.banner);
+  if (cutout) {
+    return (
+      <span className={`channel-cutout relative isolate block overflow-hidden ${className ?? ""}`} data-artwork-theme={cutout.theme}>
+        <img {...props} src={cutout.src} className="absolute inset-0 size-full object-contain p-2" />
+      </span>
+    );
+  }
   const sources = [
     ...new Set(
       [channel.banner?.trim(), channelArtwork(channel.category, channel.streamKind), "/icon-512.png"].filter(
