@@ -140,12 +140,12 @@ export function ChannelCard({ c }: { c: Channel }) {
           {!(hovering && canPreview) && (
             <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
               <div
-                className="size-16 rounded-full bg-white/95 grid place-items-center"
+                className="size-11 sm:size-14 lg:size-16 rounded-full bg-white/95 grid place-items-center"
                 style={{
                   boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.3), 0 0 24px oklch(0.55 0.22 25 / 0.45), 0 0 50px oklch(0.55 0.22 25 / 0.2)",
                 }}
               >
-                <Play className="size-6 text-background fill-current ml-0.5" />
+                <Play className="size-4 sm:size-5 lg:size-6 text-background fill-current ml-0.5" />
               </div>
             </div>
           )}
