@@ -1,5 +1,5 @@
 import joycall from "@/assets/channel-cutouts/joycall-tv.png";
-import lxp from "@/assets/channel-cutouts/lxp.png";
+import lxp from "@/assets/channels/lxp-wide.jpg";
 import healing from "@/assets/channel-cutouts/healing-streams-tv.png";
 import rhapsody from "@/assets/channel-cutouts/rhapsodytv.png";
 

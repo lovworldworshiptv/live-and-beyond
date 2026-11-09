@@ -15,7 +15,7 @@ export function ChannelArtwork({ channel, className, ...props }: Props) {
   if (cutout) {
     return (
       <span className={`channel-cutout relative isolate block overflow-hidden ${className ?? ""}`} data-artwork-theme={cutout.theme}>
-        <img {...props} src={cutout.src} className="absolute inset-0 size-full object-contain p-2" />
+        <img {...props} src={cutout.src} className={`absolute inset-0 size-full object-contain ${cutout.theme === "lxp" ? "" : "p-2"}`} />
       </span>
     );
   }
