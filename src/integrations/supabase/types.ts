@@ -58,18 +58,21 @@ export type Database = {
           channel_id: string
           created_at: string
           id: string
+          notify: boolean
           user_id: string
         }
         Insert: {
           channel_id: string
           created_at?: string
           id?: string
+          notify?: boolean
           user_id: string
         }
         Update: {
           channel_id?: string
           created_at?: string
           id?: string
+          notify?: boolean
           user_id?: string
         }
         Relationships: [
@@ -1452,6 +1455,7 @@ export type Database = {
         Args: { _channel_id: string; _user_id: string }
         Returns: boolean
       }
+      channel_follower_count: { Args: { _channel_id: string }; Returns: number }
       featured_on_demand_rankings: {
         Args: never
         Returns: {
@@ -1465,6 +1469,17 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      notify_channel_followers: {
+        Args: {
+          _body: string
+          _channel_id: string
+          _image: string
+          _kind: string
+          _link: string
+          _title: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

@@ -16,7 +16,7 @@ import { QualityMenu } from "@/components/quality-menu";
 import { usePlayerFullscreen } from "@/components/player-fullscreen";
 import { protectedChannelSrc } from "@/lib/stream-src";
 import { useFollowing, useSettings } from "@/lib/personal";
-import { useChannelFollow } from "@/lib/follows";
+import { useChannelFollow, formatFollowers } from "@/lib/follows";
 import { recordPlaybackEvent } from "@/lib/analytics";
 import { resolveChannelPlayout, type NowPlaying } from "@/lib/playout";
 import { toast } from "sonner";
@@ -79,8 +79,9 @@ function ChannelPage() {
   const [notFoundState, setNotFoundState] = useState(false);
   const { has: isFollowingLocal, toggle: toggleFollowLocal } = useFollowing();
   const [dbChannelId, setDbChannelId] = useState<string | null>(null);
-  const { following: followingDb, toggle: toggleFollowDb } = useChannelFollow(dbChannelId);
+  const { following: followingDb, toggle: toggleFollowDb, notify: notifyDb, setNotify: setNotifyDb, count: followerCount, signedIn } = useChannelFollow(dbChannelId);
   const { settings, setSettings } = useSettings();
+  const notifyOn = Boolean(dbChannelId && signedIn ? followingDb && notifyDb : settings.liveAlerts);
   const [radio, setRadio] = useState<RadioSettings | null>(null);
   const [libraryTitles, setLibraryTitles] = useState<Title[]>([]);
   const radioPlayer = useRadio();
@@ -488,23 +489,36 @@ function ChannelPage() {
             >
               {isFollowing ? <Check className="size-4" /> : <Plus className="size-4" />}
               {isFollowing ? "Following" : "Follow Channel"}
+              {followerCount != null && <span className="text-xs opacity-80 tabular-nums" aria-label={`${followerCount} followers`}>· {formatFollowers(followerCount)}</span>}
             </Button>
             <Button variant="outline"
-              onClick={() => {
+              onClick={async () => {
+                if (dbChannelId && signedIn) {
+                  if (!followingDb) { toast("Follow this channel first", { description: "Followers get alerts for new uploads and programmes." }); return; }
+                  try {
+                    await setNotifyDb(!notifyDb);
+                    toast(!notifyDb ? "Notifications on" : "Notifications off", {
+                      description: !notifyDb ? `New uploads and programmes from ${channel.name} will notify you.` : "You'll stay subscribed without alerts.",
+                    });
+                  } catch { toast.error("Couldn't update notifications. Try again."); }
+                  return;
+                }
+                if (dbChannelId) { toast("Sign in to get notifications", { description: "Follow while signed in to receive alerts." }); return; }
                 const next = !settings.liveAlerts;
                 setSettings({ ...settings, liveAlerts: next });
                 toast(next ? "Live alerts on" : "Live alerts off", {
                   description: next ? `We'll notify you when ${channel.name} goes live.` : "You won't receive live alerts.",
                 });
               }}
+              aria-pressed={notifyOn}
               className={`inline-flex items-center gap-2 px-5 h-11 rounded-md border transition font-medium ${
-                settings.liveAlerts
+                notifyOn
                   ? "bg-accent text-accent-foreground border-accent"
                   : "bg-elevated border-border hover:bg-elevated/70"
               }`}
             >
-              {settings.liveAlerts ? <BellRing className="size-4" /> : <Bell className="size-4" />}
-              {settings.liveAlerts ? "Notifying" : "Notify Me"}
+              {notifyOn ? <BellRing className="size-4" /> : <Bell className="size-4" />}
+              {notifyOn ? "Notifying" : "Notify Me"}
             </Button>
             <div className="col-span-2 flex h-11 justify-end sm:col-span-1 sm:w-28">
               <ShareMenu title={channel.name} path={`/channels/${channel.id}`} image={channel.banner || channel.logoImg} subtitle="Live on Lettflix" variant="chip" />

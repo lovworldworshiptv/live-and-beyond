@@ -29,6 +29,20 @@
       "when": 1794241394855,
       "tag": "0003_channel_library_filter_mode",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794253122871,
+      "tag": "0004_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794253134615,
+      "tag": "0005_migration",
+      "breakpoints": true
     }
   ]
 }

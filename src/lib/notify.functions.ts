@@ -30,7 +30,8 @@ export const notifyFollowersLive = createServerFn({ method: "POST" })
     const { data: followers } = await supabaseAdmin
       .from("channel_follows")
       .select("user_id")
-      .eq("channel_id", data.channelId);
+      .eq("channel_id", data.channelId)
+      .eq("notify", true);
 
     const rows = (followers ?? []).map((f) => ({
       user_id: f.user_id as string,
