@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import { startMediaPlayback } from "@/lib/media-playback";
+import { isHlsSource } from "@/lib/video-source";
 
 export type QualityLevel = {
   /** hls.js level index */
@@ -48,7 +49,7 @@ export function useHlsAttach(
     if (!playing || !src) return;
     const media = mediaRef.current;
     if (!media) return;
-    const isHls = /\.m3u8(\?|$)/i.test(src);
+    const isHls = isHlsSource(src);
     const canNative = Boolean(media.canPlayType("application/vnd.apple.mpegurl"));
     let hls: Hls | null = null;
     let disposed = false;

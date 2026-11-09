@@ -16,12 +16,14 @@ export function TitleCard({
   portrait = true,
   size = "md",
   preview = true,
+  layout = "grid",
 }: {
   t: Title;
   rank?: number;
   portrait?: boolean;
   size?: "sm" | "md" | "lg";
   preview?: boolean;
+  layout?: "grid" | "rail";
 }) {
   const [open, setOpen] = useState(false);
   const [muted, setMuted] = useState(true);
@@ -106,12 +108,12 @@ export function TitleCard({
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
   }, []);
 
-  const widthClass = !portrait ? (size === "lg" ? "w-[85vw] sm:w-[340px]" : "w-[62vw] sm:w-[260px]") : "";
+  const widthClass = layout === "rail" && !portrait ? (size === "lg" ? "w-[85vw] sm:w-[340px]" : "w-[62vw] sm:w-[260px]") : "w-full max-w-full";
 
   return (
     <div
       ref={cardRef}
-      className={`group relative shrink-0 snap-start ${widthClass}`}
+      className={`group relative min-w-0 shrink-0 snap-start ${widthClass}`}
       onMouseEnter={preview ? openSoon : undefined}
       onMouseLeave={preview ? closeSoon : undefined}
     >

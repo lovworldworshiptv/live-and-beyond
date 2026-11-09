@@ -317,7 +317,7 @@ function Index() {
           }
         >
           {featuredOnDemand.map((t) => (
-            <TitleCard key={t.id} t={t} portrait={false} />
+            <TitleCard key={t.id} t={t} portrait={false} layout="rail" />
           ))}
         </Row>
       )}

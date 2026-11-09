@@ -158,7 +158,7 @@ export function CatalogBrowse({
       {trending.length > 0 && (
         <Row title={`Featured ${heading}`}>
           {trending.map((t, i) => (
-            <TitleCard key={t.id} t={t} rank={i + 1} portrait={false} />
+            <TitleCard key={t.id} t={t} rank={i + 1} portrait={false} layout="rail" />
           ))}
         </Row>
       )}
@@ -168,7 +168,7 @@ export function CatalogBrowse({
       {newest.length > 0 && (
         <Row title="Discover more">
           {newest.map((t) => (
-            <TitleCard key={t.id} t={t} portrait={false} />
+            <TitleCard key={t.id} t={t} portrait={false} layout="rail" />
           ))}
         </Row>
       )}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Play, Volume2, VolumeX, Mic } from "lucide-react";
+import { Play, Volume2, VolumeX, Mic, ExternalLink } from "lucide-react";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { Button } from "@/components/ui/button";
 import { useProgress, useSettings } from "@/lib/personal";
@@ -8,6 +8,8 @@ import { usePlayerFullscreen } from "@/components/player-fullscreen";
 import { MovieArtwork } from "./movie-artwork";
 import { recordPlaybackEvent } from "@/lib/analytics";
 import { createOnDemandStartTracker } from "@/lib/on-demand-start";
+import { resolveVideoSource } from "@/lib/video-source";
+import { YoutubePlayer } from "./youtube-player";
 
 type Props = {
   src?: string | null;
@@ -37,6 +39,7 @@ export function StreamPlayer({
   ariaPlayLabel = "Play",
 }: Props) {
   const { setProgress } = useProgress();
+  const source = resolveVideoSource(src);
   const lastProgress = useRef(0);
   const saveProgress = () => {
     const media = mediaRef.current;
@@ -61,7 +64,7 @@ export function StreamPlayer({
   // in place; Safari/iOS falls back to native HLS with the same source.
   const { settings } = useSettings();
   const failPlayback = (message: string) => { setError(message); setPlaying(false); };
-  const hls = useHlsAttach(mediaRef, playing ? src : null, playing, settings, failPlayback);
+  const hls = useHlsAttach(mediaRef, playing && source.type === "media" ? source.url : null, playing, settings, failPlayback);
   const frameRef = useRef<HTMLDivElement | null>(null);
   const fs = usePlayerFullscreen(frameRef, mediaRef, playing && kind === "video");
   // Autoplay preference: start once when the player opens with a playable source.
@@ -74,8 +77,8 @@ export function StreamPlayer({
   }, [settings.autoplayPlayback, src]);
 
   const start = () => {
-    if (!src) {
-      setError("This title is not available to play yet.");
+    if (source.type === "invalid") {
+      setError("This title needs a valid video or provider link to play.");
       return;
     }
     setError(null);
@@ -104,7 +107,14 @@ export function StreamPlayer({
       )}
       {!playing && <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />}
 
-      {playing && kind === "video" && (
+      {playing && source.type === "youtube" && source.id && (
+        <YoutubePlayer id={source.id} start={source.start} onPlaying={() => trackStart.current?.()} onError={failPlayback}
+          onProgress={(time, duration) => { if (titleId && Number.isFinite(duration) && duration > 0 && time > 0) setProgress(titleId, Math.min(100, time / duration * 100)); }} />
+      )}
+      {playing && source.type === "embed" && (
+        <iframe src={source.url} title="Cloud video player" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" className="absolute inset-0 size-full border-0" />
+      )}
+      {playing && kind === "video" && source.type === "media" && (
         <>
           <video
             ref={(el) => { mediaRef.current = el; }}
@@ -127,7 +137,7 @@ export function StreamPlayer({
           </div>
         </>
       )}
-      {playing && kind === "audio" && (
+      {playing && kind === "audio" && source.type === "media" && (
         <audio ref={(el) => { mediaRef.current = el; }} autoPlay controls onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)} onPlaying={() => trackStart.current?.()} onTimeUpdate={saveProgress} onPause={saveProgress} onEnded={saveProgress} onError={() => failPlayback("Audio unavailable. Tap play to retry.")} className="absolute bottom-3 inset-x-3 z-10 w-[calc(100%-1.5rem)]" />
       )}
 
@@ -149,7 +159,7 @@ export function StreamPlayer({
         </Button>
       )}
 
-      {playing && kind === "audio" && (
+      {playing && kind === "audio" && source.type === "media" && (
         <div className="absolute inset-0 grid place-items-center">
           <Button variant="ghost"
             onClick={toggleMute}
@@ -161,7 +171,7 @@ export function StreamPlayer({
         </div>
       )}
 
-      {!playing && posterOverlayLabel && (
+      {!playing && !error && posterOverlayLabel && (
         <div className="absolute bottom-0 inset-x-0 p-4 lg:p-6 pointer-events-none">
           <div className="text-xs text-foreground/70 uppercase tracking-wider">Preview</div>
           <div className="font-semibold text-foreground truncate">{posterOverlayLabel}</div>
@@ -169,8 +179,13 @@ export function StreamPlayer({
       )}
 
       {error && (
-        <div role="alert" className="pointer-events-none absolute bottom-3 inset-x-3 text-center px-3 py-2 rounded bg-background/80 text-xs text-foreground">
-          {error}
+        <div role="alert" className="absolute bottom-3 inset-x-3 text-center px-3 py-2 rounded bg-background/80 text-xs text-foreground">
+          <p>{error}</p>
+          {source.type === "youtube" && source.id && (
+            <Button asChild variant="link" size="sm" className="mt-1 text-accent">
+              <a href={`https://www.youtube.com/watch?v=${source.id}`} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3.5" /> Open YouTube</a>
+            </Button>
+          )}
         </div>
       )}
     </div>

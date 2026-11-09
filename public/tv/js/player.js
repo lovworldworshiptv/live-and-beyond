@@ -11,8 +11,56 @@
   var ui = {};
   var seconds = 0, started = false, onClose = null, seekPreview = null, seekTimer = null;
   var loadGeneration = 0, radioTimer = null, reactiveContext = null, reactiveFrame = null, reactiveStream = null;
+  var provider = null, youtube = null, youtubeState = -1, providerHost = null;
+  function paused() { return youtube ? youtubeState !== 1 : video.paused; }
+  function position() { return youtube ? youtube.getCurrentTime() : video.currentTime; }
+  function duration() { return youtube ? youtube.getDuration() : video.duration; }
+  function detachProvider() {
+    if (youtube) { try { youtube.destroy(); } catch (e) {} }
+    youtube = null; youtubeState = -1; provider = null;
+    if (providerHost && providerHost.parentNode) providerHost.parentNode.removeChild(providerHost);
+    providerHost = null;
+  }
+  function attachProvider(source, start) {
+    provider = source; var generation = loadGeneration;
+    providerHost = h("div.player-provider"); root.insertBefore(providerHost, ui.controls);
+    if (source.type === "embed") {
+      providerHost.appendChild(h("iframe", { src: source.url, title: "Cloud video player", allow: "autoplay; fullscreen; encrypted-media", allowfullscreen: true }));
+      root.classList.remove("buffering"); root.classList.add("opaque-provider");
+      return;
+    }
+    function ready() {
+      if (generation !== loadGeneration || !providerHost) return;
+      var target = h("div"); providerHost.appendChild(target);
+      youtube = new window.YT.Player(target, {
+        videoId: source.id, width: "100%", height: "100%",
+        playerVars: { autoplay: 1, playsinline: 1, controls: 0, rel: 0, start: start || source.start || 0, origin: window.location.origin },
+        events: {
+          onReady: function () { if (generation === loadGeneration) youtube.playVideo(); },
+          onStateChange: function (event) {
+            if (generation !== loadGeneration) return;
+            youtubeState = event.data; root.classList.toggle("buffering", event.data === 3);
+            paintPlay(); paintTime();
+            if (event.data === 1 && !started) { started = true; Playback.record(src, "start"); showControls(); }
+            if (event.data === 2) { save(); showControls(true); }
+            if (event.data === 0) { save(); close(); }
+          },
+          onError: function (event) { if (generation === loadGeneration) fail(event.data === 101 || event.data === 150 ? "This video's owner does not allow embedded playback." : "This YouTube video is unavailable."); }
+        }
+      });
+    }
+    if (window.YT && window.YT.Player) ready();
+    else {
+      var previous = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = function () { if (previous) previous(); ready(); };
+      var script = h("script", { src: "https://www.youtube.com/iframe_api" });
+      script.onerror = function () { if (generation === loadGeneration) fail("YouTube could not load. Please retry."); };
+      document.head.appendChild(script);
+      setTimeout(function () { if (generation === loadGeneration && !youtube) fail("YouTube could not load. Please retry."); }, 20000);
+    }
+  }
 
-  function isHls(url) { return /\.m3u8(\?|$)/i.test(url); }
+  function isHls(url) { return VideoSource.isHls(url); }
 
   function attach(url, start) {
     detachHls();
@@ -41,6 +89,7 @@
     if (video.readyState >= 1) startPlayback();
   }
   function startPlayback() {
+    if (youtube) { youtube.playVideo(); return; }
     var generation = loadGeneration, media = video;
     var p = media.play();
     if (p && p.catch) p.catch(function (e) {
@@ -146,14 +195,14 @@
   }
 
   function paintPlay() {
-    var paused = video.paused;
-    ui.play.innerHTML = ""; U.append(ui.play, [icon(paused ? "play" : "pause"), h("span", { text: paused ? "Play" : "Pause" })]);
-    root.classList.toggle("paused", paused);
+    var isPaused = paused();
+    ui.play.innerHTML = ""; U.append(ui.play, [icon(isPaused ? "play" : "pause"), h("span", { text: isPaused ? "Play" : "Pause" })]);
+    root.classList.toggle("paused", isPaused);
   }
 
   function paintTime() {
     if (!src) return;
-    var d = video.duration, t = seekPreview !== null ? seekPreview : video.currentTime;
+    var d = duration(), t = seekPreview !== null ? seekPreview : position();
     var live = src.isLive || !isFinite(d);
     root.classList.toggle("is-live", live);
     if (live) { ui.time.textContent = ""; ui.dur.textContent = ""; return; }
@@ -166,25 +215,25 @@
   function showControls(stay) {
     root.classList.add("controls");
     clearTimeout(hideTimer);
-    if (!stay && !video.paused) hideTimer = setTimeout(function () { root.classList.remove("controls"); }, 4000);
+    if (!stay && !paused()) hideTimer = setTimeout(function () { root.classList.remove("controls"); }, 4000);
   }
   function togglePlay() {
-    if (video.paused) { if (root.classList.contains("failed") && src) load(src); else startPlayback(); } else video.pause();
+    if (paused()) { if (root.classList.contains("failed") && src) load(src); else startPlayback(); } else if (youtube) youtube.pauseVideo(); else video.pause();
     showControls();
   }
-  function canSeek() { return src && !src.isLive && isFinite(video.duration); }
+  function canSeek() { return src && !src.isLive && isFinite(duration()) && duration() > 0; }
   /** Repeated presses add up (e.g. ▶▶▶ = +30 s) and jump once the presses stop. */
   function seekBy(delta) {
     if (!canSeek()) return;
-    var base = seekPreview !== null ? seekPreview : video.currentTime;
-    seekPreview = Math.max(0, Math.min(video.duration - 1, base + delta));
-    ui.flash.textContent = (delta > 0 ? "+" : "−") + Math.abs(Math.round(seekPreview - video.currentTime)) + "s";
+    var base = seekPreview !== null ? seekPreview : position();
+    seekPreview = Math.max(0, Math.min(duration() - 1, base + delta));
+    ui.flash.textContent = (delta > 0 ? "+" : "−") + Math.abs(Math.round(seekPreview - position())) + "s";
     ui.flash.classList.remove("show"); ui.flash.offsetWidth; ui.flash.classList.add("show");
     showControls(); paintTime();
     clearTimeout(seekTimer);
     seekTimer = setTimeout(function () { seekTo(seekPreview); }, 650);
   }
-  function seekTo(t) { if (!canSeek()) return; seekPreview = null; try { video.currentTime = t; } catch (e) { /* ignore */ } paintTime(); }
+  function seekTo(t) { if (!canSeek()) return; seekPreview = null; try { if (youtube) youtube.seekTo(t, true); else video.currentTime = t; } catch (e) { /* ignore */ } paintTime(); }
 
   function fail(msg) {
     root.classList.add("failed"); root.classList.remove("buffering");
@@ -193,7 +242,7 @@
   }
 
   function save() {
-    if (src && src.kind === "title" && isFinite(video.duration) && video.duration > 0) Personal.saveProgress(src.id, video.currentTime, video.duration);
+    if (src && src.kind === "title" && (!provider || youtube) && isFinite(duration()) && duration() > 0) Personal.saveProgress(src.id, position(), duration());
   }
 
   function reloadChannel() {
@@ -202,7 +251,7 @@
   }
 
   function load(s) {
-    loadGeneration++; clearTimeout(radioTimer); stopReactive(); video.pause();
+    loadGeneration++; clearTimeout(radioTimer); stopReactive(); video.pause(); detachHls(); detachProvider();
     src = s; seconds = 0; started = false; seekPreview = null;
     root.className = "player buffering controls";
     root.classList.toggle("audio", !!s.isAudio);
@@ -225,19 +274,23 @@
         }).catch(function () {}).then(function () { if (generation === loadGeneration) radioTimer = setTimeout(pollSong, 15000); });
       })();
     }
-    attach(s.url, s.start || 0);
+    var source = s.kind === "title" ? VideoSource.resolve(s.url) : { type: "media", url: s.url };
+    if (source.type === "invalid") { fail("This title needs a valid video link."); return; }
+    if (source.type === "youtube" || source.type === "embed") attachProvider(source, s.start || 0);
+    else attach(source.url, s.start || 0);
     paintPlay(); paintTime(); showControls();
   }
 
   function onKey(k) {
+    if (provider && provider.type === "embed") { if (k === KEY.BACK || k === KEY.STOP) { close(); return true; } return false; }
     if (root.classList.contains("failed")) { if (k === KEY.BACK) close(); else if (k === KEY.OK && src) load(src); return true; }
     var visible = root.classList.contains("controls");
     switch (k) {
       case KEY.BACK:
-        if (visible && !video.paused) { root.classList.remove("controls"); return true; }
+        if (visible && !paused()) { root.classList.remove("controls"); return true; }
         close(); return true;
-      case KEY.PLAY: if (video.paused) togglePlay(); return true;
-      case KEY.PAUSE: if (!video.paused) togglePlay(); return true;
+      case KEY.PLAY: if (paused()) togglePlay(); return true;
+      case KEY.PAUSE: if (!paused()) togglePlay(); return true;
       case KEY.PLAYPAUSE: togglePlay(); return true;
       case KEY.STOP: close(); return true;
       case KEY.FF: seekBy(30); return true;
@@ -256,6 +309,7 @@
   function close() {
     loadGeneration++; clearTimeout(radioTimer); stopReactive();
     save();
+    detachProvider();
     if (src && started) Playback.record(src, "stop", seconds % 30);
     clearInterval(tick); clearTimeout(hideTimer); clearTimeout(seekTimer);
     detachHls();
@@ -283,7 +337,7 @@
     tick = setInterval(function () {
       if (!src) return;
       paintTime();
-      if (!video.paused && !video.seeking && video.readyState > 2) {
+      if (!paused() && (youtube || (!provider && !video.seeking && video.readyState > 2))) {
         seconds++;
         if (seconds % 30 === 0) Playback.record(src, "heartbeat", 30);
         if (seconds % 5 === 0) save();
