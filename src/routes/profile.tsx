@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Bookmark, Clock, Bell, Heart, Trash2, Pencil, ArrowRight, Loader2, Camera } from "lucide-react";
+import { Bookmark, Clock, Bell, Heart, Trash2, Pencil, ArrowRight, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site-header";
@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useAccountProfile } from "@/lib/account-profile";
 import { useProfile, useProgress, useMyList, useReminders, useFollowing } from "@/lib/personal";
 import { useCmsChannels, useCmsTitles } from "@/lib/cms-catalog";
+import { BrandLoader } from "@/components/brand-loader";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [
@@ -82,7 +83,7 @@ function ProfilePage() {
       </header>
       <p className="-mt-4 text-xs text-muted-foreground text-center md:text-left">Saved activity is stored on this device.</p>
       <AvatarPickerDialog open={pickerOpen} onOpenChange={setPickerOpen} />
-      {busy ? <div role="status" className="py-8 flex gap-2 items-center text-muted-foreground"><Loader2 className="size-4 animate-spin" />Loading your activity…</div> : continuing.length ? <section aria-labelledby="continue-heading">
+      {busy ? <BrandLoader variant="section" label="Loading your activity" /> : continuing.length ? <section aria-labelledby="continue-heading">
         <div className="flex justify-between items-center gap-3 mb-4"><h2 id="continue-heading" className="text-xl font-semibold">Continue watching</h2><span className="text-sm text-muted-foreground">{continuing.length} titles</span></div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">{continuing.map(({ p, t }) => <div key={t.id}><TitleCard t={t} portrait={false} preview={false} /><progress aria-label={`${t.title} viewing progress`} value={p.positionPct} max={100} className="mt-2 w-full h-1.5 accent-accent" /><p className="text-xs text-muted-foreground mt-1">{Math.round(p.positionPct)}% watched</p></div>)}</div>
       </section> : <section className="border-b border-border pb-7">

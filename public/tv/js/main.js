@@ -123,7 +123,15 @@
   Auth.onChange(function () { startApp(); });
 
   function loading(p) {
-    main.innerHTML = ""; main.appendChild(h("div.screen.center", null, h("div.spinner.big")));
+    main.innerHTML = "";
+    main.appendChild(h("div.screen.center", null, h("div.boot", null, [
+      h("div.boot-stage", null, [
+        h("div.boot-halo"), h("div.boot-ring"),
+        h("img.boot-mark", { src: "assets/lettflix_symbol.png", alt: "" })
+      ]),
+      h("div.boot-progress", null, h("div.boot-progress-bar")),
+      h("div.boot-label", { text: "Tuning in" })
+    ])));
     return p;
   }
   function offline() {

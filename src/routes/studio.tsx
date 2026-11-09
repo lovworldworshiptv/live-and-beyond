@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Radio, Tv, Mic2, Film, Video,
-  Loader2, ShieldOff, Pencil, Sparkles, ExternalLink, Settings, Check, ArrowRight, RefreshCw,
+  ShieldOff, Pencil, Sparkles, ExternalLink, Settings, Check, ArrowRight, RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { PlayoutPanel } from "@/components/studio/playout-panel";
 import { RadioPanel } from "@/components/studio/radio-panel";
 import { studioSearch, type StudioTab as Tab } from "@/lib/studio-navigation";
 import { AnalyticsPanel } from "@/components/studio/analytics-panel";
+import { BrandLoader } from "@/components/brand-loader";
 import { TeamPanel } from "@/components/studio/team-panel";
 import {
   SERVICE_CATALOG, fetchChannelServices, saveChannelServices, type ServiceKey,
@@ -182,11 +183,7 @@ function StudioPage() {
   }
 
   if (loading || !user) {
-    return (
-      <div className="min-h-screen grid place-items-center">
-        <Loader2 className="size-6 animate-spin text-primary" />
-      </div>
-    );
+    return <BrandLoader label="Opening Creator Studio" />;
   }
 
   if (!isCreator && !isAdmin) {
@@ -213,7 +210,7 @@ function StudioPage() {
   if (channelError) {
     return <div className="min-h-screen flex flex-col"><SiteHeader /><main className="flex-1 grid place-items-center px-6"><div className="text-center"><h1 className="text-2xl font-bold">Your channel could not be loaded</h1><Button className="mt-4" onClick={() => void load()}><RefreshCw />Try again</Button></div></main><SiteFooter /></div>;
   }
-  if (loadingChannel) return <div className="min-h-screen grid place-items-center"><Loader2 className="size-6 animate-spin text-primary" /></div>;
+  if (loadingChannel) return <BrandLoader label="Loading your channel" />;
 
   // First-login welcome
   if (!loadingChannel && !channel) {

@@ -15,6 +15,7 @@ import { SERVICE_CATALOG, fetchChannelServices, saveChannelServices, type Servic
 import { fetchRadioSettings, saveRadioSettings } from "@/lib/radio";
 import { saveChannelConfiguration } from "@/lib/channel-configuration";
 import { Button } from "@/components/ui/button";
+import { BrandLoader } from "@/components/brand-loader";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -41,11 +42,7 @@ function AdminPage() {
   }, [user, loading, navigate]);
 
   if (loading || !user) {
-    return (
-      <div className="min-h-screen grid place-items-center">
-        <Loader2 className="size-6 animate-spin text-primary" />
-      </div>
-    );
+    return <BrandLoader label="Opening the control room" />;
   }
 
   if (!isAdmin) {
@@ -1669,7 +1666,7 @@ function ApplicationsCms() {
       </div>
 
       {loading ? (
-        <div className="py-12 grid place-items-center"><Loader2 className="size-5 animate-spin text-primary" /></div>
+        <div className="py-12"><BrandLoader variant="section" label="Loading" /></div>
       ) : visible.length === 0 ? (
         <div className="py-12 text-center text-sm text-[color:var(--muted-foreground)]">No applications.</div>
       ) : (
@@ -1824,7 +1821,7 @@ function SettingCard({
         </button>
       </div>
       {loading ? (
-        <div className="h-40 grid place-items-center"><Loader2 className="size-4 animate-spin" /></div>
+          <div className="h-40"><BrandLoader variant="section" label="Loading preview" /></div>
       ) : (
         children(value, setValue)
       )}

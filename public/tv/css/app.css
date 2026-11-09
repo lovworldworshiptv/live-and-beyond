@@ -202,6 +202,26 @@ p { margin: 0; }
 .spinner.big { width: 96px; height: 96px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ---------------- Brand boot / loading ---------------- */
+/* Same language as the web loading state: the emblem under a halo, an orbiting
+   ring and a quiet progress pass. No `gap`, `inset` or `conic-gradient` here. */
+.boot { display: flex; flex-direction: column; align-items: center; }
+.boot-stage { position: relative; width: 220px; height: 220px; }
+.boot-halo { position: absolute; left: -40px; top: -40px; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(156,21,51,.55), rgba(156,21,51,0) 68%); }
+.boot-ring { position: absolute; left: 8px; top: 8px; width: 204px; height: 204px; border-radius: 50%;
+  border: 5px solid rgba(255,255,255,.12); border-top-color: var(--maroon-bright); border-right-color: var(--blue);
+  animation: spin 1.15s linear infinite; }
+.boot-mark { position: absolute; left: 36px; top: 36px; width: 148px; height: 148px; object-fit: contain; }
+.boot-progress { position: relative; width: 360px; height: 4px; margin-top: 44px; border-radius: 4px;
+  background: rgba(255,255,255,.12); overflow: hidden; }
+.boot-progress-bar { position: absolute; left: -40%; top: 0; width: 40%; height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, rgba(156,21,51,0), var(--maroon-bright), var(--blue), rgba(30,94,255,0));
+  animation: boot-pass 1.5s ease-in-out infinite; }
+.boot-label { margin-top: 22px; font-size: 22px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: var(--text2); }
+@keyframes boot-pass { 0% { left: -40%; } 100% { left: 100%; } }
+.player .spinner { border-color: rgba(255,255,255,.15); border-top-color: var(--maroon-bright); }
+
 /* ---------------- Account ---------------- */
 .account { display: flex; align-items: center; justify-content: center; padding-left: 120px;
   background: radial-gradient(ellipse at 50% 0, rgba(156,21,51,.35), rgba(17,19,21,0) 60%), var(--bg); }

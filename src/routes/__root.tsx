@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -16,6 +17,7 @@ import { RadioPlayerProvider } from "@/components/radio-player";
 import { NetworkWatcher } from "@/components/network-watcher";
 import { ContentProtection } from "@/components/content-protection";
 import { AdaptiveControls } from "@/components/adaptive-controls";
+import { RouteProgress } from "@/components/brand-loader";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -131,11 +133,13 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const navigating = useRouterState({ select: (s) => s.status === "pending" || s.isLoading });
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <RadioPlayerProvider>
+          <RouteProgress active={navigating} />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <CreatorApprovalWatcher />

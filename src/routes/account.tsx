@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AvatarChooser } from "@/components/avatar-picker";
 import { changeAccountPassword } from "@/lib/account-actions";
+import { BrandLoader } from "@/components/brand-loader";
 
 
 export const Route = createFileRoute("/account")({
@@ -77,7 +78,7 @@ function AccountPage() {
     const link = document.createElement("a"); link.href = url; link.download = "lettflix-account-data.json"; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
-  if (loading || !user) return <div className="min-h-screen grid place-items-center"><Loader2 className="size-6 animate-spin text-primary" /></div>;
+  if (loading || !user) return <BrandLoader label="Opening your account" />;
 
   return (
     <div className="min-h-screen bg-background text-foreground">

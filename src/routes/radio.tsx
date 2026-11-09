@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, Pause, Play, Radio as RadioIcon, Search } from "lucide-react";
+import { Pause, Play, Radio as RadioIcon, Search } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useRadio } from "@/components/radio-player";
 import { fetchRadioStations, type RadioStation } from "@/lib/radio";
 import { Button } from "@/components/ui/button";
+import { BrandLoader } from "@/components/brand-loader";
 
 
 export const Route = createFileRoute("/radio")({
@@ -106,7 +107,7 @@ function RadioPage() {
 
       <main className="flex-1 mx-auto w-full max-w-[1480px] px-6 lg:px-10 py-8">
         {loading ? (
-          <div className="py-24 grid place-items-center"><Loader2 className="size-6 animate-spin text-primary" /></div>
+          <BrandLoader variant="section" label="Finding stations" />
         ) : !filtered.length ? (
           <div className="py-24 text-center text-sm text-muted-foreground">
             <p>{q || category !== "All" ? "No stations match your filters." : "No radio stations available right now."}</p>
