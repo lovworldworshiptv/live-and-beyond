@@ -7,11 +7,13 @@ export function Row({
   subtitle,
   children,
   action,
+  railClassName,
 }: {
   title: string;
   subtitle?: string;
   children: ReactNode;
   action?: ReactNode;
+  railClassName?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const scroll = (dir: 1 | -1) => {
@@ -49,7 +51,7 @@ export function Row({
       </div>
       <div
         ref={ref}
-        className="flex gap-4 overflow-x-auto scrollbar-none media-rail snap-x snap-mandatory scroll-pl-6 lg:scroll-pl-10 -mx-6 lg:-mx-10 px-6 lg:px-10 pb-2"
+        className={`flex gap-4 overflow-x-auto scrollbar-none media-rail snap-x snap-mandatory scroll-pl-6 lg:scroll-pl-10 -mx-6 lg:-mx-10 px-6 lg:px-10 pb-2 ${railClassName ?? ""}`}
       >
         {children}
       </div>

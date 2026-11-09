@@ -291,6 +291,7 @@ function Index() {
       {liveNow.length > 0 && (
         <Row
           title="Live Right Now"
+          railClassName="live-channel-rail"
           subtitle="Tune into what's broadcasting across the network."
           action={
             <Link to="/channels" className="hidden sm:inline-flex items-center gap-1 text-sm text-[color:var(--secondary-foreground)] hover:text-foreground">
@@ -503,8 +504,8 @@ function LiveNowCard({ c }: { c: Channel }) {
                   {c.isLive && <span className="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded text-[11px] font-bold tracking-wide bg-[image:var(--gradient-live)] text-primary-foreground live-pulse">
                     LIVE
                   </span>}
-                  <span className="absolute top-3 right-3 text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur text-white/90">
-                    {c.viewers} watching
+                  <span className="absolute top-3 right-3 text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur text-white/90 live-channel-viewers">
+                    {c.viewers}<span className="live-channel-watching"> watching</span>
                   </span>
                   <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
                     <div
@@ -519,13 +520,13 @@ function LiveNowCard({ c }: { c: Channel }) {
                 </div>
                 <div className="p-4" style={{ background: `linear-gradient(180deg, ${tint(0.75)}, ${tint(0.95)})`, transition: "background 400ms" }}>
                   <div className="flex items-center justify-between gap-2">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-white/90">{c.category}</div>
+                    <div className="min-w-0 truncate text-xs font-semibold uppercase tracking-wider text-white/90">{c.category}</div>
                     <span className="text-white/70" aria-label="Reminder">
                       <Bell className="size-3.5" />
                     </span>
                   </div>
                   <div className="mt-1.5 font-semibold leading-tight line-clamp-1 text-white">{c.nowPlaying.title || "Live broadcast"}</div>
-                  <div className="text-sm text-white/70 mt-0.5">{c.name}</div>
+                  <div className="text-sm text-white/70 mt-0.5 truncate">{c.name}</div>
                 </div>
               </Link>
             </article>
