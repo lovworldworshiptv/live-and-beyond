@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Play, Users, Calendar, Volume2, VolumeX, Bell, BellRing, CalendarClock } from "lucide-react";
+import { Play, Calendar, Volume2, VolumeX, Bell, BellRing, CalendarClock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
@@ -132,10 +132,6 @@ export function ChannelCard({ c }: { c: Channel }) {
               LIVE
             </span>
           )}
-          <span className="absolute top-3 right-3 text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur inline-flex items-center gap-1">
-            <Users className="size-3" /> {c.viewers}
-          </span>
-
           {/* Hover play indicator (only when not previewing) */}
           {!(hovering && canPreview) && (
             <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
