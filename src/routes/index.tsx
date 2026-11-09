@@ -28,6 +28,9 @@ import { useProgress } from "@/lib/personal";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { LandingPage } from "@/components/landing-page";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { selectFeaturedOnDemand } from "@/lib/featured-on-demand";
 
 import heroImg from "@/assets/hero-broadcast.jpg";
 import ch1 from "@/assets/channel-1.jpg";
@@ -89,7 +92,17 @@ function Index() {
     const feat = titles.filter((t) => t.featured);
     return (feat.length ? feat : titles).slice(0, 10);
   }, [titles]);
-  const featuredOnDemand = useMemo(() => titles.filter((t) => t.featured).slice(0, 12), [titles]);
+  const { data: onDemandRankings = [] } = useQuery({
+    queryKey: ["featured-on-demand-rankings"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("featured_on_demand_rankings");
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 60_000,
+    refetchInterval: 60_000,
+  });
+  const featuredOnDemand = useMemo(() => selectFeaturedOnDemand(titles, onDemandRankings), [titles, onDemandRankings]);
 
   const continueWatching = useMemo(() => {
     return progressItems
@@ -295,7 +308,7 @@ function Index() {
       {featuredOnDemand.length > 0 && (
         <Row
           title="Featured On-Demand"
-          subtitle="Hand-picked films, series, documentaries and podcasts."
+          subtitle="Most-watched movies, podcasts and series across all Lettflix channels."
           action={
             <Link to="/movies" className="hidden sm:inline-flex items-center gap-1 text-sm text-[color:var(--secondary-foreground)] hover:text-foreground">
               Browse all <ArrowRight className="size-4" />

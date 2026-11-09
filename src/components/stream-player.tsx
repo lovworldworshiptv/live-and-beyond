@@ -6,10 +6,14 @@ import { useProgress, useSettings } from "@/lib/personal";
 import { QualityMenu } from "@/components/quality-menu";
 import { usePlayerFullscreen } from "@/components/player-fullscreen";
 import { MovieArtwork } from "./movie-artwork";
+import { recordPlaybackEvent } from "@/lib/analytics";
+import { createOnDemandStartTracker } from "@/lib/on-demand-start";
 
 type Props = {
   src?: string | null;
   titleId?: string;
+  analyticsTitleId?: string;
+  analyticsChannelId?: string | null;
   poster?: string | null;
   posterFallback?: string | null;
   kind?: "video" | "audio";
@@ -22,6 +26,8 @@ type Props = {
 export function StreamPlayer({
   src,
   titleId,
+  analyticsTitleId,
+  analyticsChannelId,
   poster,
   posterFallback,
   kind = "video",
@@ -43,6 +49,13 @@ export function StreamPlayer({
   const [playing, setPlaying] = useState(autoPlay);
   const [muted, setMuted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const trackStart = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    trackStart.current = createOnDemandStartTracker(() => {
+      if (!analyticsTitleId) return;
+      void recordPlaybackEvent({ titleId: analyticsTitleId, channelId: analyticsChannelId, service: kind === "audio" ? "podcast" : "vod", event: "start" });
+    });
+  }, [analyticsTitleId, analyticsChannelId, kind, src]);
 
   // Adaptive bitrate: hls.js consumes the master playlist and switches renditions
   // in place; Safari/iOS falls back to native HLS with the same source.
@@ -106,6 +119,7 @@ export function StreamPlayer({
             playsInline
             controls
             autoPlay
+            onPlaying={() => trackStart.current?.()}
             onTimeUpdate={saveProgress}
             onPause={saveProgress}
             onEnded={saveProgress}
@@ -121,7 +135,7 @@ export function StreamPlayer({
         </>
       )}
       {playing && kind === "audio" && (
-        <audio ref={(el) => { mediaRef.current = el; }} autoPlay onTimeUpdate={saveProgress} onPause={saveProgress} onEnded={saveProgress} onError={() => setError("Audio unavailable. Please try again shortly.")} className="hidden" />
+        <audio ref={(el) => { mediaRef.current = el; }} autoPlay onPlaying={() => trackStart.current?.()} onTimeUpdate={saveProgress} onPause={saveProgress} onEnded={saveProgress} onError={() => setError("Audio unavailable. Please try again shortly.")} className="hidden" />
       )}
 
       {!playing && (

@@ -1449,6 +1449,13 @@ export type Database = {
         Args: { _channel_id: string; _user_id: string }
         Returns: boolean
       }
+      featured_on_demand_rankings: {
+        Args: never
+        Returns: {
+          plays: number
+          slug: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

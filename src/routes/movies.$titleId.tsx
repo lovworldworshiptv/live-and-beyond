@@ -63,6 +63,7 @@ function TitleError({ error, reset }: ErrorComponentProps) {
 function TitleDetail() {
   const { titleId } = Route.useParams();
   const [title, setTitle] = useState<Title | null>(null);
+  const [analyticsIds, setAnalyticsIds] = useState<{ titleId: string; channelId: string | null } | null>(null);
   const [notFoundState, setNotFoundState] = useState(false);
   const [rated, setRated] = useState(false);
   const { has: hasInList, toggle: toggleList } = useMyList();
@@ -72,6 +73,7 @@ function TitleDetail() {
     let cancelled = false;
     setNotFoundState(false);
     setTitle(null);
+    setAnalyticsIds(null);
     (async () => {
       const { data } = await supabase
         .from("cms_titles")
@@ -80,7 +82,10 @@ function TitleDetail() {
         .eq("is_published", true)
         .maybeSingle();
       if (cancelled) return;
-      if (data) setTitle(mapTitleRow(data as never));
+      if (data) {
+        setTitle(mapTitleRow(data as never));
+        setAnalyticsIds({ titleId: data.id, channelId: data.channel_id });
+      }
       else setNotFoundState(true);
     })();
     return () => { cancelled = true; };
@@ -122,7 +127,10 @@ function TitleDetail() {
 
           <div id="title-player" className="mt-6 w-full min-w-0 scroll-mt-24">
             <StreamPlayer
+              key={title.id}
               titleId={title.id}
+              analyticsTitleId={analyticsIds?.titleId}
+              analyticsChannelId={analyticsIds?.channelId}
               src={title.streamUrl}
               poster={title.hero || title.cover}
               posterFallback={title.cover}
