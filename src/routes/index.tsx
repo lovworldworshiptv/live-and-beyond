@@ -518,7 +518,7 @@ function LiveNowCard({ c }: { c: Channel }) {
                     </div>
                   </div>
                 </div>
-                <div className="p-4" style={{ background: `linear-gradient(180deg, ${tint(0.75)}, ${tint(0.95)})`, transition: "background 400ms" }}>
+                <div className="p-4 channel-card-info" style={{ background: `linear-gradient(180deg, ${tint(0.75)}, ${tint(0.95)})`, transition: "background 400ms" }}>
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0 truncate text-xs font-semibold uppercase tracking-wider text-white/90">{c.category}</div>
                     <span className="text-white/70" aria-label="Reminder">
