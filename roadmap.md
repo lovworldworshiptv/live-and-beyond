@@ -65,6 +65,7 @@
 - [x] Verified authenticated Admin/Open Studio access, all Studio sections, combined TV/radio/VOD draft save and readback, unchanged creator ownership, failed-save recovery and editor reset on channel switching; phone/tablet layouts have no horizontal overflow. Test drafts removed; 19 regression tests pass. Actual streaming still depends on working media sources.
 
 ## Requests (Nov 9)
+- [x] Fetch current radio songs from configured metadata or the stream's own Icecast feed and scroll titles vertically; verified real Lettflix Gospel playback, pause and reduced-motion behaviour at phone, tablet, desktop and Web TV widths. Seven regression tests pass.
 - [x] Arrange Watch Live, Browse Library, Follow Channel and Notifying in an adaptive, evenly aligned mobile action grid; Share sits below and LN247's long name no longer overflows.
 - [x] Check every published channel play button across desktop, tablet and mobile: all 8 feeds played at 1280/768/394px; repaired blocked taps, source-ready starts, audio HLS and retry controls; verified Watch Now navigation and radio pause/resume/TV switching. Five regression tests pass.
 - [ ] Refresh Joycall TV with cinematic wide artwork like the new LXP banner; retain the complete channel identity, fill without black gaps and verify desktop, tablet and mobile.

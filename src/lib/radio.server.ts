@@ -20,6 +20,7 @@ function splitTrack(raw: string | null | undefined): { title: string | null; art
 export function parseNowPlaying(
   provider: "icecast" | "shoutcast",
   body: string,
+  streamUrl?: string,
 ): ParsedNowPlaying {
   let json: unknown = null;
   try {
@@ -30,7 +31,12 @@ export function parseNowPlaying(
 
   if (provider === "icecast" && json && typeof json === "object") {
     const stats = (json as { icestats?: { source?: unknown } }).icestats;
-    const source = Array.isArray(stats?.source) ? stats?.source[0] : stats?.source;
+    const sources = Array.isArray(stats?.source) ? stats.source : [stats?.source];
+    const mount = (url: string) => { try { return new URL(url).pathname; } catch { return null; } };
+    const source = streamUrl ? sources.find((item) => {
+      const s = item as Record<string, unknown> | undefined;
+      return typeof s?.listenurl === "string" && mount(s.listenurl) === mount(streamUrl);
+    }) : sources[0];
     const s = (source ?? {}) as Record<string, unknown>;
     const raw = (s["title"] ?? s["yp_currently_playing"] ?? null) as string | null;
     const split = splitTrack(raw);
@@ -55,4 +61,15 @@ export function parseNowPlaying(
   const plain = body.replace(/<[^>]*>/g, "").split(",").pop() ?? "";
   const split = splitTrack(plain);
   return { title: split.title, artist: split.artist, listeners: null };
+}
+
+/** Only probe the stream's own public origin; never guess another station's feed. */
+export function automaticMetadataUrl(streamUrl: string | null): string | null {
+  if (!streamUrl) return null;
+  try {
+    const url = new URL(streamUrl);
+    if (url.protocol !== "https:" || /\.(m3u8|mpd)(\?|$)/i.test(streamUrl)) return null;
+    if (url.username || url.password || !url.hostname.includes(".") || /^(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.)/i.test(url.hostname)) return null;
+    return new URL("/status-json.xsl", url.origin).href;
+  } catch { return null; }
 }

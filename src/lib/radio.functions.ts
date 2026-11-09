@@ -15,17 +15,26 @@ export const getRadioNowPlaying = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => schema.parse(data))
   .handler(async ({ data }): Promise<NowPlaying> => {
     const { createClient } = await import("@supabase/supabase-js");
-    const { parseNowPlaying } = await import("@/lib/radio.server");
+    const { parseNowPlaying, automaticMetadataUrl } = await import("@/lib/radio.server");
 
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
     const supabase = createClient(
       process.env["SUPABASE_URL"]!,
-      process.env["SUPABASE_PUBLISHABLE_KEY"]!,
-      { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+      key,
+      {
+        auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+        global: { fetch: (input, init) => {
+          const headers = new Headers(init?.headers);
+          if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+          headers.set("apikey", key);
+          return fetch(input, { ...init, headers });
+        } },
+      },
     );
 
     const { data: row } = await supabase
       .from("radio_settings")
-      .select("metadata_provider, metadata_url, now_playing_title, now_playing_artist, now_playing_artwork_url")
+      .select("metadata_provider, metadata_url, stream_url, now_playing_title, now_playing_artist, now_playing_artwork_url")
       .eq("channel_id", data.channelId)
       .maybeSingle();
 
@@ -39,14 +48,15 @@ export const getRadioNowPlaying = createServerFn({ method: "GET" })
       listeners: null,
     };
 
-    if (row.metadata_provider === "manual" || row.metadata_provider === "none") return manual;
-    if (!row.metadata_url) return manual;
+    if (row.metadata_provider === "manual") return manual;
+    const metadataUrl = row.metadata_url || automaticMetadataUrl(row.stream_url);
+    if (!metadataUrl) return manual;
 
     try {
-      const res = await fetch(row.metadata_url, { headers: { accept: "application/json, text/plain" } });
+      const res = await fetch(metadataUrl, { headers: { accept: "application/json, text/plain" }, signal: AbortSignal.timeout(5000), redirect: "error" });
       if (!res.ok) return manual;
       const text = await res.text();
-      const parsed = parseNowPlaying(row.metadata_provider as "icecast" | "shoutcast", text);
+      const parsed = parseNowPlaying(row.metadata_provider === "shoutcast" ? "shoutcast" : "icecast", text, row.stream_url ?? undefined);
       return {
         title: parsed.title ?? manual.title,
         artist: parsed.artist ?? manual.artist,

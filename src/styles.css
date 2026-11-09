@@ -268,6 +268,21 @@ div:has(> .channel-cutout) > div.pointer-events-none.absolute.inset-0 {
 @media (max-width: 1023.98px) { .feedback-toaster { bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important; } body:has([data-radio-player]) .feedback-toaster { bottom: calc(176px + env(safe-area-inset-bottom, 0px)) !important; } }
 
 /* Content protection */
+.radio-song-window { height: 2rem; overflow: hidden; }
+.radio-song-scroll { animation: radio-song-rise 14s linear infinite; }
+.radio-song-line { min-height: 2.75rem; padding-bottom: 0.75rem; line-height: 1rem; overflow-wrap: anywhere; }
+.radio-song-scroll[data-paused] { animation-play-state: paused; }
+.radio-song-window:hover .radio-song-scroll { animation-play-state: paused; }
+@keyframes radio-song-rise {
+  0%, 20% { transform: translateY(0); }
+  85%, 100% { transform: translateY(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .radio-song-window { height: auto; }
+  .radio-song-scroll { animation: none; }
+  .radio-song-line { min-height: 0; padding-bottom: 0; }
+  .radio-song-line + .radio-song-line { display: none; }
+}
 body { -webkit-touch-callout: none; }
 html:not([data-copy-allowed]) body { user-select: none; -webkit-user-select: none; }
 html:not([data-copy-allowed]) :is(input, textarea, select, [contenteditable], [data-allow-copy]) { user-select: text; -webkit-user-select: text; }

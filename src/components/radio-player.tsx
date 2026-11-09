@@ -186,10 +186,21 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
                 >
                   {station.name}
                 </Link>
-                <div role="status" className="truncate text-xs text-[color:var(--muted-foreground)]">
-                  {error ? error : nowPlaying.title
-                    ? `${nowPlaying.artist ? `${nowPlaying.artist} — ` : ""}${nowPlaying.title}`
-                    : station.stationMessage || "Live radio"}
+                <div role="status" className="text-xs text-muted-foreground">
+                  {nowPlaying.title && !error ? (
+                    <>
+                      <span className="sr-only">{nowPlaying.title}{nowPlaying.artist ? ` — ${nowPlaying.artist}` : ""}</span>
+                      <div className="radio-song-window" aria-hidden="true" title={`${nowPlaying.title}${nowPlaying.artist ? ` — ${nowPlaying.artist}` : ""}`}>
+                        <div key={`${nowPlaying.title}-${nowPlaying.artist}`} className="radio-song-scroll" data-paused={!playing || undefined}>
+                          {[0, 1].map((copy) => (
+                            <div key={copy} className="radio-song-line">
+                              {nowPlaying.title}{nowPlaying.artist ? ` — ${nowPlaying.artist}` : ""}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : <span className="block truncate">{error || station.stationMessage || "Live radio"}</span>}
                 </div>
               </div>
               <Button variant="ghost"
