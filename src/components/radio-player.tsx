@@ -11,7 +11,8 @@ import { recordPlaybackEvent } from "@/lib/analytics";
 import { startMediaPlayback } from "@/lib/media-playback";
 import { titleCase } from "@/lib/title-case";
 import { useAudioReactivity } from "@/hooks/use-audio-reactivity";
-import type { RefObject } from "react";
+import type { CSSProperties, RefObject } from "react";
+import { useBrandColor } from "@/hooks/use-brand-color";
 
 type NowPlaying = { title: string | null; artist: string | null };
 
@@ -191,13 +192,14 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
 
 export function RadioNowPlaying({ compact = false }: { compact?: boolean }) {
   const { station, nowPlaying, playing, muted, error, toggle, toggleMute, stop, visualRef } = useRadio();
+  const brand = useBrandColor(station?.logoUrl ?? undefined, station?.bannerUrl ?? undefined);
   if (!station) return null;
   const song = [nowPlaying.title, nowPlaying.artist].filter((value): value is string => !!value).map(titleCase).join(" — ");
   return (
-    <div ref={visualRef} data-audio-reactive data-playing={playing && !muted || undefined} className={`radio-podcast-player ${compact ? "radio-podcast-compact" : "radio-podcast-full"}`}>
+    <div ref={visualRef} data-audio-reactive data-playing={playing && !muted || undefined} style={brand ? ({ "--mic-rgb": brand } as CSSProperties) : undefined} className={`radio-podcast-player ${compact ? "radio-podcast-compact" : "radio-podcast-full"}`}>
       <img src={station.logoUrl || station.bannerUrl || "/icon-512.png"} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/icon-512.png"; }} alt="" className="radio-podcast-backdrop" />
       <div className="radio-podcast-shade" />
-      <div className="radio-podcast-mic" aria-hidden="true"><Mic /></div>
+      <div className="radio-podcast-mic" aria-hidden="true"><span className="radio-mic-ring" /><span className="radio-mic-ring radio-mic-ring-2" /><Mic /></div>
       <div className="radio-podcast-copy">
         <Link to="/channels/$channelId" params={{ channelId: station.slug }} className="text-xs text-muted-foreground">{station.name}</Link>
         <h2 className="radio-show-title">{titleCase(station.stationMessage || station.name)}</h2>
