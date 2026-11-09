@@ -1336,6 +1336,7 @@ export type Database = {
       }
       radio_settings: {
         Row: {
+          artwork_url: string | null
           bitrate_kbps: number
           channel_id: string
           created_at: string
@@ -1353,6 +1354,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          artwork_url?: string | null
           bitrate_kbps?: number
           channel_id: string
           created_at?: string
@@ -1370,6 +1372,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          artwork_url?: string | null
           bitrate_kbps?: number
           channel_id?: string
           created_at?: string
