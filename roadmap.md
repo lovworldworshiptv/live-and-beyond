@@ -65,6 +65,7 @@
 - [x] Verified authenticated Admin/Open Studio access, all Studio sections, combined TV/radio/VOD draft save and readback, unchanged creator ownership, failed-save recovery and editor reset on channel switching; phone/tablet layouts have no horizontal overflow. Test drafts removed; 19 regression tests pass. Actual streaming still depends on working media sources.
 
 ## Requests (Nov 9)
+- [x] Use the same wide channel cards as Lettflix Gospel and LN24 International for Featured Channels, including LXP and Rhapsody; verify Joycall and Healing Streams use the same full-image fitting.
 - [x] Fill viewer-facing banner frames without black gaps while keeping the entire artwork visible; use matching image fill for proportions unlike LN24 International. Verified at desktop, tablet and phone widths.
 - [x] Featured On-Demand ranks published movies, podcasts and series across all channels using actual playback starts; never fill with manual featured picks.
 - [x] Prevent inactivity sign-out and preserve the selected Creator Studio section on return; reproduced 30-minute sign-out, verified signed-in Radio section after reload and 31 minutes, with five regression tests.
