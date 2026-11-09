@@ -65,6 +65,7 @@
 - [x] Verified authenticated Admin/Open Studio access, all Studio sections, combined TV/radio/VOD draft save and readback, unchanged creator ownership, failed-save recovery and editor reset on channel switching; phone/tablet layouts have no horizontal overflow. Test drafts removed; 19 regression tests pass. Actual streaming still depends on working media sources.
 
 ## Requests (Nov 9)
+- [x] Make narrow foldable phone views automatically use accessible icons when button labels cannot fit; seven public pages checked at 280px, channel layouts checked at 280/320/360/394/768/1280px, radio pause/resume/close and search verified without page overflow or runtime errors.
 - [x] Change radio song titles to horizontal scrolling and initial capitals for every word; verified real song readback, horizontal movement, pause and reduced motion at 394/768/1280/1920px without page overflow.
 - [x] Fetch current radio songs from configured metadata or the stream's own Icecast feed; verified real Lettflix Gospel playback across screen sizes. Seven regression tests pass.
 - [x] Arrange Watch Live, Browse Library, Follow Channel and Notifying in an adaptive, evenly aligned mobile action grid; Share sits below and LN247's long name no longer overflows.

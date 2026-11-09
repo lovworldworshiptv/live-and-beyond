@@ -15,6 +15,7 @@ import { CreatorApprovalWatcher } from "@/components/creator-approval-watcher";
 import { RadioPlayerProvider } from "@/components/radio-player";
 import { NetworkWatcher } from "@/components/network-watcher";
 import { ContentProtection } from "@/components/content-protection";
+import { AdaptiveControls } from "@/components/adaptive-controls";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -140,6 +141,7 @@ function RootComponent() {
           <CreatorApprovalWatcher />
           <NetworkWatcher />
           <ContentProtection />
+          <AdaptiveControls />
           <Toaster position="bottom-right" theme="dark" richColors className="feedback-toaster" />
         </RadioPlayerProvider>
       </AuthProvider>

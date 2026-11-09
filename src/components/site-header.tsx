@@ -1,6 +1,7 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Search, LogOut, ShieldCheck, ChevronDown } from "lucide-react";
+import { Search, LogOut, ShieldCheck, ChevronDown, LogIn } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,10 +81,10 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
             : "sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border"
         }
       >
-      <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 h-16 flex items-center gap-4 lg:gap-8">
+      <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-10 h-16 grid grid-cols-[minmax(0,1fr)_auto] sm:flex items-center gap-2 sm:gap-4 lg:gap-8">
 
-        <Link to="/" className="flex items-center group">
-          <img src={logoHorizontal.url} alt="Lettflix" className="h-10 lg:h-11 w-auto object-contain" />
+        <Link to="/" className="flex min-w-0 shrink-0 items-center group">
+          <img src={logoHorizontal.url} alt="Lettflix" className="h-10 lg:h-11 w-auto max-w-full object-contain" />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1 text-sm">
@@ -153,12 +154,13 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
           <NotificationBell />
 
           {!user ? (
+            <Button asChild className="h-9 max-[359px]:size-10 max-[359px]:px-0 px-5 shrink-0" aria-label="Sign in" title="Sign in">
             <Link
               to="/auth"
-              className="h-9 px-5 inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-semibold leading-none hover:bg-primary/90 transition whitespace-nowrap"
             >
-              Sign in
+              <LogIn className="hidden max-[359px]:block size-4" /><span className="max-[359px]:hidden">Sign in</span>
             </Link>
+            </Button>
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

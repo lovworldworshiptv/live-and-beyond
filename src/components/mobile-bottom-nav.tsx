@@ -53,6 +53,8 @@ export function MobileBottomNav() {
                 <Link
                   to={item.to as never}
                   aria-current={active ? "page" : undefined}
+                  aria-label={item.label}
+                  title={item.label}
                   className="group relative flex-1 min-w-0 flex flex-col items-center justify-center gap-1 outline-none"
                 >
                   <span
@@ -69,7 +71,7 @@ export function MobileBottomNav() {
                   </span>
                   <span
                     key={active ? "on" : "off"}
-                    className={`text-[10.5px] font-semibold leading-none tracking-wide truncate max-w-full px-1 transition-colors duration-300 ${
+                    className={`max-[359px]:hidden text-[10.5px] font-semibold leading-none tracking-wide truncate max-w-full px-1 transition-colors duration-300 ${
                       active
                         ? "text-foreground animate-fade-in"
                         : "text-[color:var(--muted-foreground)] group-hover:text-foreground"

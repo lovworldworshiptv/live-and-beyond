@@ -290,7 +290,7 @@ function ChannelPage() {
             <ChevronRight className="size-3" />
             <span className="text-foreground">{channel.name}</span>
           </div>
-          <div className="flex items-end gap-5 flex-wrap">
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-end gap-3 sm:flex sm:gap-5">
             <div className="size-24 lg:size-28 rounded-2xl overflow-hidden border border-border shadow-[var(--shadow-card)] shrink-0 bg-elevated grid place-items-center">
               <img src={channel.logoImg} alt="" className="size-full object-contain p-2" />
             </div>
@@ -299,7 +299,7 @@ function ChannelPage() {
                 {isRadio ? <Mic className="size-3.5" /> : <Tv className="size-3.5" />}
                 {channel.category} · {channel.country}
               </div>
-              <h1 className="mt-1.5 text-3xl lg:text-5xl font-extrabold tracking-tight break-words">{channel.name}</h1>
+              <h1 className="mt-1.5 text-3xl max-[359px]:text-xl lg:text-5xl font-extrabold tracking-tight break-words">{channel.name}</h1>
               <p className="mt-2 text-[color:var(--secondary-foreground)] max-w-2xl">{channel.tagline}</p>
             </div>
           </div>
@@ -311,16 +311,16 @@ function ChannelPage() {
         <div className="mx-auto max-w-[1480px] px-4 lg:px-10 pt-4">
           <div role="group" aria-label={`Choose how to follow ${channel.name}`} className="grid grid-cols-2 sm:inline-flex rounded-lg border border-border bg-elevated p-1">
             {streamSrc && !isRadio && (
-              <button
+              <Button variant="ghost"
                 type="button"
                 aria-pressed={!radioOnHere}
                 onClick={() => { if (radioOnHere || !playing) startPlayback(); }}
                 className={`h-10 px-4 rounded-md text-sm font-semibold inline-flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${!radioOnHere ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
               >
                 <Tv className="size-4" /> Watch live TV
-              </button>
+              </Button>
             )}
-            <button
+            <Button variant="ghost"
               type="button"
               aria-pressed={radioOnHere}
               onClick={() => {
@@ -339,7 +339,7 @@ function ChannelPage() {
               className={`h-10 px-4 rounded-md text-sm font-semibold inline-flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${radioOnHere ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
               <Radio className="size-4" /> Listen to radio
-            </button>
+            </Button>
           </div>
           {radioOnHere && <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">Radio is playing below the page. Choose Watch live TV to switch back.</p>}
         </div>

@@ -268,6 +268,15 @@ div:has(> .channel-cutout) > div.pointer-events-none.absolute.inset-0 {
 @media (max-width: 1023.98px) { .feedback-toaster { bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important; } body:has([data-radio-player]) .feedback-toaster { bottom: calc(176px + env(safe-area-inset-bottom, 0px)) !important; } }
 
 /* Content protection */
+@media (max-width: 639.98px) {
+  [data-adaptive-control] { min-width: 0; max-width: 100%; white-space: nowrap; }
+  [data-adaptive-control] > span { flex-shrink: 0; white-space: nowrap; }
+  [data-adaptive-control][data-icon-only] { font-size: 0; gap: 0; padding-inline: 0.5rem; justify-content: center; }
+  [data-icon-only] > span:not(:has(svg)) { display: none; }
+}
+@media (max-width: 359.98px) {
+  [data-radio-player] button { width: 2.25rem; height: 2.75rem; }
+}
 .radio-song-window { height: 1rem; overflow: hidden; }
 .radio-song-scroll { display: flex; width: max-content; animation: radio-song-slide 18s linear infinite; }
 .radio-song-line { flex: none; padding-right: 3rem; line-height: 1rem; white-space: nowrap; }
