@@ -16,6 +16,7 @@ import { BroadcastPanel, type TvSource } from "@/components/studio/broadcast-pan
 import { MediaLibraryPanel } from "@/components/studio/media-library-panel";
 import { PlayoutPanel } from "@/components/studio/playout-panel";
 import { RadioPanel } from "@/components/studio/radio-panel";
+import { studioSearch, type StudioTab as Tab } from "@/lib/studio-navigation";
 import { AnalyticsPanel } from "@/components/studio/analytics-panel";
 import { TeamPanel } from "@/components/studio/team-panel";
 import {
@@ -40,8 +41,7 @@ export const Route = createFileRoute("/studio")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>): { channel?: string } =>
-    typeof s.channel === "string" && s.channel ? { channel: s.channel } : {},
+  validateSearch: studioSearch,
   component: StudioPage,
 });
 
@@ -49,14 +49,10 @@ const SERVICE_ICON: Record<ServiceKey, typeof Tv> = {
   tv: Tv, radio: Radio, podcasts: Mic2, movies: Film, videos: Video,
 };
 
-type Tab =
-  | "overview" | "channel" | "services" | "content"
-  | "broadcast" | "radio" | "analytics" | "team";
-
 function StudioPage() {
   const { user, isAdmin, isCreator, loading } = useAuth();
   const navigate = useNavigate();
-  const { channel: requestedChannel } = Route.useSearch();
+  const { channel: requestedChannel, section } = Route.useSearch();
   const [allChannels, setAllChannels] = useState<{ id: string; name: string }[]>([]);
   const loadGeneration = useRef(0);
   const [channel, setChannel] = useState<Partial<Channel> | null>(null);
@@ -65,7 +61,10 @@ function StudioPage() {
   const [channelError, setChannelError] = useState(false);
   const [wizard, setWizard] = useState(false);
   const [advanced, setAdvanced] = useState<Partial<Channel> | null>(null);
-  const [tab, setTab] = useState<Tab>("overview");
+  const tab = section ?? "overview";
+  const setTab = (section: Tab) => {
+    void navigate({ to: "/studio", search: previous => ({ ...previous, section }), replace: true });
+  };
   const [starting, setStarting] = useState(false);
   const [setup, setSetup] = useState<{ content: number; input: boolean; encoder: string | null; checked: Date | null; error: boolean }>({ content: 0, input: false, encoder: null, checked: null, error: false });
   const [refreshing, setRefreshing] = useState(false);
@@ -136,8 +135,14 @@ function StudioPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) navigate({ to: "/auth", search: { redirect: "/studio" }, replace: true });
-  }, [user, loading, navigate]);
+    if (!user) {
+      const search = new URLSearchParams();
+      if (requestedChannel) search.set("channel", requestedChannel);
+      if (section) search.set("section", section);
+      const suffix = search.toString();
+      navigate({ to: "/auth", search: { redirect: `/studio${suffix ? `?${suffix}` : ""}` }, replace: true });
+    }
+  }, [user, loading, navigate, requestedChannel, section]);
 
   useEffect(() => {
     if (!user || !(isCreator || isAdmin)) return;

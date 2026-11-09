@@ -26,7 +26,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let disposed = false;
     let generation = 0;
     let observedAuthEvent = false;
+    let currentUserId: string | undefined;
     async function applySession(next: Session | null) {
+      if (disposed) return;
+      // Refresh tokens without replacing the user or unmounting their workspace.
+      if (next?.user && next.user.id === currentUserId) {
+        setSession(next);
+        return;
+      }
+      currentUserId = next?.user.id;
       const request = ++generation;
       setSession(next);
       setUser(next?.user ?? null);
@@ -39,40 +47,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       if (!disposed && request === generation) setLoading(false);
     }
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
       observedAuthEvent = true;
       // Do not make Auth API requests inside its locked event callback.
-      setTimeout(() => { if (!disposed) void applySession(next); }, 0);
+      setTimeout(() => {
+        if (event === "USER_UPDATED") currentUserId = undefined;
+        if (!disposed) void applySession(next);
+      }, 0);
     });
     void supabase.auth.getSession().then(({ data }) => {
       if (!disposed && !observedAuthEvent) void applySession(data.session);
     });
     return () => { disposed = true; generation++; sub.subscription.unsubscribe(); };
   }, []);
-
-  // Idle auto sign-out after 30 minutes of inactivity
-  useEffect(() => {
-    if (!session) return;
-    const TIMEOUT_MS = 30 * 60 * 1000;
-    let timer: ReturnType<typeof setTimeout>;
-    const reset = () => {
-      clearTimeout(timer);
-      timer = setTimeout(async () => {
-        await supabase.auth.signOut();
-        if (typeof window !== "undefined") {
-          window.location.href = "/auth";
-        }
-      }, TIMEOUT_MS);
-    };
-    const events = ["mousemove", "keydown", "click", "scroll", "touchstart"] as const;
-    events.forEach((e) => window.addEventListener(e, reset, { passive: true }));
-    reset();
-    return () => {
-      clearTimeout(timer);
-      events.forEach((e) => window.removeEventListener(e, reset));
-    };
-  }, [session]);
-
 
   async function signOut() {
     await supabase.auth.signOut();

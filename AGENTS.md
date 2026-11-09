@@ -29,3 +29,4 @@
 - The VIDAA TV app in `public/tv/` is a self-contained static app: never edit, lint or bundle it; `src/server.ts` short-circuits `/tv` paths before any app route, and TV-only sign-in behaviour (short `/k/` links, phone result pages, CORS allow-list) is opt-in via `device: "tv"`, and KingsChat attempts with a `/tv/` return_path (the TV on-screen sign-in) return to that path after the callback, so web and Android flows stay unchanged.
 - Admins open any creator's Studio via /studio?channel=<id>; edits keep the channel's original creator_id so ownership never transfers to the admin.
 - Channel configuration saves await channel, service and radio writes before success; Studio editors reset on channel changes so drafts cannot cross workspaces.
+- Auth token refresh retains same-user identity and role state without inactivity timers; Studio sections live in validated URL search parameters so tab return and reload preserve the workspace location.
