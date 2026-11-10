@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ChevronDown, Play, Tv, Radio, Download, Users, ArrowRight } from "lucide-react";
+import { ChevronDown, Play, MonitorPlay, Clapperboard, AudioLines, BookmarkCheck, Download, ArrowRight } from "lucide-react";
 import logoIcon from "@/assets/lettflix-icon.png.asset.json";
 import heroBg from "@/assets/landing-hero.png.asset.json";
 import { Button } from "@/components/ui/button";
@@ -11,28 +11,28 @@ import personalImage from "@/assets/ecosystem-personal.jpg";
 
 const FEATURES = [
   {
-    icon: Tv,
+    icon: MonitorPlay,
     image: liveImage,
     imageTitle: "Live TV",
     title: "Live channels, always on",
     body: "Broadcast-grade live TV from ministries, broadcasters and creators around the world — no cable box required.",
   },
   {
-    icon: Play,
+    icon: Clapperboard,
     image: cinemaImage,
     imageTitle: "On Demand",
     title: "Movies, series & documentaries",
     body: "Discover movies, series and documentaries alongside live channels in the Lettflix catalogue.",
   },
   {
-    icon: Radio,
+    icon: AudioLines,
     image: radioImage,
     imageTitle: "Radio & Podcasts",
     title: "Radio & podcasts",
     body: "Listen to live radio and discover podcasts from broadcasters and creators.",
   },
   {
-    icon: Users,
+    icon: BookmarkCheck,
     image: personalImage,
     imageTitle: "Your Watchlist",
     title: "Make it your own",
@@ -177,7 +177,10 @@ export function LandingPage() {
               <article data-feature={i} className="group ecosystem-feature relative h-full min-w-0 overflow-hidden rounded-lg border border-border p-5">
                 <img src={f.image} alt={f.imageTitle} loading="lazy" width={1088} height={608} className="ecosystem-feature-image absolute -right-8 -top-8 size-28 rounded-md object-cover" />
                 <div className="relative mb-5 h-24">
-                  <span className="relative z-10 flex max-w-[55%] items-start gap-1.5 text-xs font-semibold"><f.icon aria-hidden className="size-3.5 shrink-0" />{f.imageTitle}</span>
+                  <div className="relative z-10 flex max-w-[55%] flex-col items-start gap-2">
+                    <span aria-hidden className="ecosystem-feature-icon grid size-11 shrink-0 place-items-center"><f.icon className="size-6" strokeWidth={1.5} /></span>
+                    <span className="text-xs font-semibold">{f.imageTitle}</span>
+                  </div>
                 </div>
                 <div>
                   <h3 className="text-base font-semibold">{f.title}</h3>
