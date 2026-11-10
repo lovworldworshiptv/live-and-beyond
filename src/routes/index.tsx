@@ -20,6 +20,7 @@ import { useBrandColor } from "@/hooks/use-brand-color";
 import type { Channel } from "@/lib/catalog";
 import { TitleCard } from "@/components/title-card";
 import { ChannelArtwork } from "@/components/channel-artwork";
+import { ChannelPlayIndicator } from "@/components/channel-play-indicator";
 
 import { SponsorBanner } from "@/components/sponsor-banner";
 import { useCmsChannels, useCmsTitles, useCmsEvents, useCmsCollections, useCmsSetting } from "@/lib/cms-catalog";
@@ -507,16 +508,7 @@ function LiveNowCard({ c }: { c: Channel }) {
                   <span className="absolute top-3 right-3 text-[11px] px-2 py-1 rounded bg-black/60 backdrop-blur text-white/90 live-channel-viewers">
                     {c.viewers}<span className="live-channel-watching"> watching</span>
                   </span>
-                  <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition">
-                    <div
-                      className="size-16 rounded-full bg-white/95 grid place-items-center transition group-hover:scale-110"
-                      style={{
-                        boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.4), 0 0 24px oklch(0.55 0.22 25 / 0.55), 0 0 50px oklch(0.55 0.22 25 / 0.25)",
-                      }}
-                    >
-                      <Play className="size-6 text-background fill-current ml-0.5" />
-                    </div>
-                  </div>
+                  <ChannelPlayIndicator />
                 </div>
                 <div className="p-4 channel-card-info" style={{ background: `linear-gradient(180deg, ${tint(0.75)}, ${tint(0.95)})`, transition: "background 400ms" }}>
                   <div className="flex items-center justify-between gap-2">

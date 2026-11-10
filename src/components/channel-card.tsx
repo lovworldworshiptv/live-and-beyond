@@ -29,6 +29,7 @@ import { useFollowing, useReminders, useSettings } from "@/lib/personal";
 import { toast } from "sonner";
 import type { Channel } from "@/lib/catalog";
 import { ChannelArtwork } from "@/components/channel-artwork";
+import { ChannelPlayIndicator } from "@/components/channel-play-indicator";
 
 export function ChannelCard({ c }: { c: Channel }) {
   const [hovering, setHovering] = useState(false);
@@ -134,16 +135,7 @@ export function ChannelCard({ c }: { c: Channel }) {
           )}
           {/* Hover play indicator (only when not previewing) */}
           {!(hovering && canPreview) && (
-            <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
-              <div
-                className="size-6 rounded-full bg-white/95 grid place-items-center"
-                style={{
-                  boxShadow: "0 0 0 3px oklch(0.55 0.22 25 / 0.3), 0 0 24px oklch(0.55 0.22 25 / 0.45), 0 0 50px oklch(0.55 0.22 25 / 0.2)",
-                }}
-              >
-                <Play className="size-3 text-background fill-current ml-px" />
-              </div>
-            </div>
+            <ChannelPlayIndicator />
           )}
 
           {/* Unmute button while preview is playing */}
