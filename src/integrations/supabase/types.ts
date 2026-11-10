@@ -709,6 +709,33 @@ export type Database = {
         }
         Relationships: []
       }
+      device_push_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       enterprise_leads: {
         Row: {
           created_at: string
@@ -1061,6 +1088,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_campaigns: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string
+          error: string | null
+          id: string
+          image_url: string | null
+          link: string | null
+          push_count: number
+          recipient_count: number
+          segment: string
+          status: string
+          title: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by: string
+          error?: string | null
+          id?: string
+          image_url?: string | null
+          link?: string | null
+          push_count?: number
+          recipient_count?: number
+          segment?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string
+          error?: string | null
+          id?: string
+          image_url?: string | null
+          link?: string | null
+          push_count?: number
+          recipient_count?: number
+          segment?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {

@@ -43,6 +43,13 @@
       "when": 1794253134615,
       "tag": "0005_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794298823264,
+      "tag": "0006_admin_notifications",
+      "breakpoints": true
     }
   ]
 }

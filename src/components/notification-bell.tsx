@@ -1,4 +1,7 @@
-import { Bell } from "lucide-react";
+import { Bell, Smartphone } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { enablePush } from "@/lib/push";
 import { Link } from "@tanstack/react-router";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -19,6 +22,21 @@ function timeAgo(iso: string) {
 export function NotificationBell() {
   const { user } = useAuth();
   const { items, unread, markAllRead } = useNotifications();
+  const [pushBusy, setPushBusy] = useState(false);
+
+  const onEnablePush = async () => {
+    setPushBusy(true);
+    try {
+      const result = await enablePush();
+      if (result.status === "registered") toast.success("This device now receives phone alerts.");
+      else if (result.status === "open-in-new-tab") toast.info("Open Lettflix in its own browser tab to allow notifications.");
+      else if (result.status === "denied") toast.error("Notifications are blocked — allow them in your browser's site settings.");
+      else if (result.status === "not-configured") toast.info("Phone alerts are not connected yet; in-app messages still work.");
+      else toast.info("This browser does not support notifications.");
+    } finally {
+      setPushBusy(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -78,6 +96,15 @@ export function NotificationBell() {
             <div key={n.id}>{body}</div>
           );
         })}
+        <DropdownMenuSeparator />
+        <button
+          onClick={onEnablePush}
+          disabled={pushBusy}
+          className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-[color:var(--muted-foreground)] hover:bg-elevated/60 transition"
+        >
+          <Smartphone className="size-3.5" />
+          {pushBusy ? "Enabling…" : "Enable phone alerts on this device"}
+        </button>
       </DropdownMenuContent>
     </DropdownMenu>
   );

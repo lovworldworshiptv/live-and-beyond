@@ -7,7 +7,8 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MediaPicker } from "@/components/media-picker";
-import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X, Home } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X, Home, Bell } from "lucide-react";
+import { NotificationsCms } from "@/components/admin/notifications-cms";
 import { toast } from "sonner";
 import { defaultNav, defaultHero, defaultFooter, defaultBottomNav } from "@/lib/homepage-defaults";
 import { bottomNavIconComponents, bottomNavIcons } from "@/lib/bottom-nav-icons";
@@ -98,6 +99,7 @@ function AdminPage() {
             <TabsTrigger value="leads"><Building2 className="size-4" /> Leads</TabsTrigger>
             <TabsTrigger value="users"><UsersIcon className="size-4" /> Users</TabsTrigger>
             <TabsTrigger value="applications"><UserPlus className="size-4" /> Applications</TabsTrigger>
+            <TabsTrigger value="notifications"><Bell className="size-4" /> Notifications</TabsTrigger>
             <TabsTrigger value="security"><KeyRound className="size-4" /> Security</TabsTrigger>
           </TabsList>
           <TabsContent value="overview"><OverviewCms /></TabsContent>
@@ -111,6 +113,7 @@ function AdminPage() {
           <TabsContent value="leads"><LeadsCms /></TabsContent>
           <TabsContent value="users"><UsersCms /></TabsContent>
           <TabsContent value="applications"><ApplicationsCms /></TabsContent>
+          <TabsContent value="notifications"><NotificationsCms /></TabsContent>
           <TabsContent value="security"><SecurityCms /></TabsContent>
         </Tabs>
 

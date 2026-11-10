@@ -9,6 +9,7 @@ import { MovieArtwork } from "./movie-artwork";
 import { recordPlaybackEvent } from "@/lib/analytics";
 import { createOnDemandStartTracker } from "@/lib/on-demand-start";
 import { resolveVideoSource } from "@/lib/video-source";
+import { pauseAllMedia, pauseOtherMedia, registerMediaElement } from "@/lib/media-playback";
 import { YoutubePlayer } from "./youtube-player";
 
 type Props = {
@@ -81,10 +82,19 @@ export function StreamPlayer({
       setError("This title needs a valid video or provider link to play.");
       return;
     }
+    // Last action wins: starting this video stops live TV and radio.
+    pauseAllMedia();
     setError(null);
     setMuted(false);
     setPlaying(true);
   };
+
+  // Register the media element so live TV or radio starting elsewhere pauses this video.
+  useEffect(() => {
+    const media = playing ? mediaRef.current : null;
+    if (!media) return;
+    return registerMediaElement(media);
+  }, [playing]);
 
   const toggleMute = () => {
     const m = mediaRef.current;
@@ -121,7 +131,7 @@ export function StreamPlayer({
             playsInline
             controls
             autoPlay
-            onPlaying={() => trackStart.current?.()}
+            onPlaying={() => { if (mediaRef.current) pauseOtherMedia(mediaRef.current); trackStart.current?.(); }}
             onTimeUpdate={saveProgress}
             onPause={saveProgress}
             onEnded={saveProgress}

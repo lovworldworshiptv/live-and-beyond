@@ -1,5 +1,8 @@
 # Lettflix Roadmap
 
+## Playback exclusivity
+- [ ] On-demand videos must stop live TV and radio on multi-service channels (e.g. Lettflix Gospel), and vice versa, so only one broadcast plays at a time on web and TV.
+
 ## Admin notifications
 - [ ] Add admin notification composer and history, audience targeting, in-app inbox and dismissible pop-ups based on Karaoke+.
 - [ ] Connect phone push delivery and add user opt-in controls.

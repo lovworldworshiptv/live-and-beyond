@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import type { RadioStation } from "@/lib/radio";
 import { getRadioNowPlaying } from "@/lib/radio.functions";
 import { recordPlaybackEvent } from "@/lib/analytics";
-import { startMediaPlayback } from "@/lib/media-playback";
+import { pauseOtherMedia, registerMediaElement, startMediaPlayback } from "@/lib/media-playback";
 import { titleCase } from "@/lib/title-case";
 import { useAudioReactivity } from "@/hooks/use-audio-reactivity";
 import type { CSSProperties, RefObject } from "react";
@@ -60,6 +60,13 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     setMuted(value === 0);
   }, []);
   useEffect(() => { if (audioRef.current) audioRef.current.volume = volume; }, [volume]);
+
+  // One broadcast at a time: registering lets any other player pause this radio.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    return registerMediaElement(audio);
+  }, []);
 
   // Attach the stream whenever the station changes
   useEffect(() => {
@@ -179,6 +186,7 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
       {children}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio ref={audioRef} muted={muted} onVolumeChange={() => setMuted(audioRef.current?.muted ?? false)} className="hidden" onPlaying={() => {
+        if (audioRef.current) pauseOtherMedia(audioRef.current);
         setPlaying(true); setError(null);
         if (!playbackStarted.current && trackedStation.current) {
           playbackStarted.current = true;

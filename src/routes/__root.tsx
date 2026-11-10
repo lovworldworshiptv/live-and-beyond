@@ -18,6 +18,7 @@ import { NetworkWatcher } from "@/components/network-watcher";
 import { ContentProtection } from "@/components/content-protection";
 import { AdaptiveControls } from "@/components/adaptive-controls";
 import { RouteProgress } from "@/components/brand-loader";
+import { NotificationPopup } from "@/components/notification-popup";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -146,6 +147,7 @@ function RootComponent() {
           <NetworkWatcher />
           <ContentProtection />
           <AdaptiveControls />
+          <NotificationPopup />
           <Toaster position="bottom-right" theme="dark" richColors className="feedback-toaster" />
         </RadioPlayerProvider>
       </AuthProvider>

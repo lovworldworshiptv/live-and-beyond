@@ -18,6 +18,7 @@ import { protectedChannelSrc } from "@/lib/stream-src";
 import { useFollowing, useSettings } from "@/lib/personal";
 import { useChannelFollow, formatFollowers } from "@/lib/follows";
 import { recordPlaybackEvent } from "@/lib/analytics";
+import { pauseOtherMedia, registerMediaElement } from "@/lib/media-playback";
 import { resolveChannelPlayout, type NowPlaying } from "@/lib/playout";
 import { toast } from "sonner";
 import { fetchRadioSettings, type RadioSettings, type RadioFormat } from "@/lib/radio";
@@ -158,6 +159,13 @@ function ChannelPage() {
       setPlaying(false);
     }
   }, [radioPlayer.station]);
+
+  // Register the live TV element so an on-demand video or radio starting elsewhere pauses it.
+  useEffect(() => {
+    const media = playing ? mediaRef.current : null;
+    if (!media) return;
+    return registerMediaElement(media);
+  }, [playing]);
 
   // A running Lettflix Live broadcast takes precedence over the configured source,
   // which in turn takes precedence over automated playout.
@@ -387,6 +395,7 @@ function ChannelPage() {
                 autoPlay
                 playsInline
                 controls
+                onPlaying={() => { if (mediaRef.current) pauseOtherMedia(mediaRef.current); }}
                 onError={() => failPlayback("This channel's live feed is unavailable. Tap play to retry.")}
                 onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)}
                 controlsList="nodownload noplaybackrate"
