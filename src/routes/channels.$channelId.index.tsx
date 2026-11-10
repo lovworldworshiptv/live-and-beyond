@@ -15,7 +15,7 @@ import { useHlsAttach } from "@/hooks/use-hls";
 import { QualityMenu } from "@/components/quality-menu";
 import { usePlayerFullscreen } from "@/components/player-fullscreen";
 import { protectedChannelSrc } from "@/lib/stream-src";
-import { useFollowing, useSettings } from "@/lib/personal";
+import { useFollowing, useReminders, useSettings } from "@/lib/personal";
 import { useChannelFollow, formatFollowers } from "@/lib/follows";
 import { recordPlaybackEvent } from "@/lib/analytics";
 import { pauseOtherMedia, registerMediaElement } from "@/lib/media-playback";
@@ -99,6 +99,8 @@ function ChannelPage() {
   const notifyOn = Boolean(dbChannelId && signedIn ? followingDb && notifyDb : settings.liveAlerts);
   const [radio, setRadio] = useState<RadioSettings | null>(null);
   const [libraryTitles, setLibraryTitles] = useState<Title[]>([]);
+  const [schedule, setSchedule] = useState<{ program_title: string; category: string | null; starts_at: string; ends_at: string }[]>([]);
+  const reminders = useReminders();
   const radioPlayer = useRadio();
 
   useEffect(() => {
@@ -107,6 +109,7 @@ function ChannelPage() {
     setChannel(null);
     setLibraryTitles([]);
     setRadio(null);
+    setSchedule([]);
     (async () => {
       const { data } = await supabase
         .from("cms_channels")
@@ -120,6 +123,10 @@ function ChannelPage() {
         const id = (data as { id: string }).id;
         setDbChannelId(id);
         fetchRadioSettings(id).then((r) => { if (!cancelled) setRadio(r); }).catch(() => {});
+        void supabase.from("cms_schedule").select("program_title,category,starts_at,ends_at").eq("channel_id", id)
+          .eq("is_published", true).is("deleted_at", null).gt("ends_at", new Date().toISOString())
+          .order("starts_at", { ascending: true }).limit(12)
+          .then(({ data: slots }) => { if (!cancelled && slots) setSchedule(slots); });
         fetchChannelLibrary(id, mapChannelRow(data as never)).then((titles) => {
           if (!cancelled) setLibraryTitles(titles);
         }).catch(() => {});
@@ -588,34 +595,43 @@ function ChannelPage() {
               <Radio className="size-4 text-primary" /> Program Schedule
             </h2>
             <div className="mt-4 rounded-xl border border-border overflow-hidden divide-y divide-border">
-              {(channel.schedule as Channel["schedule"]).map((s, i) => (
-                <div
-                  key={i}
-                  className={`px-4 py-3 flex items-center gap-4 ${
-                    s.live ? "bg-primary/10" : "bg-elevated/30"
-                  }`}
-                >
-                  <div className="w-16 text-sm font-mono font-semibold text-[color:var(--secondary-foreground)]">
-                    {s.time}
+              {schedule.length === 0 && (
+                <div className="px-4 py-6 text-sm text-[color:var(--muted-foreground)] bg-elevated/30">No upcoming programmes scheduled yet.</div>
+              )}
+              {schedule.map((slot) => {
+                const start = new Date(slot.starts_at); const end = new Date(slot.ends_at);
+                const live = start.getTime() <= Date.now() && end.getTime() > Date.now();
+                const time = start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                const today = start.toDateString() === new Date().toDateString();
+                const day = today ? "Today" : start.toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" });
+                const reminderId = `${channelId}::${slot.starts_at}::${slot.program_title}`;
+                const reminded = reminders.has(reminderId);
+                return (
+                <div key={reminderId} className={`px-4 py-3 flex items-center gap-4 ${live ? "bg-primary/10" : "bg-elevated/30"}`}>
+                  <div className="w-20 shrink-0">
+                    <div className="text-sm font-mono font-semibold text-[color:var(--secondary-foreground)]">{time}</div>
+                    <div className="text-[10px] uppercase tracking-wider text-[color:var(--muted-foreground)]">{day}</div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold flex items-center gap-2">
-                      {s.title}
-                      {s.live && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary text-primary-foreground live-pulse">
-                          LIVE
-                        </span>
+                    <div className="text-sm font-semibold flex items-center gap-2 min-w-0">
+                      <span className="truncate">{slot.program_title}</span>
+                      {live && (
+                        <span className="inline-flex shrink-0 items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary text-primary-foreground live-pulse">LIVE</span>
                       )}
                     </div>
                     <div className="text-[11px] text-[color:var(--muted-foreground)] uppercase tracking-wider mt-0.5">
-                      {s.kind}
+                      {slot.category ?? "Programme"} · until {end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </div>
                   </div>
-                  <button className="text-[color:var(--muted-foreground)] hover:text-foreground" aria-label="Set reminder">
-                    <Bell className="size-4" />
-                  </button>
+                  {!live && (
+                    <button type="button" onClick={() => { reminders.toggle({ id: reminderId, channelId, time: slot.starts_at, title: slot.program_title }); toast.success(reminded ? "Reminder removed" : "Reminder set"); }}
+                      className={reminded ? "text-primary" : "text-[color:var(--muted-foreground)] hover:text-foreground"} aria-pressed={reminded} aria-label={reminded ? "Remove reminder" : "Set reminder"}>
+                      {reminded ? <BellRing className="size-4" /> : <Bell className="size-4" />}
+                    </button>
+                  )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

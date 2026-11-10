@@ -299,11 +299,12 @@ export async function publishScheduleToGuide(channelId: string, days = 7) {
     }
   }
 
-  await supabase
+  const { error: clearError } = await supabase
     .from("cms_schedule")
     .delete()
     .eq("channel_id", channelId)
     .gte("starts_at", now.toISOString());
+  if (clearError) throw clearError;
   if (rows.length) {
     const { error } = await supabase.from("cms_schedule").insert(rows as never);
     if (error) throw error;

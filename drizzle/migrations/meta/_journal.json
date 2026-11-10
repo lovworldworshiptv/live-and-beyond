@@ -50,6 +50,13 @@
       "when": 1794298823264,
       "tag": "0006_admin_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794300040673,
+      "tag": "0007_creator_schedule_write",
+      "breakpoints": true
     }
   ]
 }

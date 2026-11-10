@@ -461,17 +461,26 @@ function ScheduleSection({
     } as never);
     if (error) { toast.error(error.message); return; }
     setName("");
-    toast.success("Programming block scheduled");
+    await syncGuide();
+    toast.success("Programming block scheduled and shown on your channel");
     onChange();
+  }
+
+  // Keep the public Program Schedule in step with every change.
+  async function syncGuide() {
+    try { await publishScheduleToGuide(channelId); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Could not update the channel schedule"); }
   }
 
   async function toggle(s: PlayoutSchedule) {
     await supabase.from("playout_schedules").update({ is_active: !s.is_active } as never).eq("id", s.id);
+    await syncGuide();
     onChange();
   }
 
   async function remove(id: string) {
     await supabase.from("playout_schedules").delete().eq("id", id);
+    await syncGuide();
     toast.success("Block removed");
     onChange();
   }
