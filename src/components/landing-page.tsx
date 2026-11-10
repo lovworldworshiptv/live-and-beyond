@@ -175,9 +175,9 @@ export function LandingPage() {
           {FEATURES.map((f, i) => (
             <Reveal key={f.title} delay={i * 110} className="h-full">
               <article className="group ecosystem-feature relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-surface/70 p-5">
+                <img src={f.image} alt={f.imageTitle} loading="lazy" width={1088} height={608} className="ecosystem-feature-image absolute -right-8 -top-8 size-28 rounded-md object-cover" />
                 <div className="relative mb-5 h-24">
                   <span className="relative z-10 flex max-w-[55%] items-start gap-1.5 text-xs font-semibold text-foreground"><f.icon aria-hidden className="size-3.5 shrink-0" />{f.imageTitle}</span>
-                  <img src={f.image} alt={f.imageTitle} loading="lazy" width={1088} height={608} className="ecosystem-feature-image absolute -right-6 -top-4 size-24 rounded-md object-cover" />
                 </div>
                 <div>
                   <h3 className="text-base font-semibold">{f.title}</h3>
