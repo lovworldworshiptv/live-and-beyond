@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { shouldCollapseControl } from "@/lib/adaptive-control-fit";
 
 /** Keep icon-bearing commands readable without changing their action or accessible name. */
 export function AdaptiveControls() {
@@ -9,22 +10,25 @@ export function AdaptiveControls() {
       frame = 0;
       for (const control of controls) {
         if (!control.isConnected) { controls.delete(control); resize.unobserve(control); continue; }
-        const compact = window.innerWidth < 640;
+        const compact = window.innerWidth < 360;
         control.removeAttribute("data-icon-only");
         if (!compact || !control.clientWidth) continue;
         const style = getComputedStyle(control);
         const nodes = Array.from(control.childNodes).filter((node) => {
           if (node.nodeType === Node.TEXT_NODE) return Boolean(node.textContent?.trim());
-          return node instanceof Element && getComputedStyle(node).display !== "none";
+          if (!(node instanceof Element)) return false;
+          const nodeStyle = getComputedStyle(node);
+          return nodeStyle.display !== "none" && nodeStyle.position !== "absolute" && nodeStyle.position !== "fixed";
         });
         const contentWidth = nodes.reduce((sum, node) => {
+          if (node instanceof HTMLElement) return sum + node.offsetWidth;
           const range = document.createRange();
           range.selectNode(node);
           return sum + range.getBoundingClientRect().width;
         }, 0);
         const gaps = Math.max(0, nodes.length - 1) * (parseFloat(style.columnGap) || 0);
         const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-        if (contentWidth + gaps + padding > control.clientWidth + 1) control.setAttribute("data-icon-only", "");
+        if (shouldCollapseControl(window.innerWidth, contentWidth + gaps + padding, control.clientWidth)) control.setAttribute("data-icon-only", "");
       }
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(fit); };

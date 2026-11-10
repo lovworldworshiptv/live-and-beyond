@@ -273,7 +273,7 @@ div:has(> .channel-cutout) > div.pointer-events-none.absolute.inset-0 {
 @media (max-width: 1023.98px) { .feedback-toaster { bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important; } body:has([data-radio-player]) .feedback-toaster { bottom: calc(176px + env(safe-area-inset-bottom, 0px)) !important; } }
 
 /* Content protection */
-@media (max-width: 639.98px) {
+@media (max-width: 359.98px) {
   [data-adaptive-control] { min-width: 0; max-width: 100%; white-space: nowrap; }
   [data-adaptive-control] > span { flex-shrink: 0; white-space: nowrap; }
   [data-adaptive-control][data-icon-only] { font-size: 0; gap: 0; padding-inline: 0.5rem; justify-content: center; }
