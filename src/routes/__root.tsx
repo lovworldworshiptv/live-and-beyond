@@ -19,6 +19,7 @@ import { ContentProtection } from "@/components/content-protection";
 import { AdaptiveControls } from "@/components/adaptive-controls";
 import { RouteProgress } from "@/components/brand-loader";
 import { NotificationPopup } from "@/components/notification-popup";
+import { ReminderWatcher } from "@/components/reminder-watcher";
 import { FeatureGate } from "@/components/feature-gate";
 
 import appCss from "../styles.css?url";
@@ -149,6 +150,7 @@ function RootComponent() {
           <ContentProtection />
           <AdaptiveControls />
           <NotificationPopup />
+          <ReminderWatcher />
           <Toaster position="bottom-right" theme="dark" richColors className="feedback-toaster" />
         </RadioPlayerProvider>
       </AuthProvider>

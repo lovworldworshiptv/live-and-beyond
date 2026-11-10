@@ -23,7 +23,8 @@ export function RemindButton({
     e.stopPropagation();
     toggle({ id, channelId, time, title });
     if (!active) {
-      toast.success("Reminder saved", { description: `Saved on this device · ${title}` });
+      requestReminderPermission();
+      toast.success("Reminder set", { description: `We'll alert you 5 minutes before ${title} starts` });
     } else {
       toast("Reminder removed", { description: title });
     }
@@ -71,4 +72,11 @@ export function RemindButton({
       <Icon className="size-4" /> {active ? "Reminder set" : "Remind me"}
     </Button>
   );
+}
+
+/** Ask once for browser alerts so reminders can reach viewers in another tab. */
+export function requestReminderPermission() {
+  if (typeof Notification !== "undefined" && Notification.permission === "default") {
+    void Notification.requestPermission().catch(() => {});
+  }
 }

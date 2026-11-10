@@ -22,7 +22,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { RemindButton } from "./remind-button";
+import { RemindButton, requestReminderPermission } from "./remind-button";
+import { formatSlotTime, nextProgramme, upcomingSlots } from "@/lib/reminder-schedule";
 import { ShareMenu } from "./share-menu";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { useFollowing, useReminders, useSettings } from "@/lib/personal";
@@ -41,8 +42,10 @@ export function ChannelCard({ c }: { c: Channel }) {
   const { has, toggle } = useFollowing();
   const following = has(c.id);
   const reminders = useReminders();
-  const reminderId = `${c.id}::${c.nowPlaying.startsAt}::${c.nowPlaying.title}`;
-  const reminderActive = reminders.has(reminderId);
+  const next = nextProgramme(c.schedule);
+  const upcoming = upcomingSlots(c.schedule);
+  const reminderId = next ? `${c.id}::${next.time}::${next.title}` : "";
+  const reminderActive = !!reminderId && reminders.has(reminderId);
   const { settings } = useSettings();
   const canPreview = c.streamKind === "video" && c.isLive && !!c.streamUrl && settings.autoplayPreviews;
 
@@ -52,19 +55,13 @@ export function ChannelCard({ c }: { c: Channel }) {
   };
 
   const confirmReminder = () => {
-    if (!c.nowPlaying.startsAt) { toast("No programme time available", { description: "Check the channel schedule for upcoming programmes." }); setReminderOpen(false); return; }
-    reminders.toggle({
-      id: reminderId,
-      channelId: c.id,
-      time: c.nowPlaying.startsAt,
-      title: c.nowPlaying.title,
-    });
+    if (!next) { setReminderOpen(false); setScheduleOpen(true); return; }
+    reminders.toggle({ id: reminderId, channelId: c.id, time: next.time, title: next.title });
     if (!reminderActive) {
-      toast.success("Reminder set", {
-        description: `Saved on this device · ${c.nowPlaying.title}`,
-      });
+      requestReminderPermission();
+      toast.success("Reminder set", { description: `We'll alert you 5 minutes before ${next.title} (${formatSlotTime(next.time)})` });
     } else {
-      toast("Reminder removed", { description: c.nowPlaying.title });
+      toast("Reminder removed", { description: next.title });
     }
     setReminderOpen(false);
   };
@@ -260,21 +257,18 @@ export function ChannelCard({ c }: { c: Channel }) {
               <Bell className="size-4 text-primary" /> Set a reminder
             </DialogTitle>
             <DialogDescription>
-              We'll notify you when this programme is about to start on {c.name}.
+              {next ? `We'll alert you 5 minutes before this programme starts on ${c.name}.` : `${c.name} has no upcoming programmes scheduled yet.`}
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-lg border border-border bg-elevated/60 p-4">
             <div className="text-[11px] uppercase tracking-wider text-[color:var(--muted-foreground)]">
-              Now / Next on {c.name}
+              Up next on {c.name}
             </div>
-            <div className="mt-1 font-semibold">{c.nowPlaying.title}</div>
-            <div className="text-sm text-[color:var(--muted-foreground)] mt-0.5">
-              {c.nowPlaying.startsAt} – {c.nowPlaying.endsAt}
-            </div>
-            {c.nowPlaying.description && (
-              <p className="text-sm text-[color:var(--secondary-foreground)] mt-3 line-clamp-3">
-                {c.nowPlaying.description}
-              </p>
+            <div className="mt-1 font-semibold">{next ? next.title : "Nothing scheduled"}</div>
+            {next && (
+              <div className="text-sm text-[color:var(--muted-foreground)] mt-0.5">
+                {formatSlotTime(next.time)}{next.endsAt ? ` – ${formatSlotTime(next.endsAt)}` : ""}
+              </div>
             )}
           </div>
           <DialogFooter className="gap-2 sm:gap-2">
@@ -288,8 +282,8 @@ export function ChannelCard({ c }: { c: Channel }) {
               onClick={confirmReminder}
               className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:brightness-110"
             >
-              {reminderActive ? <BellRing className="size-4" /> : <Bell className="size-4" />}
-              {reminderActive ? "Remove reminder" : "Set reminder"}
+              {reminderActive ? <BellRing className="size-4" /> : next ? <Bell className="size-4" /> : <CalendarClock className="size-4" />}
+              {!next ? "View schedule" : reminderActive ? "Remove reminder" : "Set reminder"}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -305,11 +299,14 @@ export function ChannelCard({ c }: { c: Channel }) {
             <SheetTitle className="flex items-center gap-2">
               <Calendar className="size-4" /> {c.name} · Schedule
             </SheetTitle>
-            <SheetDescription>Today's programming on {c.name}.</SheetDescription>
+            <SheetDescription>On air now and coming up on {c.name}.</SheetDescription>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto p-4">
             <ul className="space-y-1">
-              {c.schedule.map((s, i) => (
+              {upcoming.length === 0 && (
+                <li className="px-3 py-8 text-center text-sm text-[color:var(--muted-foreground)]">No upcoming programmes scheduled yet.</li>
+              )}
+              {upcoming.map((s, i) => (
                 <li
                   key={i}
                   className={`flex items-center justify-between gap-3 rounded-lg px-3 py-3 ${
@@ -318,7 +315,7 @@ export function ChannelCard({ c }: { c: Channel }) {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="text-[11px] text-[color:var(--muted-foreground)] uppercase tracking-wider">
-                      {s.time} · {s.kind}
+                      {s.live ? "On air now" : formatSlotTime(s.time)} · {s.kind}
                     </div>
                     <div className="text-sm font-medium truncate flex items-center gap-1.5 mt-0.5">
                       {s.live && (

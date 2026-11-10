@@ -100,4 +100,4 @@
 - [x] Channel page plays only one broadcast at a time (live TV or radio) with a Watch live TV / Listen to radio switcher
 - [x] Radio share button with unique QR share card
 
-- [ ] Make "Notify me" and "View schedule" on channels work
+- [x] Make "Notify me" and "View schedule" on channels work
