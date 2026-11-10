@@ -1,5 +1,10 @@
 # Lettflix Roadmap
 
+## Admin notifications
+- [ ] Add admin notification composer and history, audience targeting, in-app inbox and dismissible pop-ups based on Karaoke+.
+- [ ] Connect phone push delivery and add user opt-in controls.
+- [ ] Adapt viewer notifications for TV and verify admin-to-viewer delivery across screen sizes.
+
 ## Done
 - [x] Make Studio thumbnails prominent when adding on-demand content: image upload/URL, full-image preview, optional cover, upload-aware Save and linked-title artwork readback.
 - [x] Homepage, channels, guide, movies/series/documentaries/podcasts, radio
