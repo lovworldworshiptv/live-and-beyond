@@ -174,14 +174,14 @@ export function LandingPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f, i) => (
             <Reveal key={f.title} delay={i * 110} className="h-full">
-              <article className="group ecosystem-feature relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-surface/70">
-                <div className="relative aspect-video overflow-hidden">
-                  <img src={f.image} alt={f.imageTitle} loading="lazy" width={1088} height={608} className="ecosystem-feature-image size-full object-cover" />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/70 to-transparent px-4 pb-4 pt-10">
-                    <span className="flex items-center gap-2 text-sm font-semibold text-foreground"><f.icon aria-hidden className="size-4 shrink-0" />{f.imageTitle}</span>
+              <article className="group ecosystem-feature relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-surface/70 p-5">
+                <figure className="mb-5 w-32 max-w-full">
+                  <div className="aspect-video overflow-hidden rounded-md">
+                    <img src={f.image} alt={f.imageTitle} loading="lazy" width={1088} height={608} className="ecosystem-feature-image size-full object-cover" />
                   </div>
-                </div>
-                <div className="p-5">
+                  <figcaption className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-foreground"><f.icon aria-hidden className="size-3.5 shrink-0" />{f.imageTitle}</figcaption>
+                </figure>
+                <div>
                   <h3 className="text-base font-semibold">{f.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
                 </div>
