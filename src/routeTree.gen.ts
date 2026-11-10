@@ -43,6 +43,7 @@ import { Route as StudioPreviewRouteImport } from './routes/studio.preview'
 import { Route as ApiPublicRadioNowPlayingRouteImport } from './routes/api/public/radio-now-playing'
 import { Route as ChannelsChannelIdIndexRouteImport } from './routes/channels.$channelId.index'
 import { Route as ChannelsChannelIdLibraryRouteImport } from './routes/channels.$channelId.library'
+import { Route as OpenTypeIdRouteImport } from './routes/open.$type.$id'
 import { Route as ApiPublicKingschatCallbackRouteImport } from './routes/api/public/kingschat/callback'
 import { Route as ApiPublicKingschatLoginRouteImport } from './routes/api/public/kingschat/login'
 import { Route as ApiPublicKingschatPollRouteImport } from './routes/api/public/kingschat/poll'
@@ -221,6 +222,11 @@ const ChannelsChannelIdLibraryRoute =
     path: '/library',
     getParentRoute: () => ChannelsChannelIdRoute,
   } as any)
+const OpenTypeIdRoute = OpenTypeIdRouteImport.update({
+  id: '/open/$type/$id',
+  path: '/open/$type/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicKingschatCallbackRoute =
   ApiPublicKingschatCallbackRouteImport.update({
     id: '/api/public/kingschat/callback',
@@ -282,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/movies/': typeof MoviesIndexRoute
   '/api/public/radio-now-playing': typeof ApiPublicRadioNowPlayingRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
+  '/open/$type/$id': typeof OpenTypeIdRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
   '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
@@ -320,6 +327,7 @@ export interface FileRoutesByTo {
   '/movies': typeof MoviesIndexRoute
   '/api/public/radio-now-playing': typeof ApiPublicRadioNowPlayingRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
+  '/open/$type/$id': typeof OpenTypeIdRoute
   '/channels/$channelId': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
   '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
@@ -362,6 +370,7 @@ export interface FileRoutesById {
   '/movies/': typeof MoviesIndexRoute
   '/api/public/radio-now-playing': typeof ApiPublicRadioNowPlayingRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
+  '/open/$type/$id': typeof OpenTypeIdRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
   '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
@@ -405,6 +414,7 @@ export interface FileRouteTypes {
     | '/movies/'
     | '/api/public/radio-now-playing'
     | '/channels/$channelId/library'
+    | '/open/$type/$id'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
     | '/api/public/kingschat/login'
@@ -443,6 +453,7 @@ export interface FileRouteTypes {
     | '/movies'
     | '/api/public/radio-now-playing'
     | '/channels/$channelId/library'
+    | '/open/$type/$id'
     | '/channels/$channelId'
     | '/api/public/kingschat/callback'
     | '/api/public/kingschat/login'
@@ -484,6 +495,7 @@ export interface FileRouteTypes {
     | '/movies/'
     | '/api/public/radio-now-playing'
     | '/channels/$channelId/library'
+    | '/open/$type/$id'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
     | '/api/public/kingschat/login'
@@ -520,6 +532,7 @@ export interface RootRouteChildren {
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   KCodeRoute: typeof KCodeRoute
   ApiPublicRadioNowPlayingRoute: typeof ApiPublicRadioNowPlayingRoute
+  OpenTypeIdRoute: typeof OpenTypeIdRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
   ApiPublicKingschatLoginRoute: typeof ApiPublicKingschatLoginRoute
   ApiPublicKingschatPollRoute: typeof ApiPublicKingschatPollRoute
@@ -767,6 +780,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChannelsChannelIdLibraryRouteImport
       parentRoute: typeof ChannelsChannelIdRoute
     }
+    '/open/$type/$id': {
+      id: '/open/$type/$id'
+      path: '/open/$type/$id'
+      fullPath: '/open/$type/$id'
+      preLoaderRoute: typeof OpenTypeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/kingschat/callback': {
       id: '/api/public/kingschat/callback'
       path: '/api/public/kingschat/callback'
@@ -884,6 +904,7 @@ const rootRouteChildren: RootRouteChildren = {
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   KCodeRoute: KCodeRoute,
   ApiPublicRadioNowPlayingRoute: ApiPublicRadioNowPlayingRoute,
+  OpenTypeIdRoute: OpenTypeIdRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
   ApiPublicKingschatLoginRoute: ApiPublicKingschatLoginRoute,
   ApiPublicKingschatPollRoute: ApiPublicKingschatPollRoute,

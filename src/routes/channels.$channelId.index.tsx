@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { ChannelArtwork } from "@/components/channel-artwork";
 import { TitleCard } from "@/components/title-card";
 import { ShareMenu } from "@/components/share-menu";
+import { trackAudience } from "@/lib/audience";
 import { channels, type Channel, type Title } from "@/lib/catalog";
 import { fetchChannelLibrary } from "@/lib/channel-library";
 import { supabase } from "@/integrations/supabase/client";
@@ -82,6 +83,7 @@ function ChannelPage() {
   const [notFoundState, setNotFoundState] = useState(false);
   const { has: isFollowingLocal, toggle: toggleFollowLocal } = useFollowing();
   const [dbChannelId, setDbChannelId] = useState<string | null>(null);
+  useEffect(() => { if (dbChannelId) trackAudience({ kind: "visit", targetType: "channel", channelId: dbChannelId }); }, [dbChannelId]);
   const { following: followingDb, toggle: toggleFollowDb, notify: notifyDb, setNotify: setNotifyDb, count: followerCount, signedIn } = useChannelFollow(dbChannelId);
   const { settings, setSettings } = useSettings();
   const [theatre, setTheatre] = useState(false);
@@ -562,7 +564,7 @@ function ChannelPage() {
             </Button>
             </>}
             <div className="col-span-2 flex h-11 justify-end sm:col-span-1 sm:w-28">
-              <ShareMenu title={channel.name} path={`/channels/${channel.id}`} image={channel.banner || channel.logoImg} subtitle="Live on Lettflix" variant="chip" />
+              <ShareMenu title={channel.name} path={`/open/channel/${dbChannelId ?? channel.id}`} image={channel.banner || channel.logoImg} subtitle="Live on Lettflix" variant="chip" />
             </div>
           </div>
 

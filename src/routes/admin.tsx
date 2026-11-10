@@ -1,3 +1,5 @@
+import { AudienceCms } from "@/components/admin/audience-cms";
+import { BarChart3 as AudienceIcon } from "lucide-react";
 import { COUNTRIES } from "@/lib/countries";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -100,6 +102,7 @@ function AdminPage() {
             <TabsTrigger value="leads"><Building2 className="size-4" /> Leads</TabsTrigger>
             <TabsTrigger value="users"><UsersIcon className="size-4" /> Users</TabsTrigger>
             <TabsTrigger value="applications"><UserPlus className="size-4" /> Applications</TabsTrigger>
+            <TabsTrigger value="audience"><AudienceIcon className="size-4" /> Audience</TabsTrigger>
             <TabsTrigger value="notifications"><Bell className="size-4" /> Notifications</TabsTrigger>
             <TabsTrigger value="features"><ToggleRight className="size-4" /> Features</TabsTrigger>
             <TabsTrigger value="security"><KeyRound className="size-4" /> Security</TabsTrigger>
@@ -115,6 +118,7 @@ function AdminPage() {
           <TabsContent value="leads"><LeadsCms /></TabsContent>
           <TabsContent value="users"><UsersCms /></TabsContent>
           <TabsContent value="applications"><ApplicationsCms /></TabsContent>
+          <TabsContent value="audience"><AudienceCms /></TabsContent>
           <TabsContent value="notifications"><NotificationsCms /></TabsContent>
           <TabsContent value="features"><FeaturesCms /></TabsContent>
           <TabsContent value="security"><SecurityCms /></TabsContent>

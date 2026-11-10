@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { trackAudience } from "./audience";
 
 export type PlaybackService = "tv" | "radio" | "vod" | "podcast";
 export type PlaybackEventKind = "start" | "heartbeat" | "end";
@@ -21,6 +22,9 @@ export async function recordPlaybackEvent(input: {
   event?: PlaybackEventKind;
   seconds?: number;
 }) {
+  if ((input.event ?? "start") === "start") {
+    trackAudience({ kind: "stream", targetType: input.titleId ? "title" : "channel", channelId: input.channelId, titleId: input.titleId, service: input.service });
+  }
   try {
     const { data: auth } = await supabase.auth.getUser();
     await supabase.from("playback_events").insert({

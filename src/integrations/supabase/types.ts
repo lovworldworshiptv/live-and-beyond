@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      audience_events: {
+        Row: {
+          channel_id: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          creator_id: string | null
+          id: string
+          kind: string
+          platform: string | null
+          service: string | null
+          session_id: string | null
+          target_type: string
+          title_id: string | null
+        }
+        Insert: {
+          channel_id?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          creator_id?: string | null
+          id?: string
+          kind: string
+          platform?: string | null
+          service?: string | null
+          session_id?: string | null
+          target_type: string
+          title_id?: string | null
+        }
+        Update: {
+          channel_id?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          creator_id?: string | null
+          id?: string
+          kind?: string
+          platform?: string | null
+          service?: string | null
+          session_id?: string | null
+          target_type?: string
+          title_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audience_events_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string

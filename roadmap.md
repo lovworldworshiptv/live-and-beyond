@@ -101,3 +101,5 @@
 - [x] Radio share button with unique QR share card
 
 - [x] Make "Notify me" and "View schedule" on channels work
+
+- [ ] Android app: open shared /open/channel and /open/creator links in-app (handoff in docs/native-app-links.md for Claude Code)

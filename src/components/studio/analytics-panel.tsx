@@ -6,6 +6,9 @@ import {
 import { BarChart3, Clock, Loader2, Play, Users, RefreshCw } from "lucide-react";
 import { fetchChannelAnalytics, type AnalyticsSummary } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
+import { AudienceReach } from "@/components/audience-reach";
+import { ShareMenu } from "@/components/share-menu";
+import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
 export function AnalyticsPanel({ channelId }: { channelId: string }) {
@@ -121,6 +124,22 @@ export function AnalyticsPanel({ channelId }: { channelId: string }) {
           </div>
         </div>
       </div>
+      <AudienceReach channelId={channelId} days={range} title="Channel audience" />
+      <CreatorReach days={range} />
+    </div>
+  );
+}
+
+function CreatorReach({ days }: { days: number }) {
+  const { user } = useAuth();
+  if (!user) return null;
+  return (
+    <div className="space-y-4 border-t border-border pt-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">Your creator account across all your channels. Share your account link or QR card.</p>
+        <div className="w-40"><ShareMenu title="My Lettflix channels" path={`/open/creator/${user.id}`} subtitle="Creator on Lettflix" variant="chip" /></div>
+      </div>
+      <AudienceReach creatorId={user.id} days={days} title="Account visits" />
     </div>
   );
 }

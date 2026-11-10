@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { trackAudience } from "@/lib/audience";
 import { Play, Calendar, Volume2, VolumeX, Bell, BellRing, CalendarClock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -102,6 +103,7 @@ export function ChannelCard({ c }: { c: Channel }) {
         to="/channels/$channelId"
         params={{ channelId: c.id }}
         hash="watch"
+        onClick={() => trackAudience({ kind: "click", targetType: "channel", channelId: c.id, service: c.streamKind === "radio" ? "radio" : "tv" })}
         className="flex min-w-0 flex-1 flex-col rounded-xl overflow-hidden border border-border bg-elevated/50 hover:border-primary/40 transition"
       >
         <div className="relative aspect-video overflow-hidden">
@@ -185,6 +187,7 @@ export function ChannelCard({ c }: { c: Channel }) {
         to="/channels/$channelId"
         params={{ channelId: c.id }}
         hash="watch"
+        onClick={() => trackAudience({ kind: "click", targetType: "channel", channelId: c.id, service: c.streamKind === "radio" ? "radio" : "tv" })}
         className="mt-2 flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm transition hover:brightness-110"
         style={{
           boxShadow: "0 0 0 2px oklch(0.55 0.22 25 / 0.35), 0 0 18px oklch(0.55 0.22 25 / 0.35), 0 0 40px oklch(0.55 0.22 25 / 0.15)",
