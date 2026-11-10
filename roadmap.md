@@ -1,11 +1,11 @@
 # Lettflix Roadmap
 
 ## Playback exclusivity
-- [ ] On-demand videos must stop live TV and radio on multi-service channels (e.g. Lettflix Gospel), and vice versa, so only one broadcast plays at a time on web and TV.
+- [x] On-demand videos stop live TV and radio and vice versa — last action wins via a shared player registry (web); TV app parity still open.
 
 ## Admin notifications
-- [ ] Add admin notification composer and history, audience targeting, in-app inbox and dismissible pop-ups based on Karaoke+.
-- [ ] Connect phone push delivery and add user opt-in controls.
+- [x] Admin Notifications tab: composer (title, message, image, link, audience), campaign history, in-app inbox and dismissible pop-ups.
+- [ ] Phone push: Firebase connection card was cancelled — reconnect with "Include web push" to activate; opt-in controls already shipped in the bell menu and admin tab.
 - [ ] Adapt viewer notifications for TV and verify admin-to-viewer delivery across screen sizes.
 
 ## Done
