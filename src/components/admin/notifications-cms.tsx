@@ -80,7 +80,7 @@ export function NotificationsCms() {
         </div>
         <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
         <Textarea placeholder="Message" value={body} onChange={(e) => setBody(e.target.value)} rows={3} maxLength={500} />
-        <MediaPicker label="Notification image (optional)" value={imageUrl} onChange={setImageUrl} previewAspect="video" />
+        <MediaPicker label="Notification image (optional)" value={imageUrl} onChange={(url) => setImageUrl(url ?? "")} previewAspect="video" />
         <Input placeholder="Link (optional, e.g. /movies)" value={link} onChange={(e) => setLink(e.target.value)} />
         <div>
           <label className="mb-1 block text-sm text-[color:var(--muted-foreground)]">Audience</label>
