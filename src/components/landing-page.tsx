@@ -4,25 +4,37 @@ import { ChevronDown, Play, Tv, Radio, Download, Users, ArrowRight } from "lucid
 import logoIcon from "@/assets/lettflix-icon.png.asset.json";
 import heroBg from "@/assets/landing-hero.png.asset.json";
 import { Button } from "@/components/ui/button";
+import liveImage from "@/assets/ecosystem-live.jpg";
+import cinemaImage from "@/assets/ecosystem-cinema.jpg";
+import radioImage from "@/assets/ecosystem-radio.jpg";
+import personalImage from "@/assets/ecosystem-personal.jpg";
 
 const FEATURES = [
   {
     icon: Tv,
+    image: liveImage,
+    imageTitle: "Live TV",
     title: "Live channels, always on",
     body: "Broadcast-grade live TV from ministries, broadcasters and creators around the world — no cable box required.",
   },
   {
     icon: Play,
+    image: cinemaImage,
+    imageTitle: "On Demand",
     title: "Movies, series & documentaries",
     body: "Discover movies, series and documentaries alongside live channels in the Lettflix catalogue.",
   },
   {
     icon: Radio,
+    image: radioImage,
+    imageTitle: "Radio & Podcasts",
     title: "Radio & podcasts",
     body: "Listen to live radio and discover podcasts from broadcasters and creators.",
   },
   {
     icon: Users,
+    image: personalImage,
+    imageTitle: "Your Watchlist",
     title: "Make it your own",
     body: "Save titles to your watchlist and return to content you have started watching.",
   },
@@ -162,14 +174,18 @@ export function LandingPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f, i) => (
             <Reveal key={f.title} delay={i * 110} className="h-full">
-              <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-surface/70 p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/50 hover:bg-surface hover:shadow-[0_18px_40px_-18px_var(--primary)]">
-                <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-primary/20 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
-                <div className="relative grid size-11 place-items-center rounded-xl bg-primary/15 text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
-                  <f.icon className="size-5" />
+              <article className="group ecosystem-feature relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-surface/70">
+                <div className="relative aspect-video overflow-hidden">
+                  <img src={f.image} alt={f.imageTitle} loading="lazy" width={1088} height={608} className="ecosystem-feature-image size-full object-cover" />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/70 to-transparent px-4 pb-4 pt-10">
+                    <span className="flex items-center gap-2 text-sm font-semibold text-foreground"><f.icon aria-hidden className="size-4 shrink-0" />{f.imageTitle}</span>
+                  </div>
                 </div>
-                <h3 className="relative mt-4 text-base font-semibold transition-colors group-hover:text-primary">{f.title}</h3>
-                <p className="relative mt-2 text-sm leading-relaxed text-[color:var(--muted-foreground)]">{f.body}</p>
-              </div>
+                <div className="p-5">
+                  <h3 className="text-base font-semibold">{f.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
+                </div>
+              </article>
             </Reveal>
           ))}
         </div>
