@@ -68,7 +68,7 @@
     var generation = loadGeneration;
     var native = video.canPlayType("application/vnd.apple.mpegurl");
     if (isHls(url) && window.Hls && Hls.isSupported() && !(native === "probably")) {
-      hls = new Hls({ startPosition: start > 0 ? start : -1, capLevelToPlayerSize: true, maxBufferLength: 30 });
+      hls = new Hls({ startPosition: start > 0 ? start : -1, capLevelToPlayerSize: true, maxBufferLength: 30, manifestLoadingMaxRetry: 6, levelLoadingMaxRetry: 6, fragLoadingMaxRetry: 6 });
       hls.on(Hls.Events.MANIFEST_PARSED, function () { if (generation === loadGeneration) startPlayback(); });
       hls.on(Hls.Events.ERROR, function (e, d) {
         if (!d.fatal) return;
@@ -145,11 +145,17 @@
   }
 
   function onMedia(e) {
-    if (e.type === "waiting") root.classList.add("buffering");
+    if (e.type === "waiting") {
+      root.classList.add("buffering");
+      // A live stream stuck buffering for 20 s rejoins the live edge (some TV decoders never recover).
+      clearTimeout(stallTimer);
+      if (src && src.isLive) stallTimer = setTimeout(function () { if (root.classList.contains("buffering")) autoRecover(); }, 20000);
+    }
     if (e.type === "playing" || e.type === "canplay") root.classList.remove("buffering");
     if (e.type === "playing" || e.type === "pause") { paintPlay(); root.classList.toggle("paused", video.paused); }
     if (e.type === "playing" && src && src.kind === "radio") startReactive();
     if (e.type === "playing" && src && !started) { started = true; Playback.record(src, "start"); }
+    if (e.type === "playing") { autoRetries = 0; clearTimeout(stallTimer); }
     if (e.type === "error" && !hls) fail("This stream can't play right now.");
     if (e.type === "ended") {
       if (src && src.playout) return reloadChannel();           // next programme
@@ -235,7 +241,29 @@
   }
   function seekTo(t) { if (!canSeek()) return; seekPreview = null; try { if (youtube) youtube.seekTo(t, true); else video.currentTime = t; } catch (e) { /* ignore */ } paintTime(); }
 
+  // Seamless playback: transient failures retry quietly with backoff before any error shows.
+  var autoRetries = 0, autoTimer = null, stallTimer = null;
+  function autoRecover() {
+    if (!src || provider || autoRetries >= 5 || navigator.onLine === false) return false;
+    var wait = Math.min(15000, 1000 * Math.pow(2, autoRetries++));
+    var current = src, at = src.kind === "title" ? position() : 0;
+    root.classList.add("buffering"); root.classList.remove("failed");
+    clearTimeout(autoTimer);
+    autoTimer = setTimeout(function () {
+      if (src !== current) return;
+      if (current.playout) { reloadChannel(); return; }
+      var again = Object.assign({}, current);
+      if (current.kind === "title" && at > 0) again.start = at; // resume where it stopped
+      var keep = autoRetries; load(again); autoRetries = keep;   // live joins the live edge again
+    }, wait);
+    return true;
+  }
+  window.addEventListener("online", function () {
+    if (src && root && root.classList.contains("failed")) { autoRetries = 0; load(src); }
+  });
+
   function fail(msg) {
+    if (autoRecover()) return;
     root.classList.add("failed"); root.classList.remove("buffering");
     ui.error.innerHTML = "";
     U.append(ui.error, [h("h2", { text: msg }), UI.button("Retry", "replay", function () { if (src) load(src); }, "primary"), h("p", { text: "Press Back to return." })]);
@@ -307,7 +335,7 @@
   }
 
   function close() {
-    loadGeneration++; clearTimeout(radioTimer); stopReactive();
+    loadGeneration++; clearTimeout(radioTimer); clearTimeout(autoTimer); clearTimeout(stallTimer); autoRetries = 0; stopReactive();
     save();
     detachProvider();
     if (src && started) Playback.record(src, "stop", seconds % 30);

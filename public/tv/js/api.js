@@ -274,6 +274,23 @@
       var now = Date.now();
       return Catalog.data.schedule.filter(function (s) { return s.channel_id === channelId && Date.parse(s.ends_at) > now; }).slice(0, 12);
     },
+    /**
+     * CMS fingerprint (row count + latest updated_at per table). Cheap enough to poll every minute,
+     * so admin/CMS edits reach the TV without waiting for the 5-minute catalogue refresh.
+     */
+    fingerprint: function () {
+      var tables = ["cms_channels", "cms_titles", "cms_schedule", "cms_settings", "radio_settings"];
+      return Promise.all(tables.map(function (t) {
+        var token = Auth.token() || C.SUPABASE_KEY;
+        return timeoutFetch(C.SUPABASE_URL + "/rest/v1/" + t + "?select=updated_at&order=updated_at.desc&limit=1", {
+          headers: { apikey: C.SUPABASE_KEY, Authorization: "Bearer " + token, Accept: "application/json", Prefer: "count=exact" }
+        }).then(function (r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          var range = r.headers.get("content-range") || "";
+          return r.json().then(function (rows) { return t + ":" + range.split("/")[1] + ":" + (rows[0] && rows[0].updated_at); });
+        });
+      })).then(function (parts) { return parts.join("|"); });
+    },
     /** Admin feature switches (web Admin › Features); missing keys mean on. */
     featureOn: function (key) { return ((Catalog.data && Catalog.data.features) || {})[key] !== false; },
     channelById: function (id) {

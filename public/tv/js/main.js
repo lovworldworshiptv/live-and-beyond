@@ -196,7 +196,20 @@
       UI.dialog(n.title, n.body || null, [{ label: "Dismiss", primary: true, run: function () { Api.Announcements.markRead(n.id).catch(function () {}); } }]);
     }, function () {});
   }
-  setInterval(checkAnnouncement, 2 * 60 * 1000);
+  setInterval(checkAnnouncement, 60 * 1000);
+  // CMS/admin edits reach the TV within a minute: compare a tiny fingerprint, refresh the catalogue
+  // when it moves. The current screen is left as is (no focus jump); the next screen shows the update,
+  // and the side menu applies feature switches straight away.
+  var lastPrint = null;
+  function checkCms() {
+    if (document.hidden || !signedIn() || Player.isOpen()) return;
+    Catalog.fingerprint().then(function (fp) {
+      var changed = lastPrint !== null && fp !== lastPrint;
+      lastPrint = fp;
+      if (changed) return Catalog.refresh().then(function () { if (railEl) railEl.applyFeatures(); });
+    }).catch(function () {});
+  }
+  setInterval(checkCms, 60 * 1000);
   setInterval(function () { if (Auth.signedIn()) Auth.keepFresh(); }, 5 * 60 * 1000);
   // Returning with the browser Back key may restore a frozen page: reload it so it runs again.
   window.addEventListener("pageshow", function (e) { if (e.persisted) window.location.reload(); });
