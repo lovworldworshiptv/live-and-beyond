@@ -14,6 +14,7 @@ const KEYS = {
 export type ProgressEntry = {
   titleId: string;
   positionPct: number; // 0-100
+  positionSec?: number; // exact resume point
   updatedAt: number;
 };
 
@@ -133,10 +134,10 @@ export function useProgress() {
   const [items, setItems] = useStore<ProgressEntry[]>(KEYS.progress, []);
 
   const setProgress = useCallback(
-    (titleId: string, positionPct: number) => {
+    (titleId: string, positionPct: number, positionSec?: number) => {
       setItems((prev) => {
         const rest = prev.filter((i) => i.titleId !== titleId);
-        return [{ titleId, positionPct, updatedAt: Date.now() }, ...rest].slice(0, 20);
+        return [{ titleId, positionPct, positionSec, updatedAt: Date.now() }, ...rest].slice(0, 20);
       });
     },
     [setItems]

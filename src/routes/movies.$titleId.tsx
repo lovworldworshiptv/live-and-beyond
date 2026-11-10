@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus, Check, ThumbsUp, Download, ChevronRight, Star, Clock, Calendar } from "lucide-react";
+import { Plus, Check, ThumbsUp, Download, ChevronRight, Star, Clock, Calendar, Tv, Radio } from "lucide-react";
+import { useRadio } from "@/components/radio-player";
+import { fetchRadioSettings, type RadioFormat } from "@/lib/radio";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { StreamPlayer } from "@/components/stream-player";
@@ -66,6 +68,7 @@ function TitleDetail() {
   const [analyticsIds, setAnalyticsIds] = useState<{ titleId: string; channelId: string | null } | null>(null);
   const [notFoundState, setNotFoundState] = useState(false);
   const [rated, setRated] = useState(false);
+  const [playerKey, setPlayerKey] = useState(0);
   const { has: hasInList, toggle: toggleList } = useMyList();
   const { titles: allTitles } = useCmsTitles();
 
@@ -127,7 +130,7 @@ function TitleDetail() {
 
           <div id="title-player" className="mt-6 w-full min-w-0 scroll-mt-24">
             <StreamPlayer
-              key={title.id}
+              key={`${title.id}-${playerKey}`}
               titleId={title.id}
               analyticsTitleId={analyticsIds?.titleId}
               analyticsChannelId={analyticsIds?.channelId}
@@ -139,6 +142,7 @@ function TitleDetail() {
               posterOverlayLabel={`Play — ${title.title}`}
               ariaPlayLabel={audioKind ? "Listen" : "Play"}
             />
+            {analyticsIds?.channelId && <BackToLive channelId={analyticsIds.channelId} onRadio={() => setPlayerKey((k) => k + 1)} />}
             {!title.streamUrl && (
               <p className="mt-2 text-xs text-[color:var(--muted-foreground)]">
                 This title is not available to play yet.
@@ -257,6 +261,60 @@ function TitleDetail() {
       </section>
 
       <SiteFooter />
+    </div>
+  );
+}
+
+type LiveChannel = { id: string; slug: string; name: string; tagline: string | null; logo_url: string | null; banner_url: string | null; category: string | null; country: string | null; language: string | null; stream_url: string | null; is_live: boolean | null };
+
+/** Quiet return path from on-demand to the title's live TV channel and live radio. */
+function BackToLive({ channelId, onRadio }: { channelId: string; onRadio: () => void }) {
+  const radioPlayer = useRadio();
+  const [channel, setChannel] = useState<LiveChannel | null>(null);
+  const [radio, setRadio] = useState<Awaited<ReturnType<typeof fetchRadioSettings>>>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void supabase.from("cms_channels").select("id,slug,name,tagline,logo_url,banner_url,category,country,language,stream_url,is_live")
+      .eq("id", channelId).eq("is_published", true).is("deleted_at", null).maybeSingle()
+      .then(({ data }) => { if (!cancelled) setChannel(data as LiveChannel | null); });
+    fetchRadioSettings(channelId).then((r) => { if (!cancelled) setRadio(r?.is_enabled && r.stream_url ? r : null); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [channelId]);
+  if (!channel) return null;
+  const hasTv = !!channel.stream_url;
+  if (!hasTv && !radio) return null;
+  const listen = () => {
+    if (!radio) return;
+    onRadio();
+    radioPlayer.play({
+      channelId: channel.id, slug: channel.slug, name: channel.name, tagline: channel.tagline,
+      logoUrl: radio.artwork_url || channel.logo_url, bannerUrl: channel.banner_url,
+      category: channel.category, country: channel.country, language: channel.language,
+      streamUrl: radio.stream_url!, format: (radio.format ?? "mp3") as RadioFormat, bitrate: radio.bitrate_kbps ?? 128,
+      nowPlayingTitle: radio.now_playing_title, nowPlayingArtist: radio.now_playing_artist,
+      nowPlayingArtwork: radio.now_playing_artwork_url, stationMessage: radio.station_message,
+    });
+  };
+  const radioOn = radioPlayer.station?.channelId === channel.id && radioPlayer.playing;
+  return (
+    <div className="mt-3 flex min-w-0 flex-wrap items-center gap-2 rounded-xl border border-border bg-surface/70 px-3 py-2 backdrop-blur">
+      <span className="flex min-w-0 flex-1 items-center gap-2 text-xs text-muted-foreground">
+        {channel.logo_url && <img src={channel.logo_url} alt="" className="size-6 shrink-0 rounded object-contain bg-elevated" />}
+        <span className="truncate">Back to live on <span className="font-semibold text-foreground">{channel.name}</span></span>
+      </span>
+      {hasTv && (
+        <Button asChild size="sm" variant="secondary" className="h-9 gap-1.5">
+          <Link to="/channels/$channelId" params={{ channelId: channel.slug }}>
+            <span className={`size-1.5 rounded-full bg-primary ${channel.is_live ? "animate-pulse" : ""}`} aria-hidden />
+            <Tv className="size-4" /> Live TV
+          </Link>
+        </Button>
+      )}
+      {radio && (
+        <Button size="sm" variant="secondary" className="h-9 gap-1.5" onClick={listen} aria-pressed={radioOn}>
+          <Radio className="size-4" /> {radioOn ? "On air" : "Live radio"}
+        </Button>
+      )}
     </div>
   );
 }

@@ -39,7 +39,20 @@ export function StreamPlayer({
   posterOverlayLabel,
   ariaPlayLabel = "Play",
 }: Props) {
-  const { setProgress } = useProgress();
+  const { items: progressItems, setProgress } = useProgress();
+  // Exact resume point captured once per title; finished titles restart from the beginning.
+  const resume = useRef<{ sec?: number; pct?: number } | null>(null);
+  const captureResume = () => {
+    const entry = titleId ? progressItems.find((i) => i.titleId === titleId) : undefined;
+    resume.current = entry && entry.positionPct > 0 && entry.positionPct < 95 ? { sec: entry.positionSec, pct: entry.positionPct } : {};
+  };
+  const resumeMedia = () => {
+    const media = mediaRef.current; const r = resume.current;
+    if (!media || !r || (!r.sec && !r.pct)) return;
+    const target = r.sec ?? (Number.isFinite(media.duration) ? (r.pct! / 100) * media.duration : 0);
+    if (target > 0) media.currentTime = target;
+    resume.current = {};
+  };
   const source = resolveVideoSource(src);
   const lastProgress = useRef(0);
   const saveProgress = () => {
@@ -47,7 +60,7 @@ export function StreamPlayer({
     if (!titleId || !media || !Number.isFinite(media.duration) || media.duration <= 0 || media.currentTime <= 0) return;
     if (Date.now() - lastProgress.current < 5000 && !media.paused && !media.ended) return;
     lastProgress.current = Date.now();
-    setProgress(titleId, Math.min(100, media.currentTime / media.duration * 100));
+    setProgress(titleId, Math.min(100, media.currentTime / media.duration * 100), media.currentTime);
   };
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(autoPlay);
@@ -84,6 +97,7 @@ export function StreamPlayer({
     }
     // Last action wins: starting this video stops live TV and radio.
     pauseAllMedia();
+    captureResume();
     setError(null);
     setMuted(false);
     setPlaying(true);
@@ -118,8 +132,8 @@ export function StreamPlayer({
       {!playing && <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />}
 
       {playing && source.type === "youtube" && source.id && (
-        <YoutubePlayer id={source.id} start={source.start} onPlaying={() => trackStart.current?.()} onError={failPlayback}
-          onProgress={(time, duration) => { if (titleId && Number.isFinite(duration) && duration > 0 && time > 0) setProgress(titleId, Math.min(100, time / duration * 100)); }} />
+        <YoutubePlayer id={source.id} start={resume.current?.sec ? Math.floor(resume.current.sec) : source.start} resumePct={resume.current?.pct} onPlaying={() => trackStart.current?.()} onError={failPlayback}
+          onProgress={(time, duration) => { if (titleId && Number.isFinite(duration) && duration > 0 && time > 0) setProgress(titleId, Math.min(100, time / duration * 100), time); }} />
       )}
       {playing && source.type === "embed" && (
         <iframe src={source.url} title="Cloud video player" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" className="absolute inset-0 size-full border-0" />
@@ -132,6 +146,7 @@ export function StreamPlayer({
             controls
             autoPlay
             onPlaying={() => { if (mediaRef.current) pauseOtherMedia(mediaRef.current); trackStart.current?.(); }}
+            onLoadedMetadata={resumeMedia}
             onTimeUpdate={saveProgress}
             onPause={saveProgress}
             onEnded={saveProgress}
@@ -148,7 +163,7 @@ export function StreamPlayer({
         </>
       )}
       {playing && kind === "audio" && source.type === "media" && (
-        <audio ref={(el) => { mediaRef.current = el; }} autoPlay controls onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)} onPlaying={() => trackStart.current?.()} onTimeUpdate={saveProgress} onPause={saveProgress} onEnded={saveProgress} onError={() => failPlayback("Audio unavailable. Tap play to retry.")} className="absolute bottom-3 inset-x-3 z-10 w-[calc(100%-1.5rem)]" />
+        <audio ref={(el) => { mediaRef.current = el; }} autoPlay controls onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)} onPlaying={() => trackStart.current?.()} onLoadedMetadata={resumeMedia} onTimeUpdate={saveProgress} onPause={saveProgress} onEnded={saveProgress} onError={() => failPlayback("Audio unavailable. Tap play to retry.")} className="absolute bottom-3 inset-x-3 z-10 w-[calc(100%-1.5rem)]" />
       )}
 
       {!playing && (
