@@ -19,6 +19,7 @@ import { ContentProtection } from "@/components/content-protection";
 import { AdaptiveControls } from "@/components/adaptive-controls";
 import { RouteProgress } from "@/components/brand-loader";
 import { NotificationPopup } from "@/components/notification-popup";
+import { FeatureGate } from "@/components/feature-gate";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -142,7 +143,7 @@ function RootComponent() {
         <RadioPlayerProvider>
           <RouteProgress active={navigating} />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
+          <FeatureGate><Outlet /></FeatureGate>
           <CreatorApprovalWatcher />
           <NetworkWatcher />
           <ContentProtection />

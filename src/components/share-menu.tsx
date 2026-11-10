@@ -1,3 +1,4 @@
+import { useFeature } from "@/lib/feature-flags";
 import { useEffect, useState } from "react";
 import {
   Share2, Link as LinkIcon, Twitter, Facebook, MessageCircle, Send, Linkedin, Mail,
@@ -12,7 +13,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { createShareCard } from "@/lib/share-card";
 
-export function ShareMenu({
+export function ShareMenu(props: Parameters<typeof ShareMenuInner>[0]) {
+  return useFeature("share") ? <ShareMenuInner {...props} /> : null;
+}
+
+function ShareMenuInner({
   title,
   path,
   image,

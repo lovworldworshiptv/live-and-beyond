@@ -17,6 +17,7 @@ import { QualityMenu } from "@/components/quality-menu";
 import { usePlayerFullscreen } from "@/components/player-fullscreen";
 import { protectedChannelSrc } from "@/lib/stream-src";
 import { useFollowing, useReminders, useSettings } from "@/lib/personal";
+import { useFeature } from "@/lib/feature-flags";
 import { useChannelFollow, formatFollowers } from "@/lib/follows";
 import { recordPlaybackEvent } from "@/lib/analytics";
 import { pauseOtherMedia, registerMediaElement } from "@/lib/media-playback";
@@ -229,6 +230,7 @@ function ChannelPage() {
     return () => clearTimeout(t);
   }, [playout]);
 
+  const followOn = useFeature("follow");
   const isFollowing = dbChannelId ? followingDb : isFollowingLocal(channel?.id ?? "");
 
   const streamSrc =
@@ -511,6 +513,7 @@ function ChannelPage() {
             >
               <LibraryBig className="size-4" /> Browse Library
             </Link>
+            {followOn && <>
             <Button variant="outline"
               onClick={async () => {
                 const wasFollowing = isFollowing;
@@ -557,6 +560,7 @@ function ChannelPage() {
               {notifyOn ? <BellRing className="size-4" /> : <Bell className="size-4" />}
               {notifyOn ? "Notifying" : "Notify Me"}
             </Button>
+            </>}
             <div className="col-span-2 flex h-11 justify-end sm:col-span-1 sm:w-28">
               <ShareMenu title={channel.name} path={`/channels/${channel.id}`} image={channel.banner || channel.logoImg} subtitle="Live on Lettflix" variant="chip" />
             </div>

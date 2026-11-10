@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/lettflix-logo.png.asset.json";
 import { useCmsSetting } from "@/lib/cms-catalog";
+import { useFeatureFlags, isPathEnabled } from "@/lib/feature-flags";
 import { defaultFooter, type FooterConfig } from "@/lib/homepage-defaults";
 import { resolveFooterHref } from "@/lib/navigation";
 
@@ -14,9 +15,10 @@ const LEGAL_LINKS = [
 ] as const;
 
 export function SiteFooter() {
+  const { flags } = useFeatureFlags();
   const { value: footer } = useCmsSetting<FooterConfig>("footer", defaultFooter);
   const columns = (footer.columns ?? [])
-    .map((col) => ({ ...col, items: (col.items ?? []).filter((i) => isRealHref(i.href)) }))
+    .map((col) => ({ ...col, items: (col.items ?? []).filter((i) => isRealHref(i.href) && isPathEnabled(flags, resolveFooterHref(i.href, i.label))) }))
     .filter((col) => col.items.length > 0);
 
   return (

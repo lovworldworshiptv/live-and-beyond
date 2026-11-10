@@ -1,3 +1,4 @@
+import { useFeature } from "@/lib/feature-flags";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -17,6 +18,10 @@ type Announcement = {
 
 /** Shows the latest unread admin announcement as an in-app pop-up, once per message. */
 export function NotificationPopup() {
+  return useFeature("popups") ? <NotificationPopupInner /> : null;
+}
+
+function NotificationPopupInner() {
   const { user } = useAuth();
   const [current, setCurrent] = useState<Announcement | null>(null);
 

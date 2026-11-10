@@ -21,11 +21,15 @@ import { SearchDialog } from "@/components/search-dialog";
 import { NotificationBell } from "@/components/notification-bell";
 import { UserAvatar } from "@/components/user-avatar";
 import { useAccountProfile } from "@/lib/account-profile";
+import { useFeatureFlags, isPathEnabled } from "@/lib/feature-flags";
 
 
 export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const { value: nav } = useCmsSetting<NavConfig>("nav", defaultNav);
-  const navItems = nav.items;
+  const { flags } = useFeatureFlags();
+  const navItems = nav.items
+    .filter((i) => isPathEnabled(flags, i.to))
+    .map((i) => ({ ...i, children: i.children?.filter((c) => isPathEnabled(flags, c.to)) }));
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -190,14 +194,16 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
                 <DropdownMenuItem asChild>
                   <Link to="/profiles">Switch profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/games">Games</Link>
-                </DropdownMenuItem>
+                {isPathEnabled(flags, "/games") && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/games">Games</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Link to="/account">Account & Settings</Link>
                 </DropdownMenuItem>
                 {(isCreator || isAdmin) && <DropdownMenuSeparator />}
-                {isCreator && (
+                {isCreator && (isAdmin || isPathEnabled(flags, "/studio")) && (
                   <DropdownMenuItem asChild>
                     <Link to="/studio">Creator Studio</Link>
                   </DropdownMenuItem>

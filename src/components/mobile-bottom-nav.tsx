@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { bottomNavIcon } from "@/lib/bottom-nav-icons";
 import { useCmsSetting } from "@/lib/cms-catalog";
+import { useFeatureFlags, isPathEnabled } from "@/lib/feature-flags";
 import { defaultBottomNav, type BottomNavConfig } from "@/lib/homepage-defaults";
 
 // Locked bar height (content area, excluding safe-area inset).
@@ -10,7 +11,8 @@ const INDICATOR_WIDTH = 28; // px
 
 export function MobileBottomNav() {
   const { value: config } = useCmsSetting<BottomNavConfig>("bottomNav", defaultBottomNav);
-  const items = (config?.items?.length ? config.items : defaultBottomNav.items).slice(0, 5);
+  const { flags } = useFeatureFlags();
+  const items = (config?.items?.length ? config.items : defaultBottomNav.items).filter((i) => isPathEnabled(flags, i.to)).slice(0, 5);
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const matches = (to: string) =>

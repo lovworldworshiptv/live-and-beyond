@@ -7,7 +7,8 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MediaPicker } from "@/components/media-picker";
-import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X, Home, Bell } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X, Home, Bell, ToggleRight } from "lucide-react";
+import { FeaturesCms } from "@/components/admin/features-cms";
 import { NotificationsCms } from "@/components/admin/notifications-cms";
 import { toast } from "sonner";
 import { defaultNav, defaultHero, defaultFooter, defaultBottomNav } from "@/lib/homepage-defaults";
@@ -100,6 +101,7 @@ function AdminPage() {
             <TabsTrigger value="users"><UsersIcon className="size-4" /> Users</TabsTrigger>
             <TabsTrigger value="applications"><UserPlus className="size-4" /> Applications</TabsTrigger>
             <TabsTrigger value="notifications"><Bell className="size-4" /> Notifications</TabsTrigger>
+            <TabsTrigger value="features"><ToggleRight className="size-4" /> Features</TabsTrigger>
             <TabsTrigger value="security"><KeyRound className="size-4" /> Security</TabsTrigger>
           </TabsList>
           <TabsContent value="overview"><OverviewCms /></TabsContent>
@@ -114,6 +116,7 @@ function AdminPage() {
           <TabsContent value="users"><UsersCms /></TabsContent>
           <TabsContent value="applications"><ApplicationsCms /></TabsContent>
           <TabsContent value="notifications"><NotificationsCms /></TabsContent>
+          <TabsContent value="features"><FeaturesCms /></TabsContent>
           <TabsContent value="security"><SecurityCms /></TabsContent>
         </Tabs>
 

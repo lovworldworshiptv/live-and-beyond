@@ -1,6 +1,7 @@
 import { BrandLoader } from "@/components/brand-loader";
 import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useFeature } from "@/lib/feature-flags";
 import { Plus, Check, ThumbsUp, Download, ChevronRight, Star, Clock, Calendar, Tv, Radio } from "lucide-react";
 import { useRadio } from "@/components/radio-player";
 import { fetchRadioSettings, type RadioFormat } from "@/lib/radio";
@@ -69,6 +70,7 @@ function TitleDetail() {
   const [analyticsIds, setAnalyticsIds] = useState<{ titleId: string; channelId: string | null } | null>(null);
   const [notFoundState, setNotFoundState] = useState(false);
   const [rated, setRated] = useState(false);
+  const downloadsOn = useFeature("downloads");
   const [playerKey, setPlayerKey] = useState(0);
   const { has: hasInList, toggle: toggleList } = useMyList();
   const { titles: allTitles } = useCmsTitles();
@@ -196,12 +198,12 @@ function TitleDetail() {
             >
               <ThumbsUp className={`size-4 ${rated ? "fill-current" : ""}`} /> {rated ? "Rated" : "Rate"}
             </Button>
-            <Button variant="ghost"
+            {downloadsOn && <Button variant="ghost"
               onClick={() => toast("Download unavailable", { description: "Offline downloads are not currently available." })}
               className="inline-flex items-center gap-2 px-5 h-12 rounded-md bg-elevated border border-border hover:bg-elevated/70 transition font-medium"
             >
               <Download className="size-4" /> Download
-            </Button>
+            </Button>}
             <div className="h-12 w-32">
               <ShareMenu title={title.title} path={`/movies/${title.id}`} image={title.hero || title.cover} variant="chip" />
             </div>
