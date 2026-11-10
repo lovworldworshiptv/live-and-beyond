@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand-loader";
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Radio as RadioIcon, Save, Music2 } from "lucide-react";
 import { toast } from "sonner";
@@ -75,7 +76,7 @@ export function RadioPanel({ channelId }: { channelId: string }) {
   }
 
   if (loading) {
-    return <div className="py-20 grid place-items-center"><Loader2 className="size-5 animate-spin text-primary" /></div>;
+    return <BrandLoader variant="section" label="Loading radio" />;
   }
 
   return (

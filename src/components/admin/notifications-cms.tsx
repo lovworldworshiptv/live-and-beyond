@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand-loader";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -113,7 +114,7 @@ export function NotificationsCms() {
       <section className="rounded-xl border border-border bg-card p-5">
         <h2 className="text-lg font-semibold mb-4">History</h2>
         {isLoading ? (
-          <div className="py-10 grid place-items-center"><Loader2 className="size-5 animate-spin text-[color:var(--muted-foreground)]" /></div>
+          <BrandLoader variant="section" label="Loading history" />
         ) : !history?.length ? (
           <p className="py-10 text-center text-sm text-[color:var(--muted-foreground)]">No notifications sent yet.</p>
         ) : (

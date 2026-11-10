@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand-loader";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -423,9 +424,7 @@ export function BroadcastPanel({
           </div>
 
           {loading ? (
-            <div className="mt-6 flex items-center gap-2 text-sm text-[color:var(--muted-foreground)]">
-              <Loader2 className="size-4 animate-spin" /> Loading broadcast setup…
-            </div>
+            <BrandLoader variant="section" label="Loading broadcast setup" />
           ) : input ? (
             <div className="mt-6 space-y-4">
               <div className="flex items-center gap-2 text-xs">

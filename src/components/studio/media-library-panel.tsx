@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand-loader";
 import { useCallback, useEffect, useState } from "react";
 import { Film, Music, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
@@ -381,9 +382,7 @@ export function MediaLibraryPanel({ channelId }: { channelId: string }) {
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-sm text-[color:var(--muted-foreground)]">
-          <Loader2 className="size-4 animate-spin" /> Loading library…
-        </div>
+        <BrandLoader variant="section" label="Loading library" />
       ) : assets.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-10 text-center">
           <Film className="size-8 mx-auto text-[color:var(--muted-foreground)]" />

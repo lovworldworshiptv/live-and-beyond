@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand-loader";
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Trash2, UserPlus, Users } from "lucide-react";
 import { toast } from "sonner";
@@ -127,7 +128,7 @@ export function TeamPanel({ channelId }: { channelId: string }) {
       </section>
 
       <section className="rounded-2xl border border-border bg-elevated/40 divide-y divide-border">
-        {loading && <div className="p-8 grid place-items-center"><Loader2 className="size-5 animate-spin text-primary" /></div>}
+        {loading && <BrandLoader variant="section" label="Loading team" />}
         {!loading && !members.length && (
           <p className="p-6 text-sm text-[color:var(--muted-foreground)]">
             No team members yet — you're running this channel solo.

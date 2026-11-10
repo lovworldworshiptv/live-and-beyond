@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand-loader";
 import { useCallback, useEffect, useState } from "react";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
@@ -35,7 +36,7 @@ export function AnalyticsPanel({ channelId }: { channelId: string }) {
 
   if (error) return <div role="alert" className="py-8 border-y border-border"><p className="text-sm text-muted-foreground">Analytics could not be loaded. No estimated metrics are shown.</p><Button variant="outline" className="mt-3 h-11" onClick={() => void load()}><RefreshCw />Try again</Button></div>;
   if (loading || !data) {
-    return <div className="py-20 grid place-items-center"><Loader2 className="size-5 animate-spin text-primary" /></div>;
+    return <BrandLoader variant="section" label="Loading analytics" />;
   }
 
   const kpis = [

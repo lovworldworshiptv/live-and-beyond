@@ -256,7 +256,7 @@ function ChannelsCms() {
     setEditing({ kind: "tv", is_published: true, is_live: false, popularity: 0, is_trending: false, display_order: 0 });
   }
 
-  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  if (loading) return <BrandLoader variant="section" label="Loading" />;
 
   return (
     <div className="space-y-6">
@@ -524,7 +524,7 @@ function TitlesCms() {
   const [editing, setEditing] = useState<Partial<Title> | null>(null);
   const openNew = () => setEditing({ kind: "movie", is_published: true, display_order: 0 });
 
-  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  if (loading) return <BrandLoader variant="section" label="Loading" />;
 
   return (
     <div className="space-y-6">
@@ -672,7 +672,7 @@ function CollectionsCms() {
   const [editing, setEditing] = useState<Partial<Collection> | null>(null);
   const openNew = () => setEditing({ is_published: true, is_featured: false });
 
-  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  if (loading) return <BrandLoader variant="section" label="Loading" />;
 
   return (
     <div className="space-y-6">
@@ -786,7 +786,7 @@ function UsersCms() {
     [rows, filter]
   );
 
-  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  if (loading) return <BrandLoader variant="section" label="Loading" />;
 
   return (
     <div className="space-y-6">
@@ -886,7 +886,7 @@ function OverviewCms() {
     })();
   }, []);
 
-  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  if (loading) return <BrandLoader variant="section" label="Loading" />;
   return (
     <div className="space-y-6">
       <div>
@@ -940,7 +940,7 @@ function ScheduleCms() {
     [rows, channelFilter]
   );
 
-  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  if (loading) return <BrandLoader variant="section" label="Loading" />;
 
   return (
     <div className="space-y-6">
@@ -1065,7 +1065,7 @@ function EventsCms() {
 
   const openNew = () => setEditing({ is_published: true });
 
-  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  if (loading) return <BrandLoader variant="section" label="Loading" />;
 
   return (
     <div className="space-y-6">
@@ -1242,7 +1242,7 @@ function SponsorsCms() {
     is_active: true,
   });
 
-  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  if (loading) return <BrandLoader variant="section" label="Loading" />;
 
   return (
     <div className="space-y-6">
@@ -1451,7 +1451,7 @@ function LeadsCms() {
     refresh();
   }
 
-  if (loading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  if (loading) return <BrandLoader variant="section" label="Loading" />;
 
   return (
     <div className="space-y-6">
@@ -1531,7 +1531,7 @@ function SecurityCms() {
     })();
   }, []);
 
-  if (loading) return <div className="py-12 text-center"><Loader2 className="size-5 animate-spin inline text-primary" /></div>;
+  if (loading) return <BrandLoader variant="section" label="Loading" />;
 
   return (
     <div className="space-y-8">

@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand-loader";
 import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRight, ArrowLeft, Search, Filter, LibraryBig } from "lucide-react";
@@ -120,7 +121,7 @@ function ChannelLibraryPage() {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <SiteHeader />
-        <div className="mx-auto max-w-[1480px] px-6 py-24 text-center text-[color:var(--muted-foreground)]">Loading channel…</div>
+        <BrandLoader variant="section" label="Loading channel" className="py-24" />
       </div>
     );
   }

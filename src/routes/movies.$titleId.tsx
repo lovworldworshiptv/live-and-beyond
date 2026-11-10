@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand-loader";
 import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Plus, Check, ThumbsUp, Download, ChevronRight, Star, Clock, Calendar, Tv, Radio } from "lucide-react";
@@ -99,7 +100,7 @@ function TitleDetail() {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <SiteHeader />
-        <div className="mx-auto max-w-[1480px] px-6 py-24 text-center text-[color:var(--muted-foreground)]">Loading title…</div>
+        <BrandLoader variant="section" label="Loading title" className="py-24" />
       </div>
     );
   }

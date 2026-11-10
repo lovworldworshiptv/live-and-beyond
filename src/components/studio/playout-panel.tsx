@@ -1,3 +1,4 @@
+import { BrandLoader } from "@/components/brand-loader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ListVideo, Plus, Trash2, Loader2, Clock, ArrowUp, ArrowDown, Play, CalendarClock, Power,
@@ -247,9 +248,7 @@ export function PlayoutPanel({
       </section>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-sm text-[color:var(--muted-foreground)]">
-          <Loader2 className="size-4 animate-spin" /> Loading playout…
-        </div>
+        <BrandLoader variant="section" label="Loading playout" />
       ) : (
         <>
           {/* Playlists */}
