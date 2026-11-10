@@ -12,7 +12,8 @@ export const getRouter = () => {
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
     defaultPendingComponent: () => <BrandLoader variant="full" />,
-    defaultPendingMs: 400,
+    defaultPendingMs: 150,
+    defaultPendingMinMs: 0,
   });
 
   return router;
