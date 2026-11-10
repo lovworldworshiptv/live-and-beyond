@@ -379,3 +379,27 @@ body.playing #main, body.playing .rail { visibility: hidden; }
 .player.paused .radio-song-ticker { animation-play-state: paused; }
 @keyframes radio-song-rise { 0%, 80% { transform: translateY(0); } 100% { transform: translateY(-100px); } }
 @media (prefers-reduced-motion: reduce) { .radio-reactive-mic { transform: none !important; } .radio-song-ticker { animation: none; } }
+
+/* Channel Program Schedule (web parity) */
+.sched { margin: 10px 0 40px; }
+.sched h2 { margin-bottom: 18px; }
+.sched-list { width: 1180px; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.sched-row { display: flex; align-items: center; padding: 16px 24px; background: rgba(38,44,54,.35); border-top: 1px solid var(--border); transition: background .15s; }
+.sched-row:first-child { border-top: 0; }
+.sched-row.live { background: rgba(156,21,51,.18); }
+.sched-row.focused { background: var(--elevated); box-shadow: inset 0 0 0 4px #fff; }
+.sched-time { width: 150px; flex: none; }
+.sched-time b { display: block; font-family: monospace; font-size: 24px; color: var(--text2); }
+.sched-time span { font-size: 15px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.sched-info { min-width: 0; flex: 1; }
+.sched-title { display: flex; align-items: center; font-size: 26px; font-weight: 700; }
+.sched-title span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.sched-live { flex: none; margin-left: 14px; padding: 3px 10px; border-radius: 5px; background: var(--maroon-bright); font-style: normal; font-size: 15px; font-weight: 800; }
+.sched-meta { margin-top: 4px; font-size: 16px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.sched-empty { padding: 24px; font-size: 22px; color: var(--muted); background: rgba(38,44,54,.35); }
+
+/* Title detail: back to live (web parity) */
+.back-to-live { margin-top: 30px; }
+.back-to-live > span { display: block; margin-bottom: 14px; font-size: 21px; color: var(--text2); }
+.back-to-live b { color: var(--text); }
+.back-to-live .btn { margin-bottom: 0; }

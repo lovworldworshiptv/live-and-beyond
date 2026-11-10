@@ -46,7 +46,11 @@
     }
   };
 
+  // Web FeatureGate: sections an admin switched off show "Temporarily unavailable".
+  var SCREEN_FEATURE = { movies: "movies", series: "series", podcasts: "podcasts", channels: "channels", channel: "channels", radio: "radio", title: "movies" };
   function build(name, arg) {
+    if (railEl) railEl.applyFeatures();
+    if (SCREEN_FEATURE[name] && !Catalog.featureOn(SCREEN_FEATURE[name])) return Screens.unavailable(go);
     return name === "title" ? Screens.title(arg, go) : name === "channel" ? Screens.channel(arg, go) : Screens[name](go);
   }
   function rebuild(entry) {
@@ -114,7 +118,7 @@
       railEl.refreshUser();
       railEl.style.display = "";
       var ready = Catalog.hasData() ? Promise.resolve() : loading(Catalog.refresh());
-      ready.then(function () { var saved = U.store.get("lf.screen." + (Auth.userId() || "guest"), null); if (saved && ROOTS.indexOf(saved.name) >= 0) go.root(saved.name); else if (saved && (saved.name === "title" || saved.name === "channel")) { go.root("home"); go.push(saved.name, saved.arg); } else go.root("home"); }, function () { offline(); });
+      ready.then(function () { var saved = U.store.get("lf.screen." + (Auth.userId() || "guest"), null); if (saved && ROOTS.indexOf(saved.name) >= 0) go.root(saved.name); else if (saved && (saved.name === "title" || saved.name === "channel")) { go.root("home"); go.push(saved.name, saved.arg); } else go.root("home"); setTimeout(checkAnnouncement, 1500); }, function () { offline(); });
     } else {
       if (railEl) railEl.style.display = "none";
       go.root("welcome");
@@ -184,6 +188,15 @@
   Promise.all([resumingKc ? Promise.resolve() : intro(), Auth.keepFresh()]).then(function () {
     if (signedIn() && !Catalog.hasData()) return warm;
   }).then(startApp);
+  // Admin announcements (web parity): the latest unread one pops up once per session; never over the player.
+  function checkAnnouncement() {
+    if (!Auth.signedIn() || preview || Player.isOpen() || document.querySelector(".dialog-wrap") || !Catalog.featureOn("popups")) return;
+    Api.Announcements.next().then(function (n) {
+      if (!n || Player.isOpen()) return;
+      UI.dialog(n.title, n.body || null, [{ label: "Dismiss", primary: true, run: function () { Api.Announcements.markRead(n.id).catch(function () {}); } }]);
+    }, function () {});
+  }
+  setInterval(checkAnnouncement, 2 * 60 * 1000);
   setInterval(function () { if (Auth.signedIn()) Auth.keepFresh(); }, 5 * 60 * 1000);
   // Returning with the browser Back key may restore a frozen page: reload it so it runs again.
   window.addEventListener("pageshow", function (e) { if (e.persisted) window.location.reload(); });

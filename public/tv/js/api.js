@@ -30,7 +30,7 @@
         return Auth.refresh().then(function () { opts.retried = true; return rest(path, query, opts); });
       }
       if (!r.ok) throw new Error("HTTP " + r.status);
-      return opts.body && !opts.jsonResult ? null : r.json();
+      return (opts.body && !opts.jsonResult) || opts.empty ? null : r.json();
     });
   }
 
@@ -230,11 +230,13 @@
         rest("cms_titles", "select=*&is_published=eq.true&deleted_at=is.null&order=display_order.asc,created_at.desc"),
         soft(rest("radio_settings", "select=" + encodeURIComponent(RADIO_COLUMNS) + "&is_enabled=eq.true")),
         soft(rest("rpc/featured_on_demand_rankings", "", { method: "POST", jsonResult: true })),
-        soft(rest("cms_schedule", "select=id,channel_id,program_title,starts_at,ends_at&is_published=eq.true&ends_at=gte." + encodeURIComponent(since) + "&order=starts_at.asc"))
+        soft(rest("cms_schedule", "select=id,channel_id,program_title,category,starts_at,ends_at&is_published=eq.true&deleted_at=is.null&ends_at=gte." + encodeURIComponent(since) + "&order=starts_at.asc")),
+        soft(rest("cms_settings", "select=value&key=eq.features"))
       ]).then(function (res) {
         Catalog.data = {
           channels: res[0].map(mapChannel), titles: res[1].map(mapTitle),
-          radio: res[2] ? mapRadio(res[2]) : [], rankings: res[3] || [], schedule: res[4] || []
+          radio: res[2] ? mapRadio(res[2]) : [], rankings: res[3] || [], schedule: res[4] || [],
+          features: (res[5] && res[5][0] && res[5][0].value) || {}
         };
         Catalog.syncedAt = Date.now();
         store.set(CATALOG_KEY, { at: Catalog.syncedAt, data: Catalog.data });
@@ -266,6 +268,16 @@
         return s.channel_id === ch.id && Date.parse(s.starts_at) <= now && Date.parse(s.ends_at) > now;
       })[0];
       return row ? row.program_title : (ch.nowTitle || null);
+    },
+    /** A channel's upcoming published programmes (web Program Schedule): not yet ended, first 12. */
+    scheduleFor: function (channelId) {
+      var now = Date.now();
+      return Catalog.data.schedule.filter(function (s) { return s.channel_id === channelId && Date.parse(s.ends_at) > now; }).slice(0, 12);
+    },
+    /** Admin feature switches (web Admin › Features); missing keys mean on. */
+    featureOn: function (key) { return ((Catalog.data && Catalog.data.features) || {})[key] !== false; },
+    channelById: function (id) {
+      return id ? Catalog.data.channels.filter(function (c) { return c.id === id; })[0] || null : null;
     }
   };
 
@@ -406,5 +418,67 @@
     }
   };
 
-  window.Api = { rest: rest, Auth: Auth, KingsChat: KingsChat, Catalog: Catalog, Personal: Personal, Playback: Playback };
+  // ---------------- Follows (account-scoped, same table and RPC as the web) ----------------
+
+  var followMap = null;
+  var Follows = {
+    /** channel id -> notify flag for the signed-in account. */
+    load: function () {
+      var uid = Auth.userId();
+      if (!uid) { followMap = {}; return Promise.resolve(followMap); }
+      return rest("channel_follows", "select=channel_id,notify&user_id=eq." + encodeURIComponent(uid)).then(function (rows) {
+        followMap = {};
+        (rows || []).forEach(function (r) { followMap[r.channel_id] = r.notify !== false; });
+        return followMap;
+      });
+    },
+    ready: function () { return followMap ? Promise.resolve(followMap) : Follows.load(); },
+    following: function (id) { return !!(followMap && id in followMap); },
+    notify: function (id) { return !!(followMap && followMap[id]); },
+    count: function (id) {
+      return rest("rpc/channel_follower_count", "", { method: "POST", body: { _channel_id: id }, jsonResult: true }).then(function (n) { return Number(n) || 0; });
+    },
+    toggle: function (id) {
+      var uid = Auth.userId();
+      if (!uid) return Promise.reject(new Error("signin"));
+      var q = "user_id=eq." + encodeURIComponent(uid) + "&channel_id=eq." + encodeURIComponent(id);
+      if (Follows.following(id)) {
+        return rest("channel_follows", q, { method: "DELETE", empty: true }).then(function () { delete followMap[id]; return false; });
+      }
+      return rest("channel_follows", "", { method: "POST", body: { user_id: uid, channel_id: id, notify: true } }).then(function () { followMap[id] = true; return true; });
+    },
+    setNotify: function (id, on) {
+      var uid = Auth.userId();
+      var q = "user_id=eq." + encodeURIComponent(uid) + "&channel_id=eq." + encodeURIComponent(id);
+      return rest("channel_follows", q, { method: "PATCH", body: { notify: on } }).then(function () { followMap[id] = on; return on; });
+    },
+    reset: function () { followMap = null; }
+  };
+  Auth.onChange(function () { Follows.reset(); });
+
+  /** Compact follower count, as on the web: 999, 1.2K, 3.4M. */
+  function formatFollowers(n) {
+    if (n < 1000) return String(n);
+    if (n < 1000000) return (n / 1000).toFixed(n < 10000 ? 1 : 0).replace(/\.0$/, "") + "K";
+    return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+  }
+
+  /** Admin announcements (web NotificationPopup): the latest unread one, shown once per app session. */
+  var seenAnnouncements = {};
+  var Announcements = {
+    next: function () {
+      if (!Auth.signedIn()) return Promise.resolve(null);
+      return rest("notifications", "select=id,title,body,link,image_url&kind=eq.announcement&read_at=is.null&order=created_at.desc&limit=1").then(function (rows) {
+        var row = rows && rows[0];
+        if (!row || seenAnnouncements[row.id]) return null;
+        seenAnnouncements[row.id] = true;
+        return row;
+      });
+    },
+    markRead: function (id) {
+      return rest("notifications", "id=eq." + encodeURIComponent(id), { method: "PATCH", body: { read_at: new Date().toISOString() } });
+    }
+  };
+
+  window.Api = { rest: rest, Auth: Auth, KingsChat: KingsChat, Catalog: Catalog, Personal: Personal, Playback: Playback, Follows: Follows, Announcements: Announcements, formatFollowers: formatFollowers };
 })();

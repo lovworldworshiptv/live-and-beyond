@@ -238,6 +238,15 @@
         UI.toast(added ? "Added to My List" : "Removed from My List");
       }, playable ? null : "autofocus")
     ];
+    // Web parity: a quiet return path to the title's channel — its live TV and live radio.
+    var home = Catalog.channelById(t.channelId), homeRadio = home && Catalog.radioStation(home.slug);
+    var liveTv = home && !home.isRadio && (home.stream || home.playout);
+    var liveRadio = homeRadio && homeRadio.stream;
+    var backToLive = home && (liveTv || liveRadio) ? h("div.back-to-live", null, [
+      h("span", null, ["Back to live on ", h("b", { text: home.name })]),
+      liveTv ? UI.button("Live TV", "live", function () { Player.playChannel(home.slug); }) : null,
+      liveRadio ? UI.button("Live Radio", "radio", function () { Player.playRadio(home.slug); }) : null
+    ]) : null;
     var meta = [t.kind, t.category, t.year, t.duration, t.seasons ? t.seasons + (t.seasons === 1 ? " season" : " seasons") : null].filter(Boolean)
       .map(function (m) { return h("span", { text: m }); });
     meta.push(h("span.rating", { text: t.rating }));
@@ -253,7 +262,8 @@
           h("p.detail-synopsis", { text: t.synopsis }),
           t.cast.length ? h("p.detail-cast", null, [h("b", { text: "Featuring: " }), t.cast.join(", ")]) : null,
           playable ? null : h("p.detail-note", { text: "This title isn't available to play yet." }),
-          h("div.bb-actions", null, buttons)
+          h("div.bb-actions", null, buttons),
+          backToLive
         ]),
         UI.row("More like this", more.map(function (x) { return UI.titleCard(x, go.openTitle); }))
       ]))
@@ -270,6 +280,41 @@
     var grid = h("div.grid"), actions = h("div.bb-actions"), mode = c.filterMode;
     if (!c.isRadio) actions.appendChild(UI.button("Watch Live TV", "live", function () { Player.playChannel(slug); }, "primary autofocus"));
     if (station && station.stream) actions.appendChild(UI.button("Listen To Radio", "radio", function () { Player.playRadio(slug); }, c.isRadio ? "primary autofocus" : ""));
+    // Web parity: Follow with the public follower count, and per-channel notifications for followers.
+    var Follows = Api.Follows, followers = null, busy = false;
+    function setLabel(btn, iconName, label) { btn.innerHTML = ""; U.append(btn, [icon(iconName), h("span", { text: label })]); }
+    function paintFollow() {
+      var on = Follows.following(c.id);
+      setLabel(followBtn, on ? "check" : "add", (on ? "Following" : "Follow") + (followers != null ? " · " + Api.formatFollowers(followers) : ""));
+      var notifyOn = on && Follows.notify(c.id);
+      setLabel(notifyBtn, notifyOn ? "bellOn" : "bell", notifyOn ? "Notifying" : "Notify Me");
+    }
+    var followBtn = UI.button("Follow", "add", function () {
+      if (!Auth.signedIn()) { UI.toast("Sign in to follow channels"); return; }
+      if (busy) return;
+      busy = true;
+      Follows.ready().then(function () { return Follows.toggle(c.id); }).then(function (on) {
+        followers = followers == null ? null : Math.max(0, followers + (on ? 1 : -1));
+        paintFollow();
+        UI.toast(on ? "Following " + c.name : "Unfollowed " + c.name);
+      }, function () { UI.toast("Couldn't update. Check your connection."); }).then(function () { busy = false; });
+    });
+    var notifyBtn = UI.button("Notify Me", "bell", function () {
+      if (!Auth.signedIn()) { UI.toast("Sign in to get notifications"); return; }
+      if (!Follows.following(c.id)) { UI.toast("Follow this channel first"); return; }
+      if (busy) return;
+      busy = true;
+      var next = !Follows.notify(c.id);
+      Follows.setNotify(c.id, next).then(function () {
+        paintFollow();
+        UI.toast(next ? "Notifications on for " + c.name : "Notifications off");
+      }, function () { UI.toast("Couldn't update notifications. Try again."); }).then(function () { busy = false; });
+    });
+    var followOn = Catalog.featureOn("follow");
+    if (followOn) actions.appendChild(followBtn);
+    if (followOn) actions.appendChild(notifyBtn);
+    if (followOn) Follows.count(c.id).then(function (n) { followers = n; paintFollow(); }, function () {});
+    if (followOn && Auth.signedIn()) Follows.ready().then(paintFollow, function () {});
     var chips = h("div.hrow.chips", { data: { pad: "0" } }, h("div.htrack", null, Catalog.filterOptions(titles, mode).map(function (value) {
       return UI.sel(h("div.chip" + (value === "All" ? ".active" : ""), { text: U.titleCase(value) }), function () {
         active = value;
@@ -281,9 +326,32 @@
     function fill() { grid.innerHTML = ""; var filtered = titles.filter(function (t) { return Catalog.matchesFilter(t, mode, active); }); U.append(grid, filtered.length ? cardsFor(filtered, go) : empty("No content yet", "")); }
     fill();
     var banner = UI.channelArtwork(h("div.channel-header-art"), [c.banner, c.logo, U.channelArt(c.category, c.isRadio)]);
-    var content = h("div.vtrack", null, [h("header.page-head.vanchor", null, [banner, h("h1", { text: c.name }), actions]), h("h2", { text: "Channel Library" }), chips, grid]);
+    var content = h("div.vtrack", null, [h("header.page-head.vanchor", null, [banner, h("h1", { text: c.name }), actions]), programSchedule(c), h("h2", { text: "Channel Library" }), chips, grid]);
     var el = h("div.screen.grid-screen.channel-detail", null, h("div.vscroll.page", { data: { mode: "keep" } }, content));
     return { el: el, focus: function () { return el.querySelector(".autofocus") || el.querySelector(".focusable"); } };
+  }
+
+  /** Web parity: the channel's upcoming published programmes, with the one on air marked LIVE. */
+  function programSchedule(c) {
+    var slots = Catalog.scheduleFor(c.id), now = Date.now();
+    function hm(d) { return (d.getHours() < 10 ? "0" : "") + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes(); }
+    var DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    var rows = slots.map(function (s) {
+      var start = new Date(s.starts_at), end = new Date(s.ends_at);
+      var live = start.getTime() <= now && end.getTime() > now;
+      var day = start.toDateString() === new Date().toDateString() ? "Today" : DAYS[start.getDay()] + " " + start.getDate() + " " + MONTHS[start.getMonth()];
+      return UI.sel(h("div.sched-row" + (live ? ".live" : ""), null, [
+        h("div.sched-time", null, [h("b", { text: hm(start) }), h("span", { text: day })]),
+        h("div.sched-info", null, [
+          h("div.sched-title", null, [h("span", { text: s.program_title }), live ? h("em.sched-live", { text: "LIVE" }) : null]),
+          h("div.sched-meta", { text: (s.category || "Programme") + " · until " + hm(end) })
+        ])
+      ]), function () { if (live && !c.isRadio) Player.playChannel(c.slug); });
+    });
+    return h("section.sched", null, [
+      h("h2", { text: "Program Schedule" }),
+      h("div.sched-list", null, rows.length ? rows : [h("div.sched-empty", { text: "No upcoming programmes scheduled yet." })])
+    ]);
   }
 
   // ---------------- Account ----------------
@@ -449,9 +517,19 @@
     return { el: el, focus: function () { return email; } };
   }
 
+  /** Web FeatureGate: a section an admin has switched off. */
+  function unavailable(go) {
+    var el = h("div.screen", null, h("div.empty", null, [
+      h("h2", { text: "Temporarily unavailable" }),
+      h("p", { text: "This part of Lettflix is switched off right now. Please check back later." }),
+      h("div.bb-actions.center", null, [UI.button("Back to home", "home", function () { go.root("home"); }, "primary autofocus")])
+    ]));
+    return { el: el, focus: function () { return el.querySelector(".autofocus"); } };
+  }
+
   window.Screens = {
     home: home, movies: function (go) { return hub("movies", go); }, series: function (go) { return hub("series", go); },
     podcasts: function (go) { return hub("podcasts", go); }, channels: channels, radio: radio, mylist: myList,
-    search: search, title: title, channel: channel, account: account, welcome: welcome, signin: signin
+    search: search, title: title, channel: channel, account: account, welcome: welcome, signin: signin, unavailable: unavailable
   };
 })();

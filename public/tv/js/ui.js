@@ -41,6 +41,15 @@
       var all = el.querySelectorAll(".rail-item");
       for (var i = 0; i < all.length; i++) all[i].classList.toggle("active", all[i].getAttribute("data-id") === id);
     };
+    // Sections an admin switched off drop out of the rail (web nav parity).
+    el.applyFeatures = function () {
+      var all = el.querySelectorAll(".rail-item");
+      for (var i = 0; i < all.length; i++) {
+        var id = all[i].getAttribute("data-id");
+        var key = { channels: "channels", movies: "movies", series: "series", podcasts: "podcasts", radio: "radio" }[id];
+        all[i].style.display = key && !Api.Catalog.featureOn(key) ? "none" : "";
+      }
+    };
     el.refreshUser = function () {
       var name = Api.Auth.displayName() || "You";
       avatar.textContent = name.charAt(0).toUpperCase(); myName.textContent = name;
