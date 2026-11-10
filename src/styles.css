@@ -95,6 +95,11 @@
   --channel-lxp-fill: linear-gradient(120deg, oklch(0.48 0.12 230), oklch(0.65 0.11 205));
   --channel-healing-fill: linear-gradient(120deg, oklch(0.45 0.14 265), oklch(0.7 0.1 230));
   --channel-rhapsody-fill: linear-gradient(120deg, oklch(0.62 0.1 220), oklch(0.85 0.08 200));
+  --ecosystem-live-bg: oklch(0.39 0.14 15);
+  --ecosystem-cinema-bg: oklch(0.4 0.16 265);
+  --ecosystem-radio-bg: oklch(0.38 0.075 185);
+  --ecosystem-watchlist-bg: oklch(0.39 0.13 340);
+  --ecosystem-foreground: oklch(1 0 0);
 }
 
 .dark { color-scheme: dark; }
@@ -108,7 +113,10 @@
 }
 
 .landing-overlay { background: var(--gradient-landing-overlay); }
-.ecosystem-feature { transition: border-color 240ms ease, box-shadow 240ms ease, transform 240ms ease; }
+.ecosystem-feature { color: var(--ecosystem-foreground); background: var(--ecosystem-live-bg); transition: border-color 240ms ease, box-shadow 240ms ease, transform 240ms ease; }
+.ecosystem-feature[data-feature="1"] { background: var(--ecosystem-cinema-bg); }
+.ecosystem-feature[data-feature="2"] { background: var(--ecosystem-radio-bg); }
+.ecosystem-feature[data-feature="3"] { background: var(--ecosystem-watchlist-bg); }
 .ecosystem-feature-image { transform: rotate(25deg); box-shadow: var(--shadow-card); transition: transform 500ms ease; }
 @media (hover: hover) and (pointer: fine) {
   .ecosystem-feature:hover { border-color: var(--primary); box-shadow: var(--shadow-glow); }
