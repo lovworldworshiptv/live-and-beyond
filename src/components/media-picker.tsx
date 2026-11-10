@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Upload, Loader2, X, Image as ImageIcon, Film } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   value: string | null | undefined;
@@ -10,6 +11,8 @@ type Props = {
   folder?: string;
   label?: string;
   kind?: "image" | "video";
+  previewAspect?: "video";
+  onUploadingChange?: (uploading: boolean) => void;
 };
 
 export function MediaPicker({
@@ -19,6 +22,8 @@ export function MediaPicker({
   folder = "uploads",
   label = "Upload or paste URL",
   kind = "image",
+  previewAspect,
+  onUploadingChange,
 }: Props) {
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -26,6 +31,7 @@ export function MediaPicker({
 
   async function handleFile(file: File) {
     setUploading(true);
+    onUploadingChange?.(true);
     try {
       const ext = file.name.split(".").pop() ?? "bin";
       const path = `${folder}/${crypto.randomUUID()}.${ext}`;
@@ -44,6 +50,7 @@ export function MediaPicker({
       toast.error(msg);
     } finally {
       setUploading(false);
+      onUploadingChange?.(false);
       if (inputRef.current) inputRef.current.value = "";
     }
   }
@@ -51,33 +58,39 @@ export function MediaPicker({
   const Icon = kind === "video" ? Film : ImageIcon;
 
   return (
-    <div className="space-y-2">
-      <div className="flex gap-2">
+    <div className="min-w-0 space-y-2" aria-busy={uploading}>
+      <div className="flex min-w-0 gap-2">
         <input
           type="text"
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value || null)}
           placeholder={label}
-          className="flex-1 h-10 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+          aria-label={label}
+          disabled={uploading}
+          className="min-w-0 flex-1 h-10 px-3 rounded-md bg-elevated border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
         />
-        <button
+        <Button
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="inline-flex items-center gap-2 h-10 px-3 rounded-md bg-primary/15 hover:bg-primary/25 text-primary text-xs font-semibold disabled:opacity-60"
+          aria-label={`Upload ${label}`}
+          className="shrink-0 h-10 px-3 text-xs"
         >
           {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
           {uploading ? "Uploading…" : "Upload"}
-        </button>
+        </Button>
         {value && (
-          <button
+          <Button
             type="button"
             onClick={() => onChange(null)}
-            className="size-10 grid place-items-center rounded-md hover:bg-elevated text-[color:var(--muted-foreground)]"
-            aria-label="Clear"
+            variant="ghost"
+            size="icon"
+            disabled={uploading}
+            className="size-10 shrink-0 text-muted-foreground"
+            aria-label={`Clear ${label}`}
           >
             <X className="size-4" />
-          </button>
+          </Button>
         )}
         <input
           ref={inputRef}
@@ -97,7 +110,7 @@ export function MediaPicker({
               <Icon className="size-4" /> <span className="truncate">{value}</span>
             </div>
           ) : (
-            <img src={value} alt="preview" className={`w-full max-h-40 ${folder.startsWith("channels/") || folder.startsWith("radio/") ? "object-contain" : "object-cover"}`} />
+             <img src={value} alt={`${label} preview`} className={`w-full ${previewAspect === "video" ? "aspect-video object-contain" : `max-h-40 ${folder.startsWith("channels/") || folder.startsWith("radio/") ? "object-contain" : "object-cover"}`}`} />
           )}
         </div>
       )}

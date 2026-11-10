@@ -1,6 +1,7 @@
 # Lettflix Roadmap
 
 ## Done
+- [x] Make Studio thumbnails prominent when adding on-demand content: image upload/URL, full-image preview, optional cover, upload-aware Save and linked-title artwork readback.
 - [x] Homepage, channels, guide, movies/series/documentaries/podcasts, radio
 - [x] Auth (email, KingsChat), profile, account settings, MFA
 - [x] Admin CMS (channels, titles, schedule, events, sponsors, homepage, nav)

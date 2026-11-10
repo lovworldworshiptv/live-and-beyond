@@ -172,7 +172,7 @@ function useCrud<T extends { id: string }>(table: string, order: OrderSpec = "cr
 // ---------- Shared form primitives ----------
 export function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="text-xs font-medium text-[color:var(--muted-foreground)] mb-1.5 block">{label}</span>
       {children}
     </label>

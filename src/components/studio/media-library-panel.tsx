@@ -6,6 +6,7 @@ import { MediaPicker } from "@/components/media-picker";
 import { Field, inputClass, textareaClass } from "@/routes/admin";
 import { fetchMediaAssets, formatDuration, type MediaAsset } from "@/lib/playout";
 import { slugify } from "@/lib/channel-services";
+import { Button } from "@/components/ui/button";
 
 type Kind = "movie" | "series" | "podcast" | "documentary" | "music";
 
@@ -85,6 +86,8 @@ function ContentEditor({
   const [draft, setDraft] = useState<Draft>(value);
   const [saving, setSaving] = useState(false);
   const [probing, setProbing] = useState(false);
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const [backdropUploading, setBackdropUploading] = useState(false);
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setDraft((d) => ({ ...d, [k]: v }));
 
   // Pull the linked on-demand title so edits round-trip both records.
@@ -107,6 +110,7 @@ function ContentEditor({
         episodes: (t.episodes as number) ?? null,
         cast_list: (t.cast_list as string[]) ?? [],
         display_order: (t.display_order as number) ?? 0,
+        poster_url: (t.poster_url as string) ?? d.poster_url,
         backdrop_url: (t.backdrop_url as string) ?? d.backdrop_url,
         trailer_url: (t.trailer_url as string) ?? d.trailer_url,
         is_published: Boolean(t.is_published),
@@ -187,7 +191,7 @@ function ContentEditor({
         await supabase
           .from("media_assets")
           .update({ title_id: (data as { id: string }).id } as never)
-          .eq("id", assetId!);
+          .eq("id", assetId);
       }
     }
 
@@ -197,14 +201,26 @@ function ContentEditor({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm grid place-items-center p-4 overflow-y-auto">
-      <div className="w-full max-w-3xl rounded-2xl border border-border bg-background p-6 my-8">
+    <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm grid place-items-center p-3 sm:p-4 overflow-y-auto">
+      <div role="dialog" aria-modal="true" aria-labelledby="content-editor-title" className="w-full min-w-0 max-w-3xl rounded-lg border border-border bg-background p-4 sm:p-6 my-4 max-h-[calc(100dvh-2rem)] overflow-y-auto">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold">{draft.id ? "Edit content" : "New content"}</h3>
+          <h3 id="content-editor-title" className="text-lg font-bold">{draft.id ? "Edit content" : "New content"}</h3>
           <button onClick={onClose} aria-label="Close" className="size-9 grid place-items-center rounded-md hover:bg-elevated">
             <X className="size-4" />
           </button>
         </div>
+
+        <section aria-label="Content artwork" className="mt-5 border-b border-border pb-5">
+          <h4 className="mb-3 text-sm font-semibold">Content artwork</h4>
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+            <Field label="Thumbnail">
+              <MediaPicker value={draft.poster_url} onChange={(u) => set("poster_url", u)} folder="titles/posters" label="Thumbnail image URL" previewAspect="video" onUploadingChange={setThumbnailUploading} />
+            </Field>
+            <Field label="Cover image (optional)">
+              <MediaPicker value={draft.backdrop_url} onChange={(u) => set("backdrop_url", u)} folder="titles/backdrops" label="Cover image URL" previewAspect="video" onUploadingChange={setBackdropUploading} />
+            </Field>
+          </div>
+        </section>
 
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <Field label="Title">
@@ -264,12 +280,6 @@ function ContentEditor({
         </div>
 
         <div className="grid gap-4 mt-4 md:grid-cols-2">
-          <Field label="Poster">
-            <MediaPicker value={draft.poster_url} onChange={(u) => set("poster_url", u)} folder="titles/posters" />
-          </Field>
-          <Field label="Backdrop">
-            <MediaPicker value={draft.backdrop_url} onChange={(u) => set("backdrop_url", u)} folder="titles/backdrops" />
-          </Field>
           <Field label="Video / audio file">
             <MediaPicker
               value={draft.source_url}
@@ -319,13 +329,13 @@ function ContentEditor({
           <button onClick={onClose} className="h-11 px-5 rounded-md border border-border bg-elevated text-sm font-medium">
             Cancel
           </button>
-          <button
+          <Button
             onClick={save}
-            disabled={saving}
+            disabled={saving || thumbnailUploading || backdropUploading}
             className="h-11 px-6 rounded-md bg-primary text-primary-foreground font-semibold text-sm inline-flex items-center gap-2 disabled:opacity-50"
           >
             {saving ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />} Save
-          </button>
+          </Button>
         </div>
       </div>
     </div>
