@@ -12,6 +12,7 @@ import { MediaPicker } from "@/components/media-picker";
 import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X, Home, Bell, ToggleRight } from "lucide-react";
 import { FeaturesCms } from "@/components/admin/features-cms";
 import { NotificationsCms } from "@/components/admin/notifications-cms";
+import { HeroRequestsCms } from "@/components/admin/hero-requests-cms";
 import { toast } from "sonner";
 import { defaultNav, defaultHero, defaultFooter, defaultBottomNav } from "@/lib/homepage-defaults";
 import { bottomNavIconComponents, bottomNavIcons } from "@/lib/bottom-nav-icons";
@@ -1749,6 +1750,7 @@ function ApplicationsCms() {
 type SettingKey = "nav" | "hero" | "footer" | "bottomNav";
 
 function HomepageCms() {
+  const [heroVersion, setHeroVersion] = useState(0);
   return (
     <div className="space-y-8">
       <div>
@@ -1760,7 +1762,8 @@ function HomepageCms() {
       <SettingCard settingKey="nav" title="Top Navigation" description="Primary links shown in the header. Add sub-links to reveal a hover dropdown.">
         {(value, setValue) => <NavForm value={value} onChange={setValue} />}
       </SettingCard>
-      <SettingCard settingKey="hero" title="Hero Showcase" description="Rounded hero banner carousel — image, text, and per-slide CTAs.">
+      <HeroRequestsCms onApproved={() => setHeroVersion(v => v + 1)} />
+      <SettingCard key={heroVersion} settingKey="hero" title="Hero Showcase" description="Rounded hero banner carousel — image, text, and per-slide CTAs.">
         {(value, setValue) => <HeroForm value={value} onChange={setValue} />}
       </SettingCard>
       <SettingCard settingKey="bottomNav" title="Bottom Navigation (tablet & mobile)" description="Up to 5 tabs shown in the mobile bottom bar.">

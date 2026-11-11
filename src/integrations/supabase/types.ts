@@ -825,6 +825,68 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_requests: {
+        Row: {
+          admin_note: string | null
+          channel_id: string
+          content_kind: string
+          content_slug: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          requested_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          starts_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          channel_id: string
+          content_kind: string
+          content_slug?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          requested_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          starts_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          channel_id?: string
+          content_kind?: string
+          content_slug?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          requested_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          starts_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hero_requests_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kingschat_identities: {
         Row: {
           access_token: string | null

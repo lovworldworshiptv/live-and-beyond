@@ -1,4 +1,4 @@
-export const STUDIO_TABS = ["overview", "channel", "services", "content", "broadcast", "radio", "analytics", "team"] as const;
+export const STUDIO_TABS = ["overview", "channel", "services", "content", "broadcast", "radio", "spotlight", "analytics", "team"] as const;
 export type StudioTab = typeof STUDIO_TABS[number];
 
 export function studioSearch(search: Record<string, unknown>): { channel?: string; section?: StudioTab } {
