@@ -329,8 +329,8 @@ function AccountPage() {
                   <AlertTriangle className="size-5 text-primary shrink-0 mt-0.5" />
                   <div className="flex-1">
                     <div className="font-semibold">Delete account</div>
-                    <p className="text-sm text-muted-foreground mt-1">Self-service account deletion is not available yet. No deletion will be scheduled here.</p>
-                    <Button variant="destructive" disabled className="mt-3">Delete my account</Button>
+                    <p className="text-sm text-muted-foreground mt-1">Permanently remove your account and personal data.</p>
+                    <Button variant="destructive" asChild className="mt-3"><Link to="/delete-account">Delete my account</Link></Button>
                   </div>
                 </div>
               </div>

@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChannelsRouteImport } from './routes/channels'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as DeleteAccountRouteImport } from './routes/delete-account'
 import { Route as DocumentariesRouteImport } from './routes/documentaries'
 import { Route as EnterpriseRouteImport } from './routes/enterprise'
 import { Route as GamesRouteImport } from './routes/games'
@@ -83,6 +84,11 @@ const CommunityRoute = CommunityRouteImport.update({
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeleteAccountRoute = DeleteAccountRouteImport.update({
+  id: '/delete-account',
+  path: '/delete-account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocumentariesRoute = DocumentariesRouteImport.update({
@@ -262,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/channels': typeof ChannelsRouteWithChildren
   '/community': typeof CommunityRoute
   '/cookies': typeof CookiesRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
   '/games': typeof GamesRoute
@@ -303,6 +310,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/community': typeof CommunityRoute
   '/cookies': typeof CookiesRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
   '/games': typeof GamesRoute
@@ -344,6 +352,7 @@ export interface FileRoutesById {
   '/channels': typeof ChannelsRouteWithChildren
   '/community': typeof CommunityRoute
   '/cookies': typeof CookiesRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/documentaries': typeof DocumentariesRoute
   '/enterprise': typeof EnterpriseRoute
   '/games': typeof GamesRoute
@@ -388,6 +397,7 @@ export interface FileRouteTypes {
     | '/channels'
     | '/community'
     | '/cookies'
+    | '/delete-account'
     | '/documentaries'
     | '/enterprise'
     | '/games'
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/community'
     | '/cookies'
+    | '/delete-account'
     | '/documentaries'
     | '/enterprise'
     | '/games'
@@ -469,6 +480,7 @@ export interface FileRouteTypes {
     | '/channels'
     | '/community'
     | '/cookies'
+    | '/delete-account'
     | '/documentaries'
     | '/enterprise'
     | '/games'
@@ -512,6 +524,7 @@ export interface RootRouteChildren {
   ChannelsRoute: typeof ChannelsRouteWithChildren
   CommunityRoute: typeof CommunityRoute
   CookiesRoute: typeof CookiesRoute
+  DeleteAccountRoute: typeof DeleteAccountRoute
   DocumentariesRoute: typeof DocumentariesRoute
   EnterpriseRoute: typeof EnterpriseRoute
   GamesRoute: typeof GamesRoute
@@ -589,6 +602,13 @@ declare module '@tanstack/react-router' {
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/delete-account': {
+      id: '/delete-account'
+      path: '/delete-account'
+      fullPath: '/delete-account'
+      preLoaderRoute: typeof DeleteAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/documentaries': {
@@ -884,6 +904,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChannelsRoute: ChannelsRouteWithChildren,
   CommunityRoute: CommunityRoute,
   CookiesRoute: CookiesRoute,
+  DeleteAccountRoute: DeleteAccountRoute,
   DocumentariesRoute: DocumentariesRoute,
   EnterpriseRoute: EnterpriseRoute,
   GamesRoute: GamesRoute,

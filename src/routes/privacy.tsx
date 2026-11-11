@@ -88,6 +88,9 @@ function PrivacyPage() {
           </ul>
           <p>To exercise these rights, contact us using the information provided below.</p>
 
+          <h3>Deleting your account</h3>
+          <p>You can permanently delete your account and personal data at any time on the <Link to="/delete-account">Delete your account</Link> page.</p>
+
           <h2>6. Data Security</h2>
           <p>
             We implement industry-standard security measures to protect your information, including encryption, access controls, and regular security reviews. However, no system is completely secure, and we cannot guarantee absolute security.
