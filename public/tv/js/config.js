@@ -5,5 +5,5 @@ window.LETT_CONFIG = {
   // Same-origin when served from lettflix.com/tv/ (KingsChat sign-in needs that: its API sends no CORS headers).
   API_ORIGIN: location.origin,
   WEB_ORIGIN: "https://lettflix.com",
-  VERSION: "1.3.2"
+  VERSION: "1.3.3"
 };

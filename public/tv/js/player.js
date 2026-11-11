@@ -13,8 +13,10 @@
   var loadGeneration = 0, radioTimer = null, reactiveContext = null, reactiveFrame = null, reactiveStream = null;
   var provider = null, youtube = null, youtubeState = -1, providerHost = null;
   function paused() { return youtube ? youtubeState !== 1 : video.paused; }
-  function position() { return youtube ? youtube.getCurrentTime() : video.currentTime; }
-  function duration() { return youtube ? youtube.getDuration() : video.duration; }
+  // The YouTube player gains its methods only once its iframe API is ready; until then report 0.
+  function yt(name) { return youtube && typeof youtube[name] === "function" ? (youtube[name]() || 0) : 0; }
+  function position() { return youtube ? yt("getCurrentTime") : video.currentTime; }
+  function duration() { return youtube ? yt("getDuration") : video.duration; }
   function detachProvider() {
     if (youtube) { try { youtube.destroy(); } catch (e) {} }
     youtube = null; youtubeState = -1; provider = null;
@@ -89,7 +91,7 @@
     if (video.readyState >= 1) startPlayback();
   }
   function startPlayback() {
-    if (youtube) { youtube.playVideo(); return; }
+    if (youtube) { if (youtube.playVideo) youtube.playVideo(); return; }
     var generation = loadGeneration, media = video;
     var p = media.play();
     if (p && p.catch) p.catch(function (e) {
@@ -224,7 +226,7 @@
     if (!stay && !paused()) hideTimer = setTimeout(function () { root.classList.remove("controls"); }, 4000);
   }
   function togglePlay() {
-    if (paused()) { if (root.classList.contains("failed") && src) load(src); else startPlayback(); } else if (youtube) youtube.pauseVideo(); else video.pause();
+    if (paused()) { if (root.classList.contains("failed") && src) load(src); else startPlayback(); } else if (youtube) { if (youtube.pauseVideo) youtube.pauseVideo(); } else video.pause();
     showControls();
   }
   function canSeek() { return src && !src.isLive && isFinite(duration()) && duration() > 0; }

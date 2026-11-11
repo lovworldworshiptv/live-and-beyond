@@ -109,7 +109,9 @@
   function home(go) {
     var d = data(), films = d.titles.filter(function (t) { return !t.isAudio; });
     var featured = d.titles.filter(function (t) { return t.featured && !t.isAudio; });
-    var heroT = featured[0] || films.slice().sort(byNewest)[0];
+    // Billboard follows the website's homepage banner first (title-linked slides), then featured, then newest.
+    var bannerT = (d.heroSlugs || []).map(function (slug) { return Catalog.title(slug); }).filter(function (t) { return t && !t.isAudio; })[0];
+    var heroT = bannerT || featured[0] || films.slice().sort(byNewest)[0];
     var hero = heroT ? UI.titleCard(heroT, go.openTitle) : null;
     var newest = films.slice().sort(byNewest).slice(0, 12);
     var topYear = newest.length ? newest[0].createdAt : null;

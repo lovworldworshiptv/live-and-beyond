@@ -49,7 +49,8 @@
       return r.json().catch(function () { return {}; }).then(function (j) {
         if (!r.ok) {
           var msg = j.error_description || j.msg || j.message || j.error || ("HTTP " + r.status);
-          throw new Error(msg);
+          var err = new Error(msg); err.status = r.status; err.code = j.error_code || j.code || null;
+          throw err;
         }
         return j;
       });
@@ -103,13 +104,26 @@
     refresh: function () {
       if (!session || !session.refresh_token) return Promise.reject(new Error("signed out"));
       if (refreshing) return refreshing;
-      refreshing = authFetch("token?grant_type=refresh_token", { refresh_token: session.refresh_token })
-        .then(function (j) { adopt(j); refreshing = null; }, function (e) {
-          refreshing = null;
-          // A rejected refresh token means the session is gone (signed out elsewhere).
-          if (/invalid|not found|revoked/i.test(String(e.message))) { Auth.clear(); Auth.emit(); }
+      var token = session.refresh_token;
+      function attempt(netRetry) {
+        return authFetch("token?grant_type=refresh_token", { refresh_token: token }).then(function (j) {
+          // A captive portal or proxy can answer 200 with no tokens: keep the current session.
+          if (!j || !j.access_token || !j.refresh_token) throw new Error("network");
+          adopt(j);
+        }, function (e) {
+          // Only a definite rejection from Supabase Auth (400/401 with a refresh-token error) signs out.
+          // Timeouts, lost connections, 5xx and gateway errors keep the user signed in; it retries later.
+          var definite = (e.status === 400 || e.status === 401) &&
+            (/refresh_token_not_found|refresh_token_already_used|session_not_found|session_expired/.test(String(e.code)) ||
+             /refresh token not found|already used|revoked|session.*(not found|expired)/i.test(String(e.message)));
+          if (definite) { if (session && session.refresh_token === token) { Auth.clear(); Auth.emit(); } throw e; }
+          // A dropped response may already have rotated the token server-side; Supabase accepts the
+          // old one for ~10 s, so retry once quickly to pick up the new pair inside that window.
+          if (!e.status && netRetry) return new Promise(function (res) { setTimeout(res, 2500); }).then(function () { return attempt(false); });
           throw e;
         });
+      }
+      refreshing = attempt(true).then(function () { refreshing = null; }, function (e) { refreshing = null; throw e; });
       return refreshing;
     },
     /** Refreshes ahead of expiry; called at start-up and every few minutes. */
@@ -231,12 +245,16 @@
         soft(rest("radio_settings", "select=" + encodeURIComponent(RADIO_COLUMNS) + "&is_enabled=eq.true")),
         soft(rest("rpc/featured_on_demand_rankings", "", { method: "POST", jsonResult: true })),
         soft(rest("cms_schedule", "select=id,channel_id,program_title,category,starts_at,ends_at&is_published=eq.true&deleted_at=is.null&ends_at=gte." + encodeURIComponent(since) + "&order=starts_at.asc")),
-        soft(rest("cms_settings", "select=value&key=eq.features"))
+        soft(rest("cms_settings", "select=key,value&key=in.(features,hero)"))
       ]).then(function (res) {
+        var settings = {};
+        (res[5] || []).forEach(function (r) { settings[r.key] = r.value; });
         Catalog.data = {
           channels: res[0].map(mapChannel), titles: res[1].map(mapTitle),
           radio: res[2] ? mapRadio(res[2]) : [], rankings: res[3] || [], schedule: res[4] || [],
-          features: (res[5] && res[5][0] && res[5][0].value) || {}
+          features: settings.features || {},
+          // Homepage banner slides linked to a title (admin-set, or approved channel spotlight requests).
+          heroSlugs: ((settings.hero && settings.hero.slides) || []).filter(function (x) { return x && x.visible !== false && x.contentId; }).map(function (x) { return x.contentId; })
         };
         Catalog.syncedAt = Date.now();
         store.set(CATALOG_KEY, { at: Catalog.syncedAt, data: Catalog.data });
