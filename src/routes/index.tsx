@@ -191,15 +191,31 @@ function Index() {
         <div className="mx-auto max-w-[1480px]">
           <div className="relative isolate overflow-hidden rounded-2xl lg:rounded-3xl border border-white/10 bg-elevated/40 shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]">
             <div className="relative aspect-[3/4] sm:aspect-[16/10] lg:aspect-[21/9] max-h-[78vh] w-full">
-              {heroSlides.map((s, i) => (
-                <img
-                  key={i}
-                  src={s.imageUrl || heroImg}
-                  alt={s.title || "Lettflix broadcast showcase"}
-                  className="absolute inset-0 size-full object-cover transition-opacity duration-1000"
-                  style={{ opacity: i === slideIdx ? 1 : 0 }}
-                />
-              ))}
+              {heroSlides.map((s, i) => {
+                const src = s.imageUrl || heroImg;
+                return (
+                  <div
+                    key={i}
+                    className="absolute inset-0 overflow-hidden transition-opacity duration-1000"
+                    style={{ opacity: i === slideIdx ? 1 : 0 }}
+                    aria-hidden={i !== slideIdx}
+                  >
+                    {/* Softened fill of the same artwork so the frame never shows empty gaps */}
+                    <img
+                      src={src}
+                      alt=""
+                      aria-hidden
+                      className="absolute inset-0 size-full object-cover scale-110 blur-2xl brightness-[0.55]"
+                    />
+                    {/* Full banner — always fits within the frame, never cropped */}
+                    <img
+                      src={src}
+                      alt={s.title || "Lettflix broadcast showcase"}
+                      className="absolute inset-0 size-full object-contain"
+                    />
+                  </div>
+                );
+              })}
 
               {hasHeroText && (
                 <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
