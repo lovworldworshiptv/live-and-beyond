@@ -200,18 +200,11 @@ function Index() {
                     style={{ opacity: i === slideIdx ? 1 : 0 }}
                     aria-hidden={i !== slideIdx}
                   >
-                    {/* Softened fill of the same artwork so the frame never shows empty gaps */}
-                    <img
-                      src={src}
-                      alt=""
-                      aria-hidden
-                      className="absolute inset-0 size-full object-cover scale-110 blur-2xl brightness-[0.55]"
-                    />
-                    {/* Full banner — always fits within the frame, never cropped */}
+                    {/* Wide cinematic banner — designed to fill the frame edge-to-edge */}
                     <img
                       src={src}
                       alt={s.title || "Lettflix broadcast showcase"}
-                      className="absolute inset-0 size-full object-contain"
+                      className="absolute inset-0 size-full object-cover"
                     />
                   </div>
                 );
