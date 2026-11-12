@@ -17,6 +17,8 @@ import { useHlsAttach } from "@/hooks/use-hls";
 import { QualityMenu } from "@/components/quality-menu";
 import { usePlayerFullscreen } from "@/components/player-fullscreen";
 import { protectedChannelSrc } from "@/lib/stream-src";
+import { resolveVideoSource } from "@/lib/video-source";
+import { YoutubePlayer } from "@/components/youtube-player";
 import { useFollowing, useReminders, useSettings } from "@/lib/personal";
 import { useFeature } from "@/lib/feature-flags";
 import { useChannelFollow, formatFollowers } from "@/lib/follows";
@@ -242,8 +244,10 @@ function ChannelPage() {
     (channel?.streamKind === "radio" && radio?.is_enabled ? radio.stream_url ?? "" : "");
   // Live/HLS sources are played through the same-origin manifest proxy so the
   // Cloudflare playback URL is never exposed in the DOM.
-  const playbackSrc = protectedChannelSrc(channelId, streamSrc) ?? streamSrc;
-  const hls = useHlsAttach(mediaRef, playbackSrc, playing, undefined, failPlayback);
+  const ytSource = resolveVideoSource(streamSrc);
+  const youtubeId = ytSource.type === "youtube" ? ytSource.id ?? null : null;
+  const playbackSrc = youtubeId ? "" : protectedChannelSrc(channelId, streamSrc) ?? streamSrc;
+  const hls = useHlsAttach(mediaRef, playbackSrc, playing && !youtubeId, undefined, failPlayback);
   const watchStarted = useRef<string | null>(null);
   useEffect(() => {
     if (watchStarted.current === channelId || !channel || !streamSrc || window.location.hash !== "#watch") return;
@@ -399,6 +403,8 @@ function ChannelPage() {
                   className="hidden"
                 />
               </>
+            ) : youtubeId ? (
+              <YoutubePlayer id={youtubeId} onPlaying={() => {}} onProgress={() => {}} onError={failPlayback} />
             ) : (
               <video
                 ref={(el) => { mediaRef.current = el; }}
@@ -417,7 +423,7 @@ function ChannelPage() {
           )}
           
 
-          {playing && !isRadio && (
+          {playing && !isRadio && !youtubeId && (
             <>
               <div className="player-overlay-controls absolute bottom-14 right-3 z-20 flex items-center gap-2">
                 <QualityMenu controller={hls} />
