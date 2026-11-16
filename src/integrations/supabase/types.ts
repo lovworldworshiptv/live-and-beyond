@@ -1671,6 +1671,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      trending_on_demand_rankings: {
+        Args: never
+        Returns: {
+          plays: number
+          slug: string
+        }[]
+      }
     }
     Enums: {
       app_role: "viewer" | "creator" | "admin"

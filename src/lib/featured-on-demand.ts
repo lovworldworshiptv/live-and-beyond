@@ -13,3 +13,14 @@ export function selectFeaturedOnDemand(titles: Title[], rankings: OnDemandRankin
     return [title];
   }).slice(0, 12);
 }
+/** Trending: most played on-demand titles (any kind) across all channels, in database order. */
+export function selectTrendingOnDemand(titles: Title[], rankings: OnDemandRanking[]): Title[] {
+  const bySlug = new Map(titles.map((title) => [title.id, title]));
+  const seen = new Set<string>();
+  return rankings.flatMap(({ slug, plays }) => {
+    const title = bySlug.get(slug);
+    if (!title || Number(plays) <= 0 || seen.has(slug)) return [];
+    seen.add(slug);
+    return [title];
+  }).slice(0, 10);
+}

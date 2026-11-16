@@ -31,7 +31,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { LandingPage } from "@/components/landing-page";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { selectFeaturedOnDemand } from "@/lib/featured-on-demand";
+import { selectFeaturedOnDemand, selectTrendingOnDemand } from "@/lib/featured-on-demand";
 
 import heroImg from "@/assets/hero-broadcast.jpg";
 import ch1 from "@/assets/channel-1.jpg";
@@ -89,10 +89,17 @@ function Index() {
     const trending = channels.filter((c) => c.trending);
     return (trending.length ? trending : channels).slice(0, 10);
   }, [channels]);
-  const trending = useMemo(() => {
-    const feat = titles.filter((t) => t.featured);
-    return (feat.length ? feat : titles).slice(0, 10);
-  }, [titles]);
+  const { data: trendingRankings = [] } = useQuery({
+    queryKey: ["trending-on-demand-rankings"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("trending_on_demand_rankings");
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 60_000,
+    refetchInterval: 60_000,
+  });
+  const trending = useMemo(() => selectTrendingOnDemand(titles, trendingRankings), [titles, trendingRankings]);
   const { data: onDemandRankings = [] } = useQuery({
     queryKey: ["featured-on-demand-rankings"],
     queryFn: async () => {

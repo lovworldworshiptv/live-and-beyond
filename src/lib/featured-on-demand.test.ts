@@ -1,4 +1,4 @@
-import { expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { Title } from "./catalog";
 import { selectFeaturedOnDemand } from "./featured-on-demand";
 
@@ -18,4 +18,15 @@ it("only includes available published catalogue titles and the requested content
 });
 it("deduplicates the shelf", () => {
   expect(selectFeaturedOnDemand([title("movie", "Film")], [{ slug: "movie", plays: 10 }, { slug: "movie", plays: 10 }])).toHaveLength(1);
+});
+import { selectTrendingOnDemand } from "./featured-on-demand";
+describe("selectTrendingOnDemand", () => {
+  it("keeps play order, includes music, drops unknown/zero/duplicates, caps at 10", () => {
+    const mk = (id: string, kind: string) => ({ id, kind }) as never;
+    const titles = [mk("a", "Film"), mk("b", "Music"), mk("c", "Series")];
+    const r = selectTrendingOnDemand(titles, [
+      { slug: "b", plays: 9 }, { slug: "x", plays: 8 }, { slug: "a", plays: 5 }, { slug: "b", plays: 2 }, { slug: "c", plays: 0 },
+    ]);
+    expect(r.map((t: { id: string }) => t.id)).toEqual(["b", "a"]);
+  });
 });
