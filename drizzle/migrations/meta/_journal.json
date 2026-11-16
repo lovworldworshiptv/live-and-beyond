@@ -92,6 +92,13 @@
       "when": 1794793141107,
       "tag": "0012_trending_on_demand_rankings",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794793440509,
+      "tag": "0013_verified_view_stats",
+      "breakpoints": true
     }
   ]
 }

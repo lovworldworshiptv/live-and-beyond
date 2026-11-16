@@ -1,3 +1,4 @@
+import { VerifiedViews } from "@/components/verified-views";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +42,7 @@ export function AudienceCms() {
             {channels.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select></div>
       </div>
+      <VerifiedViews channelId={channelId || null} days={30} />
       <AudienceReach channelId={channelId || undefined} title={channelId ? "Channel audience" : "Platform audience"} />
 
       <section className="rounded-lg border border-border bg-elevated/40 p-5 space-y-4">

@@ -6,6 +6,7 @@ import {
 import { BarChart3, Clock, Loader2, Play, Users, RefreshCw } from "lucide-react";
 import { fetchChannelAnalytics, type AnalyticsSummary } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
+import { VerifiedViews } from "@/components/verified-views";
 import { AudienceReach } from "@/components/audience-reach";
 import { ShareMenu } from "@/components/share-menu";
 import { useAuth } from "@/hooks/use-auth";
@@ -79,6 +80,7 @@ export function AnalyticsPanel({ channelId }: { channelId: string }) {
         ))}
       </div>
 
+      <VerifiedViews channelId={channelId} days={range} />
       {data.plays === 0 && data.watchHours === 0 && <p className="text-sm text-muted-foreground border-y border-border py-4">No playback recorded in this period yet.</p>}
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2 rounded-lg border border-border bg-elevated/40 p-5">

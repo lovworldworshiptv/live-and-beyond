@@ -7,6 +7,7 @@ import { QualityMenu } from "@/components/quality-menu";
 import { usePlayerFullscreen } from "@/components/player-fullscreen";
 import { MovieArtwork } from "./movie-artwork";
 import { recordPlaybackEvent } from "@/lib/analytics";
+import { createWatchMeter } from "@/lib/watch-meter";
 import { createOnDemandStartTracker } from "@/lib/on-demand-start";
 import { resolveVideoSource } from "@/lib/video-source";
 import { pauseAllMedia, pauseOtherMedia, registerMediaElement } from "@/lib/media-playback";
@@ -67,6 +68,14 @@ export function StreamPlayer({
   const [muted, setMuted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const trackStart = useRef<(() => void) | null>(null);
+  const meterInfo = useRef({ analyticsTitleId, analyticsChannelId, kind });
+  meterInfo.current = { analyticsTitleId, analyticsChannelId, kind };
+  const meter = useRef(createWatchMeter((seconds) => {
+    const m = meterInfo.current;
+    if (!m.analyticsTitleId) return;
+    void recordPlaybackEvent({ titleId: m.analyticsTitleId, channelId: m.analyticsChannelId, service: m.kind === "audio" ? "podcast" : "vod", event: "heartbeat", seconds });
+  }));
+  useEffect(() => () => meter.current.pause(), [src]);
   useEffect(() => {
     trackStart.current = createOnDemandStartTracker(() => {
       if (!analyticsTitleId) return;
@@ -133,7 +142,7 @@ export function StreamPlayer({
 
       {playing && source.type === "youtube" && source.id && (
         <YoutubePlayer id={source.id} start={resume.current?.sec ? Math.floor(resume.current.sec) : source.start} resumePct={resume.current?.pct} onPlaying={() => trackStart.current?.()} onError={failPlayback}
-          onProgress={(time, duration) => { if (titleId && Number.isFinite(duration) && duration > 0 && time > 0) setProgress(titleId, Math.min(100, time / duration * 100), time); }} />
+          onProgress={(time, duration) => { meter.current.tick(time); if (titleId && Number.isFinite(duration) && duration > 0 && time > 0) setProgress(titleId, Math.min(100, time / duration * 100), time); }} />
       )}
       {playing && source.type === "embed" && (
         <iframe src={source.url} title="Cloud video player" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" className="absolute inset-0 size-full border-0" />
@@ -147,9 +156,9 @@ export function StreamPlayer({
             autoPlay
             onPlaying={() => { if (mediaRef.current) pauseOtherMedia(mediaRef.current); trackStart.current?.(); }}
             onLoadedMetadata={resumeMedia}
-            onTimeUpdate={saveProgress}
-            onPause={saveProgress}
-            onEnded={saveProgress}
+            onTimeUpdate={() => { if (mediaRef.current) meter.current.tick(mediaRef.current.currentTime); saveProgress(); }}
+            onPause={() => { meter.current.pause(); saveProgress(); }}
+            onEnded={() => { meter.current.pause(); saveProgress(); }}
             onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)}
             onError={() => failPlayback("Playback unavailable. Tap play to retry.")}
             controlsList="nodownload noplaybackrate"
@@ -163,7 +172,7 @@ export function StreamPlayer({
         </>
       )}
       {playing && kind === "audio" && source.type === "media" && (
-        <audio ref={(el) => { mediaRef.current = el; }} autoPlay controls onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)} onPlaying={() => trackStart.current?.()} onLoadedMetadata={resumeMedia} onTimeUpdate={saveProgress} onPause={saveProgress} onEnded={saveProgress} onError={() => failPlayback("Audio unavailable. Tap play to retry.")} className="absolute bottom-3 inset-x-3 z-10 w-[calc(100%-1.5rem)]" />
+        <audio ref={(el) => { mediaRef.current = el; }} autoPlay controls onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)} onPlaying={() => trackStart.current?.()} onLoadedMetadata={resumeMedia} onTimeUpdate={() => { if (mediaRef.current) meter.current.tick(mediaRef.current.currentTime); saveProgress(); }} onPause={() => { meter.current.pause(); saveProgress(); }} onEnded={() => { meter.current.pause(); saveProgress(); }} onError={() => failPlayback("Audio unavailable. Tap play to retry.")} className="absolute bottom-3 inset-x-3 z-10 w-[calc(100%-1.5rem)]" />
       )}
 
       {!playing && (

@@ -26,7 +26,13 @@ describe("selectTrendingOnDemand", () => {
     const titles = [mk("a", "Film"), mk("b", "Music"), mk("c", "Series")];
     const r = selectTrendingOnDemand(titles, [
       { slug: "b", plays: 9 }, { slug: "x", plays: 8 }, { slug: "a", plays: 5 }, { slug: "b", plays: 2 }, { slug: "c", plays: 0 },
-    ]);
+    ], "none");
     expect(r.map((t: { id: string }) => t.id)).toEqual(["b", "a"]);
+  });
+  it("keeps the pinned title at #1 and ranks the rest by plays", () => {
+    const mk = (id: string, kind: string) => ({ id, kind }) as never;
+    const titles = [mk("a", "Film"), mk("b", "Music"), mk("jesus", "Music")];
+    const r = selectTrendingOnDemand(titles, [{ slug: "b", plays: 9 }, { slug: "jesus", plays: 1 }, { slug: "a", plays: 5 }], "jesus");
+    expect(r.map((t: { id: string }) => t.id)).toEqual(["jesus", "b", "a"]);
   });
 });

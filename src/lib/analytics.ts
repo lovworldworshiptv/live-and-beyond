@@ -104,3 +104,23 @@ export async function fetchChannelAnalytics(channelId: string, days = 14): Promi
     })),
   };
 }
+
+export type ViewStatRow = { channel_id: string | null; service: string; title_id: string | null; views: number; streams: number; watch_seconds: number; unique_viewers: number };
+
+/** Verified views (30s+ per viewer per target per day). Pass null channel for platform-wide (admins only). */
+export async function fetchViewStats(channelId: string | null, days: number): Promise<ViewStatRow[]> {
+  const { data, error } = await supabase.rpc("channel_view_stats", { _channel_id: channelId as string, _days: days });
+  if (error) throw error;
+  return ((data ?? []) as ViewStatRow[]).map((r) => ({ ...r, views: Number(r.views), streams: Number(r.streams), watch_seconds: Number(r.watch_seconds), unique_viewers: Number(r.unique_viewers) }));
+}
+
+export function summarizeByService(rows: ViewStatRow[]) {
+  const groups: Record<"ondemand" | "tv" | "radio", { views: number; streams: number; hours: number }> = {
+    ondemand: { views: 0, streams: 0, hours: 0 }, tv: { views: 0, streams: 0, hours: 0 }, radio: { views: 0, streams: 0, hours: 0 },
+  };
+  for (const r of rows) {
+    const key = r.service === "tv" ? "tv" : r.service === "radio" ? "radio" : "ondemand";
+    groups[key].views += r.views; groups[key].streams += r.streams; groups[key].hours += r.watch_seconds / 3600;
+  }
+  return groups;
+}

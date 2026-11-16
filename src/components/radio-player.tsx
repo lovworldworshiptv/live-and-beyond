@@ -181,6 +181,14 @@ export function RadioPlayerProvider({ children }: { children: ReactNode }) {
     [station, playing, error, nowPlaying, play, toggle, stop, muted, toggleMute, volume, setVolume, visualRef],
   );
 
+  // Listening time: 30-second heartbeats while audio is actually playing (YouTube-style 30s view rule).
+  useEffect(() => {
+    if (!playing || !station?.channelId) return;
+    const channelId = station.channelId;
+    const t = setInterval(() => { void recordPlaybackEvent({ channelId, service: "radio", event: "heartbeat", seconds: 30 }); }, 30_000);
+    return () => clearInterval(t);
+  }, [playing, station?.channelId]);
+
   return (
     <Ctx.Provider value={value}>
       {children}

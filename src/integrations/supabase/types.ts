@@ -1646,6 +1646,18 @@ export type Database = {
         Returns: boolean
       }
       channel_follower_count: { Args: { _channel_id: string }; Returns: number }
+      channel_view_stats: {
+        Args: { _channel_id: string; _days?: number }
+        Returns: {
+          channel_id: string
+          service: string
+          streams: number
+          title_id: string
+          unique_viewers: number
+          views: number
+          watch_seconds: number
+        }[]
+      }
       featured_on_demand_rankings: {
         Args: never
         Returns: {
