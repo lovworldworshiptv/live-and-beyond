@@ -1,0 +1,2 @@
+ALTER TABLE public.cms_titles ADD COLUMN IF NOT EXISTS fresh_override text NOT NULL DEFAULT 'auto';
+ALTER TABLE public.cms_titles ADD CONSTRAINT cms_titles_fresh_override_chk CHECK (fresh_override IN ('auto','on','off'));

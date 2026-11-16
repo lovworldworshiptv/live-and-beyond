@@ -405,6 +405,8 @@ export type Title = {
   featured?: boolean;
   cast?: string[];
   streamUrl?: string;
+  publishedAt?: string;
+  freshOverride?: "auto" | "on" | "off";
 };
 
 export const titles: Title[] = [

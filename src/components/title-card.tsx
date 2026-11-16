@@ -7,6 +7,7 @@ import { useHlsAttach } from "@/hooks/use-hls";
 import { ShareMenu } from "./share-menu";
 import type { Title } from "@/lib/catalog";
 import { MovieArtwork } from "./movie-artwork";
+import { isFresh } from "@/lib/fresh";
 
 const PREVIEW_WIDTH = 340;
 
@@ -135,11 +136,13 @@ export function TitleCard({
             className="size-full object-cover transition duration-500 group-hover:scale-105"
           />
           <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
-          {rank && (
+          {rank ? (
             <span className="absolute top-3 left-3 text-[11px] font-bold px-2 py-1 rounded bg-background/60 backdrop-blur">
               #{rank}
             </span>
-          )}
+          ) : isFresh(t) ? (
+            <span className="absolute top-3 left-3 text-[10px] font-bold px-2 py-1 rounded bg-primary text-primary-foreground shadow">Fresh</span>
+          ) : null}
           <span className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-background/60 backdrop-blur text-foreground/90">
             {t.kind}
           </span>

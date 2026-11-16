@@ -632,6 +632,7 @@ export type Database = {
           duration_label: string | null
           duration_minutes: number | null
           episodes: number | null
+          fresh_override: string
           genre: string | null
           id: string
           is_featured: boolean
@@ -661,6 +662,7 @@ export type Database = {
           duration_label?: string | null
           duration_minutes?: number | null
           episodes?: number | null
+          fresh_override?: string
           genre?: string | null
           id?: string
           is_featured?: boolean
@@ -690,6 +692,7 @@ export type Database = {
           duration_label?: string | null
           duration_minutes?: number | null
           episodes?: number | null
+          fresh_override?: string
           genre?: string | null
           id?: string
           is_featured?: boolean

@@ -637,3 +637,12 @@ html[data-shielded] video { filter: brightness(0) !important; }
   }
   .theatre-stage[data-theatre] .theatre-bar { padding-inline: 1.5rem; }
 }
+
+/* Netflix-style outlined Top 10 rank numerals */
+.trending-rank {
+  font-family: "Oswald", "Bebas Neue", system-ui, sans-serif;
+  color: var(--background);
+  -webkit-text-stroke: 3px color-mix(in oklab, var(--foreground) 85%, transparent);
+  paint-order: stroke fill;
+  text-shadow: 0 6px 24px color-mix(in oklab, var(--background) 70%, transparent);
+}

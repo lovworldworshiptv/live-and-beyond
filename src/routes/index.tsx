@@ -350,12 +350,13 @@ function Index() {
       {trending.length > 0 && (
         <Row title="Trending On Lettflix" subtitle="Most watched across the platform this week.">
           {trending.map((t, i) => (
-            <Link key={t.id} to="/movies/$titleId" params={{ titleId: t.id }} className="group shrink-0 w-[62vw] sm:w-[260px] snap-start">
-              <div className="relative rounded-xl overflow-hidden border border-border bg-elevated/50">
+            <Link key={t.id} to="/movies/$titleId" params={{ titleId: t.id }} aria-label={`#${i + 1} ${t.title}`} className="group shrink-0 w-[78vw] sm:w-[330px] snap-start block">
+              <div className="flex items-end">
+              <span aria-hidden className="trending-rank shrink-0 -mr-3 sm:-mr-4 select-none font-black leading-[0.74] text-[96px] sm:text-[132px] tracking-[-0.08em]">{i + 1}</span>
+              <div className="relative z-10 min-w-0 flex-1 rounded-xl overflow-hidden border border-border bg-elevated/50">
                 <div className="relative aspect-video overflow-hidden">
                   <img src={t.hero || t.cover} alt={t.title} loading="lazy" className="size-full object-cover group-hover:scale-105 transition duration-500" />
                   <div className="absolute inset-0" style={{ background: "var(--gradient-card)" }} />
-                  <span className="absolute top-3 left-3 text-[11px] font-bold px-2 py-1 rounded bg-black/60 backdrop-blur text-white">#{i + 1}</span>
                   <div
                     className="absolute bottom-3 right-3 size-11 rounded-full bg-white/95 grid place-items-center opacity-0 group-hover:opacity-100 transition"
                     style={{
@@ -366,7 +367,8 @@ function Index() {
                   </div>
                 </div>
               </div>
-              <div className="mt-2.5">
+              </div>
+              <div className="mt-2.5 pl-12 sm:pl-16">
                 <div className="font-semibold leading-tight line-clamp-1">{t.title}</div>
                 <div className="text-xs text-[color:var(--muted-foreground)] mt-0.5">{t.kind} · {t.duration}</div>
               </div>

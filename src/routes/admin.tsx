@@ -516,6 +516,7 @@ type Title = {
   episodes: number | null;
   cast_list: string[] | null;
   is_featured: boolean | null;
+  fresh_override?: "auto" | "on" | "off";
   stream_url: string | null;
   trailer_url: string | null;
   poster_url: string | null;
@@ -659,6 +660,7 @@ function TitleEditor({ value, onClose, onSave }: { value: Partial<Title>; onClos
       <div className="flex gap-6 mt-4">
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_published ?? true} onChange={(e) => set("is_published", e.target.checked)} /> Published</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_featured ?? false} onChange={(e) => set("is_featured", e.target.checked)} /> Featured</label>
+        <label className="flex items-center gap-2 text-sm">Fresh tag <select className="h-8 rounded-md border border-border bg-background px-2 text-sm" value={form.fresh_override ?? "auto"} onChange={(e) => set("fresh_override", e.target.value as "auto" | "on" | "off")}><option value="auto">Automatic (music, 14 days)</option><option value="on">Always show</option><option value="off">Hide</option></select></label>
       </div>
     </ModalShell>
   );

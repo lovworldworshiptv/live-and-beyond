@@ -119,6 +119,8 @@ export function mapTitleRow(r: TitleRow): Title {
     featured: r.is_featured ?? fallback?.featured,
     cast: (r.cast_list && r.cast_list.length ? r.cast_list : fallback?.cast) ?? undefined,
     streamUrl: r.stream_url ?? fallback?.streamUrl ?? undefined,
+    publishedAt: (r as { created_at?: string }).created_at,
+    freshOverride: ((r as { fresh_override?: string }).fresh_override ?? "auto") as "auto" | "on" | "off",
   };
 }
 

@@ -35,6 +35,7 @@ type Draft = {
   display_order: number;
   is_published: boolean;
   is_featured: boolean;
+  fresh_override: "auto" | "on" | "off";
   publish_to_catalog: boolean;
 };
 
@@ -59,6 +60,7 @@ const EMPTY: Draft = {
   display_order: 0,
   is_published: true,
   is_featured: false,
+  fresh_override: "auto",
   publish_to_catalog: true,
 };
 
@@ -116,6 +118,7 @@ function ContentEditor({
         trailer_url: (t.trailer_url as string) ?? d.trailer_url,
         is_published: Boolean(t.is_published),
         is_featured: Boolean(t.is_featured),
+        fresh_override: ((t.fresh_override as string) ?? "auto") as "auto" | "on" | "off",
         publish_to_catalog: true,
       }));
     })();
@@ -181,6 +184,7 @@ function ContentEditor({
         display_order: draft.display_order,
         is_published: draft.is_published,
         is_featured: draft.is_featured,
+        fresh_override: draft.fresh_override,
       };
 
       if (draft.title_id) {
@@ -319,6 +323,14 @@ function ContentEditor({
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={draft.is_featured} onChange={(e) => set("is_featured", e.target.checked)} /> Featured
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            Fresh tag
+            <select className="h-8 rounded-md border border-border bg-background px-2 text-sm" value={draft.fresh_override} onChange={(e) => set("fresh_override", e.target.value as "auto" | "on" | "off")}>
+              <option value="auto">Automatic (music, 14 days)</option>
+              <option value="on">Always show</option>
+              <option value="off">Hide</option>
+            </select>
           </label>
         </div>
         <p className="mt-2 text-xs text-[color:var(--muted-foreground)]">
