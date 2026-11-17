@@ -40,3 +40,4 @@
 - Radio microphone size follows captured playback RMS, never simulated beats, plus a steady artwork-coloured on-air ripple while playing; enable anonymous CORS only on verified compatible feeds, leaving unsupported streams audible with a static mic.
 - Radio volume controls operate on the shared playback element so full and compact players stay synchronized; TV uses remote-focusable volume steps.
 - Hero is admin-only; channels request via hero_requests.
+- Homepage slide artwork and default Watch Now links use the same CMS title slug so both open the same on-demand video.

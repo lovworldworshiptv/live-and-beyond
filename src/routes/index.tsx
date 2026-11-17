@@ -217,6 +217,15 @@ function Index() {
                 );
               })}
 
+              {!isLegacy && activeSlide.contentId && (
+                <Link
+                  to="/movies/$titleId"
+                  params={{ titleId: activeSlide.contentId }}
+                  aria-label={`Watch ${activeTitle || "featured video"}`}
+                  className="absolute inset-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2"
+                />
+              )}
+
               {hasHeroText && (
                 <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               )}
