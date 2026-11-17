@@ -12,6 +12,7 @@ import { createOnDemandStartTracker } from "@/lib/on-demand-start";
 import { resolveVideoSource } from "@/lib/video-source";
 import { pauseAllMedia, pauseOtherMedia, registerMediaElement } from "@/lib/media-playback";
 import { YoutubePlayer } from "./youtube-player";
+import { NextOnDemand, type NextOnDemandTitle } from "./next-on-demand";
 
 type Props = {
   src?: string | null;
@@ -25,6 +26,9 @@ type Props = {
   className?: string;
   posterOverlayLabel?: string;
   ariaPlayLabel?: string;
+  nextTitle?: NextOnDemandTitle;
+  onNext?: () => void;
+  startFromBeginning?: boolean;
 };
 
 export function StreamPlayer({
@@ -39,11 +43,17 @@ export function StreamPlayer({
   className,
   posterOverlayLabel,
   ariaPlayLabel = "Play",
+  nextTitle,
+  onNext,
+  startFromBeginning = false,
 }: Props) {
+  const [ended, setEnded] = useState(false);
+  const endedOnce = useRef(false);
   const { items: progressItems, setProgress } = useProgress();
   // Exact resume point captured once per title; finished titles restart from the beginning.
   const resume = useRef<{ sec?: number; pct?: number } | null>(null);
   const captureResume = () => {
+    if (startFromBeginning) { resume.current = {}; return; }
     const entry = titleId ? progressItems.find((i) => i.titleId === titleId) : undefined;
     resume.current = entry && entry.positionPct > 0 && entry.positionPct < 95 ? { sec: entry.positionSec, pct: entry.positionPct } : {};
   };
@@ -93,11 +103,11 @@ export function StreamPlayer({
   // Autoplay preference: start once when the player opens with a playable source.
   const autoStarted = useRef(false);
   useEffect(() => {
-    if (autoStarted.current || !settings.autoplayPlayback || !src || playing) return;
+    if (autoStarted.current || !(autoPlay || settings.autoplayPlayback) || !src) return;
     autoStarted.current = true;
     start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.autoplayPlayback, src]);
+  }, [settings.autoplayPlayback, autoPlay, src]);
 
   const start = () => {
     if (source.type === "invalid") {
@@ -106,6 +116,7 @@ export function StreamPlayer({
     }
     // Last action wins: starting this video stops live TV and radio.
     pauseAllMedia();
+    setEnded(false);
     captureResume();
     setError(null);
     setMuted(false);
@@ -125,6 +136,8 @@ export function StreamPlayer({
     m.muted = !m.muted;
     setMuted(m.muted);
   };
+  const finish = () => { if (endedOnce.current) return; endedOnce.current = true; meter.current.pause(); saveProgress(); setEnded(true); };
+  const didPlay = () => { endedOnce.current = false; setEnded(false); trackStart.current?.(); };
 
   return (
     <div ref={frameRef} data-protected-player data-video-player={kind === "video" || undefined} data-idle={fs.idle || undefined} className={`relative rounded-lg overflow-hidden border border-border bg-background ${className ?? "aspect-video"}`}>
@@ -141,7 +154,7 @@ export function StreamPlayer({
       {!playing && <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />}
 
       {playing && source.type === "youtube" && source.id && (
-        <YoutubePlayer id={source.id} start={resume.current?.sec ? Math.floor(resume.current.sec) : source.start} resumePct={resume.current?.pct} onPlaying={() => trackStart.current?.()} onError={failPlayback}
+        <YoutubePlayer id={source.id} start={resume.current?.sec ? Math.floor(resume.current.sec) : source.start} resumePct={resume.current?.pct} onPlaying={didPlay} onEnded={finish} onError={failPlayback}
           onProgress={(time, duration) => { meter.current.tick(time); if (titleId && Number.isFinite(duration) && duration > 0 && time > 0) setProgress(titleId, Math.min(100, time / duration * 100), time); }} />
       )}
       {playing && source.type === "embed" && (
@@ -154,11 +167,11 @@ export function StreamPlayer({
             playsInline
             controls
             autoPlay
-            onPlaying={() => { if (mediaRef.current) pauseOtherMedia(mediaRef.current); trackStart.current?.(); }}
+            onPlaying={() => { if (mediaRef.current) pauseOtherMedia(mediaRef.current); didPlay(); }}
             onLoadedMetadata={resumeMedia}
             onTimeUpdate={() => { if (mediaRef.current) meter.current.tick(mediaRef.current.currentTime); saveProgress(); }}
             onPause={() => { meter.current.pause(); saveProgress(); }}
-            onEnded={() => { meter.current.pause(); saveProgress(); }}
+            onEnded={finish}
             onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)}
             onError={() => failPlayback("Playback unavailable. Tap play to retry.")}
             controlsList="nodownload noplaybackrate"
@@ -172,7 +185,7 @@ export function StreamPlayer({
         </>
       )}
       {playing && kind === "audio" && source.type === "media" && (
-        <audio ref={(el) => { mediaRef.current = el; }} autoPlay controls onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)} onPlaying={() => trackStart.current?.()} onLoadedMetadata={resumeMedia} onTimeUpdate={() => { if (mediaRef.current) meter.current.tick(mediaRef.current.currentTime); saveProgress(); }} onPause={() => { meter.current.pause(); saveProgress(); }} onEnded={() => { meter.current.pause(); saveProgress(); }} onError={() => failPlayback("Audio unavailable. Tap play to retry.")} className="absolute bottom-3 inset-x-3 z-10 w-[calc(100%-1.5rem)]" />
+        <audio ref={(el) => { mediaRef.current = el; }} autoPlay controls onVolumeChange={() => setMuted(mediaRef.current?.muted ?? false)} onPlaying={didPlay} onLoadedMetadata={resumeMedia} onTimeUpdate={() => { if (mediaRef.current) meter.current.tick(mediaRef.current.currentTime); saveProgress(); }} onPause={() => { meter.current.pause(); saveProgress(); }} onEnded={finish} onError={() => failPlayback("Audio unavailable. Tap play to retry.")} className="absolute bottom-3 inset-x-3 z-10 w-[calc(100%-1.5rem)]" />
       )}
 
       {!playing && (
@@ -212,6 +225,7 @@ export function StreamPlayer({
         </div>
       )}
 
+      {ended && nextTitle && onNext && <NextOnDemand title={nextTitle} onPlay={onNext} onCancel={() => setEnded(false)} />}
       {error && (
         <div role="alert" className="absolute bottom-3 inset-x-3 text-center px-3 py-2 rounded bg-background/80 text-xs text-foreground">
           <p>{error}</p>

@@ -1,5 +1,8 @@
 # Lettflix Roadmap
 
+## Continuous playback
+- [x] Add a cancellable 5–1 next-title countdown and automatic on-demand continuation on web and TV; exact timing tests and real Favour-to-Split Second playback verified, including cancellation and narrow-screen fitting.
+
 ## Playback exclusivity
 - [x] On-demand videos stop live TV and radio and vice versa — last action wins via a shared player registry (web); TV app parity still open.
 

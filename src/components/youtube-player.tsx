@@ -32,14 +32,15 @@ const fmt = (s: number) => {
 type Props = {
   id: string; start?: number; resumePct?: number;
   onPlaying: () => void; onProgress: (time: number, duration: number) => void; onError: (message: string) => void;
+  onEnded?: () => void;
 };
 
 /** YouTube playback behind Lettflix controls: a transparent shield stops YouTube's hover chrome and logo from appearing. */
-export function YoutubePlayer({ id, start = 0, resumePct, onPlaying, onProgress, onError }: Props) {
+export function YoutubePlayer({ id, start = 0, resumePct, onPlaying, onProgress, onError, onEnded }: Props) {
   const wrap = useRef<HTMLDivElement>(null);
   const host = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
-  const callbacks = useRef({ onPlaying, onProgress, onError }); callbacks.current = { onPlaying, onProgress, onError };
+  const callbacks = useRef({ onPlaying, onProgress, onError, onEnded }); callbacks.current = { onPlaying, onProgress, onError, onEnded };
   const [active, setActive] = useState(false);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -69,6 +70,7 @@ export function YoutubePlayer({ id, start = 0, resumePct, onPlaying, onProgress,
             setActive(playingNow);
             if (playingNow) callbacks.current.onPlaying();
             if (event.data === 2 || event.data === 0) save();
+            if (event.data === 0) callbacks.current.onEnded?.();
           },
           onError: (event: { data: number }) => callbacks.current.onError([101, 150].includes(event.data) ? "This video's owner does not allow embedded playback." : event.data === 100 ? "This YouTube video is private or unavailable." : "YouTube playback unavailable. Tap play to retry."),
         },

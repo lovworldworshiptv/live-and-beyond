@@ -12,6 +12,47 @@
   var seconds = 0, started = false, onClose = null, seekPreview = null, seekTimer = null;
   var loadGeneration = 0, radioTimer = null, reactiveContext = null, reactiveFrame = null, reactiveStream = null;
   var provider = null, youtube = null, youtubeState = -1, providerHost = null;
+  var nextTimer = null, nextTitle = null, titleFinished = false;
+  function cancelNext() {
+    clearInterval(nextTimer); nextTimer = null; nextTitle = null;
+    if (ui.next) ui.next.hidden = true;
+  }
+  function playNext() {
+    if (!nextTitle) return;
+    var title = nextTitle, generation = loadGeneration;
+    cancelNext();
+    Playback.resolveTitle(title.slug, false).then(function (s) {
+      if (generation !== loadGeneration) return;
+      if (src && started) Playback.record(src, "stop", seconds % 30);
+      load(s); Nav.focus(ui.play);
+    }, function (e) { if (generation === loadGeneration) fail(e.message); });
+  }
+  function finishTitle() {
+    save();
+    if (!src || src.kind !== "title" || titleFinished) return;
+    titleFinished = true;
+    var current = Api.Catalog.title(src.id), titles = Api.Catalog.data.titles;
+    var candidates = titles.filter(function (t) {
+      var type = VideoSource.resolve(t.stream).type;
+      return t.slug !== src.id && (type === "media" || type === "youtube");
+    });
+    var same = candidates.filter(function (t) { return current && t.category === current.category; });
+    var pool = same.length ? same : candidates;
+    var index = titles.indexOf(current);
+    nextTitle = pool.filter(function (t) { return titles.indexOf(t) > index; })[0] || pool[0];
+    if (!nextTitle) { close(); return; }
+    var remaining = 5;
+    ui.nextTitle.textContent = U.titleCase(nextTitle.title);
+    ui.nextArt.src = nextTitle.poster || nextTitle.backdrop || "assets/lettflix_icon.png";
+    ui.nextArt.onerror = function () { this.onerror = null; this.src = "assets/lettflix_icon.png"; };
+    ui.nextCount.textContent = "Up next in " + remaining;
+    ui.next.hidden = false; Nav.focus(ui.nextCancel);
+    nextTimer = setInterval(function () {
+      remaining--;
+      if (remaining === 0) playNext();
+      else ui.nextCount.textContent = "Up next in " + remaining;
+    }, 1000);
+  }
   function paused() { return youtube ? youtubeState !== 1 : video.paused; }
   // The YouTube player gains its methods only once its iframe API is ready; until then report 0.
   function yt(name) { return youtube && typeof youtube[name] === "function" ? (youtube[name]() || 0) : 0; }
@@ -45,7 +86,7 @@
             paintPlay(); paintTime();
             if (event.data === 1 && !started) { started = true; Playback.record(src, "start"); showControls(); }
             if (event.data === 2) { save(); showControls(true); }
-            if (event.data === 0) { save(); close(); }
+            if (event.data === 0) finishTitle();
           },
           onError: function (event) { if (generation === loadGeneration) fail(event.data === 101 || event.data === 150 ? "This video's owner does not allow embedded playback." : "This YouTube video is unavailable."); }
         }
@@ -127,6 +168,11 @@
     ui.spinner = h("div.spinner");
     ui.error = h("div.player-error");
     ui.flash = h("div.seek-flash");
+    ui.nextArt = h("img", { alt: "" });
+    ui.nextCount = h("p", { role: "status", "aria-live": "polite", "aria-atomic": "true" });
+    ui.nextTitle = h("h2");
+    ui.nextCancel = UI.button("Cancel", "", function () { cancelNext(); Nav.focus(ui.play); }, "ghost");
+    ui.next = h("div.player-next", { hidden: true }, [ui.nextArt, ui.nextCount, ui.nextTitle, ui.nextCancel, UI.button("Play now", "play", playNext, "primary")]);
     ui.controls = h("div.player-controls", null, [
       h("div.player-top", null, [h("div", null, [ui.title, ui.sub]), ui.live]),
       h("div.player-bottom", null, [
@@ -134,7 +180,7 @@
         h("div.player-buttons", null, [ui.rw, ui.play, ui.ff, ui.volume, h("div.spacer"), ui.restart])
       ])
     ]);
-    root = h("div.player", null, [video, ui.art, ui.radioView, ui.spinner, ui.flash, ui.error, ui.controls]);
+    root = h("div.player", null, [video, ui.art, ui.radioView, ui.spinner, ui.flash, ui.error, ui.controls, ui.next]);
     ["playing", "pause", "waiting", "canplay", "ended", "error", "loadedmetadata"].forEach(function (ev) { video.addEventListener(ev, onMedia); });
     video.addEventListener("volumechange", paintVolume);
   }
@@ -161,7 +207,7 @@
     if (e.type === "error" && !hls) fail("This stream can't play right now.");
     if (e.type === "ended") {
       if (src && src.playout) return reloadChannel();           // next programme
-      if (src && src.kind === "title") { save(); close(); }
+      if (src && src.kind === "title") finishTitle();
     }
     if (e.type === "pause") showControls(true);
   }
@@ -281,6 +327,8 @@
   }
 
   function load(s) {
+    cancelNext();
+    titleFinished = false;
     loadGeneration++; clearTimeout(radioTimer); stopReactive(); video.pause(); detachHls(); detachProvider();
     src = s; seconds = 0; started = false; seekPreview = null;
     root.className = "player buffering controls";
@@ -312,6 +360,11 @@
   }
 
   function onKey(k) {
+    if (nextTitle) {
+      if (k === KEY.BACK || k === KEY.STOP) { cancelNext(); Nav.focus(ui.play); return true; }
+      if (k === KEY.OK || k === KEY.LEFT || k === KEY.RIGHT || k === KEY.UP || k === KEY.DOWN) return false;
+      cancelNext();
+    }
     if (provider && provider.type === "embed") { if (k === KEY.BACK || k === KEY.STOP) { close(); return true; } return false; }
     if (root.classList.contains("failed")) { if (k === KEY.BACK) close(); else if (k === KEY.OK && src) load(src); return true; }
     var visible = root.classList.contains("controls");
@@ -337,6 +390,7 @@
   }
 
   function close() {
+    cancelNext();
     loadGeneration++; clearTimeout(radioTimer); clearTimeout(autoTimer); clearTimeout(stallTimer); autoRetries = 0; stopReactive();
     save();
     detachProvider();

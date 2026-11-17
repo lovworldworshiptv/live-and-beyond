@@ -9,6 +9,7 @@ export function registerMediaElement(media: HTMLMediaElement) {
 
 /** Pause every registered player (used when a non-media player such as an embed starts). */
 export function pauseAllMedia() {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("lettflix:playback-start"));
   for (const media of activeMedia) {
     if (!media.paused) media.pause();
   }
@@ -16,6 +17,7 @@ export function pauseAllMedia() {
 
 /** Pause every other registered player — the viewer's last action takes preeminence. */
 export function pauseOtherMedia(except: HTMLMediaElement) {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("lettflix:playback-start"));
   for (const media of activeMedia) {
     if (media !== except && !media.paused) media.pause();
   }

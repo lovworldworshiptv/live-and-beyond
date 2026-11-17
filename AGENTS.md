@@ -41,3 +41,4 @@
 - Radio volume controls operate on the shared playback element so full and compact players stay synchronized; TV uses remote-focusable volume steps.
 - Hero is admin-only; channels request via hero_requests.
 - Homepage slide artwork and default Watch Now links use the same CMS title slug so both open the same on-demand video.
+- On-demand continuation uses real ended events and a cancellable five-second countdown, selecting playable published catalogue titles; new titles start at zero and switching media cancels pending continuation so the latest viewer action wins.

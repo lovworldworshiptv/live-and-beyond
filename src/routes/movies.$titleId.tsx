@@ -16,6 +16,8 @@ import { useMyList } from "@/lib/personal";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { MovieArtwork } from "@/components/movie-artwork";
+import { nextOnDemand } from "@/lib/continuous-playback";
+import { resolveVideoSource } from "@/lib/video-source";
 
 export const Route = createFileRoute("/movies/$titleId")({
   head: () => ({
@@ -65,6 +67,8 @@ function TitleError({ error, reset }: ErrorComponentProps) {
 }
 
 function TitleDetail() {
+  const router = useRouter();
+  const [continuousTitle, setContinuousTitle] = useState<string | null>(null);
   const { titleId } = Route.useParams();
   const [title, setTitle] = useState<Title | null>(null);
   const [analyticsIds, setAnalyticsIds] = useState<{ titleId: string; channelId: string | null } | null>(null);
@@ -110,6 +114,10 @@ function TitleDetail() {
   const audioKind = title.kind === "Podcast";
   const related = allTitles.filter((t) => t.id !== title.id && t.category === title.category);
   const alsoLike = allTitles.filter((t) => t.id !== title.id).slice(0, 6);
+  const nextTitle = nextOnDemand(title, allTitles, (url) => {
+    const source = resolveVideoSource(url);
+    return source.type === "media" || source.type === "youtube";
+  });
 
 
   return (
@@ -144,6 +152,13 @@ function TitleDetail() {
               className={audioKind ? "aspect-[21/9] lg:aspect-[21/6]" : "aspect-video"}
               posterOverlayLabel={`Play — ${title.title}`}
               ariaPlayLabel={audioKind ? "Listen" : "Play"}
+              autoPlay={continuousTitle === titleId}
+              startFromBeginning={continuousTitle === titleId}
+              nextTitle={nextTitle}
+              onNext={nextTitle ? () => {
+                setContinuousTitle(nextTitle.id);
+                void router.navigate({ to: "/movies/$titleId", params: { titleId: nextTitle.id } });
+              } : undefined}
             />
             {analyticsIds?.channelId && <BackToLive channelId={analyticsIds.channelId} onRadio={() => setPlayerKey((k) => k + 1)} />}
             {!title.streamUrl && (
