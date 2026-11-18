@@ -7,8 +7,15 @@ export function checkoutExpired(createdAt: string, now = Date.now()) {
 }
 
 export function paymentReturnReference(search: Record<string, unknown>) {
-  const value = search.reference ?? search.transaction_ref ?? search.TransactionRef;
-  return typeof value === "string" && /^[A-Za-z0-9_-]{1,128}$/.test(value) ? value : undefined;
+  // Squad may append its own reference, producing duplicate keys (arrays) or "ref?reference=ref".
+  for (const key of ["reference", "transaction_ref", "TransactionRef", "ref", "trans_ref"]) {
+    const raw = search[key];
+    for (const item of Array.isArray(raw) ? raw : [raw]) {
+      const value = typeof item === "string" ? item.split("?")[0].split("&")[0].trim() : undefined;
+      if (value && /^[A-Za-z0-9_-]{1,128}$/.test(value)) return value;
+    }
+  }
+  return undefined;
 }
 
 export function canPollPayment(startedAt: number, now: number) {

@@ -18,3 +18,9 @@ describe("PPV checkout timing and return", () => {
     expect(paymentReturnReference({ reference: "x".repeat(129) })).toBeUndefined();
   });
 });
+import { paymentReturnReference as readRef } from "./ppv-checkout";
+import { describe as d2, it as i2, expect as e2 } from "vitest";
+d2("Squad return reference", () => {
+  i2("accepts duplicated reference keys", () => { e2(readRef({ reference: ["LF-abc", "LF-abc"] })).toBe("LF-abc"); });
+  i2("strips an appended query", () => { e2(readRef({ reference: "LF-abc?reference=LF-abc" })).toBe("LF-abc"); });
+});

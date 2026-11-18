@@ -61,7 +61,7 @@ export async function verifySquadTransaction(config: SquadConfig, reference: str
     status: String(data?.transaction_status ?? "").toLowerCase(),
     ok: String(data?.transaction_status ?? "").toLowerCase() === "success" && Number.isSafeInteger(amount) && amount > 0,
     amountKobo: Number.isSafeInteger(amount) ? amount : 0,
-    currency: String(data?.currency ?? ""),
+    currency: String(data?.currency ?? data?.transaction_currency_id ?? ""),
     reference: String(data?.transaction_ref ?? ""),
   };
 }
