@@ -56,7 +56,7 @@ function EventEditor({ event, onClose, onSave }: { event: Event | null; onClose:
   const [kind, setKind] = useState<"live" | "live_replay" | "vod">(event?.event_type === "vod" ? "vod" : event?.event_type === "live_replay" ? "live_replay" : "live");
   const localStart = event ? new Date(new Date(event.starts_at).getTime() - new Date(event.starts_at).getTimezoneOffset() * 60000).toISOString().slice(0,16) : "";
   const [starts, setStarts] = useState(localStart);
-  const salesDate = new Date(event && !event.sales_starts_at.startsWith("1970-") ? event.sales_starts_at : Date.now());
+  const salesDate = new Date(event ? (event.sales_starts_at.startsWith("1970-") ? Math.min(Date.parse(event.created_at), Date.parse(event.starts_at)) : event.sales_starts_at) : Date.now());
   const [salesStarts, setSalesStarts] = useState(new Date(salesDate.getTime() - salesDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16));
   const [duration, setDuration] = useState(event?.duration_minutes ?? 120);
   const [hours, setHours] = useState(event?.replay_hours ?? 48);
