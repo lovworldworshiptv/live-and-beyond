@@ -3,8 +3,15 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 export type SquadConfig = { secret: string; sandbox: boolean };
 export type SquadVerification = { ok: boolean; amountKobo: number; currency: string; reference: string; status?: string };
 
+export function squadSecretForEnvironment(sandbox: boolean, secrets: { live?: string; sandbox?: string }) {
+  const secret = sandbox ? secrets.sandbox : secrets.live;
+  if (!secret || (!sandbox && secret.startsWith("sandbox_sk_"))) throw new Error("Squad credentials unavailable for this environment");
+  return secret;
+}
+
 function base(config: SquadConfig) {
   if (!config.secret) throw new Error("Squad is not configured");
+  if (!config.sandbox && config.secret.startsWith("sandbox_sk_")) throw new Error("Sandbox credentials cannot be used for live payments");
   return config.sandbox ? "https://sandbox-api-d.squadco.com" : "https://api-d.squadco.com";
 }
 

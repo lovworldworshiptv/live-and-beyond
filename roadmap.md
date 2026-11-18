@@ -1,5 +1,12 @@
 # Lettflix Roadmap
 
+## PPV enterprise security — approved implementation, phase by phase
+- [x] Phase 1 code: isolated Squad test/live credentials, 30-minute checkout reuse with one-shot initiation, dedicated two-minute return polling, durable webhook deduplication and mismatch review/audit; 37 tests pass, signed-in return denial/forged webhook checks pass. Provider acceptance remains blocked below.
+- [ ] Phase 2: pending-order reconciliation, transactional ledger/refund processing and receipt delivery; provider acceptance and refund API verification required.
+- [ ] Phase 3: persistent playback sessions, configured concurrency/geo rules and waiting room; policy decisions and protected test asset required.
+- [ ] Phase 4: finance/payout safeguards, expanded lifecycle/pricing, DRM and operational acceptance; business policies and provider capabilities required.
+- [ ] Confirmation/checkout rate limits: standard backend primitive unavailable; ad-hoc implementation requires the user's explicit tradeoff approval.
+
 ## Channel Pay-Per-View — Phase 1
 - [x] Implement persisted Squad checkout, verified buyer return/signed webhook confirmation, atomic single-receipt settlement and renewable protected PPV viewer delivery; 32 tests pass and authenticated missing-order/closed-sales/forged-webhook checks pass.
 - [ ] Complete real payment → protected playback → refund acceptance; blocked by missing Squad sandbox credentials, approved event and protected video asset. Live sales remain locked.

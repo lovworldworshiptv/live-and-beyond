@@ -148,6 +148,20 @@
       "when": 1794993723944,
       "tag": "0020_ppv_sales_availability",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794994771071,
+      "tag": "0021_ppv_checkout_and_webhook_security",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794994893557,
+      "tag": "0022_ppv_audit_least_privilege",
+      "breakpoints": true
     }
   ]
 }

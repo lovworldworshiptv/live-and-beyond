@@ -1615,11 +1615,15 @@ export type Database = {
           access_expires_at: string
           access_starts_at: string
           amount_minor: number
+          checkout_claimed_at: string | null
+          checkout_expires_at: string
+          checkout_url: string | null
           commission_bps: number
           created_at: string
           currency: string
           event_id: string
           id: string
+          payment_state: string
           provider: string
           reference: string
           refunded_at: string | null
@@ -1632,11 +1636,15 @@ export type Database = {
           access_expires_at: string
           access_starts_at: string
           amount_minor: number
+          checkout_claimed_at?: string | null
+          checkout_expires_at?: string
+          checkout_url?: string | null
           commission_bps?: number
           created_at?: string
           currency?: string
           event_id: string
           id?: string
+          payment_state?: string
           provider?: string
           reference: string
           refunded_at?: string | null
@@ -1649,11 +1657,15 @@ export type Database = {
           access_expires_at?: string
           access_starts_at?: string
           amount_minor?: number
+          checkout_claimed_at?: string | null
+          checkout_expires_at?: string
+          checkout_url?: string | null
           commission_bps?: number
           created_at?: string
           currency?: string
           event_id?: string
           id?: string
+          payment_state?: string
           provider?: string
           reference?: string
           refunded_at?: string | null
@@ -1668,6 +1680,35 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "ppv_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ppv_payment_audit: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          order_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          order_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ppv_payment_audit_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "ppv_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -1753,6 +1794,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ppv_webhook_events: {
+        Row: {
+          event: string
+          payload_sha256: string
+          processed_at: string | null
+          received_at: string
+          reference: string
+        }
+        Insert: {
+          event: string
+          payload_sha256: string
+          processed_at?: string | null
+          received_at?: string
+          reference: string
+        }
+        Update: {
+          event?: string
+          payload_sha256?: string
+          processed_at?: string | null
+          received_at?: string
+          reference?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -1915,6 +1980,7 @@ export type Database = {
           watch_seconds: number
         }[]
       }
+      claim_ppv_checkout: { Args: { _order_id: string }; Returns: boolean }
       confirm_ppv_payment: {
         Args: {
           _amount: number
@@ -1964,11 +2030,15 @@ export type Database = {
           access_expires_at: string
           access_starts_at: string
           amount_minor: number
+          checkout_claimed_at: string | null
+          checkout_expires_at: string
+          checkout_url: string | null
           commission_bps: number
           created_at: string
           currency: string
           event_id: string
           id: string
+          payment_state: string
           provider: string
           reference: string
           refunded_at: string | null
@@ -2009,6 +2079,7 @@ export type Database = {
           id: string
         }[]
       }
+      review_ppv_payment: { Args: { _order_id: string }; Returns: undefined }
       review_ppv_spotlight: {
         Args: { _approve: boolean; _note: string; _request_id: string }
         Returns: undefined

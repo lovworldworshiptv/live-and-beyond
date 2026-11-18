@@ -1,10 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createHmac } from "node:crypto";
-import { initiateSquadTransaction, validSquadSignature, verifySquadTransaction } from "./squad.server";
+import { initiateSquadTransaction, validSquadSignature, verifySquadTransaction, squadSecretForEnvironment } from "./squad.server";
 
 afterEach(() => vi.unstubAllGlobals());
 
 describe("Squad payment preparation", () => {
+  it("never sends the live credential to sandbox or sandbox credentials to live", () => {
+    expect(() => squadSecretForEnvironment(true, { live: "live-fixture" })).toThrow();
+    expect(squadSecretForEnvironment(true, { live: "live-fixture", sandbox: "sandbox-fixture" })).toBe("sandbox-fixture");
+    expect(() => squadSecretForEnvironment(false, { live: "sandbox_sk_fixture" })).toThrow();
+  });
   it("sends exact kobo amounts without a second conversion", async () => {
     const mock = vi.fn().mockResolvedValue(Response.json({ success: true, data: { checkout_url: "https://checkout.squadco.com/test" } }));
     vi.stubGlobal("fetch", mock);

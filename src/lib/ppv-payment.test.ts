@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
 afterEach(() => vi.unstubAllGlobals());
-const order: Database["public"]["Tables"]["ppv_orders"]["Row"] = { id: "order", event_id: "event", user_id: "buyer", provider: "squad", reference: "LF-TEST", sandbox: true, amount_minor: 250005, currency: "NGN", status: "unpaid", verified_at: null, refunded_at: null, access_starts_at: "2026-11-18T00:00:00Z", access_expires_at: "2026-11-19T00:00:00Z", created_at: "2026-11-18T00:00:00Z", commission_bps: 2500 };
+const order: Database["public"]["Tables"]["ppv_orders"]["Row"] = { id: "order", event_id: "event", user_id: "buyer", provider: "squad", reference: "LF-TEST", sandbox: true, amount_minor: 250005, currency: "NGN", status: "unpaid", verified_at: null, refunded_at: null, access_starts_at: "2026-11-18T00:00:00Z", access_expires_at: "2026-11-19T00:00:00Z", created_at: "2026-11-18T00:00:00Z", commission_bps: 2500, checkout_url: null, checkout_claimed_at: null, checkout_expires_at: "2026-11-18T00:30:00Z", payment_state: "pending" };
 function setup(change = {}) {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ success: true, data: { transaction_status: "Success", transaction_amount: 250005, currency: "NGN", transaction_ref: "LF-TEST", ...change } })));
   const rpc = vi.fn().mockResolvedValue({ data: "paid", error: null });
@@ -26,7 +26,9 @@ describe("Squad PPV confirmation", () => {
   });
   it.each([{ transaction_amount: 250004 }, { currency: "USD" }, { transaction_ref: "OTHER" }])("rejects mismatched provider confirmation %j", async change => {
     const { client, rpc } = setup(change);
-    await expect(confirmSquadOrder(client, order, "fixture")).rejects.toThrow("mismatch"); expect(rpc).not.toHaveBeenCalled();
+    await expect(confirmSquadOrder(client, order, "fixture")).rejects.toThrow("mismatch");
+    expect(rpc).toHaveBeenCalledWith("review_ppv_payment", { _order_id: "order" });
+    expect(rpc).not.toHaveBeenCalledWith("confirm_ppv_payment", expect.anything());
   });
   it("never restores an already refunded order", async () => {
     const { client, rpc } = setup();

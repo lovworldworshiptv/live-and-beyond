@@ -20,26 +20,30 @@ export const startPpvCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ eventId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const secret = process.env["SQUAD_SECRET_KEY"];
     const accountId = process.env["CLOUDFLARE_ACCOUNT_ID"];
     const apiToken = process.env["CLOUDFLARE_STREAM_API_TOKEN"];
-    if (!secret || !accountId || !apiToken) throw new Error("Ticket sales are unavailable");
+    if (!accountId || !apiToken) throw new Error("Ticket sales are unavailable");
     const auth = await context.supabase.auth.getUser();
     if (auth.error || !auth.data.user?.email) throw new Error("A verified email is required for checkout");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { signPremiumStream } = await import("./ppv-access.server");
     const asset = await supabaseAdmin.from("ppv_playback_assets").select("*").eq("event_id", data.eventId).maybeSingle();
     if (asset.error || !asset.data?.sales_enabled) throw new Error("Ticket sales are not open");
+    const { squadSecretForEnvironment } = await import("./squad.server");
+    const secret = squadSecretForEnvironment(asset.data.sandbox, { live: process.env["SQUAD_SECRET_KEY"], sandbox: process.env["SQUAD_SANDBOX_SECRET_KEY"] });
     // Confirm real protected delivery before asking anyone to pay.
     await signPremiumStream({ accountId, apiToken }, asset.data.stream_uid, Math.floor(Date.now() / 1000) + 60);
     const reference = `LF-${crypto.randomUUID()}`;
     const prepared = await supabaseAdmin.rpc("prepare_ppv_order", { _event_id: data.eventId, _user_id: context.userId, _reference: reference });
     const order = prepared.data?.[0];
     if (prepared.error || !order) throw new Error("Ticket sales are unavailable for this event");
-    const { getRequest } = await import("@tanstack/react-start/server");
-    const origin = new URL(getRequest().url).origin;
+    if (order.checkout_url) return { orderId: order.id, checkoutUrl: order.checkout_url };
+    const claim = await supabaseAdmin.rpc("claim_ppv_checkout", { _order_id: order.id });
+    if (claim.error || claim.data !== true) throw new Error("Checkout is being prepared. Please try again shortly.");
     const { initiateSquadTransaction } = await import("./squad.server");
-    const checkout = await initiateSquadTransaction({ secret, sandbox: order.sandbox }, { email: auth.data.user.email, amountKobo: order.amount_minor, reference: order.reference, callbackUrl: `${origin}/ppv/${data.eventId}?order=${order.id}`, customerName: "Lettflix viewer" });
+    const checkout = await initiateSquadTransaction({ secret, sandbox: order.sandbox }, { email: auth.data.user.email, amountKobo: order.amount_minor, reference: order.reference, callbackUrl: `https://lettflix.com/ppv/payment/return?reference=${encodeURIComponent(order.reference)}`, customerName: "Lettflix viewer" });
+    const saved = await supabaseAdmin.from("ppv_orders").update({ checkout_url: checkout.checkoutUrl }).eq("id", order.id);
+    if (saved.error) throw new Error("Could not save checkout. Please try again shortly.");
     return { orderId: order.id, checkoutUrl: checkout.checkoutUrl };
   });
 
@@ -51,12 +55,30 @@ export const confirmPpvPurchase = createServerFn({ method: "POST" })
     setResponseHeader("Cache-Control", "no-store");
     const found = await context.supabase.from("ppv_orders").select("*").eq("id", data.orderId).eq("user_id", context.userId).maybeSingle();
     if (found.error || !found.data) throw new Error("Purchase not found");
-    const secret = process.env["SQUAD_SECRET_KEY"];
-    if (!secret) throw new Error("Payment confirmation unavailable");
+    const { squadSecretForEnvironment } = await import("./squad.server");
+    const secret = squadSecretForEnvironment(found.data.sandbox, { live: process.env["SQUAD_SECRET_KEY"], sandbox: process.env["SQUAD_SANDBOX_SECRET_KEY"] });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { confirmSquadOrder } = await import("./ppv-payment.server");
     try { return await confirmSquadOrder(supabaseAdmin, found.data, secret); }
     catch { throw new Error("Payment could not be verified. Please try again."); }
+  });
+
+export const confirmPpvReturn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ reference: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/) }).strict().parse(input))
+  .handler(async ({ data, context }) => {
+    const { setResponseHeader } = await import("@tanstack/react-start/server");
+    setResponseHeader("Cache-Control", "no-store");
+    const found = await context.supabase.from("ppv_orders").select("*").eq("reference", data.reference).eq("user_id", context.userId).maybeSingle();
+    if (found.error || !found.data) { const { setResponseStatus } = await import("@tanstack/react-start/server"); setResponseStatus(404); throw new Error("Purchase not found"); }
+    const { squadSecretForEnvironment } = await import("./squad.server");
+    const secret = squadSecretForEnvironment(found.data.sandbox, { live: process.env["SQUAD_SECRET_KEY"], sandbox: process.env["SQUAD_SANDBOX_SECRET_KEY"] });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { confirmSquadOrder } = await import("./ppv-payment.server");
+    try {
+      const result = await confirmSquadOrder(supabaseAdmin, found.data, secret);
+      return { ...result, eventId: found.data.event_id };
+    } catch { throw new Error("Payment could not be verified. Please try again."); }
   });
 
 export const savePpvDelivery = createServerFn({ method: "POST" })
@@ -87,7 +109,8 @@ export const getPpvPlaybackAccess = createServerFn({ method: "POST" })
     const result = await context.supabase.from("ppv_orders").select("*").eq("id", data.orderId).eq("user_id", context.userId).maybeSingle();
     if (result.error || !result.data || result.data.status !== "paid" || !result.data.verified_at || result.data.refunded_at) throw new Error("A verified PPV purchase is required");
     const order = result.data;
-    const secret = process.env["SQUAD_SECRET_KEY"];
+    const { squadSecretForEnvironment } = await import("./squad.server");
+    const secret = squadSecretForEnvironment(order.sandbox, { live: process.env["SQUAD_SECRET_KEY"], sandbox: process.env["SQUAD_SANDBOX_SECRET_KEY"] });
     const accountId = process.env["CLOUDFLARE_ACCOUNT_ID"];
     const apiToken = process.env["CLOUDFLARE_STREAM_API_TOKEN"];
     if (!secret || !accountId || !apiToken) throw new Error("Protected PPV playback is unavailable");
@@ -117,11 +140,12 @@ export const checkSquadPayments = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const check = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
     if (check.error || check.data !== true) throw new Error("Admin access required");
-    const secret = process.env["SQUAD_SECRET_KEY"];
+    const { squadSecretForEnvironment } = await import("./squad.server");
+    const secret = data.sandbox ? process.env["SQUAD_SANDBOX_SECRET_KEY"] : process.env["SQUAD_SECRET_KEY"];
     if (!secret) return { configured: false, connected: false, sandbox: data.sandbox, error: "Squad key not saved" };
     try {
       const { checkSquadConnection } = await import("./squad.server");
-      await checkSquadConnection({ secret, sandbox: data.sandbox });
+      await checkSquadConnection({ secret: squadSecretForEnvironment(data.sandbox, { live: process.env["SQUAD_SECRET_KEY"], sandbox: process.env["SQUAD_SANDBOX_SECRET_KEY"] }), sandbox: data.sandbox });
       return { configured: true, connected: true, sandbox: data.sandbox, error: null };
     } catch (error) {
       return { configured: true, connected: false, sandbox: data.sandbox, error: error instanceof Error ? error.message : "Squad could not be reached" };

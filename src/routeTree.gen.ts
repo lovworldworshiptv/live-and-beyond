@@ -46,6 +46,7 @@ import { Route as ApiPublicRadioNowPlayingRouteImport } from './routes/api/publi
 import { Route as ChannelsChannelIdIndexRouteImport } from './routes/channels.$channelId.index'
 import { Route as ChannelsChannelIdLibraryRouteImport } from './routes/channels.$channelId.library'
 import { Route as OpenTypeIdRouteImport } from './routes/open.$type.$id'
+import { Route as PpvPaymentReturnRouteImport } from './routes/ppv.payment.return'
 import { Route as ApiPublicKingschatCallbackRouteImport } from './routes/api/public/kingschat/callback'
 import { Route as ApiPublicKingschatLoginRouteImport } from './routes/api/public/kingschat/login'
 import { Route as ApiPublicKingschatPollRouteImport } from './routes/api/public/kingschat/poll'
@@ -240,6 +241,11 @@ const OpenTypeIdRoute = OpenTypeIdRouteImport.update({
   path: '/open/$type/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PpvPaymentReturnRoute = PpvPaymentReturnRouteImport.update({
+  id: '/ppv/payment/return',
+  path: '/ppv/payment/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicKingschatCallbackRoute =
   ApiPublicKingschatCallbackRouteImport.update({
     id: '/api/public/kingschat/callback',
@@ -309,6 +315,7 @@ export interface FileRoutesByFullPath {
   '/api/public/radio-now-playing': typeof ApiPublicRadioNowPlayingRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/open/$type/$id': typeof OpenTypeIdRoute
+  '/ppv/payment/return': typeof PpvPaymentReturnRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
   '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
@@ -351,6 +358,7 @@ export interface FileRoutesByTo {
   '/api/public/radio-now-playing': typeof ApiPublicRadioNowPlayingRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/open/$type/$id': typeof OpenTypeIdRoute
+  '/ppv/payment/return': typeof PpvPaymentReturnRoute
   '/channels/$channelId': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
   '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
@@ -397,6 +405,7 @@ export interface FileRoutesById {
   '/api/public/radio-now-playing': typeof ApiPublicRadioNowPlayingRoute
   '/channels/$channelId/library': typeof ChannelsChannelIdLibraryRoute
   '/open/$type/$id': typeof OpenTypeIdRoute
+  '/ppv/payment/return': typeof PpvPaymentReturnRoute
   '/channels/$channelId/': typeof ChannelsChannelIdIndexRoute
   '/api/public/kingschat/callback': typeof ApiPublicKingschatCallbackRoute
   '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
@@ -444,6 +453,7 @@ export interface FileRouteTypes {
     | '/api/public/radio-now-playing'
     | '/channels/$channelId/library'
     | '/open/$type/$id'
+    | '/ppv/payment/return'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
     | '/api/public/kingschat/login'
@@ -486,6 +496,7 @@ export interface FileRouteTypes {
     | '/api/public/radio-now-playing'
     | '/channels/$channelId/library'
     | '/open/$type/$id'
+    | '/ppv/payment/return'
     | '/channels/$channelId'
     | '/api/public/kingschat/callback'
     | '/api/public/kingschat/login'
@@ -531,6 +542,7 @@ export interface FileRouteTypes {
     | '/api/public/radio-now-playing'
     | '/channels/$channelId/library'
     | '/open/$type/$id'
+    | '/ppv/payment/return'
     | '/channels/$channelId/'
     | '/api/public/kingschat/callback'
     | '/api/public/kingschat/login'
@@ -571,6 +583,7 @@ export interface RootRouteChildren {
   PpvEventIdRoute: typeof PpvEventIdRoute
   ApiPublicRadioNowPlayingRoute: typeof ApiPublicRadioNowPlayingRoute
   OpenTypeIdRoute: typeof OpenTypeIdRoute
+  PpvPaymentReturnRoute: typeof PpvPaymentReturnRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
   ApiPublicKingschatLoginRoute: typeof ApiPublicKingschatLoginRoute
   ApiPublicKingschatPollRoute: typeof ApiPublicKingschatPollRoute
@@ -840,6 +853,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OpenTypeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ppv/payment/return': {
+      id: '/ppv/payment/return'
+      path: '/ppv/payment/return'
+      fullPath: '/ppv/payment/return'
+      preLoaderRoute: typeof PpvPaymentReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/kingschat/callback': {
       id: '/api/public/kingschat/callback'
       path: '/api/public/kingschat/callback'
@@ -967,6 +987,7 @@ const rootRouteChildren: RootRouteChildren = {
   PpvEventIdRoute: PpvEventIdRoute,
   ApiPublicRadioNowPlayingRoute: ApiPublicRadioNowPlayingRoute,
   OpenTypeIdRoute: OpenTypeIdRoute,
+  PpvPaymentReturnRoute: PpvPaymentReturnRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,
   ApiPublicKingschatLoginRoute: ApiPublicKingschatLoginRoute,
   ApiPublicKingschatPollRoute: ApiPublicKingschatPollRoute,

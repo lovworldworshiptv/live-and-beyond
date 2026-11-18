@@ -19,7 +19,7 @@ This is a test-commerce/access foundation, **not a verified production Phase 1 M
 - Buyer checkout, authenticated return confirmation, signed Squad charge webhook and the protected event player are wired. The player renews through the gate before token expiry and stops on failed renewal. Real buy/watch/refund verification remains blocked by provider test credentials and a configured premium asset; no native/TV purchase integration is opened.
 
 ## Squad confirmation and delivery
-- Redirect: the current site's `/ppv/<event UUID>?order=<order UUID>`. Return reconciliation never trusts query parameters as payment proof.
+- Redirect: server-fixed `https://lettflix.com/ppv/payment/return?reference=<reference>`. The dedicated page polls buyer-scoped API confirmation every three seconds for up to two minutes; URL status/amount never grant access. Old order-ID returns remain supported. Provider-added reference aliases remain to be confirmed in sandbox.
 - Webhook: `https://lettflix.com/api/public/squad/webhook`, after publishing. Configure this in Squad; it validates raw-body `x-squad-encrypted-body` HMAC-SHA512, resolves the persisted reference and re-verifies through Squad before settlement.
 - `confirm_ppv_payment` locks the order, checks reference/currency/exact amount/environment and atomically writes paid status plus a single balanced revenue receipt. Duplicate callbacks cannot double-credit; refunded orders stay terminal. Receipt split is on gross until actual gateway-fee settlement is implemented, not a withdrawable wallet balance.
 - Refund status returned by Squad verification is persisted as terminal revocation. Automated refund initiation and reconciliation of provider refunds whose transaction endpoint continues reporting Success are not complete; live sales therefore remain locked.
@@ -46,3 +46,12 @@ This is a test-commerce/access foundation, **not a verified production Phase 1 M
 - Unit tests cover default/override split, balanced cents, dual switches, spotlight eligibility, exact price conversion, event destination and Studio return section.
 
 Stop after a verified Phase 1 commerce demo before Phase 2 tiers/promos/gifts/payouts or Phase 3 DRM/scale. Full OpenAPI and gateway test documentation follow real commerce endpoints; current internal functions are getPpvWorkspace, savePpvSettings, savePpvDraft and reviewPpvEvent.
+
+## Enterprise fix pass — checkout and webhook phase
+- Test payments require `SQUAD_SANDBOX_SECRET_KEY`; there is no live-key fallback. API host selection remains explicitly tied to the persisted order environment; a sandbox-prefixed live credential is rejected.
+- `prepare_ppv_order` serializes buyer/event preparation and reuses the same pending order for 30 minutes. Checkout URLs are persisted. `claim_ppv_checkout` permits only one provider initiation per order; an ambiguous failed initiation deliberately stays claimed until expiry rather than risk duplicate charges. Paid active purchases cannot open another checkout.
+- Expiry is derived from stored timestamps rather than an unattended cleanup timer. Expired unpaid checkouts are not reused; late verified payments still settle for safety, pending a reviewed late-payment refund policy.
+- Verified webhook events store only reference, event, payload digest and timestamps, not raw customer/payment payloads. The unique reference/event key skips completed duplicates; unfinished events retry the row-locked settlement. Raw-body HMAC is mandatory, with case-insensitive hex decoding. Sandbox must confirm provider serialization before activation.
+- Successful payment mismatches persist `payment_state=review` and a private audit entry, with no playable gate. Settlement inserts its audit entry in the same transaction as paid status and the balanced receipt.
+- No payment, refund, reconciliation, notification, concurrency or DRM acceptance is implied by this phase. No live activation, no viewer-identity watermark and no inactivity logout added.
+- Rate limiting awaits explicit approval of an ad-hoc solution because the backend has no standard primitive. Reconciliation, refunds, delivered receipts, configured concurrency/geo policies and financial ledger work remain the next phases.
