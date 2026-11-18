@@ -35,7 +35,7 @@ export function PpvDelivery({ events }: { events: { id: string; title: string }[
   const [result, setResult] = useState("");
   useEffect(() => {
     let disposed = false;
-    setUid(""); setCountries([]); setEnabled(false); setSandbox(true);
+    setUid(""); setCountries([]); setEnabled(false); setSandbox(false);
     if (!eventId) return;
     setBusy(true);
     void fetchSettings({ data: { eventId } }).then(settings => {

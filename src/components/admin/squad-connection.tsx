@@ -7,7 +7,7 @@ import { checkSquadPayments } from "@/lib/ppv.functions";
 
 export function SquadConnection() {
   const check = useServerFn(checkSquadPayments);
-  const [sandbox, setSandbox] = useState(true);
+  const [sandbox, setSandbox] = useState(false);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   async function verify() {

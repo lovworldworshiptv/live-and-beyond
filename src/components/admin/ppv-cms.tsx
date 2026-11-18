@@ -32,7 +32,7 @@ export function PpvCms() {
   if (error) return <section><p>Pay-Per-View could not be loaded.</p><Button className="mt-3" onClick={() => void load()}><RefreshCw />Try again</Button></section>;
   if (!data) return <BrandLoader variant="section" label="Loading Pay-Per-View" />;
   return <div className="space-y-8">
-    <header><h2 className="flex items-center gap-2 text-xl font-semibold"><Ticket className="text-accent" />Pay-Per-View</h2><p className="mt-2 text-sm text-muted-foreground">Event preparation and approvals · Ticket sales not yet open</p></header>
+    <header><h2 className="flex items-center gap-2 text-xl font-semibold"><Ticket className="text-accent" />Pay-Per-View</h2><p className="mt-2 text-sm text-muted-foreground">Event preparation, approvals and ticket sales</p></header>
     <SquadConnection />
     <PpvDelivery events={data.events} />
     <SettingsRow key={`platform-${data.platform?.updated_at}`} title="Platform-wide PPV" enabled={data.platform?.enabled ?? false} commission={data.platform?.platform_commission_bps ?? DEFAULT_COMMISSION_BPS} busy={busy} onSave={values => act(() => saveSettings({ data: values }))} />
