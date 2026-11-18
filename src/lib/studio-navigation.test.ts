@@ -11,4 +11,7 @@ describe("Studio return location", () => {
   it("rejects unknown sections", () => {
     expect(studioSearch({ section: "unknown" })).toEqual({});
   });
+  it("retains the Pay-Per-View section on return", () => {
+    expect(studioSearch({ section: "ppv" })).toEqual({ section: "ppv" });
+  });
 });

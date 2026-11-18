@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MediaPicker } from "@/components/media-picker";
 import { Loader2, Plus, Pencil, Trash2, ShieldCheck, ShieldOff, Video, Radio, Layers, Users as UsersIcon, LayoutDashboard, CalendarClock, Sparkles, Megaphone, Building2, KeyRound, UserPlus, Check, X, Home, Bell, ToggleRight } from "lucide-react";
 import { FeaturesCms } from "@/components/admin/features-cms";
+import { PpvCms } from "@/components/admin/ppv-cms";
 import { NotificationsCms } from "@/components/admin/notifications-cms";
 import { HeroRequestsCms } from "@/components/admin/hero-requests-cms";
 import { toast } from "sonner";
@@ -106,6 +107,7 @@ function AdminPage() {
             <TabsTrigger value="audience"><AudienceIcon className="size-4" /> Audience</TabsTrigger>
             <TabsTrigger value="notifications"><Bell className="size-4" /> Notifications</TabsTrigger>
             <TabsTrigger value="features"><ToggleRight className="size-4" /> Features</TabsTrigger>
+            <TabsTrigger value="ppv"><Sparkles className="size-4" /> Pay-Per-View</TabsTrigger>
             <TabsTrigger value="security"><KeyRound className="size-4" /> Security</TabsTrigger>
           </TabsList>
           <TabsContent value="overview"><OverviewCms /></TabsContent>
@@ -122,6 +124,7 @@ function AdminPage() {
           <TabsContent value="audience"><AudienceCms /></TabsContent>
           <TabsContent value="notifications"><NotificationsCms /></TabsContent>
           <TabsContent value="features"><FeaturesCms /></TabsContent>
+          <TabsContent value="ppv"><PpvCms /></TabsContent>
           <TabsContent value="security"><SecurityCms /></TabsContent>
         </Tabs>
 

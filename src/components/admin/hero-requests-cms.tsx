@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { reviewPpvSpotlight } from "@/lib/ppv.functions";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +10,7 @@ import { defaultHero, type HeroConfig } from "@/lib/homepage-defaults";
 import { addSlideToHero, heroSlideFromRequest, HERO_REQUEST_KINDS, type HeroRequest } from "@/lib/hero-requests";
 
 export function HeroRequestsCms({ onApproved }: { onApproved?: () => void }) {
+  const reviewPpv = useServerFn(reviewPpvSpotlight);
   const [rows, setRows] = useState<(HeroRequest & { cms_channels: { name: string } | null })[]>([]);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
@@ -21,6 +24,13 @@ export function HeroRequestsCms({ onApproved }: { onApproved?: () => void }) {
   const review = async (r: (typeof rows)[number], approve: boolean) => {
     setBusy(r.id);
     try {
+      if (r.ppv_event_id) {
+        await reviewPpv({ data: { requestId: r.id, approve, note: notes[r.id]?.trim() || "" } });
+        toast.success(approve ? "PPV event added to the homepage banner" : "Request declined");
+        if (approve) onApproved?.();
+        void load();
+        return;
+      }
       if (approve) {
         const { data } = await supabase.from("cms_settings").select("value").eq("key", "hero").maybeSingle();
         const hero = { ...defaultHero, ...((data?.value as HeroConfig | null) ?? {}) };
@@ -53,7 +63,7 @@ export function HeroRequestsCms({ onApproved }: { onApproved?: () => void }) {
           {r.image_url && <img src={r.image_url} alt="" className="h-16 w-28 shrink-0 rounded object-cover" />}
           <div className="min-w-0 flex-1">
             <p className="font-medium">{r.title}</p>
-            <p className="text-xs text-[color:var(--muted-foreground)]">{r.cms_channels?.name} · {HERO_REQUEST_KINDS.find(k => k.value === r.content_kind)?.label}{r.starts_at ? ` · ${new Date(r.starts_at).toLocaleString()}` : ""}</p>
+            <p className="text-xs text-[color:var(--muted-foreground)]">{r.cms_channels?.name} · {r.ppv_event_id ? "Pay-Per-View event" : HERO_REQUEST_KINDS.find(k => k.value === r.content_kind)?.label}{r.starts_at ? ` · ${new Date(r.starts_at).toLocaleString()}` : ""}</p>
             {r.description && <p className="text-xs mt-1 line-clamp-2">{r.description}</p>}
             <Input className="mt-2 h-9" placeholder="Optional note to the channel" value={notes[r.id] ?? ""} onChange={e => setNotes(n => ({ ...n, [r.id]: e.target.value }))} />
           </div>

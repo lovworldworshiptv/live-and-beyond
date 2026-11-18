@@ -19,6 +19,7 @@ import { RadioPanel } from "@/components/studio/radio-panel";
 import { studioSearch, type StudioTab as Tab } from "@/lib/studio-navigation";
 import { AnalyticsPanel } from "@/components/studio/analytics-panel";
 import { HeroRequestPanel } from "@/components/studio/hero-request-panel";
+import { PpvPanel } from "@/components/studio/ppv-panel";
 import { BrandLoader } from "@/components/brand-loader";
 import { TeamPanel } from "@/components/studio/team-panel";
 import {
@@ -90,7 +91,7 @@ function StudioPage() {
   const groups: { label: string; items: [Tab, string][] }[] = [
     { label: "Workspace", items: [["overview", "Overview"]] },
     { label: "Channel", items: [["channel", "Branding"], ["services", "Services"]] },
-    { label: "Content", items: [["content", "Library"], ["spotlight", "Homepage spotlight"]] },
+    { label: "Content", items: [["content", "Library"], ["spotlight", "Homepage spotlight"], ["ppv", "Pay-Per-View"]] },
     { label: "Broadcast", items: [["broadcast", "Live TV"], ["radio", "Radio"]] },
     { label: "Audience & analytics", items: [["analytics", "Analytics"], ["team", "Team"]] },
   ];
@@ -457,6 +458,7 @@ function StudioPage() {
         {tab === "radio" && channel?.id && <RadioPanel key={channel.id} channelId={channel.id} />}
 
         {tab === "spotlight" && channel?.id && <HeroRequestPanel key={channel.id} channelId={channel.id} />}
+        {tab === "ppv" && channel?.id && <PpvPanel key={channel.id} channelId={channel.id} />}
 
         {tab === "analytics" && channel?.id && <AnalyticsPanel channelId={channel.id} />}
 

@@ -838,6 +838,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          ppv_event_id: string | null
           requested_by: string
           reviewed_at: string | null
           reviewed_by: string | null
@@ -855,6 +856,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          ppv_event_id?: string | null
           requested_by: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -872,6 +874,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          ppv_event_id?: string | null
           requested_by?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -886,6 +889,13 @@ export type Database = {
             columns: ["channel_id"]
             isOneToOne: false
             referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hero_requests_ppv_event_id_fkey"
+            columns: ["ppv_event_id"]
+            isOneToOne: false
+            referencedRelation: "ppv_events"
             referencedColumns: ["id"]
           },
         ]
@@ -1497,6 +1507,130 @@ export type Database = {
           },
         ]
       }
+      ppv_channel_settings: {
+        Row: {
+          approval_required: boolean
+          channel_id: string
+          enabled: boolean
+          platform_commission_bps: number | null
+          updated_at: string
+        }
+        Insert: {
+          approval_required?: boolean
+          channel_id: string
+          enabled?: boolean
+          platform_commission_bps?: number | null
+          updated_at?: string
+        }
+        Update: {
+          approval_required?: boolean
+          channel_id?: string
+          enabled?: boolean
+          platform_commission_bps?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ppv_channel_settings_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: true
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ppv_events: {
+        Row: {
+          admin_note: string
+          channel_id: string
+          created_at: string
+          created_by: string
+          description: string
+          duration_minutes: number
+          event_type: string
+          id: string
+          platform_commission_bps: number | null
+          poster_url: string | null
+          price_ngn_minor: number
+          price_usd_minor: number
+          rental_start_days: number
+          replay_hours: number
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string
+          channel_id: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          duration_minutes?: number
+          event_type?: string
+          id?: string
+          platform_commission_bps?: number | null
+          poster_url?: string | null
+          price_ngn_minor: number
+          price_usd_minor: number
+          rental_start_days?: number
+          replay_hours?: number
+          starts_at: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string
+          channel_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          duration_minutes?: number
+          event_type?: string
+          id?: string
+          platform_commission_bps?: number | null
+          poster_url?: string | null
+          price_ngn_minor?: number
+          price_usd_minor?: number
+          rental_start_days?: number
+          replay_hours?: number
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ppv_events_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "cms_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ppv_platform_settings: {
+        Row: {
+          enabled: boolean
+          id: boolean
+          platform_commission_bps: number
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          id?: boolean
+          platform_commission_bps?: number
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          id?: boolean
+          platform_commission_bps?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1681,6 +1815,34 @@ export type Database = {
           _link: string
           _title: string
         }
+        Returns: undefined
+      }
+      public_ppv_event: {
+        Args: { _id: string }
+        Returns: {
+          channel_name: string
+          channel_slug: string
+          description: string
+          duration_minutes: number
+          event_type: string
+          id: string
+          poster_url: string
+          price_ngn_minor: number
+          price_usd_minor: number
+          rental_start_days: number
+          replay_hours: number
+          starts_at: string
+          title: string
+        }[]
+      }
+      public_ppv_spotlight_ids: {
+        Args: never
+        Returns: {
+          id: string
+        }[]
+      }
+      review_ppv_spotlight: {
+        Args: { _approve: boolean; _note: string; _request_id: string }
         Returns: undefined
       }
       trending_on_demand_rankings: {

@@ -99,6 +99,27 @@
       "when": 1794793440509,
       "tag": "0013_verified_view_stats",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1794960958624,
+      "tag": "0014_ppv_management_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1794961150630,
+      "tag": "0015_ppv_hero_spotlight_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794961440734,
+      "tag": "0016_ppv_public_spotlight_eligibility",
+      "breakpoints": true
     }
   ]
 }

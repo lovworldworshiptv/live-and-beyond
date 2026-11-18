@@ -1,0 +1,3 @@
+CREATE FUNCTION public.public_ppv_spotlight_ids() RETURNS TABLE(id uuid) LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT DISTINCT e.id FROM public.ppv_events e JOIN public.cms_channels c ON c.id=e.channel_id JOIN public.ppv_channel_settings s ON s.channel_id=c.id JOIN public.ppv_platform_settings p ON p.id JOIN public.hero_requests r ON r.ppv_event_id=e.id WHERE e.status='approved' AND r.status='approved' AND s.enabled AND p.enabled AND c.is_published AND c.deleted_at IS NULL $$;
+REVOKE ALL ON FUNCTION public.public_ppv_spotlight_ids() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.public_ppv_spotlight_ids() TO anon,authenticated,service_role;

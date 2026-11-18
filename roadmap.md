@@ -1,5 +1,14 @@
 # Lettflix Roadmap
 
+## Channel Pay-Per-View — Phase 1
+- [x] Add PPV event homepage spotlight requests; Admin approval atomically places the event on the hero, linked to event details. Verified request → approval → homepage → event page; disabled events are filtered out.
+- [x] Build and verify Admin platform/channel switches, configurable commission, Studio event drafts and approval queue. Authenticated create/submit/reload/approve verified; test content removed and switches restored off.
+- [ ] Connect Paystack and Stripe test payments — requires provider setup confirmation and credentials/connection.
+- [ ] Implement verified checkout, idempotent payment settlement, receipts and cancellation refunds after providers are connected.
+- [ ] Implement entitlements, protected signed HLS delivery and newest-session takeover; requires a premium source with token-enforced delivery, never a public channel/YouTube URL.
+- [ ] Verify buy → watch → device takeover → refund → revoked access in test mode; deliver Phase 1 demo checklist before Phase 2.
+- [ ] Native/TV purchase entitlement handoff after web checkout and protected playback are verified; native billing is ported separately by Claude Code.
+
 ## Continuous playback
 - [x] Add a cancellable 5–1 next-title countdown and automatic on-demand continuation on web and TV; exact timing tests and real Favour-to-Split Second playback verified, including cancellation and narrow-screen fitting.
 

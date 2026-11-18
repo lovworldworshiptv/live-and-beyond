@@ -40,6 +40,7 @@ import { Route as CollectionsCollectionIdRouteImport } from './routes/collection
 import { Route as KCodeRouteImport } from './routes/k.$code'
 import { Route as MoviesIndexRouteImport } from './routes/movies.index'
 import { Route as MoviesTitleIdRouteImport } from './routes/movies.$titleId'
+import { Route as PpvEventIdRouteImport } from './routes/ppv.$eventId'
 import { Route as StudioPreviewRouteImport } from './routes/studio.preview'
 import { Route as ApiPublicRadioNowPlayingRouteImport } from './routes/api/public/radio-now-playing'
 import { Route as ChannelsChannelIdIndexRouteImport } from './routes/channels.$channelId.index'
@@ -206,6 +207,11 @@ const MoviesTitleIdRoute = MoviesTitleIdRouteImport.update({
   path: '/$titleId',
   getParentRoute: () => MoviesRoute,
 } as any)
+const PpvEventIdRoute = PpvEventIdRouteImport.update({
+  id: '/ppv/$eventId',
+  path: '/ppv/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudioPreviewRoute = StudioPreviewRouteImport.update({
   id: '/preview',
   path: '/preview',
@@ -290,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/k/$code': typeof KCodeRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
+  '/ppv/$eventId': typeof PpvEventIdRoute
   '/studio/preview': typeof StudioPreviewRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
@@ -330,6 +337,7 @@ export interface FileRoutesByTo {
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/k/$code': typeof KCodeRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
+  '/ppv/$eventId': typeof PpvEventIdRoute
   '/studio/preview': typeof StudioPreviewRoute
   '/channels': typeof ChannelsIndexRoute
   '/movies': typeof MoviesIndexRoute
@@ -374,6 +382,7 @@ export interface FileRoutesById {
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/k/$code': typeof KCodeRoute
   '/movies/$titleId': typeof MoviesTitleIdRoute
+  '/ppv/$eventId': typeof PpvEventIdRoute
   '/studio/preview': typeof StudioPreviewRoute
   '/channels/': typeof ChannelsIndexRoute
   '/movies/': typeof MoviesIndexRoute
@@ -419,6 +428,7 @@ export interface FileRouteTypes {
     | '/collections/$collectionId'
     | '/k/$code'
     | '/movies/$titleId'
+    | '/ppv/$eventId'
     | '/studio/preview'
     | '/channels/'
     | '/movies/'
@@ -459,6 +469,7 @@ export interface FileRouteTypes {
     | '/collections/$collectionId'
     | '/k/$code'
     | '/movies/$titleId'
+    | '/ppv/$eventId'
     | '/studio/preview'
     | '/channels'
     | '/movies'
@@ -502,6 +513,7 @@ export interface FileRouteTypes {
     | '/collections/$collectionId'
     | '/k/$code'
     | '/movies/$titleId'
+    | '/ppv/$eventId'
     | '/studio/preview'
     | '/channels/'
     | '/movies/'
@@ -544,6 +556,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   KCodeRoute: typeof KCodeRoute
+  PpvEventIdRoute: typeof PpvEventIdRoute
   ApiPublicRadioNowPlayingRoute: typeof ApiPublicRadioNowPlayingRoute
   OpenTypeIdRoute: typeof OpenTypeIdRoute
   ApiPublicKingschatCallbackRoute: typeof ApiPublicKingschatCallbackRoute
@@ -772,6 +785,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MoviesTitleIdRouteImport
       parentRoute: typeof MoviesRoute
     }
+    '/ppv/$eventId': {
+      id: '/ppv/$eventId'
+      path: '/ppv/$eventId'
+      fullPath: '/ppv/$eventId'
+      preLoaderRoute: typeof PpvEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/studio/preview': {
       id: '/studio/preview'
       path: '/preview'
@@ -924,6 +944,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   KCodeRoute: KCodeRoute,
+  PpvEventIdRoute: PpvEventIdRoute,
   ApiPublicRadioNowPlayingRoute: ApiPublicRadioNowPlayingRoute,
   OpenTypeIdRoute: OpenTypeIdRoute,
   ApiPublicKingschatCallbackRoute: ApiPublicKingschatCallbackRoute,

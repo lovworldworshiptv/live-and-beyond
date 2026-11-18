@@ -19,6 +19,7 @@ export type HeroSlide = {
   meta?: string;
   /** Slug of the linked on-demand title — powers Watch Now / More Info. */
   contentId?: string;
+  ppvEventId?: string;
   primaryCta?: HeroCta;
   secondaryCta?: HeroCta;
   tertiaryCta?: HeroCta;

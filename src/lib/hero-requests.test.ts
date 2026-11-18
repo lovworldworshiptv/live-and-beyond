@@ -5,6 +5,12 @@ import { defaultHero } from "./homepage-defaults";
 const base: HeroRequest = { id: "1", channel_id: "c", content_kind: "movie", title: "The First Extraction", description: "d", content_slug: "the-first-extrction", image_url: "https://x/y.jpg", starts_at: null, status: "pending", admin_note: null, created_at: "" };
 
 describe("hero requests", () => {
+  it("links approved PPV requests to their event, never a free movie player", () => {
+    const slide = heroSlideFromRequest({ ...base, content_kind: "ppv", ppv_event_id: "event-1" }, "Lettflix");
+    expect(slide.primaryCta?.to).toBe("/ppv/event-1");
+    expect(slide.contentId).toBeUndefined();
+    expect(slide.ppvEventId).toBe("event-1");
+  });
   it("links an approved movie to its title", () => {
     const s = heroSlideFromRequest(base, "Lettflix Movies");
     expect(s.contentId).toBe("the-first-extrction");

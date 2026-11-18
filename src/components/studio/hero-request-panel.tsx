@@ -75,7 +75,7 @@ export function HeroRequestPanel({ channelId }: { channelId: string }) {
       <form onSubmit={submit} className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2">
         <label className="text-sm grid gap-1">What to feature
           <select className={field} value={kind} onChange={e => setKind(e.target.value as HeroRequestKind)}>
-            {HERO_REQUEST_KINDS.map(k => <option key={k.value} value={k.value}>{k.label}</option>)}
+            {HERO_REQUEST_KINDS.filter(k => k.value !== "ppv").map(k => <option key={k.value} value={k.value}>{k.label}</option>)}
           </select>
         </label>
         {kind === "upcoming" ? (
@@ -102,7 +102,7 @@ export function HeroRequestPanel({ channelId }: { channelId: string }) {
             {r.image_url && <img src={r.image_url} alt="" className="h-12 w-20 shrink-0 rounded object-cover" />}
             <div className="min-w-0 flex-1">
               <p className="font-medium truncate">{r.title}</p>
-              <p className="text-xs text-muted-foreground">{HERO_REQUEST_KINDS.find(k => k.value === r.content_kind)?.label} · {STATUS[r.status]}</p>
+              <p className="text-xs text-muted-foreground">{r.ppv_event_id ? "Pay-Per-View event" : HERO_REQUEST_KINDS.find(k => k.value === r.content_kind)?.label} · {STATUS[r.status]}</p>
               {r.admin_note && <p className="text-xs mt-1">Note: {r.admin_note}</p>}
             </div>
             {r.status === "pending" && <Button size="icon" variant="ghost" aria-label="Withdraw request" onClick={() => withdraw(r.id)}><Trash2 className="size-4" /></Button>}

@@ -32,6 +32,7 @@ import { LandingPage } from "@/components/landing-page";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { selectFeaturedOnDemand, selectTrendingOnDemand } from "@/lib/featured-on-demand";
+import { ppvSlideEligible } from "@/lib/ppv";
 
 import heroImg from "@/assets/hero-broadcast.jpg";
 import ch1 from "@/assets/channel-1.jpg";
@@ -78,6 +79,11 @@ const COLLECTION_GRADIENTS = [
 
 function Index() {
   const { value: hero } = useCmsSetting<HeroConfig>("hero", defaultHero);
+  const { data: eligibleSpotlights = [] } = useQuery({ queryKey: ["ppv-spotlight-ids"], queryFn: async () => {
+    const result = await supabase.rpc("public_ppv_spotlight_ids");
+    if (result.error) throw result.error;
+    return (result.data ?? []).map(item => item.id);
+  }, staleTime: 0, refetchInterval: 15000 });
   const { channels } = useCmsChannels();
   const { titles } = useCmsTitles();
   const { events } = useCmsEvents(8);
@@ -127,9 +133,9 @@ function Index() {
   const cmsSlides = useMemo(
     () =>
       (hero.slides ?? []).filter(
-        (x) => x && x.visible !== false && (x.imageUrl || x.title || x.badge || x.description || x.contentId),
+        (x) => x && x.visible !== false && ppvSlideEligible(x.ppvEventId, eligibleSpotlights) && (x.imageUrl || x.title || x.badge || x.description || x.contentId),
       ),
-    [hero],
+    [hero, eligibleSpotlights],
   );
   const heroSlides = useMemo(() => {
     const mainVisible =
