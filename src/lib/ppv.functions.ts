@@ -3,6 +3,39 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ppvDraftSchema } from "./ppv";
 
+export const getPpvPlaybackAccess = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ orderId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { setResponseHeader } = await import("@tanstack/react-start/server");
+    setResponseHeader("Cache-Control", "no-store");
+    const result = await context.supabase.from("ppv_orders").select("*").eq("id", data.orderId).eq("user_id", context.userId).maybeSingle();
+    if (result.error || !result.data || result.data.status !== "paid" || !result.data.verified_at || result.data.refunded_at) throw new Error("A verified PPV purchase is required");
+    const order = result.data;
+    const secret = process.env["SQUAD_SECRET_KEY"];
+    const accountId = process.env["CLOUDFLARE_ACCOUNT_ID"];
+    const apiToken = process.env["CLOUDFLARE_STREAM_API_TOKEN"];
+    if (!secret || !accountId || !apiToken) throw new Error("Protected PPV playback is unavailable");
+    // Owner has been authenticated and scoped above. Privileged reads are only
+    // for private delivery configuration and current payment revocation state.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { authorizePpvPlayback, signPremiumStream } = await import("./ppv-access.server");
+    const { verifySquadTransaction } = await import("./squad.server");
+    try {
+      return await authorizePpvPlayback(order, context.userId, {
+        verify: (reference) => verifySquadTransaction({ secret, sandbox: order.sandbox }, reference),
+        gate: async () => {
+          const gate = await supabaseAdmin.rpc("ppv_playback_gate", { _order_id: data.orderId, _user_id: context.userId });
+          if (gate.error) throw new Error("Access check unavailable");
+          return gate.data?.[0] ?? null;
+        },
+        sign: (uid, expires) => signPremiumStream({ accountId, apiToken }, uid, expires),
+      });
+    } catch {
+      throw new Error("PPV access denied. Your payment must be verified, not refunded, and within its access period.");
+    }
+  });
+
 export const checkSquadPayments = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ sandbox: z.boolean() }).parse(input))

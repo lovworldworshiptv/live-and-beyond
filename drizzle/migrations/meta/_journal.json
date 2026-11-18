@@ -120,6 +120,13 @@
       "when": 1794961440734,
       "tag": "0016_ppv_public_spotlight_eligibility",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794993391411,
+      "tag": "0017_ppv_verified_playback_access",
+      "breakpoints": true
     }
   ]
 }

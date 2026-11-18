@@ -1610,6 +1610,65 @@ export type Database = {
           },
         ]
       }
+      ppv_orders: {
+        Row: {
+          access_expires_at: string
+          access_starts_at: string
+          amount_minor: number
+          created_at: string
+          currency: string
+          event_id: string
+          id: string
+          provider: string
+          reference: string
+          refunded_at: string | null
+          sandbox: boolean
+          status: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          access_expires_at: string
+          access_starts_at: string
+          amount_minor: number
+          created_at?: string
+          currency?: string
+          event_id: string
+          id?: string
+          provider?: string
+          reference: string
+          refunded_at?: string | null
+          sandbox: boolean
+          status?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          access_expires_at?: string
+          access_starts_at?: string
+          amount_minor?: number
+          created_at?: string
+          currency?: string
+          event_id?: string
+          id?: string
+          provider?: string
+          reference?: string
+          refunded_at?: string | null
+          sandbox?: boolean
+          status?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ppv_orders_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "ppv_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ppv_platform_settings: {
         Row: {
           enabled: boolean
@@ -1630,6 +1689,32 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      ppv_playback_assets: {
+        Row: {
+          event_id: string
+          sandbox: boolean
+          stream_uid: string
+        }
+        Insert: {
+          event_id: string
+          sandbox?: boolean
+          stream_uid: string
+        }
+        Update: {
+          event_id?: string
+          sandbox?: boolean
+          stream_uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ppv_playback_assets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: true
+            referencedRelation: "ppv_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -1816,6 +1901,14 @@ export type Database = {
           _title: string
         }
         Returns: undefined
+      }
+      ppv_playback_gate: {
+        Args: { _order_id: string; _user_id: string }
+        Returns: {
+          access_expires_at: string
+          sandbox: boolean
+          stream_uid: string
+        }[]
       }
       public_ppv_event: {
         Args: { _id: string }
