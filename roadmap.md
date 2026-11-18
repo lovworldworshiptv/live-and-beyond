@@ -133,3 +133,5 @@
 - [ ] Provide deployed Squad redirect and webhook addresses once order settlement exists; clarify that the referenced Logo.dev secret is not a Squad public key.
 - [x] Save Squad secret key through the secure project-secret form, matching Encyclovia AI.
 - [ ] Wire Squad checkout into persisted PPV orders and atomic settlement with protected premium delivery; requires a test account for buy/watch/refund verification.
+- [x] PPV admin: allowed countries as dropdown; explain Event / Protected Stream video ID in UI
+- [x] Squad: adopt Encyclovia key-prefix detection (sandbox_ key on SQUAD_SECRET_KEY works for test mode)

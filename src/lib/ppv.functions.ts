@@ -153,7 +153,7 @@ export const checkSquadPayments = createServerFn({ method: "POST" })
     const check = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
     if (check.error || check.data !== true) throw new Error("Admin access required");
     const { squadSecretForEnvironment } = await import("./squad.server");
-    const secret = data.sandbox ? process.env["SQUAD_SANDBOX_SECRET_KEY"] : process.env["SQUAD_SECRET_KEY"];
+    const secret = data.sandbox ? (process.env["SQUAD_SANDBOX_SECRET_KEY"] || (process.env["SQUAD_SECRET_KEY"]?.startsWith("sandbox_") ? process.env["SQUAD_SECRET_KEY"] : undefined)) : process.env["SQUAD_SECRET_KEY"];
     if (!secret) return { configured: false, connected: false, sandbox: data.sandbox, error: "Squad key not saved" };
     try {
       const { checkSquadConnection } = await import("./squad.server");

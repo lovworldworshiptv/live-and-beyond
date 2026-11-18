@@ -4,7 +4,9 @@ export type SquadConfig = { secret: string; sandbox: boolean };
 export type SquadVerification = { ok: boolean; amountKobo: number; currency: string; reference: string; status?: string };
 
 export function squadSecretForEnvironment(sandbox: boolean, secrets: { live?: string; sandbox?: string }) {
-  const secret = sandbox ? secrets.sandbox : secrets.live;
+  // Encyclovia pattern: one SQUAD_SECRET_KEY whose prefix decides the environment.
+  // A sandbox_ key on the main secret serves test mode; a dedicated sandbox secret still wins.
+  const secret = sandbox ? (secrets.sandbox || (secrets.live?.startsWith("sandbox_") ? secrets.live : undefined)) : secrets.live;
   if (!secret || (!sandbox && secret.startsWith("sandbox_sk_"))) throw new Error("Squad credentials unavailable for this environment");
   return secret;
 }

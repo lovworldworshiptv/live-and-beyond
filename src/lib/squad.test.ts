@@ -9,6 +9,7 @@ describe("Squad payment preparation", () => {
     expect(() => squadSecretForEnvironment(true, { live: "live-fixture" })).toThrow();
     expect(squadSecretForEnvironment(true, { live: "live-fixture", sandbox: "sandbox-fixture" })).toBe("sandbox-fixture");
     expect(() => squadSecretForEnvironment(false, { live: "sandbox_sk_fixture" })).toThrow();
+    expect(squadSecretForEnvironment(true, { live: "sandbox_sk_fixture" })).toBe("sandbox_sk_fixture");
   });
   it("sends exact kobo amounts without a second conversion", async () => {
     const mock = vi.fn().mockResolvedValue(Response.json({ success: true, data: { checkout_url: "https://checkout.squadco.com/test" } }));
