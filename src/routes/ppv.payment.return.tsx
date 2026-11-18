@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { CheckCircle2, RefreshCw, Play, Clock } from "lucide-react";
+import { CheckCircle2, RefreshCw, Play, Clock, Ticket } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -52,17 +52,20 @@ function PaymentReturn() {
     void poll();
     return () => { disposed = true; if (timer) clearTimeout(timer); };
   }, [user, reference, confirm, attempt]);
-  return <div className="flex min-h-screen flex-col"><SiteHeader /><main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
-    <p className="text-sm font-semibold text-accent">Lettflix Pay-Per-View</p>
-    <h1 className="mt-3 break-words text-3xl font-bold">Your Ticket Payment</h1>
-    {loading ? <BrandLoader variant="section" label="Loading account" /> : !reference ? <p role="alert" className="mt-6 text-muted-foreground">A valid payment reference is required.</p> : !user ? <div className="mt-6 space-y-4"><p>Sign in to confirm your own ticket payment.</p><Button asChild><Link to="/auth">Sign in</Link></Button></div> : <div className="mt-8 space-y-5" aria-live="polite">
+  return <div className="flex min-h-screen flex-col"><SiteHeader /><main className="mx-auto w-full max-w-md flex-1 px-4 py-10 sm:py-16">
+    <div className="rounded-xl border border-border bg-elevated p-6 text-center [&_button]:w-full [&_svg.size-10]:mx-auto">
+    <p className="flex items-center justify-center gap-2 text-sm font-semibold text-accent"><Ticket className="size-4" />Lettflix Pay-Per-View</p>
+    <h1 className="mt-2 break-words text-2xl font-bold">Your ticket payment</h1>
+    {loading ? <BrandLoader variant="section" label="Loading account" /> : !reference ? <p role="alert" className="mt-6 text-muted-foreground">We couldn't find a payment to check. Open your event and tap Check my payment.</p> : !user ? <div className="mt-6 space-y-4"><p>Sign in to confirm your own ticket payment.</p><Button asChild className="w-full"><Link to="/auth">Sign in</Link></Button></div> : <div className="mt-8 space-y-5" aria-live="polite">
       {state === "confirming" && <BrandLoader variant="section" label="Confirming payment" />}
-      {state === "paid" && <><CheckCircle2 className="size-10 text-accent" /><h2 className="text-xl font-semibold">Payment Verified</h2><p className="text-muted-foreground">Your ticket is ready.</p>{eventId && <Button asChild><Link to="/ppv/$eventId" params={{ eventId }}><Play />Go to event</Link></Button>}</>}
+      {state === "paid" && <><CheckCircle2 className="size-10 text-accent" /><h2 className="text-xl font-semibold">Payment Verified</h2><p className="text-muted-foreground">Your ticket is ready.</p>{eventId && <Button asChild className="w-full"><Link to="/ppv/$eventId" params={{ eventId }}><Play />Go to event</Link></Button>}</>}
       {state === "pending" && <><Clock className="size-10 text-muted-foreground" /><h2 className="text-xl font-semibold">Payment Pending</h2><p className="text-muted-foreground">Your payment has not been confirmed yet. You can check again shortly.</p></>}
-      {state === "failed" && <><h2 className="text-xl font-semibold">Payment Unsuccessful</h2><p className="text-muted-foreground">No ticket access was granted.</p>{eventId && <Button asChild><Link to="/ppv/$eventId" params={{ eventId }}>Try again</Link></Button>}</>}
+      {state === "failed" && <><h2 className="text-xl font-semibold">Payment Unsuccessful</h2><p className="text-muted-foreground">No ticket access was granted.</p>{eventId && <Button asChild className="w-full"><Link to="/ppv/$eventId" params={{ eventId }}>Try again</Link></Button>}</>}
       {state === "refunded" && <><h2 className="text-xl font-semibold">Payment Refunded</h2><p className="text-muted-foreground">This ticket no longer grants access.</p></>}
       {state === "error" && <p role="alert" className="text-muted-foreground">We could not verify this purchase. Check that you are signed in to the account that bought the ticket.</p>}
       {(state === "pending" || state === "error") && <Button variant="outline" onClick={() => setAttempt(value => value + 1)}><RefreshCw />Check payment again</Button>}
     </div>}
+    <Button asChild variant="ghost" className="mt-6 w-full"><Link to="/guide">Browse events</Link></Button>
+    </div>
   </main><SiteFooter /></div>;
 }
