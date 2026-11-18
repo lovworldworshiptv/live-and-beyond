@@ -14,7 +14,10 @@ import { ppvEnabled, resolveCommission, toMinorUnits, type PpvDraft } from "@/li
 type Workspace = Awaited<ReturnType<typeof getPpvWorkspace>>;
 type Event = Workspace["events"][number];
 const SELECT = "h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm";
-const labels: Record<string, string> = { draft: "Draft", pending: "Awaiting review", approved: "Approved · Sales not open", rejected: "Changes requested" };
+const labels: Record<string, string> = { draft: "Draft", pending: "Awaiting review", approved: "Approved", rejected: "Changes requested" };
+function statusLabel(event: Event) {
+  return event.status === "approved" ? (event.sales_open ? "Approved · Sales open" : "Approved · Sales not open") : labels[event.status];
+}
 
 export function PpvPanel({ channelId }: { channelId: string }) {
   const getWorkspace = useServerFn(getPpvWorkspace);
@@ -40,7 +43,7 @@ export function PpvPanel({ channelId }: { channelId: string }) {
     <p className="text-sm text-muted-foreground">Ticket sales are not open. Payments and protected playback must be connected before launch.</p>
     {!workspace.events.length ? <div className="border-y border-border py-12 text-center"><Ticket className="mx-auto mb-3 size-8 text-muted-foreground" /><p>No PPV events yet.</p></div> : <div className="grid gap-3 sm:grid-cols-2">{workspace.events.map(event => <article key={event.id} className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
       {event.poster_url && <div className="aspect-video bg-surface"><img src={event.poster_url} alt={event.title} className="size-full object-contain" /></div>}
-      <div className="p-4"><p className="text-xs font-medium text-accent">{labels[event.status]}</p><h3 className="mt-2 break-words font-semibold">{event.title}</h3><p className="mt-1 text-xs text-muted-foreground">Ticket sales: {event.sales_starts_at.startsWith("1970-") ? "On approval and activation" : new Date(event.sales_starts_at).toLocaleString()}</p><p className="mt-1 text-xs text-muted-foreground">Event starts: {new Date(event.starts_at).toLocaleString()} · {event.event_type === "vod" ? "VOD rental" : "Live event"}</p><p className="mt-3 text-sm">{new Intl.NumberFormat(undefined, { style: "currency", currency: "NGN" }).format(event.price_ngn_minor / 100)} · {new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(event.price_usd_minor / 100)}</p>
+      <div className="p-4"><p className="text-xs font-medium text-accent">{statusLabel(event)}</p><h3 className="mt-2 break-words font-semibold">{event.title}</h3><p className="mt-1 text-xs text-muted-foreground">Ticket sales: {event.sales_starts_at.startsWith("1970-") ? "On approval and activation" : new Date(event.sales_starts_at).toLocaleString()}</p><p className="mt-1 text-xs text-muted-foreground">Event starts: {new Date(event.starts_at).toLocaleString()} · {event.event_type === "vod" ? "VOD rental" : "Live event"}</p><p className="mt-3 text-sm">{new Intl.NumberFormat(undefined, { style: "currency", currency: "NGN" }).format(event.price_ngn_minor / 100)} · {new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(event.price_usd_minor / 100)}</p>
       {event.admin_note && <p className="mt-2 text-sm text-muted-foreground">{event.admin_note}</p>}
       <div className="mt-3 flex flex-wrap gap-2"><Button variant="outline" disabled={!enabled} onClick={() => setEditor(event)}><Pencil />Edit draft</Button>
       {event.status === "approved" && <Button variant="secondary" disabled={!enabled || !event.poster_url || requesting !== null} onClick={async () => { setRequesting(event.id); try { await requestSpotlight({ data: { eventId: event.id } }); toast.success("Homepage spotlight requested — awaiting Admin approval"); } catch (err) { toast.error(err instanceof Error ? err.message : "Could not request spotlight"); } finally { setRequesting(null); } }}><Send />Request homepage spotlight</Button>}</div></div>

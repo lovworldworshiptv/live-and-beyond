@@ -222,7 +222,10 @@ export const getPpvWorkspace = createServerFn({ method: "POST" })
       settings, events, channels,
     ]);
     for (const result of [platform, channelSettings, eventRows, channelRows]) if (result.error) throw new Error("Could not load Pay-Per-View. Try again.");
-    return { platform: platform.data, settings: channelSettings.data ?? [], events: eventRows.data ?? [], channels: channelRows.data ?? [] };
+    const rows = eventRows.data ?? [];
+    const salesFlags = await Promise.all(rows.map(row => context.supabase.rpc("public_ppv_sales", { _event_id: row.id })));
+    const eventsWithSales = rows.map((row, index) => ({ ...row, sales_open: salesFlags[index].data === true }));
+    return { platform: platform.data, settings: channelSettings.data ?? [], events: eventsWithSales, channels: channelRows.data ?? [] };
   });
 
 export const savePpvSettings = createServerFn({ method: "POST" })
