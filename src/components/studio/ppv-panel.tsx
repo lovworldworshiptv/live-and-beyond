@@ -77,7 +77,7 @@ function EventEditor({ event, onClose, onSave }: { event: Event | null; onClose:
   }
   return <Dialog open onOpenChange={open => { if (!open && !busy && !uploading) onClose(); }}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto rounded-lg">
     <DialogHeader><DialogTitle>{event ? "Edit PPV event" : "New PPV event"}</DialogTitle><DialogDescription>Standard access · NGN and USD pricing</DialogDescription></DialogHeader>
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
       <label className="grid gap-1 text-sm sm:col-span-2">Title<Input value={title} maxLength={160} onChange={e => setTitle(e.target.value)} /></label>
       <label className="grid gap-1 text-sm">Event type<select className={SELECT} value={kind} onChange={e => setKind(e.target.value as typeof kind)}><option value="live">Live event</option><option value="live_replay">Live + replay</option><option value="vod">VOD rental</option></select></label>
       <label className="grid gap-1 text-sm">Ticket sales start (your local time)<Input type="datetime-local" value={salesStarts} max={starts || undefined} onChange={e => setSalesStarts(e.target.value)} /></label>
