@@ -1,3 +1,4 @@
+import { LANGUAGES } from "@/lib/languages";
 import { COUNTRIES } from "@/lib/countries";
 import { useState } from "react";
 import { Check, ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
@@ -162,7 +163,7 @@ export function ChannelSetupWizard({ channel, creatorId, initialServices, onClos
                 </select>
               </Field>
               <Field label="Language">
-                <input className={inputClass} value={str("language")} onChange={(e) => set("language", e.target.value)} placeholder="English" />
+                <select className={inputClass} value={str("language")} onChange={(e) => set("language", e.target.value)}><option value="">Choose a language…</option>{str("language") && !(LANGUAGES as readonly string[]).includes(str("language")) && <option value={str("language")}>{str("language")}</option>}{LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}</select>
               </Field>
               <Field label="Library browsing filters">
                 <select className={inputClass} value={str("library_filter_mode") || "categories"} onChange={(e) => set("library_filter_mode", e.target.value)}>

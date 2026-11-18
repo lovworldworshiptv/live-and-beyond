@@ -1,3 +1,4 @@
+import { LANGUAGES } from "@/lib/languages";
 import { AudienceCms } from "@/components/admin/audience-cms";
 import { BarChart3 as AudienceIcon } from "lucide-react";
 import { COUNTRIES } from "@/lib/countries";
@@ -436,7 +437,7 @@ export function ChannelEditor({ value, onClose, onSave, onSaved }: { value: Part
             {["Sports","News","Entertainment","Christian Living","Music","LoveWorld","Radio","Audio","Video","Education","Lifestyle","Kids & Family"].map((c) => <option key={c}>{c}</option>)}
           </select>
         </Field>
-        <Field label="Language"><input className={inputClass} value={form.language ?? ""} onChange={(e) => set("language", e.target.value)} /></Field>
+        <Field label="Language"><select className={inputClass} value={form.language ?? ""} onChange={(e) => set("language", e.target.value)}><option value="">Choose a language…</option>{form.language && !(LANGUAGES as readonly string[]).includes(form.language) && <option value={form.language}>{form.language}</option>}{LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}</select></Field>
         <Field label="Library browsing filters">
           <select className={inputClass} value={form.library_filter_mode ?? "categories"} onChange={(e) => set("library_filter_mode", e.target.value === "genres" ? "genres" : "categories")}>
             <option value="categories">Categories — films, series, podcasts, music</option>
