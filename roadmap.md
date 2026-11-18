@@ -119,5 +119,6 @@
 - [x] Trending: 'In The Name Of Jesus' pinned #1; #2+ by most plays
 ## Squad payments connection
 
+- [ ] Provide deployed Squad redirect and webhook addresses once order settlement exists; clarify that the referenced Logo.dev secret is not a Squad public key.
 - [x] Save Squad secret key through the secure project-secret form, matching Encyclovia AI.
 - [ ] Wire Squad checkout into persisted PPV orders and atomic settlement with protected premium delivery; requires a test account for buy/watch/refund verification.
