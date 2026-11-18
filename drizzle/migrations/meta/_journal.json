@@ -127,6 +127,13 @@
       "when": 1794993391411,
       "tag": "0017_ppv_verified_playback_access",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794993524880,
+      "tag": "0018_ppv_access_least_privilege_grants",
+      "breakpoints": true
     }
   ]
 }
