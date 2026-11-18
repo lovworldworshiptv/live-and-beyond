@@ -3,6 +3,23 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ppvDraftSchema } from "./ppv";
 
+export const checkSquadPayments = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ sandbox: z.boolean() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const check = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (check.error || check.data !== true) throw new Error("Admin access required");
+    const secret = process.env["SQUAD_SECRET_KEY"];
+    if (!secret) return { configured: false, connected: false, sandbox: data.sandbox, error: "Squad key not saved" };
+    try {
+      const { checkSquadConnection } = await import("./squad.server");
+      await checkSquadConnection({ secret, sandbox: data.sandbox });
+      return { configured: true, connected: true, sandbox: data.sandbox, error: null };
+    } catch (error) {
+      return { configured: true, connected: false, sandbox: data.sandbox, error: error instanceof Error ? error.message : "Squad could not be reached" };
+    }
+  });
+
 export const getPpvWorkspace = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ channelId: z.string().uuid().optional() }).parse(input))

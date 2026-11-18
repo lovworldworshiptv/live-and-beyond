@@ -1,7 +1,8 @@
 # Lettflix Roadmap
 
 ## Channel Pay-Per-View — Phase 1
-- [ ] Connect Squad test payments — user selected Squad; requires the secure test-account connection before implementing checkout.
+- [x] Store Squad credentials securely using Encyclovia AI’s project-secret approach.
+- [x] Verify Squad live credentials from authenticated Admin and add hosted-checkout/verification helpers matching Encyclovia; nine tests pass and phone/desktop checks pass. Test-account check rejected; no charges made.
 - [x] Add PPV event homepage spotlight requests; Admin approval atomically places the event on the hero, linked to event details. Verified request → approval → homepage → event page; disabled events are filtered out.
 - [x] Build and verify Admin platform/channel switches, configurable commission, Studio event drafts and approval queue. Authenticated create/submit/reload/approve verified; test content removed and switches restored off.
 - [ ] Implement verified checkout, idempotent payment settlement, receipts and cancellation refunds after providers are connected.
@@ -118,5 +119,5 @@
 - [x] Trending: 'In The Name Of Jesus' pinned #1; #2+ by most plays
 ## Squad payments connection
 
-- [ ] Connect Squad test account via secure connector card (user re-enters key in card)
-- [ ] Wire Squad checkout into PPV orders after connection
+- [x] Save Squad secret key through the secure project-secret form, matching Encyclovia AI.
+- [ ] Wire Squad checkout into persisted PPV orders and atomic settlement with protected premium delivery; requires a test account for buy/watch/refund verification.

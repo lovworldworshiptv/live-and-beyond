@@ -43,3 +43,4 @@
 - Homepage slide artwork and default Watch Now links use the same CMS title slug so both open the same on-demand video.
 - On-demand continuation uses real ended events and a cancellable five-second countdown, selecting playable published catalogue titles; new titles start at zero and switching media cancels pending continuation so the latest viewer action wins.
 - PPV preparation uses authenticated server functions and private manager-scoped tables; database triggers enforce admin-only approval/commission and immutable ownership. Approval never opens sales before verified checkout and token-enforced premium delivery exist, so public channel sources cannot bypass paid access.
+- Squad uses the server-only project secret, hosted checkout in exact kobo, raw-body HMAC-SHA512 and API re-verification; select test/live explicitly rather than deriving environment from a secret. Helpers do not open sales without persisted orders, atomic settlement and protected delivery.

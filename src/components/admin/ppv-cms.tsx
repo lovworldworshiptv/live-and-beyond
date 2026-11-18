@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { BrandLoader } from "@/components/brand-loader";
 import { getPpvWorkspace, savePpvSettings, reviewPpvEvent } from "@/lib/ppv.functions";
 import { DEFAULT_COMMISSION_BPS } from "@/lib/ppv";
+import { SquadConnection } from "./squad-connection";
 
 type Workspace = Awaited<ReturnType<typeof getPpvWorkspace>>;
 export function PpvCms() {
@@ -31,6 +32,7 @@ export function PpvCms() {
   if (!data) return <BrandLoader variant="section" label="Loading Pay-Per-View" />;
   return <div className="space-y-8">
     <header><h2 className="flex items-center gap-2 text-xl font-semibold"><Ticket className="text-accent" />Pay-Per-View</h2><p className="mt-2 text-sm text-muted-foreground">Event preparation and approvals · Ticket sales not yet open</p></header>
+    <SquadConnection />
     <SettingsRow key={`platform-${data.platform?.updated_at}`} title="Platform-wide PPV" enabled={data.platform?.enabled ?? false} commission={data.platform?.platform_commission_bps ?? DEFAULT_COMMISSION_BPS} busy={busy} onSave={values => act(() => saveSettings({ data: values }))} />
     <section><h3 className="mb-4 font-semibold">Channels</h3><div className="divide-y divide-border">{data.channels.map(channel => {
       const setting = data.settings.find(row => row.channel_id === channel.id);

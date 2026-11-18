@@ -12,7 +12,7 @@
 This is a management foundation, **not a completed Phase 1 MVP**. Approved does not mean on sale. No purchases, fabricated revenue, entitlements, premium source URLs or payment success are exposed. Existing free content is unchanged. TV PPV discovery/purchase handoff is deferred until protected playback and payment access exist; TV never treats a PPV spotlight as a free title.
 
 ## Blockers before commerce
-1. Squad is the selected PPV payment provider. Its test account must be connected before payment code is written. Built-in payment eligibility was checked against the confirmed Nigerian business registration and this product; no built-in provider is available for this setup. The cancelled Paystack connection was never created. Squad's documented test API uses bearer authentication at https://sandbox-api-d.squadco.com, with a read-only credential check at /merchant/balance?currency_id=NGN.
+1. Squad credentials are now saved through the secure project-secret form, matching Encyclovia AI's direct API approach. Admin PPV offers an admin-only, read-only connection check with an explicit test/live selector. Server-only helpers prepare exact-kobo hosted checkout, API verification and HMAC-SHA512 signatures. They are not exposed as checkout endpoints and do not charge customers. Orders, atomic settlement, return reconciliation and the webhook still need implementation alongside protected delivery. The cancelled Paystack connection was never created.
 2. Premium sources must enforce expiring playback credentials at delivery (Cloudflare Stream signed playback or an equivalent protected CDN). Public YouTube/HLS/channel URLs cannot be paywalled by hiding a button. Do not reuse publicly readable CMS source fields.
 3. Checkout settlement must atomically persist orders/payments/ledger/entitlements with unique provider-event and order keys, verify signatures, amounts, currency and buyer; refund settlement revokes access.
 4. Concurrency needs persistent sessions and heartbeat takeover; native/TV calls require the same entitlement checks. Native IAP is separate Android work, not web checkout inside a native app.
@@ -26,6 +26,7 @@ This is a management foundation, **not a completed Phase 1 MVP**. Approved does 
 - After connection: test payment failures, duplicate/delayed webhooks, signed URL expiry, refund revocation and takeover.
 
 ## Verification completed
+- Squad live account verified through authenticated Admin → Pay-Per-View using a read-only balance request. Test endpoint rejected the supplied credential (403); no payment initiated. Admin check fits phone/desktop. Nine Squad/PPV tests pass; production charges remain disabled.
 - Authenticated Admin saved platform/channel switches; Studio created an exact NGN 2500.05 / USD 10 draft, submitted, reloaded and read it back; Admin approved event, Studio requested spotlight, Admin approved spotlight, homepage Event Details opened the same event with sales disabled.
 - Event detail page has no horizontal overflow at 280/394/768px; desktop/tablet screenshots inspected. Temporary event and spotlight were removed after tests; switches restored off.
 - Unit tests cover default/override split, balanced cents, dual switches, spotlight eligibility, exact price conversion, event destination and Studio return section.
