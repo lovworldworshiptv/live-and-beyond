@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+import { ppvAccountReturn } from "@/lib/ppv-discovery";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
@@ -39,7 +41,7 @@ export function PpvPurchase({ eventId, salesOpen }: { eventId: string; salesOpen
     } catch (error) { setMessage(error instanceof Error ? error.message : "Please try again."); }
     finally { setBusy(false); }
   }
-  if (!user) return <p className="mt-4 text-sm text-muted-foreground">Sign in to purchase or access your PPV ticket.</p>;
+  if (!user) return <div className="mt-4 flex flex-wrap gap-3"><Button asChild><Link to="/auth" search={{ mode: "signup", redirect: ppvAccountReturn(eventId) }}><Ticket />Create account to get access</Link></Button><Button asChild variant="outline"><Link to="/auth" search={{ mode: "signin", redirect: ppvAccountReturn(eventId) }}>Sign in</Link></Button></div>;
   return <div className="mt-4 space-y-4">
     {purchase && <p className="break-words text-sm">Purchase: {purchase.status} · {new Intl.NumberFormat(undefined, { style: "currency", currency: purchase.currency }).format(purchase.amount_minor / 100)}</p>}
     <div className="flex flex-wrap gap-2">

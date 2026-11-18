@@ -1,3 +1,4 @@
+import { PpvEvents } from "@/components/ppv-events";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Play,
@@ -355,6 +356,8 @@ function Index() {
         </Row>
       )}
 
+
+      <PpvEvents layout="rail" />
 
       {/* FEATURED CHANNELS */}
       {featuredChannels.length > 0 && (

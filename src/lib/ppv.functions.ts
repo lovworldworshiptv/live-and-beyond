@@ -307,3 +307,19 @@ export const getPublicPpvEvent = createServerFn({ method: "GET" })
     const sales = await client.rpc("public_ppv_sales", { _event_id: data.id });
     return { ...event, salesOpen: !sales.error && sales.data === true };
   });
+
+export const getPublicPpvEvents = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { createClient } = await import("@supabase/supabase-js");
+    const { url, key } = { url: process.env["SUPABASE_URL"], key: process.env["SUPABASE_PUBLISHABLE_KEY"] };
+    if (!url || !key) throw new Error("Events are unavailable");
+    const client = createClient<import("@/integrations/supabase/types").Database>(url, key, { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: (input, init) => {
+      const headers = new Headers(init?.headers);
+      if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+      headers.set("apikey", key);
+      return fetch(input, { ...init, headers });
+    } } });
+    const result = await client.rpc("public_ppv_events");
+    if (result.error) throw new Error("Events are unavailable");
+    return result.data ?? [];
+  });

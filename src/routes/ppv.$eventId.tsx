@@ -1,3 +1,5 @@
+import { PpvCountdown } from "@/components/ppv-events";
+import { ShareMenu } from "@/components/share-menu";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { CalendarDays, Clock, Ticket } from "lucide-react";
@@ -25,6 +27,7 @@ function EventPage() {
   return <div className="min-h-screen flex flex-col"><SiteHeader /><main className="flex-1">
     <section className="border-b border-border"><div className="mx-auto max-w-6xl px-6 py-8">
       {event.poster_url && <img src={event.poster_url} alt={event.title} className="mb-6 aspect-video max-h-[55dvh] w-full object-contain" />}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-4"><PpvCountdown startsAt={event.starts_at} /><ShareMenu title={event.title} path={`/ppv/${eventId}`} image={event.poster_url} subtitle={`Pay-Per-View · ${event.channel_name}`} /></div>
       <p className="flex items-center gap-2 text-sm font-semibold text-accent"><Ticket className="size-4" />Pay-Per-View · {event.channel_name}</p><h1 className="mt-3 break-words text-3xl font-bold">{event.title}</h1><p className="mt-4 max-w-3xl whitespace-pre-line text-muted-foreground">{event.description}</p>
     </div></section>
     <section className="mx-auto max-w-6xl px-6 py-6"><PpvPurchase key={eventId} eventId={eventId} salesOpen={event.salesOpen} /></section>

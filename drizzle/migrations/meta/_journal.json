@@ -183,6 +183,13 @@
       "when": 1794996317745,
       "tag": "0025_restrict_ppv_platform_settings_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795014660027,
+      "tag": "0026_public_ppv_discovery",
+      "breakpoints": true
     }
   ]
 }

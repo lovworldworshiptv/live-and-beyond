@@ -104,6 +104,21 @@
 
   function cardsFor(titles, go, badgeFn) { return titles.map(function (t) { return UI.titleCard(t, go.openTitle, { badge: badgeFn ? badgeFn(t) : null }); }); }
 
+  function ppvCards(events) {
+    return (events || []).map(function (e) {
+      var card = UI.titleCard({ slug: e.id, title: e.title, backdrop: e.poster_url, poster: e.poster_url }, function () {
+        var url = window.LETT_CONFIG.WEB_ORIGIN + "/ppv/" + e.id;
+        UI.dialog(e.title, "Pay-Per-View · " + e.channel_name + " · " + new Date(e.starts_at).toLocaleString(), [{ label: "Close", icon: "back", primary: true }]);
+        var box = document.querySelector(".dialog"), qr = qrcode(0, "M");
+        qr.addData(url); qr.make();
+        var wrap = h("div.qr.ready"); wrap.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 4, scalable: true });
+        if (box) { box.insertBefore(wrap, box.querySelector(".dialog-actions")); box.insertBefore(h("p", { text: "Scan to sign in and get event access. " + url }), box.querySelector(".dialog-actions")); }
+      }, { badge: "Pay-Per-View" });
+      card.__item = { type: "title", data: { slug: e.id, title: e.title, kind: "Pay-Per-View", category: e.channel_name, synopsis: e.description, backdrop: e.poster_url, poster: e.poster_url, duration: new Date(e.starts_at).toLocaleString() } };
+      return card;
+    });
+  }
+
   // ---------------- Home ----------------
 
   function home(go) {
@@ -120,6 +135,7 @@
       UI.row("Continue watching for " + (Auth.displayName() || "you"), cardsFor(continueWatching(), go)),
       UI.row("New on Lettflix", cardsFor(newest, go, function (t) { return t.createdAt === topYear ? "Recently added" : null; })),
       UI.row("Featured On-Demand", cardsFor(Catalog.featured(), go)),
+      UI.row("Pay-Per-View", ppvCards(data().ppvEvents)),
       UI.row("Podcasts", cardsFor(d.titles.filter(function (t) { return t.isAudio; }), go)),
       UI.row("Radio", d.radio.map(function (r) { return UI.radioCard(r, go.openRadio); }))
     ].concat(categories(films).map(function (cat) {
@@ -211,7 +227,8 @@
       var titles = d.titles.filter(function (t) { return !n || (t.title + " " + t.category + " " + t.kind + " " + t.cast.join(" ")).toLowerCase().indexOf(n) >= 0; });
       var chans = d.channels.filter(function (c) { return n && (c.name + " " + c.category + " " + c.tagline).toLowerCase().indexOf(n) >= 0; });
       if (!n) titles = titles.slice().sort(byNewest).slice(0, 12);
-      var cards = chans.map(function (c) { return UI.channelCard(c, go.openChannel); }).concat(titles.map(function (t) { return UI.titleCard(t, go.openTitle); }));
+      var events = (d.ppvEvents || []).filter(function (e) { return (e.title + " " + e.channel_name + " Pay-Per-View").toLowerCase().indexOf(n) >= 0; });
+      var cards = ppvCards(events).concat(chans.map(function (c) { return UI.channelCard(c, go.openChannel); }).concat(titles.map(function (t) { return UI.titleCard(t, go.openTitle); })));
       results.appendChild(h("h2.results-head", { text: n ? (cards.length ? "Results for “" + q.trim() + "”" : "") : "Popular on Lettflix" }));
       U.append(results, cards.length ? cards : empty("No results for “" + q.trim() + "”", "Try a different title, channel or genre."));
     }
@@ -328,7 +345,7 @@
     function fill() { grid.innerHTML = ""; var filtered = titles.filter(function (t) { return Catalog.matchesFilter(t, mode, active); }); U.append(grid, filtered.length ? cardsFor(filtered, go) : empty("No content yet", "")); }
     fill();
     var banner = UI.channelArtwork(h("div.channel-header-art"), [c.banner, c.logo, U.channelArt(c.category, c.isRadio)]);
-    var content = h("div.vtrack", null, [h("header.page-head.vanchor", null, [banner, h("h1", { text: c.name }), actions]), programSchedule(c), h("h2", { text: "Channel Library" }), chips, grid]);
+    var content = h("div.vtrack", null, [h("header.page-head.vanchor", null, [banner, h("h1", { text: c.name }), actions]), UI.row("Pay-Per-View", ppvCards((data().ppvEvents || []).filter(function (e) { return e.channel_slug === c.slug; }))), programSchedule(c), h("h2", { text: "Channel Library" }), chips, grid]);
     var el = h("div.screen.grid-screen.channel-detail", null, h("div.vscroll.page", { data: { mode: "keep" } }, content));
     return { el: el, focus: function () { return el.querySelector(".autofocus") || el.querySelector(".focusable"); } };
   }

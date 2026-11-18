@@ -1,3 +1,5 @@
+import { PpvEvents } from "@/components/ppv-events";
+import { PPV_CATEGORY } from "@/lib/ppv-discovery";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Radio, CalendarDays } from "lucide-react";
@@ -31,17 +33,18 @@ function GuidePage() {
     <main className="mx-auto max-w-[1480px] px-6 py-10 lg:px-10">
       <h1 className="text-3xl font-bold lg:text-4xl">Programme guide</h1>
       <div className="mt-6 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-        <input aria-label="Filter channels" placeholder="Search channels…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-11 w-full min-w-0 rounded-md border border-border bg-surface px-4 text-sm" />
+        <input aria-label="Filter channels" placeholder="Search channels or events…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-11 w-full min-w-0 rounded-md border border-border bg-surface px-4 text-sm" />
         <div className="flex gap-1" aria-label="Programme view">
           {([["now", "Now"], ["next", "Next"], ["all", "Schedule"]] as const).map(([id, label]) => <Button key={id} variant={view === id ? "default" : "outline"} aria-pressed={view === id} className="h-11 flex-1" onClick={() => setView(id)}>{id === "now" ? <Radio className="size-4" /> : <CalendarDays className="size-4" />}{label}</Button>)}
         </div>
       </div>
       <div className="mt-3 flex gap-2 overflow-x-auto scrollbar-none">
-        {["All", ...new Set(channels.map((c) => c.category).filter(Boolean))].map((g) => <Button key={g} variant={category === g ? "default" : "outline"} aria-pressed={category === g} className="h-11 shrink-0" onClick={() => setCategory(g)}>{g}</Button>)}
+        {["All", PPV_CATEGORY, ...new Set(channels.map((c) => c.category).filter((value) => Boolean(value) && value !== PPV_CATEGORY))].map((g) => <Button key={g} variant={category === g ? "default" : "outline"} aria-pressed={category === g} className="h-11 shrink-0" onClick={() => setCategory(g)}>{g}</Button>)}
       </div>
       <p className="mt-4 text-xs text-muted-foreground">Programme times shown in your local time.</p>
       {loading && <p role="status" className="py-12 text-muted-foreground">Loading programmes…</p>}
-      {!loading && !filtered.length && <div className="py-16 text-center"><p>No channels match your filters.</p><Button className="mt-4" variant="outline" onClick={() => { setQuery(""); setCategory("All"); }}>Clear filters</Button></div>}
+      {category !== PPV_CATEGORY && !loading && !filtered.length && <div className="py-16 text-center"><p>No channels match your filters.</p><Button className="mt-4" variant="outline" onClick={() => { setQuery(""); setCategory("All"); }}>Clear filters</Button></div>}
+      {(category === "All" || category === PPV_CATEGORY) && <PpvEvents query={query} showEmpty={category === PPV_CATEGORY} />}
       <div className="mt-6 divide-y divide-border">
         {filtered.map((c) => {
           const upcoming = c.schedule.filter((s) => new Date(s.time).getTime() > now);

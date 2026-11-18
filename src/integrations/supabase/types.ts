@@ -2178,6 +2178,25 @@ export type Database = {
           title: string
         }[]
       }
+      public_ppv_events: {
+        Args: never
+        Returns: {
+          channel_name: string
+          channel_slug: string
+          description: string
+          duration_minutes: number
+          event_type: string
+          id: string
+          poster_url: string
+          price_ngn_minor: number
+          price_usd_minor: number
+          rental_start_days: number
+          replay_hours: number
+          sales_open: boolean
+          starts_at: string
+          title: string
+        }[]
+      }
       public_ppv_sales: { Args: { _event_id: string }; Returns: boolean }
       public_ppv_spotlight_ids: {
         Args: never

@@ -245,14 +245,15 @@
         soft(rest("radio_settings", "select=" + encodeURIComponent(RADIO_COLUMNS) + "&is_enabled=eq.true")),
         soft(rest("rpc/featured_on_demand_rankings", "", { method: "POST", jsonResult: true })),
         soft(rest("cms_schedule", "select=id,channel_id,program_title,category,starts_at,ends_at&is_published=eq.true&deleted_at=is.null&ends_at=gte." + encodeURIComponent(since) + "&order=starts_at.asc")),
-        soft(rest("cms_settings", "select=key,value&key=in.(features,hero)"))
+        soft(rest("cms_settings", "select=key,value&key=in.(features,hero)")),
+        soft(rest("rpc/public_ppv_events", "", { method: "POST", jsonResult: true }))
       ]).then(function (res) {
         var settings = {};
         (res[5] || []).forEach(function (r) { settings[r.key] = r.value; });
         Catalog.data = {
           channels: res[0].map(mapChannel), titles: res[1].map(mapTitle),
           radio: res[2] ? mapRadio(res[2]) : [], rankings: res[3] || [], schedule: res[4] || [],
-          features: settings.features || {},
+          features: settings.features || {}, ppvEvents: res[6] || [],
           // Homepage banner slides linked to a title (admin-set, or approved channel spotlight requests).
           heroSlugs: ((settings.hero && settings.hero.slides) || []).filter(function (x) { return x && x.visible !== false && x.contentId; }).map(function (x) { return x.contentId; })
         };

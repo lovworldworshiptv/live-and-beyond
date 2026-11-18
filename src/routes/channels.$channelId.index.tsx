@@ -1,3 +1,4 @@
+import { PpvEvents } from "@/components/ppv-events";
 import { BrandLoader } from "@/components/brand-loader";
 import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -599,6 +600,8 @@ function ChannelPage() {
               </div>
             ))}
           </div>
+
+          <PpvEvents channelSlug={channelId} />
 
           {/* PROGRAM SCHEDULE */}
           <div className="mt-10">
