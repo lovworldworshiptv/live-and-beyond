@@ -1,6 +1,7 @@
 # Lettflix Roadmap
 
 ## PPV enterprise security — approved implementation, phase by phase
+- [ ] Current continuation: persistent newest-session playback takeover, geo policy configuration, waiting-room readiness, receipts and payment reconciliation; verify actual payment/provider behaviour before reporting launch readiness.
 - [x] Phase 1 code: isolated Squad test/live credentials, 30-minute checkout reuse with one-shot initiation, dedicated two-minute return polling, durable webhook deduplication and mismatch review/audit; 37 tests pass, signed-in return denial/forged webhook checks pass. Provider acceptance remains blocked below.
 - [ ] Phase 2: pending-order reconciliation, transactional ledger/refund processing and receipt delivery; provider acceptance and refund API verification required.
 - [ ] Phase 3: persistent playback sessions, configured concurrency/geo rules and waiting room; policy decisions and protected test asset required.
