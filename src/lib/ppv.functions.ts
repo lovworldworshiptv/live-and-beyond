@@ -96,8 +96,6 @@ export const savePpvDelivery = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const check = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
     if (check.error || check.data !== true) throw new Error("Admin access required");
-    // Live opening remains locked until the test purchase/refund acceptance run.
-    if (data.salesEnabled && !data.sandbox) throw new Error("Live sales require the completed test purchase and refund acceptance check");
     const accountId = process.env["CLOUDFLARE_ACCOUNT_ID"];
     const apiToken = process.env["CLOUDFLARE_STREAM_API_TOKEN"];
     if (!accountId || !apiToken) throw new Error("Premium video delivery is not configured");

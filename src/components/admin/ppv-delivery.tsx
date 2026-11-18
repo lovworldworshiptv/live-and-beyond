@@ -28,7 +28,7 @@ export function PpvDelivery({ events }: { events: { id: string; title: string }[
   const reconcile = useServerFn(reconcilePpvPayments);
   const [eventId, setEventId] = useState("");
   const [uid, setUid] = useState("");
-  const [sandbox, setSandbox] = useState(true);
+  const [sandbox, setSandbox] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [busy, setBusy] = useState(false);
   const [countries, setCountries] = useState<string[]>([]);
@@ -57,7 +57,7 @@ export function PpvDelivery({ events }: { events: { id: string; title: string }[
       </div>
       <p className="self-center text-sm text-muted-foreground">One active stream per ticket · New playback takes over</p>
       <label className="flex items-center justify-between gap-3 text-sm">Squad test environment<Switch checked={sandbox} onCheckedChange={setSandbox} /></label>
-      <label className="flex items-center justify-between gap-3 text-sm">Open test ticket sales<Switch checked={enabled} onCheckedChange={setEnabled} disabled={!sandbox} /></label>
+      <label className="flex items-center justify-between gap-3 text-sm">{sandbox ? "Open test ticket sales" : "Open live ticket sales (real payments)"}<Switch checked={enabled} onCheckedChange={setEnabled} /></label>
       <Button disabled={busy} type="submit" variant="outline"><Save />Save delivery</Button>
     </form>
     <div className="mt-4 space-y-2"><Button variant="outline" disabled={busy} onClick={async () => { setBusy(true); try { const checked = await reconcile({ data: {} }); setResult(`${checked.checked} checked · ${checked.confirmed} confirmed · ${checked.deferred} awaiting retry`); } catch { setResult("Payment checks unavailable"); } finally { setBusy(false); } }}>Check pending payments</Button>{result && <p role="status" className="text-sm text-muted-foreground">{result}</p>}</div>

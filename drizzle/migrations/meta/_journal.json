@@ -197,6 +197,13 @@
       "when": 1795015530278,
       "tag": "0027_ppv_sales_start_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1795020575049,
+      "tag": "0028_open_live_ppv_sales",
+      "breakpoints": true
     }
   ]
 }
