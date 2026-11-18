@@ -3,6 +3,81 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ppvDraftSchema } from "./ppv";
 
+export const getPpvPurchase = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ eventId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { setResponseHeader } = await import("@tanstack/react-start/server");
+    setResponseHeader("Cache-Control", "no-store");
+    const result = await context.supabase.from("ppv_orders").select("id,status,amount_minor,currency,access_starts_at,access_expires_at,created_at").eq("event_id", data.eventId).eq("user_id", context.userId).order("created_at", { ascending: false }).limit(20);
+    if (result.error) throw new Error("Could not load your purchase");
+    const rows = result.data ?? [];
+    const active = rows.find(row => row.status === "paid" && Date.parse(row.access_expires_at) > Date.now());
+    return active ?? (rows.length ? rows[0] : null);
+  });
+
+export const startPpvCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ eventId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const secret = process.env["SQUAD_SECRET_KEY"];
+    const accountId = process.env["CLOUDFLARE_ACCOUNT_ID"];
+    const apiToken = process.env["CLOUDFLARE_STREAM_API_TOKEN"];
+    if (!secret || !accountId || !apiToken) throw new Error("Ticket sales are unavailable");
+    const auth = await context.supabase.auth.getUser();
+    if (auth.error || !auth.data.user?.email) throw new Error("A verified email is required for checkout");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { signPremiumStream } = await import("./ppv-access.server");
+    const asset = await supabaseAdmin.from("ppv_playback_assets").select("*").eq("event_id", data.eventId).maybeSingle();
+    if (asset.error || !asset.data?.sales_enabled) throw new Error("Ticket sales are not open");
+    // Confirm real protected delivery before asking anyone to pay.
+    await signPremiumStream({ accountId, apiToken }, asset.data.stream_uid, Math.floor(Date.now() / 1000) + 60);
+    const reference = `LF-${crypto.randomUUID()}`;
+    const prepared = await supabaseAdmin.rpc("prepare_ppv_order", { _event_id: data.eventId, _user_id: context.userId, _reference: reference });
+    const order = prepared.data?.[0];
+    if (prepared.error || !order) throw new Error("Ticket sales are unavailable for this event");
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const origin = new URL(getRequest().url).origin;
+    const { initiateSquadTransaction } = await import("./squad.server");
+    const checkout = await initiateSquadTransaction({ secret, sandbox: order.sandbox }, { email: auth.data.user.email, amountKobo: order.amount_minor, reference: order.reference, callbackUrl: `${origin}/ppv/${data.eventId}?order=${order.id}`, customerName: "Lettflix viewer" });
+    return { orderId: order.id, checkoutUrl: checkout.checkoutUrl };
+  });
+
+export const confirmPpvPurchase = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ orderId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { setResponseHeader } = await import("@tanstack/react-start/server");
+    setResponseHeader("Cache-Control", "no-store");
+    const found = await context.supabase.from("ppv_orders").select("*").eq("id", data.orderId).eq("user_id", context.userId).maybeSingle();
+    if (found.error || !found.data) throw new Error("Purchase not found");
+    const secret = process.env["SQUAD_SECRET_KEY"];
+    if (!secret) throw new Error("Payment confirmation unavailable");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { confirmSquadOrder } = await import("./ppv-payment.server");
+    try { return await confirmSquadOrder(supabaseAdmin, found.data, secret); }
+    catch { throw new Error("Payment could not be verified. Please try again."); }
+  });
+
+export const savePpvDelivery = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ eventId: z.string().uuid(), streamUid: z.string().regex(/^[a-f0-9]{32}$/), sandbox: z.boolean(), salesEnabled: z.boolean() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const check = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (check.error || check.data !== true) throw new Error("Admin access required");
+    // Live opening remains locked until the test purchase/refund acceptance run.
+    if (data.salesEnabled && !data.sandbox) throw new Error("Live sales require the completed test purchase and refund acceptance check");
+    const accountId = process.env["CLOUDFLARE_ACCOUNT_ID"];
+    const apiToken = process.env["CLOUDFLARE_STREAM_API_TOKEN"];
+    if (!accountId || !apiToken) throw new Error("Premium video delivery is not configured");
+    const { signPremiumStream } = await import("./ppv-access.server");
+    await signPremiumStream({ accountId, apiToken }, data.streamUid, Math.floor(Date.now() / 1000) + 60);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const result = await supabaseAdmin.from("ppv_playback_assets").upsert({ event_id: data.eventId, stream_uid: data.streamUid, sandbox: data.sandbox, sales_enabled: data.salesEnabled });
+    if (result.error) throw new Error("Could not save protected delivery");
+    return { ok: true };
+  });
+
 export const getPpvPlaybackAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ orderId: z.string().uuid() }).parse(input))
@@ -157,5 +232,8 @@ export const getPublicPpvEvent = createServerFn({ method: "GET" })
     } } });
     const result = await client.rpc("public_ppv_event", { _id: data.id });
     if (result.error) throw new Error("Event details are unavailable");
-    return (result.data?.[0] ?? null) as { id: string; title: string; description: string; poster_url: string | null; event_type: string; starts_at: string; duration_minutes: number; replay_hours: number; rental_start_days: number; price_ngn_minor: number; price_usd_minor: number; channel_name: string; channel_slug: string } | null;
+    const event = (result.data?.[0] ?? null) as { id: string; title: string; description: string; poster_url: string | null; event_type: string; starts_at: string; duration_minutes: number; replay_hours: number; rental_start_days: number; price_ngn_minor: number; price_usd_minor: number; channel_name: string; channel_slug: string } | null;
+    if (!event) return null;
+    const sales = await client.rpc("public_ppv_sales", { _event_id: data.id });
+    return { ...event, salesOpen: !sales.error && sales.data === true };
   });

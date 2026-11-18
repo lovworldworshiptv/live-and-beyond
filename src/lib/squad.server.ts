@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export type SquadConfig = { secret: string; sandbox: boolean };
-export type SquadVerification = { ok: boolean; amountKobo: number; currency: string; reference: string };
+export type SquadVerification = { ok: boolean; amountKobo: number; currency: string; reference: string; status?: string };
 
 function base(config: SquadConfig) {
   if (!config.secret) throw new Error("Squad is not configured");
@@ -49,6 +49,7 @@ export async function verifySquadTransaction(config: SquadConfig, reference: str
   const data = await squadRequest(config, `/transaction/verify/${encodeURIComponent(reference)}`);
   const amount = Number(data?.transaction_amount);
   return {
+    status: String(data?.transaction_status ?? "").toLowerCase(),
     ok: String(data?.transaction_status ?? "").toLowerCase() === "success" && Number.isSafeInteger(amount) && amount > 0,
     amountKobo: Number.isSafeInteger(amount) ? amount : 0,
     currency: String(data?.currency ?? ""),

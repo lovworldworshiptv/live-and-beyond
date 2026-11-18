@@ -1,0 +1,5 @@
+CREATE FUNCTION public.public_ppv_sales(_event_id uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT EXISTS(SELECT 1 FROM public.ppv_events e JOIN public.ppv_playback_assets a ON a.event_id=e.id JOIN public.cms_channels c ON c.id=e.channel_id JOIN public.ppv_channel_settings s ON s.channel_id=c.id JOIN public.ppv_platform_settings p ON p.id=true WHERE e.id=_event_id AND e.status='approved' AND a.sales_enabled AND a.sandbox AND c.is_published AND c.deleted_at IS NULL AND s.enabled AND p.enabled) $$;
+REVOKE ALL ON FUNCTION public.public_ppv_sales(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.public_ppv_sales(uuid) TO anon,authenticated,service_role;
+CREATE FUNCTION public.guard_ppv_test_sales() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN IF NEW.sales_enabled AND NOT NEW.sandbox THEN RAISE EXCEPTION 'Live sales await test acceptance'; END IF; RETURN NEW; END $$;
+CREATE TRIGGER guard_ppv_test_sales BEFORE INSERT OR UPDATE ON public.ppv_playback_assets FOR EACH ROW EXECUTE FUNCTION public.guard_ppv_test_sales();

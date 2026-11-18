@@ -1,6 +1,8 @@
 # Lettflix Roadmap
 
 ## Channel Pay-Per-View — Phase 1
+- [x] Implement persisted Squad checkout, verified buyer return/signed webhook confirmation, atomic single-receipt settlement and renewable protected PPV viewer delivery; 32 tests pass and authenticated missing-order/closed-sales/forged-webhook checks pass.
+- [ ] Complete real payment → protected playback → refund acceptance; blocked by missing Squad sandbox credentials, approved event and protected video asset. Live sales remain locked.
 - [x] Add server-side buyer/payment/refund gates and fresh Squad verification before issuing short-lived protected playback credentials; no public-source or admin bypass.
 - [x] Store Squad credentials securely using Encyclovia AI’s project-secret approach.
 - [x] Verify Squad live credentials from authenticated Admin and add hosted-checkout/verification helpers matching Encyclovia; nine tests pass and phone/desktop checks pass. Test-account check rejected; no charges made.

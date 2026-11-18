@@ -134,6 +134,20 @@
       "when": 1794993524880,
       "tag": "0018_ppv_access_least_privilege_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794993617386,
+      "tag": "0019_ppv_payment_confirmation",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794993723944,
+      "tag": "0020_ppv_sales_availability",
+      "breakpoints": true
     }
   ]
 }

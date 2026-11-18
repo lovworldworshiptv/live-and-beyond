@@ -1615,6 +1615,7 @@ export type Database = {
           access_expires_at: string
           access_starts_at: string
           amount_minor: number
+          commission_bps: number
           created_at: string
           currency: string
           event_id: string
@@ -1631,6 +1632,7 @@ export type Database = {
           access_expires_at: string
           access_starts_at: string
           amount_minor: number
+          commission_bps?: number
           created_at?: string
           currency?: string
           event_id: string
@@ -1647,6 +1649,7 @@ export type Database = {
           access_expires_at?: string
           access_starts_at?: string
           amount_minor?: number
+          commission_bps?: number
           created_at?: string
           currency?: string
           event_id?: string
@@ -1693,16 +1696,19 @@ export type Database = {
       ppv_playback_assets: {
         Row: {
           event_id: string
+          sales_enabled: boolean
           sandbox: boolean
           stream_uid: string
         }
         Insert: {
           event_id: string
+          sales_enabled?: boolean
           sandbox?: boolean
           stream_uid: string
         }
         Update: {
           event_id?: string
+          sales_enabled?: boolean
           sandbox?: boolean
           stream_uid?: string
         }
@@ -1712,6 +1718,38 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: true
             referencedRelation: "ppv_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ppv_receipts: {
+        Row: {
+          amount_minor: number
+          channel_minor: number
+          order_id: string
+          platform_minor: number
+          verified_at: string
+        }
+        Insert: {
+          amount_minor: number
+          channel_minor: number
+          order_id: string
+          platform_minor: number
+          verified_at?: string
+        }
+        Update: {
+          amount_minor?: number
+          channel_minor?: number
+          order_id?: string
+          platform_minor?: number
+          verified_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ppv_receipts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "ppv_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -1877,6 +1915,16 @@ export type Database = {
           watch_seconds: number
         }[]
       }
+      confirm_ppv_payment: {
+        Args: {
+          _amount: number
+          _currency: string
+          _order_id: string
+          _reference: string
+          _sandbox: boolean
+        }
+        Returns: string
+      }
       featured_on_demand_rankings: {
         Args: never
         Returns: {
@@ -1910,6 +1958,32 @@ export type Database = {
           stream_uid: string
         }[]
       }
+      prepare_ppv_order: {
+        Args: { _event_id: string; _reference: string; _user_id: string }
+        Returns: {
+          access_expires_at: string
+          access_starts_at: string
+          amount_minor: number
+          commission_bps: number
+          created_at: string
+          currency: string
+          event_id: string
+          id: string
+          provider: string
+          reference: string
+          refunded_at: string | null
+          sandbox: boolean
+          status: string
+          user_id: string
+          verified_at: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "ppv_orders"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       public_ppv_event: {
         Args: { _id: string }
         Returns: {
@@ -1928,6 +2002,7 @@ export type Database = {
           title: string
         }[]
       }
+      public_ppv_sales: { Args: { _event_id: string }; Returns: boolean }
       public_ppv_spotlight_ids: {
         Args: never
         Returns: {
