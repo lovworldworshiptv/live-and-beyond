@@ -320,7 +320,7 @@ function StudioPage() {
       </section>
 
       <section aria-label="Broadcast status" className="sticky top-16 z-30 border-b border-border bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 py-3 grid grid-cols-[minmax(0,1fr)_auto] gap-3 items-center">
+        <div className="mx-auto max-w-[1480px] px-6 lg:px-10 py-3 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-3 items-center">
           <div className="min-w-0" role="status"><div className="flex items-center gap-2"><span className={`size-2.5 shrink-0 rounded-full ${starting ? "bg-warning" : channel?.is_live ? "bg-live" : "bg-muted-foreground"}`} /><span className="font-semibold">{starting ? "Starting" : channel?.is_live ? "Live" : "Off air"}</span><span className="text-xs text-muted-foreground truncate">{sourceName}</span></div><p className="mt-1 text-xs text-muted-foreground">{setup.error ? "Status refresh unavailable" : source === "ingest" ? `Encoder: ${setup.encoder === "live" || setup.encoder === "connected" ? "connected" : setup.input ? "waiting for connection" : "not configured"}` : "Playback health available in broadcast controls"}{setup.checked && ` · Checked ${setup.checked.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}</p></div>
           <div className="flex items-center gap-1"><Button variant="ghost" size="icon" className="size-11" aria-label="Refresh workspace status" disabled={refreshing} onClick={() => void refreshWorkspace()}><RefreshCw className={refreshing ? "animate-spin" : ""} /></Button><Button className="h-11 px-3" disabled={starting} onClick={() => setTab("broadcast")}>{channel?.is_live ? "Manage broadcast" : "Set up / Go live"}</Button></div>
         </div>
