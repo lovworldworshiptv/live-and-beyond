@@ -9,6 +9,24 @@ import { ShareMenu } from "@/components/share-menu";
 import { Row } from "@/components/row";
 import brandArt from "@/assets/auth-cinema.jpg";
 
+export function PpvCountdownBlocks({ startsAt, label }: { startsAt: string; label: string }) {
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => { setNow(Date.now()); const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, [startsAt]);
+  const started = now !== null && Date.parse(startsAt) <= now;
+  const parts = now === null ? null : ppvCountdownParts(startsAt, now);
+  const units: [string, number | undefined][] = [["Days", parts?.days], ["Hours", parts?.hours], ["Mins", parts?.minutes], ["Secs", parts?.seconds]];
+  return <div>
+    <p className="text-xs text-muted-foreground">{label}</p>
+    {started ? <p className="mt-2 text-sm font-semibold text-accent">Start time reached</p> :
+      <div role="timer" aria-label={label} className="mt-2 grid grid-cols-4 gap-2">
+        {units.map(([unit, value]) => <div key={unit} className="rounded-md border border-border bg-background/60 px-1 py-2 text-center">
+          <span className="block font-mono text-xl font-semibold tabular-nums sm:text-2xl">{value === undefined ? "--" : String(value).padStart(2, "0")}</span>
+          <span className="text-[11px] text-muted-foreground">{unit}</span>
+        </div>)}
+      </div>}
+  </div>;
+}
+
 export function PpvCountdown({ startsAt }: { startsAt: string }) {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => { setNow(Date.now()); const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, [startsAt]);

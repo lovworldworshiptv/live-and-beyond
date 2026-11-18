@@ -30,7 +30,7 @@ export function PpvPurchase({ eventId, salesOpen }: { eventId: string; salesOpen
         if (!disposed) setMessage(result.status === "paid" ? "Payment verified." : "Payment is not confirmed or has been refunded.");
       }
       if (!disposed) await load();
-    })().catch(() => { if (!disposed) setMessage("Could not confirm your purchase. Try Confirm payment."); });
+    })().catch(() => { if (!disposed) setMessage("Could not confirm your purchase. Tap Check my payment."); });
     return () => { disposed = true; };
   }, [load, user, confirm]);
   async function act(payment: boolean) {
@@ -41,12 +41,14 @@ export function PpvPurchase({ eventId, salesOpen }: { eventId: string; salesOpen
     } catch (error) { setMessage(error instanceof Error ? error.message : "Please try again."); }
     finally { setBusy(false); }
   }
-  if (!user) return <div className="mt-4 flex flex-wrap gap-3"><Button asChild><Link to="/auth" search={{ mode: "signup", redirect: ppvAccountReturn(eventId) }}><Ticket />Create account to get access</Link></Button><Button asChild variant="outline"><Link to="/auth" search={{ mode: "signin", redirect: ppvAccountReturn(eventId) }}>Sign in</Link></Button></div>;
-  return <div className="mt-4 space-y-4">
-    {purchase && <p className="break-words text-sm">Purchase: {purchase.status} · {new Intl.NumberFormat(undefined, { style: "currency", currency: purchase.currency }).format(purchase.amount_minor / 100)}</p>}
-    <div className="flex flex-wrap gap-2">
-      {purchase?.status === "paid" && purchase.payment_state === "fulfilled" ? <Button disabled={busy} onClick={() => setWatching(true)}><Play />Watch event</Button> : <Button disabled={busy || !salesOpen} onClick={() => void act(true)}><Ticket />{salesOpen ? "Buy test ticket" : "Sales not open"}</Button>}
-      {purchase && purchase.status !== "refunded" && <Button variant="outline" disabled={busy} onClick={() => void act(false)}><RefreshCw />Confirm payment</Button>}
+  if (!user) return <div className="grid gap-2"><Button asChild className="h-11 w-full"><Link to="/auth" search={{ mode: "signup", redirect: ppvAccountReturn(eventId) }}><Ticket />Create account to buy</Link></Button><Button asChild variant="outline" className="h-11 w-full"><Link to="/auth" search={{ mode: "signin", redirect: ppvAccountReturn(eventId) }}>I have an account</Link></Button></div>;
+  const owned = purchase?.status === "paid" && purchase.payment_state === "fulfilled";
+  const statusLabel = owned ? "Ticket confirmed" : purchase?.status === "refunded" ? "Refunded" : purchase?.status === "paid" ? "Payment received, finishing up" : purchase ? "Payment not confirmed yet" : "";
+  return <div className="space-y-4">
+    {purchase && <p className={`rounded-md border px-3 py-2 text-sm ${owned ? "border-accent/40 text-accent" : "border-border text-muted-foreground"}`}>{statusLabel} · {new Intl.NumberFormat(undefined, { style: "currency", currency: purchase.currency }).format(purchase.amount_minor / 100)}</p>}
+    <div className="grid gap-2">
+      {owned ? <Button className="h-11 w-full" disabled={busy} onClick={() => setWatching(true)}><Play />Watch event</Button> : <Button className="h-11 w-full" disabled={busy || !salesOpen} onClick={() => void act(true)}><Ticket />{busy ? "Opening checkout…" : salesOpen ? "Buy ticket" : "Tickets not on sale yet"}</Button>}
+      {purchase && !owned && purchase.status !== "refunded" && <Button variant="outline" className="h-11 w-full" disabled={busy} onClick={() => void act(false)}><RefreshCw />Check my payment</Button>}
     </div>
     {message && <p role="status" className="break-words text-sm text-muted-foreground">{message}</p>}
     {purchase?.status === "paid" && <PpvReceipt orderId={purchase.id} currency={purchase.currency} />}
