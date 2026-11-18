@@ -48,3 +48,4 @@
 - PPV checkout persists immutable orders before Squad initiation; signed webhooks and buyer returns share atomic idempotent receipt settlement. Test-only sales remain database-enforced until real acceptance passes; viewer token renewal fails closed.
 - PPV checkout uses a server-fixed return URL, isolated sandbox secrets, a 30-minute order reuse window and durable one-shot initiation claim; verified webhook hashes deduplicate completed events while unfinished attempts retry atomic settlement.
 - PPV sessions use durable order-locked newest-session takeover with fail-closed renewal and country checks; financial receipts insert balanced pending entries and refund reversals transactionally, never available payout balances.
+- PPV platform settings reads require admin or existing non-deleted channel-management access, preserving Studio configuration while denying ordinary viewers.
