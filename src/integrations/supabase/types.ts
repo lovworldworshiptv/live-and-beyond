@@ -2068,6 +2068,7 @@ export type Database = {
         Args: { _channel_id: string; _user_id: string }
         Returns: boolean
       }
+      can_read_ppv_finance: { Args: { _order_id: string }; Returns: boolean }
       channel_follower_count: { Args: { _channel_id: string }; Returns: number }
       channel_view_stats: {
         Args: { _channel_id: string; _days?: number }

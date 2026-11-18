@@ -47,6 +47,13 @@ PASS here means the named automated or browser check passed, **not** provider ac
 | 29–32 | NOT RUN | Require sandbox/live provider acceptance and subsequent reconciliation phase. |
 
 ## Next phases / blockers
+### Continuation result
+- Final regression run: 41 tests passed across nine PPV/Squad test files; preview build OK and whitespace check clean.
+- Admin manual reconciliation returns real zero-order readback at desktop/394/280px with no horizontal overflow or page errors. Authenticated callback returns 200 and anonymous callback 401. Five-minute schedule exists; production execution after publication is not verified.
+- Concrete database limits verified: five successful checkout attempts then denial; 45 successful confirmations then denial. Test limit rows removed.
+- Persistent order-locked session takeover, country checks, waiting room, buyer receipts, in-app receipt alerts, balanced pending ledger and refund reversals are implemented. Actual purchased playback, takeover/refund, fee settlement and provider country enforcement are NOT RUN.
+- Sandbox key entry was declined; real acceptance remains blocked. Full refunds/cancellations, fee/tax ledger, receipt email/SMS, payout hold/KYC/MFA, promos/gifts, DRM, device enforcement and native/TV purchase handoff are still outstanding, not completed by this continuation.
+
 1. Sandbox key, approved test event, protected Stream asset and provider refund API acceptance; then reconciliation, full ledger/receipt delivery, refunds.
 2. Confirm payout hold/refund windows, concurrency takeover policy and broadcast-rights countries before financial/session/geo enforcement.
 3. Native/TV PPV remains closed until web commerce acceptance. TV/free playback behaviour is unchanged; no identity watermarks or inactivity timeouts added.

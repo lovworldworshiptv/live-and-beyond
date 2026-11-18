@@ -169,6 +169,13 @@
       "when": 1794995385520,
       "tag": "0023_ppv_sessions_receipts_and_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794996006574,
+      "tag": "0024_ppv_finance_integrity",
+      "breakpoints": true
     }
   ]
 }
