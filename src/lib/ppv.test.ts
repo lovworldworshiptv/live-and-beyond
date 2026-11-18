@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { ppvEnabled, ppvSlideEligible, resolveCommission, splitRevenue, toMinorUnits } from "./ppv";
+import { ppvDraftSchema, ppvEnabled, ppvSlideEligible, resolveCommission, splitRevenue, toMinorUnits } from "./ppv";
 describe("PPV rules", () => {
+  it("keeps ticket-sales start distinct from event start and rejects sales starting later", () => {
+    const draft = { channel_id: "65d4b93b-aa01-4b7b-8497-cc3d33563f4e", title: "Scheduled event", description: "", poster_url: null, event_type: "live", sales_starts_at: "2026-11-19T10:00:00Z", starts_at: "2026-11-20T18:00:00Z", duration_minutes: 120, replay_hours: 48, rental_start_days: 30, price_ngn_minor: 150000, price_usd_minor: 100, status: "draft" };
+    expect(ppvDraftSchema.parse(draft).sales_starts_at).toBe("2026-11-19T10:00:00Z");
+    expect(ppvDraftSchema.safeParse({ ...draft, sales_starts_at: draft.starts_at }).success).toBe(true);
+    expect(ppvDraftSchema.safeParse({ ...draft, sales_starts_at: "2026-11-20T18:00:01Z" }).success).toBe(false);
+  });
   it("hides a spotlight when PPV is disabled or approval removed", () => {
     expect(ppvSlideEligible("event-1", [])).toBe(false);
     expect(ppvSlideEligible("event-1", ["event-1"])).toBe(true);

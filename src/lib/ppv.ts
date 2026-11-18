@@ -25,10 +25,11 @@ export const ppvDraftSchema = z.object({
   title: z.string().trim().min(1).max(160), description: z.string().max(4000),
   poster_url: z.string().url().max(2000).nullable(),
   event_type: z.enum(["live", "live_replay", "vod"]),
+  sales_starts_at: z.string().datetime(),
   starts_at: z.string().datetime(), duration_minutes: z.number().int().min(1).max(1440),
   replay_hours: z.number().int().min(1).max(720), rental_start_days: z.number().int().min(1).max(365),
   price_ngn_minor: z.number().int().min(100).max(1000000000),
   price_usd_minor: z.number().int().min(100).max(100000000),
   status: z.enum(["draft", "pending"]),
-});
+}).refine(event => Date.parse(event.sales_starts_at) <= Date.parse(event.starts_at), { path: ["sales_starts_at"], message: "Ticket sales must start before or at the event start time" });
 export type PpvDraft = z.infer<typeof ppvDraftSchema>;

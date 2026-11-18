@@ -1,2 +1,3 @@
 - PPV discovery shares the public event-list RPC across web and TV; expose only approved, enabled published-channel events and never payment records or protected sources.
 - PPV links return viewers to the same event after account creation or sign-in; discovery must never bypass existing checkout or playback gates.
+- PPV ticket-sales start is separate from event access start; validate their order and enforce sales opening in public availability and order insertion, never just the browser.

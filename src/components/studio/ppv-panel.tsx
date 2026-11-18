@@ -40,7 +40,7 @@ export function PpvPanel({ channelId }: { channelId: string }) {
     <p className="text-sm text-muted-foreground">Ticket sales are not open. Payments and protected playback must be connected before launch.</p>
     {!workspace.events.length ? <div className="border-y border-border py-12 text-center"><Ticket className="mx-auto mb-3 size-8 text-muted-foreground" /><p>No PPV events yet.</p></div> : <div className="grid gap-3 sm:grid-cols-2">{workspace.events.map(event => <article key={event.id} className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
       {event.poster_url && <div className="aspect-video bg-surface"><img src={event.poster_url} alt={event.title} className="size-full object-contain" /></div>}
-      <div className="p-4"><p className="text-xs font-medium text-accent">{labels[event.status]}</p><h3 className="mt-2 break-words font-semibold">{event.title}</h3><p className="mt-1 text-xs text-muted-foreground">{new Date(event.starts_at).toLocaleString()} · {event.event_type === "vod" ? "VOD rental" : "Live event"}</p><p className="mt-3 text-sm">{new Intl.NumberFormat(undefined, { style: "currency", currency: "NGN" }).format(event.price_ngn_minor / 100)} · {new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(event.price_usd_minor / 100)}</p>
+      <div className="p-4"><p className="text-xs font-medium text-accent">{labels[event.status]}</p><h3 className="mt-2 break-words font-semibold">{event.title}</h3><p className="mt-1 text-xs text-muted-foreground">Ticket sales: {event.sales_starts_at.startsWith("1970-") ? "On approval and activation" : new Date(event.sales_starts_at).toLocaleString()}</p><p className="mt-1 text-xs text-muted-foreground">Event starts: {new Date(event.starts_at).toLocaleString()} · {event.event_type === "vod" ? "VOD rental" : "Live event"}</p><p className="mt-3 text-sm">{new Intl.NumberFormat(undefined, { style: "currency", currency: "NGN" }).format(event.price_ngn_minor / 100)} · {new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(event.price_usd_minor / 100)}</p>
       {event.admin_note && <p className="mt-2 text-sm text-muted-foreground">{event.admin_note}</p>}
       <div className="mt-3 flex flex-wrap gap-2"><Button variant="outline" disabled={!enabled} onClick={() => setEditor(event)}><Pencil />Edit draft</Button>
       {event.status === "approved" && <Button variant="secondary" disabled={!enabled || !event.poster_url || requesting !== null} onClick={async () => { setRequesting(event.id); try { await requestSpotlight({ data: { eventId: event.id } }); toast.success("Homepage spotlight requested — awaiting Admin approval"); } catch (err) { toast.error(err instanceof Error ? err.message : "Could not request spotlight"); } finally { setRequesting(null); } }}><Send />Request homepage spotlight</Button>}</div></div>
@@ -56,6 +56,8 @@ function EventEditor({ event, onClose, onSave }: { event: Event | null; onClose:
   const [kind, setKind] = useState<"live" | "live_replay" | "vod">(event?.event_type === "vod" ? "vod" : event?.event_type === "live_replay" ? "live_replay" : "live");
   const localStart = event ? new Date(new Date(event.starts_at).getTime() - new Date(event.starts_at).getTimezoneOffset() * 60000).toISOString().slice(0,16) : "";
   const [starts, setStarts] = useState(localStart);
+  const salesDate = new Date(event && !event.sales_starts_at.startsWith("1970-") ? event.sales_starts_at : Date.now());
+  const [salesStarts, setSalesStarts] = useState(new Date(salesDate.getTime() - salesDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16));
   const [duration, setDuration] = useState(event?.duration_minutes ?? 120);
   const [hours, setHours] = useState(event?.replay_hours ?? 48);
   const [days, setDays] = useState(event?.rental_start_days ?? 30);
@@ -67,8 +69,9 @@ function EventEditor({ event, onClose, onSave }: { event: Event | null; onClose:
   async function save(status: "draft" | "pending") {
     setBusy(true); setError("");
     try {
-      if (!title.trim() || !starts) throw new Error("Add a title and start date");
-      await onSave({ ...(event ? { id: event.id } : {}), title, description, poster_url: poster, event_type: kind, starts_at: new Date(starts).toISOString(), duration_minutes: duration, replay_hours: hours, rental_start_days: days, price_ngn_minor: toMinorUnits(ngn), price_usd_minor: toMinorUnits(usd), status });
+      if (!title.trim() || !starts || !salesStarts) throw new Error("Add a title, ticket-sales start and event start");
+      if (Date.parse(salesStarts) > Date.parse(starts)) throw new Error("Ticket sales must start before or at the event start time");
+      await onSave({ ...(event ? { id: event.id } : {}), title, description, poster_url: poster, event_type: kind, sales_starts_at: new Date(salesStarts).toISOString(), starts_at: new Date(starts).toISOString(), duration_minutes: duration, replay_hours: hours, rental_start_days: days, price_ngn_minor: toMinorUnits(ngn), price_usd_minor: toMinorUnits(usd), status });
     } catch (err) { setError(err instanceof Error ? err.message : "Could not save event"); }
     finally { setBusy(false); }
   }
@@ -77,7 +80,8 @@ function EventEditor({ event, onClose, onSave }: { event: Event | null; onClose:
     <div className="grid gap-4 sm:grid-cols-2">
       <label className="grid gap-1 text-sm sm:col-span-2">Title<Input value={title} maxLength={160} onChange={e => setTitle(e.target.value)} /></label>
       <label className="grid gap-1 text-sm">Event type<select className={SELECT} value={kind} onChange={e => setKind(e.target.value as typeof kind)}><option value="live">Live event</option><option value="live_replay">Live + replay</option><option value="vod">VOD rental</option></select></label>
-      <label className="grid gap-1 text-sm">Starts (your local time)<Input type="datetime-local" value={starts} onChange={e => setStarts(e.target.value)} /></label>
+      <label className="grid gap-1 text-sm">Ticket sales start (your local time)<Input type="datetime-local" value={salesStarts} max={starts || undefined} onChange={e => setSalesStarts(e.target.value)} /></label>
+      <label className="grid gap-1 text-sm">Event starts (your local time)<Input type="datetime-local" value={starts} min={salesStarts || undefined} onChange={e => setStarts(e.target.value)} /></label>
       <label className="grid gap-1 text-sm">NGN price<Input inputMode="decimal" value={ngn} onChange={e => setNgn(e.target.value)} /></label>
       <label className="grid gap-1 text-sm">USD price<Input inputMode="decimal" value={usd} onChange={e => setUsd(e.target.value)} /></label>
       <label className="grid gap-1 text-sm">Duration (minutes)<Input type="number" min={1} max={1440} value={duration} onChange={e => setDuration(Number(e.target.value))} /></label>

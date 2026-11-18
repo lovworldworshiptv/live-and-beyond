@@ -1,6 +1,7 @@
 # Lettflix Roadmap
 
 ## Pay-Per-View discovery and sharing
+- [x] Add separate ticket-sales start and event start, enforce sales timing in availability/order creation; verified authenticated draft save/reload, invalid date rejection and 394/614/1280px layouts. Temporary draft removed; 41 PPV tests pass.
 - [x] Show approved eligible PPV events after Featured On-Demand, before channel Program Schedule, and in a Guide capsule; exact countdowns and account-returning purchase/share QR links, including TV discovery.
 - [x] Verified actual event discovery, share card, account return URL, signed-in closed-sales state and 280/394/768/1280px layouts; 40 PPV tests pass. Real purchase/playback acceptance still requires configured sandbox delivery (tracked below).
 

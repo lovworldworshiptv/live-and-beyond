@@ -30,6 +30,8 @@ export const startPpvCheckout = createServerFn({ method: "POST" })
     const { signPremiumStream } = await import("./ppv-access.server");
     const { enforcePpvLimit } = await import("./ppv-security.server");
     await enforcePpvLimit(supabaseAdmin, context.userId, "checkout");
+    const availability = await context.supabase.rpc("public_ppv_sales", { _event_id: data.eventId });
+    if (availability.error || availability.data !== true) throw new Error("Ticket sales are not open yet");
     const asset = await supabaseAdmin.from("ppv_playback_assets").select("*").eq("event_id", data.eventId).maybeSingle();
     if (asset.error || !asset.data?.sales_enabled) throw new Error("Ticket sales are not open");
     const { squadSecretForEnvironment } = await import("./squad.server");
@@ -305,7 +307,10 @@ export const getPublicPpvEvent = createServerFn({ method: "GET" })
     const event = (result.data?.[0] ?? null) as { id: string; title: string; description: string; poster_url: string | null; event_type: string; starts_at: string; duration_minutes: number; replay_hours: number; rental_start_days: number; price_ngn_minor: number; price_usd_minor: number; channel_name: string; channel_slug: string } | null;
     if (!event) return null;
     const sales = await client.rpc("public_ppv_sales", { _event_id: data.id });
-    return { ...event, salesOpen: !sales.error && sales.data === true };
+    const schedule = await client.rpc("public_ppv_sales_schedule");
+    if (schedule.error) throw new Error("Event schedule is unavailable");
+    const salesStart = (schedule.data as { id: string; sales_starts_at: string }[]).find(item => item.id === data.id)?.sales_starts_at;
+    return { ...event, sales_starts_at: salesStart ?? null, salesOpen: !sales.error && sales.data === true };
   });
 
 export const getPublicPpvEvents = createServerFn({ method: "GET" })

@@ -1555,6 +1555,7 @@ export type Database = {
           price_usd_minor: number
           rental_start_days: number
           replay_hours: number
+          sales_starts_at: string
           starts_at: string
           status: string
           title: string
@@ -1575,6 +1576,7 @@ export type Database = {
           price_usd_minor: number
           rental_start_days?: number
           replay_hours?: number
+          sales_starts_at?: string
           starts_at: string
           status?: string
           title: string
@@ -1595,6 +1597,7 @@ export type Database = {
           price_usd_minor?: number
           rental_start_days?: number
           replay_hours?: number
+          sales_starts_at?: string
           starts_at?: string
           status?: string
           title?: string
@@ -2198,6 +2201,13 @@ export type Database = {
         }[]
       }
       public_ppv_sales: { Args: { _event_id: string }; Returns: boolean }
+      public_ppv_sales_schedule: {
+        Args: never
+        Returns: {
+          id: string
+          sales_starts_at: string
+        }[]
+      }
       public_ppv_spotlight_ids: {
         Args: never
         Returns: {

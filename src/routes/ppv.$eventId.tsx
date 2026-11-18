@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getPublicPpvEvent } from "@/lib/ppv.functions";
 import { PpvPurchase } from "@/components/ppv-purchase";
 
-const eventQuery = (id: string) => queryOptions({ queryKey: ["public-ppv-event", id], queryFn: () => getPublicPpvEvent({ data: { id } }), staleTime: 0 });
+const eventQuery = (id: string) => queryOptions({ queryKey: ["public-ppv-event", id], queryFn: () => getPublicPpvEvent({ data: { id } }), staleTime: 0, refetchInterval: 1000 });
 export const Route = createFileRoute("/ppv/$eventId")({
   loader: ({ context, params }) => context.queryClient.ensureQueryData(eventQuery(params.eventId)),
   head: ({ loaderData }) => {
@@ -30,7 +30,7 @@ function EventPage() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4"><PpvCountdown startsAt={event.starts_at} /><ShareMenu title={event.title} path={`/ppv/${eventId}`} image={event.poster_url} subtitle={`Pay-Per-View · ${event.channel_name}`} /></div>
       <p className="flex items-center gap-2 text-sm font-semibold text-accent"><Ticket className="size-4" />Pay-Per-View · {event.channel_name}</p><h1 className="mt-3 break-words text-3xl font-bold">{event.title}</h1><p className="mt-4 max-w-3xl whitespace-pre-line text-muted-foreground">{event.description}</p>
     </div></section>
-    <section className="mx-auto max-w-6xl px-6 py-6"><PpvPurchase key={eventId} eventId={eventId} salesOpen={event.salesOpen} /></section>
+    <section className="mx-auto max-w-6xl px-6 py-6">{event.sales_starts_at && <div className="mb-4 space-y-2"><p className="text-sm text-muted-foreground">Ticket sales start: {new Date(event.sales_starts_at).toLocaleString(undefined, { dateStyle: "full", timeStyle: "short" })}</p>{Date.parse(event.sales_starts_at) > Date.now() && <PpvCountdown startsAt={event.sales_starts_at} />}</div>}<PpvPurchase key={eventId} eventId={eventId} salesOpen={event.salesOpen} /></section>
     <section className="mx-auto grid max-w-6xl gap-6 px-6 py-8 md:grid-cols-2"><div className="space-y-3"><p className="flex items-start gap-2"><CalendarDays className="size-5 shrink-0 text-accent" />{new Date(event.starts_at).toLocaleString(undefined, { dateStyle: "full", timeStyle: "short" })}</p><p className="flex gap-2"><Clock className="size-5 text-accent" />{event.duration_minutes} minutes · Standard access</p>{event.event_type !== "live" && <p className="text-sm text-muted-foreground">{event.event_type === "vod" ? `${event.rental_start_days} days to start · ${event.replay_hours} hours to finish` : `${event.replay_hours} hours of replay access`}</p>}<Button asChild variant="outline"><Link to="/channels/$channelId" params={{ channelId: event.channel_slug }}>View channel</Link></Button></div><div className="border-t border-border pt-4"><p className="text-lg font-semibold">{new Intl.NumberFormat(undefined, { style: "currency", currency: "NGN" }).format(event.price_ngn_minor / 100)} / {new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(event.price_usd_minor / 100)}</p><p className="mt-3 text-sm text-muted-foreground" role="status">{event.salesOpen ? "Test ticket sales open · One active stream per purchase" : "Ticket sales are not yet open."}</p></div></section>
   </main><SiteFooter /></div>;
 }
