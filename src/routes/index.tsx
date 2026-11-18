@@ -29,6 +29,7 @@ import { useProgress } from "@/lib/personal";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { LandingPage } from "@/components/landing-page";
+import { BrandLoader } from "@/components/brand-loader";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { selectFeaturedOnDemand, selectTrendingOnDemand } from "@/lib/featured-on-demand";
@@ -53,7 +54,7 @@ export const Route = createFileRoute("/")({
 
 function HomeRoute() {
   const { user, loading } = useAuth();
-  if (loading) return <LandingPage />;
+  if (loading) return <BrandLoader variant="full" label="Tuning in" />;
   if (!user) return <LandingPage />;
   return <Index />;
 }
