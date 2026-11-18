@@ -162,6 +162,13 @@
       "when": 1794994893557,
       "tag": "0022_ppv_audit_least_privilege",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794995385520,
+      "tag": "0023_ppv_sessions_receipts_and_limits",
+      "breakpoints": true
     }
   ]
 }

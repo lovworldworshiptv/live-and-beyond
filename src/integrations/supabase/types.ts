@@ -1610,6 +1610,41 @@ export type Database = {
           },
         ]
       }
+      ppv_ledger_entries: {
+        Row: {
+          account: string
+          amount_minor: number
+          created_at: string
+          currency: string
+          kind: string
+          order_id: string
+        }
+        Insert: {
+          account: string
+          amount_minor: number
+          created_at?: string
+          currency?: string
+          kind: string
+          order_id: string
+        }
+        Update: {
+          account?: string
+          amount_minor?: number
+          created_at?: string
+          currency?: string
+          kind?: string
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ppv_ledger_entries_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "ppv_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ppv_orders: {
         Row: {
           access_expires_at: string
@@ -1736,18 +1771,21 @@ export type Database = {
       }
       ppv_playback_assets: {
         Row: {
+          allowed_countries: string[]
           event_id: string
           sales_enabled: boolean
           sandbox: boolean
           stream_uid: string
         }
         Insert: {
+          allowed_countries?: string[]
           event_id: string
           sales_enabled?: boolean
           sandbox?: boolean
           stream_uid: string
         }
         Update: {
+          allowed_countries?: string[]
           event_id?: string
           sales_enabled?: boolean
           sandbox?: boolean
@@ -1759,6 +1797,38 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: true
             referencedRelation: "ppv_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ppv_playback_sessions: {
+        Row: {
+          ended_at: string | null
+          heartbeat_at: string
+          id: string
+          order_id: string
+          user_id: string
+        }
+        Insert: {
+          ended_at?: string | null
+          heartbeat_at?: string
+          id: string
+          order_id: string
+          user_id: string
+        }
+        Update: {
+          ended_at?: string | null
+          heartbeat_at?: string
+          id?: string
+          order_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ppv_playback_sessions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "ppv_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -1794,6 +1864,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ppv_request_limits: {
+        Row: {
+          action: string
+          attempts: number
+          user_id: string
+          window_at: string
+        }
+        Insert: {
+          action: string
+          attempts?: number
+          user_id: string
+          window_at?: string
+        }
+        Update: {
+          action?: string
+          attempts?: number
+          user_id?: string
+          window_at?: string
+        }
+        Relationships: []
       }
       ppv_webhook_events: {
         Row: {
@@ -1963,6 +2054,16 @@ export type Database = {
       }
     }
     Functions: {
+      acquire_ppv_session: {
+        Args: {
+          _country: string
+          _order_id: string
+          _session_id: string
+          _start: boolean
+          _user_id: string
+        }
+        Returns: boolean
+      }
       can_manage_channel: {
         Args: { _channel_id: string; _user_id: string }
         Returns: boolean
@@ -1990,6 +2091,10 @@ export type Database = {
           _sandbox: boolean
         }
         Returns: string
+      }
+      consume_ppv_request: {
+        Args: { _action: string; _user_id: string }
+        Returns: boolean
       }
       featured_on_demand_rankings: {
         Args: never

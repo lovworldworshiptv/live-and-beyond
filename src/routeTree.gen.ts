@@ -51,6 +51,7 @@ import { Route as ApiPublicKingschatCallbackRouteImport } from './routes/api/pub
 import { Route as ApiPublicKingschatLoginRouteImport } from './routes/api/public/kingschat/login'
 import { Route as ApiPublicKingschatPollRouteImport } from './routes/api/public/kingschat/poll'
 import { Route as ApiPublicKingschatStartRouteImport } from './routes/api/public/kingschat/start'
+import { Route as ApiPublicSquadReconcileRouteImport } from './routes/api/public/squad/reconcile'
 import { Route as ApiPublicSquadWebhookRouteImport } from './routes/api/public/squad/webhook'
 import { Route as ApiPublicStreamSlugRouteImport } from './routes/api/public/stream.$slug'
 
@@ -267,6 +268,11 @@ const ApiPublicKingschatStartRoute = ApiPublicKingschatStartRouteImport.update({
   path: '/api/public/kingschat/start',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSquadReconcileRoute = ApiPublicSquadReconcileRouteImport.update({
+  id: '/api/public/squad/reconcile',
+  path: '/api/public/squad/reconcile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSquadWebhookRoute = ApiPublicSquadWebhookRouteImport.update({
   id: '/api/public/squad/webhook',
   path: '/api/public/squad/webhook',
@@ -321,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
   '/api/public/kingschat/poll': typeof ApiPublicKingschatPollRoute
   '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
+  '/api/public/squad/reconcile': typeof ApiPublicSquadReconcileRoute
   '/api/public/squad/webhook': typeof ApiPublicSquadWebhookRoute
   '/api/public/stream/$slug': typeof ApiPublicStreamSlugRoute
 }
@@ -364,6 +371,7 @@ export interface FileRoutesByTo {
   '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
   '/api/public/kingschat/poll': typeof ApiPublicKingschatPollRoute
   '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
+  '/api/public/squad/reconcile': typeof ApiPublicSquadReconcileRoute
   '/api/public/squad/webhook': typeof ApiPublicSquadWebhookRoute
   '/api/public/stream/$slug': typeof ApiPublicStreamSlugRoute
 }
@@ -411,6 +419,7 @@ export interface FileRoutesById {
   '/api/public/kingschat/login': typeof ApiPublicKingschatLoginRoute
   '/api/public/kingschat/poll': typeof ApiPublicKingschatPollRoute
   '/api/public/kingschat/start': typeof ApiPublicKingschatStartRoute
+  '/api/public/squad/reconcile': typeof ApiPublicSquadReconcileRoute
   '/api/public/squad/webhook': typeof ApiPublicSquadWebhookRoute
   '/api/public/stream/$slug': typeof ApiPublicStreamSlugRoute
 }
@@ -459,6 +468,7 @@ export interface FileRouteTypes {
     | '/api/public/kingschat/login'
     | '/api/public/kingschat/poll'
     | '/api/public/kingschat/start'
+    | '/api/public/squad/reconcile'
     | '/api/public/squad/webhook'
     | '/api/public/stream/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -502,6 +512,7 @@ export interface FileRouteTypes {
     | '/api/public/kingschat/login'
     | '/api/public/kingschat/poll'
     | '/api/public/kingschat/start'
+    | '/api/public/squad/reconcile'
     | '/api/public/squad/webhook'
     | '/api/public/stream/$slug'
   id:
@@ -548,6 +559,7 @@ export interface FileRouteTypes {
     | '/api/public/kingschat/login'
     | '/api/public/kingschat/poll'
     | '/api/public/kingschat/start'
+    | '/api/public/squad/reconcile'
     | '/api/public/squad/webhook'
     | '/api/public/stream/$slug'
   fileRoutesById: FileRoutesById
@@ -588,6 +600,7 @@ export interface RootRouteChildren {
   ApiPublicKingschatLoginRoute: typeof ApiPublicKingschatLoginRoute
   ApiPublicKingschatPollRoute: typeof ApiPublicKingschatPollRoute
   ApiPublicKingschatStartRoute: typeof ApiPublicKingschatStartRoute
+  ApiPublicSquadReconcileRoute: typeof ApiPublicSquadReconcileRoute
   ApiPublicSquadWebhookRoute: typeof ApiPublicSquadWebhookRoute
   ApiPublicStreamSlugRoute: typeof ApiPublicStreamSlugRoute
 }
@@ -888,6 +901,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicKingschatStartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/squad/reconcile': {
+      id: '/api/public/squad/reconcile'
+      path: '/api/public/squad/reconcile'
+      fullPath: '/api/public/squad/reconcile'
+      preLoaderRoute: typeof ApiPublicSquadReconcileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/squad/webhook': {
       id: '/api/public/squad/webhook'
       path: '/api/public/squad/webhook'
@@ -992,6 +1012,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicKingschatLoginRoute: ApiPublicKingschatLoginRoute,
   ApiPublicKingschatPollRoute: ApiPublicKingschatPollRoute,
   ApiPublicKingschatStartRoute: ApiPublicKingschatStartRoute,
+  ApiPublicSquadReconcileRoute: ApiPublicSquadReconcileRoute,
   ApiPublicSquadWebhookRoute: ApiPublicSquadWebhookRoute,
   ApiPublicStreamSlugRoute: ApiPublicStreamSlugRoute,
 }

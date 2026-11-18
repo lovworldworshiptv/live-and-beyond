@@ -16,7 +16,7 @@ export async function confirmSquadOrder(client: SupabaseClient<Database>, order:
     throw new Error("Payment verification mismatch");
   }
   if (payment.status === "refunded") {
-    const revoked = await client.from("ppv_orders").update({ status: "refunded", refunded_at: new Date().toISOString() }).eq("id", order.id).neq("status", "refunded");
+    const revoked = await client.from("ppv_orders").update({ status: "refunded", payment_state: "refunded", refunded_at: new Date().toISOString() }).eq("id", order.id).neq("status", "refunded");
     if (revoked.error) throw new Error("Could not revoke refunded payment");
     return { status: "refunded" as const };
   }

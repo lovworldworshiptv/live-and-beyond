@@ -3,9 +3,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Ticket, RefreshCw, Play } from "lucide-react";
-import { getPpvPurchase, startPpvCheckout, confirmPpvPurchase, getPpvPlaybackAccess } from "@/lib/ppv.functions";
+import { getPpvPurchase, startPpvCheckout, confirmPpvPurchase, getPpvPlaybackAccess, getPpvReceipt } from "@/lib/ppv.functions";
 import { useHlsAttach } from "@/hooks/use-hls";
 import { registerMediaElement, pauseOtherMedia } from "@/lib/media-playback";
+import { formatPpvCountdown, remainingPpvWait } from "@/lib/ppv-waiting";
 
 export function PpvPurchase({ eventId, salesOpen }: { eventId: string; salesOpen: boolean }) {
   const { user } = useAuth();
@@ -42,12 +43,29 @@ export function PpvPurchase({ eventId, salesOpen }: { eventId: string; salesOpen
   return <div className="mt-4 space-y-4">
     {purchase && <p className="break-words text-sm">Purchase: {purchase.status} · {new Intl.NumberFormat(undefined, { style: "currency", currency: purchase.currency }).format(purchase.amount_minor / 100)}</p>}
     <div className="flex flex-wrap gap-2">
-      {purchase?.status === "paid" ? <Button disabled={busy} onClick={() => setWatching(true)}><Play />Watch event</Button> : <Button disabled={busy || !salesOpen} onClick={() => void act(true)}><Ticket />{salesOpen ? "Buy test ticket" : "Sales not open"}</Button>}
+      {purchase?.status === "paid" && purchase.payment_state === "fulfilled" ? <Button disabled={busy} onClick={() => setWatching(true)}><Play />Watch event</Button> : <Button disabled={busy || !salesOpen} onClick={() => void act(true)}><Ticket />{salesOpen ? "Buy test ticket" : "Sales not open"}</Button>}
       {purchase && purchase.status !== "refunded" && <Button variant="outline" disabled={busy} onClick={() => void act(false)}><RefreshCw />Confirm payment</Button>}
     </div>
     {message && <p role="status" className="break-words text-sm text-muted-foreground">{message}</p>}
-    {watching && purchase && <ProtectedPpvPlayer orderId={purchase.id} />}
+    {purchase?.status === "paid" && <PpvReceipt orderId={purchase.id} currency={purchase.currency} />}
+    {watching && purchase && <PpvWaitingPlayer orderId={purchase.id} startsAt={purchase.access_starts_at} serverNow={purchase.serverNow} />}
   </div>;
+}
+
+function PpvReceipt({ orderId, currency }: { orderId: string; currency: string }) {
+  const fetchReceipt = useServerFn(getPpvReceipt);
+  const [receipt, setReceipt] = useState<Awaited<ReturnType<typeof getPpvReceipt>>>(null);
+  useEffect(() => { let disposed = false; void fetchReceipt({ data: { orderId } }).then(result => { if (!disposed) setReceipt(result); }).catch(() => {}); return () => { disposed = true; }; }, [orderId, fetchReceipt]);
+  if (!receipt) return null;
+  return <div className="border-t border-border pt-4 text-sm" data-allow-copy><h3 className="font-semibold">Payment Receipt</h3><p className="mt-2">{new Intl.NumberFormat(undefined, { style: "currency", currency }).format(receipt.amount_minor / 100)} · {new Date(receipt.verified_at).toLocaleString()}</p><p className="mt-1 break-all text-xs text-muted-foreground">Ticket {orderId}</p></div>;
+}
+
+function PpvWaitingPlayer({ orderId, startsAt, serverNow }: { orderId: string; startsAt: string; serverNow: string }) {
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => { const start = performance.now(); setElapsed(0); const timer = setInterval(() => setElapsed(performance.now() - start), 1000); return () => clearInterval(timer); }, [serverNow]);
+  const remaining = remainingPpvWait(startsAt, serverNow, elapsed);
+  if (remaining > 0) return <div className="border-t border-border py-8"><h2 className="text-xl font-semibold">Your Event Starts Soon</h2><p className="mt-4 font-mono text-3xl tabular-nums">{formatPpvCountdown(remaining)}</p><p className="mt-3 text-sm text-muted-foreground">Your ticket is verified. Playback opens when access begins.</p></div>;
+  return <ProtectedPpvPlayer orderId={orderId} />;
 }
 
 function ProtectedPpvPlayer({ orderId }: { orderId: string }) {
@@ -60,9 +78,12 @@ function ProtectedPpvPlayer({ orderId }: { orderId: string }) {
   useEffect(() => {
     let disposed = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const sessionId = crypto.randomUUID();
+    let start = true;
     const renew = async () => {
       try {
-        const result = await access({ data: { orderId } });
+        const result = await access({ data: { orderId, sessionId, start } });
+        start = false;
         if (disposed) return;
         const position = media.current?.currentTime ?? 0;
         if (position > 0) media.current?.addEventListener("loadedmetadata", () => { if (media.current && Number.isFinite(media.current.duration)) media.current.currentTime = Math.min(position, media.current.duration); }, { once: true });
@@ -70,7 +91,7 @@ function ProtectedPpvPlayer({ orderId }: { orderId: string }) {
         timer = setTimeout(() => void renew(), Math.max(1000, Date.parse(result.expiresAt) - Date.now() - 20000));
       } catch {
         if (disposed) return;
-        media.current?.pause(); setSource(null); setError("Access unavailable. Confirm your payment or try again.");
+        media.current?.pause(); setSource(null); setError("Playback ended or moved to another device. Confirm your payment before retrying.");
       }
     };
     void renew();

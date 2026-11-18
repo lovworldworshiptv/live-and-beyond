@@ -9,11 +9,12 @@ export const getPpvPurchase = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { setResponseHeader } = await import("@tanstack/react-start/server");
     setResponseHeader("Cache-Control", "no-store");
-    const result = await context.supabase.from("ppv_orders").select("id,status,amount_minor,currency,access_starts_at,access_expires_at,created_at").eq("event_id", data.eventId).eq("user_id", context.userId).order("created_at", { ascending: false }).limit(20);
+    const result = await context.supabase.from("ppv_orders").select("id,status,payment_state,amount_minor,currency,access_starts_at,access_expires_at,created_at").eq("event_id", data.eventId).eq("user_id", context.userId).order("created_at", { ascending: false }).limit(20);
     if (result.error) throw new Error("Could not load your purchase");
     const rows = result.data ?? [];
-    const active = rows.find(row => row.status === "paid" && Date.parse(row.access_expires_at) > Date.now());
-    return active ?? (rows.length ? rows[0] : null);
+    const active = rows.find(row => row.status === "paid" && row.payment_state === "fulfilled" && Date.parse(row.access_expires_at) > Date.now());
+    const purchase = active ?? (rows.length ? rows[0] : null);
+    return purchase ? { ...purchase, serverNow: new Date().toISOString() } : null;
   });
 
 export const startPpvCheckout = createServerFn({ method: "POST" })
@@ -27,6 +28,8 @@ export const startPpvCheckout = createServerFn({ method: "POST" })
     if (auth.error || !auth.data.user?.email) throw new Error("A verified email is required for checkout");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { signPremiumStream } = await import("./ppv-access.server");
+    const { enforcePpvLimit } = await import("./ppv-security.server");
+    await enforcePpvLimit(supabaseAdmin, context.userId, "checkout");
     const asset = await supabaseAdmin.from("ppv_playback_assets").select("*").eq("event_id", data.eventId).maybeSingle();
     if (asset.error || !asset.data?.sales_enabled) throw new Error("Ticket sales are not open");
     const { squadSecretForEnvironment } = await import("./squad.server");
@@ -59,6 +62,8 @@ export const confirmPpvPurchase = createServerFn({ method: "POST" })
     const secret = squadSecretForEnvironment(found.data.sandbox, { live: process.env["SQUAD_SECRET_KEY"], sandbox: process.env["SQUAD_SANDBOX_SECRET_KEY"] });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { confirmSquadOrder } = await import("./ppv-payment.server");
+    const { enforcePpvLimit } = await import("./ppv-security.server");
+    await enforcePpvLimit(supabaseAdmin, context.userId, "confirm");
     try { return await confirmSquadOrder(supabaseAdmin, found.data, secret); }
     catch { throw new Error("Payment could not be verified. Please try again."); }
   });
@@ -75,6 +80,8 @@ export const confirmPpvReturn = createServerFn({ method: "POST" })
     const secret = squadSecretForEnvironment(found.data.sandbox, { live: process.env["SQUAD_SECRET_KEY"], sandbox: process.env["SQUAD_SANDBOX_SECRET_KEY"] });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { confirmSquadOrder } = await import("./ppv-payment.server");
+    const { enforcePpvLimit } = await import("./ppv-security.server");
+    await enforcePpvLimit(supabaseAdmin, context.userId, "confirm");
     try {
       const result = await confirmSquadOrder(supabaseAdmin, found.data, secret);
       return { ...result, eventId: found.data.event_id };
@@ -83,7 +90,7 @@ export const confirmPpvReturn = createServerFn({ method: "POST" })
 
 export const savePpvDelivery = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ eventId: z.string().uuid(), streamUid: z.string().regex(/^[a-f0-9]{32}$/), sandbox: z.boolean(), salesEnabled: z.boolean() }).parse(input))
+  .inputValidator((input: unknown) => z.object({ eventId: z.string().uuid(), streamUid: z.string().regex(/^[a-f0-9]{32}$/), sandbox: z.boolean(), salesEnabled: z.boolean(), allowedCountries: z.array(z.string().regex(/^[A-Z]{2}$/)).max(249).default([]) }).strict().parse(input))
   .handler(async ({ data, context }) => {
     const check = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
     if (check.error || check.data !== true) throw new Error("Admin access required");
@@ -95,14 +102,14 @@ export const savePpvDelivery = createServerFn({ method: "POST" })
     const { signPremiumStream } = await import("./ppv-access.server");
     await signPremiumStream({ accountId, apiToken }, data.streamUid, Math.floor(Date.now() / 1000) + 60);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const result = await supabaseAdmin.from("ppv_playback_assets").upsert({ event_id: data.eventId, stream_uid: data.streamUid, sandbox: data.sandbox, sales_enabled: data.salesEnabled });
+    const result = await supabaseAdmin.from("ppv_playback_assets").upsert({ event_id: data.eventId, stream_uid: data.streamUid, sandbox: data.sandbox, sales_enabled: data.salesEnabled, allowed_countries: [...new Set(data.allowedCountries)] });
     if (result.error) throw new Error("Could not save protected delivery");
     return { ok: true };
   });
 
 export const getPpvPlaybackAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ orderId: z.string().uuid() }).parse(input))
+  .inputValidator((input: unknown) => z.object({ orderId: z.string().uuid(), sessionId: z.string().uuid(), start: z.boolean().default(false) }).strict().parse(input))
   .handler(async ({ data, context }) => {
     const { setResponseHeader } = await import("@tanstack/react-start/server");
     setResponseHeader("Cache-Control", "no-store");
@@ -119,10 +126,15 @@ export const getPpvPlaybackAccess = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { authorizePpvPlayback, signPremiumStream } = await import("./ppv-access.server");
     const { verifySquadTransaction } = await import("./squad.server");
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const country = getRequest().headers.get("cf-ipcountry") ?? "";
+    const { checkPpvSession } = await import("./ppv-security.server");
     try {
+      await checkPpvSession(supabaseAdmin, { orderId: order.id, userId: context.userId, sessionId: data.sessionId, country, start: data.start });
       return await authorizePpvPlayback(order, context.userId, {
         verify: (reference) => verifySquadTransaction({ secret, sandbox: order.sandbox }, reference),
         gate: async () => {
+          await checkPpvSession(supabaseAdmin, { orderId: order.id, userId: context.userId, sessionId: data.sessionId, country, start: false });
           const gate = await supabaseAdmin.rpc("ppv_playback_gate", { _order_id: data.orderId, _user_id: context.userId });
           if (gate.error) throw new Error("Access check unavailable");
           return gate.data?.[0] ?? null;
@@ -130,7 +142,7 @@ export const getPpvPlaybackAccess = createServerFn({ method: "POST" })
         sign: (uid, expires) => signPremiumStream({ accountId, apiToken }, uid, expires),
       });
     } catch {
-      throw new Error("PPV access denied. Your payment must be verified, not refunded, and within its access period.");
+      throw new Error("PPV access ended, moved to another device, or is unavailable in your location. Confirm your payment before retrying.");
     }
   });
 
@@ -150,6 +162,40 @@ export const checkSquadPayments = createServerFn({ method: "POST" })
     } catch (error) {
       return { configured: true, connected: false, sandbox: data.sandbox, error: error instanceof Error ? error.message : "Squad could not be reached" };
     }
+  });
+
+export const getPpvReceipt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ orderId: z.string().uuid() }).strict().parse(input))
+  .handler(async ({ data, context }) => {
+    const { setResponseHeader } = await import("@tanstack/react-start/server");
+    setResponseHeader("Cache-Control", "no-store");
+    const found = await context.supabase.from("ppv_receipts").select("amount_minor,verified_at").eq("order_id", data.orderId).maybeSingle();
+    if (found.error) throw new Error("Receipt unavailable");
+    return found.data;
+  });
+
+export const getPpvDeliverySettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ eventId: z.string().uuid() }).strict().parse(input))
+  .handler(async ({ data, context }) => {
+    const check = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (check.error || check.data !== true) throw new Error("Admin access required");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const found = await supabaseAdmin.from("ppv_playback_assets").select("stream_uid,sandbox,sales_enabled,allowed_countries").eq("event_id", data.eventId).maybeSingle();
+    if (found.error) throw new Error("Delivery settings unavailable");
+    return found.data;
+  });
+
+export const reconcilePpvPayments = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({}).strict().parse(input))
+  .handler(async ({ context }) => {
+    const check = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (check.error || check.data !== true) throw new Error("Admin access required");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { reconcilePpvOrders } = await import("./ppv-reconcile.server");
+    return await reconcilePpvOrders(supabaseAdmin, { live: process.env["SQUAD_SECRET_KEY"], sandbox: process.env["SQUAD_SANDBOX_SECRET_KEY"] });
   });
 
 export const getPpvWorkspace = createServerFn({ method: "POST" })
